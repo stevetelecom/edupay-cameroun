@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduPay Cameroun — Maquettes v2 Pro</title>
+<style>
+:root {
+  --ep-navy:#0B2545; --ep-teal:#0D9E75; --ep-teal2:#0A8562;
+  --ep-teal-lt:#E0F5EE; --ep-teal-mid:#9FE1CB;
+  --ep-gold:#E8A020; --ep-gold-lt:#FEF3DC;
+  --ep-red:#D94040; --ep-red-lt:#FBEAEA;
+  --ep-blue-lt:#E6F0FB; --ep-purple-lt:#EDE9FE;
+  --border:rgba(0,0,0,0.09); --radius-md:8px; --radius-lg:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:#f1f3f5;color:#1a1a2e;}
+
+/* ── NAV ── */
+.topnav{display:flex;gap:4px;flex-wrap:wrap;padding:10px 20px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;box-shadow:0 1px 6px rgba(0,0,0,.07);}
+.nbtn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:#fff;color:#555;cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap;}
+.nbtn svg{width:13px;height:13px;flex-shrink:0;}
+.nbtn:hover{background:#f1f3f5;}
+.nbtn.on{background:var(--ep-navy);color:#fff;border-color:var(--ep-navy);}
+.nbtn.on svg{stroke:#fff;}
+
+/* ── SCREENS: full width except forms ── */
+.screen{display:none;width:100%;}
+.screen.on{display:block;}
+.screen-form{display:none;width:100%;min-height:calc(100vh - 50px);background:#f1f3f5;}
+.screen-form.on{display:flex;flex-direction:column;}
+
+/* ── SHARED ── */
+.epcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
+.pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
+.pg{background:#E0F5EE;color:#085041;}.pa{background:#FEF3DC;color:#8B5E10;}
+.pr{background:#FBEAEA;color:#9B2C2C;}.pb{background:#E6F0FB;color:#1A4F8A;}
+.kpi{background:#f8f9fa;border-radius:var(--radius-md);padding:16px;text-align:center;}
+.kval{font-size:22px;font-weight:700;color:#1a1a2e;}
+.klbl{font-size:11px;color:#888;margin-top:4px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+.row:last-child{border-bottom:none;}
+.seclbl{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;}
+.btn-p{background:var(--ep-teal);color:#fff;border:none;padding:11px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;width:100%;transition:background .15s;}
+.btn-p:hover{background:var(--ep-teal2);}
+.btn-o{background:transparent;color:var(--ep-teal);border:2px solid var(--ep-teal);padding:9px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;width:100%;transition:all .15s;}
+.btn-o:hover{background:var(--ep-teal-lt);}
+.inp{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:var(--radius-md);font-size:13px;margin-bottom:12px;outline:none;transition:border .15s;}
+.inp:focus{border-color:var(--ep-teal);}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.lbl{font-size:11px;color:#666;margin-bottom:5px;font-weight:500;}
+.av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}
+.sbar-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-md);font-size:13px;color:#555;cursor:pointer;margin-bottom:2px;}
+.sbar-item svg{width:15px;height:15px;flex-shrink:0;}
+.sbar-item.on{background:var(--ep-teal-lt);color:#085041;font-weight:600;}
+.sbar-item:hover:not(.on){background:#f0f0f0;}
+.prog{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px;}
+.pfill{height:100%;background:var(--ep-teal);border-radius:3px;}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.divider{height:1px;background:#f0f0f0;margin:14px 0;}
+.ep-body2{padding:24px 28px;background:#f1f3f5;}
+.badge-cnt{background:var(--ep-red-lt);color:#9B2C2C;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;}
+
+/* ── HERO ── */
+.hero-band{background:var(--ep-navy);color:#fff;overflow:hidden;}
+.hero-top{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.08);}
+.logo-t{font-size:20px;font-weight:700;letter-spacing:-.3px;}
+.logo-t span{color:#5DCAA5;}
+.hero-main{padding:48px 28px 36px;}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 14px;font-size:11px;color:rgba(255,255,255,.75);margin-bottom:18px;}
+.hero-h1{font-size:36px;font-weight:700;line-height:1.2;max-width:520px;margin-bottom:14px;}
+.hero-h1 em{font-style:normal;color:#5DCAA5;}
+.hero-sub{font-size:14px;color:rgba(255,255,255,.6);max-width:440px;margin-bottom:28px;line-height:1.65;}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.hbtn-main{background:var(--ep-teal);color:#fff;border:none;padding:13px 26px;border-radius:var(--radius-md);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;}
+.hbtn-main:hover{background:var(--ep-teal2);}
+.hbtn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);padding:13px 26px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;}
+.hero-stats{display:flex;border-top:1px solid rgba(255,255,255,.08);}
+.hstat{flex:1;padding:18px 28px;border-right:1px solid rgba(255,255,255,.08);text-align:center;}
+.hstat:last-child{border-right:none;}
+.hstat-v{font-size:22px;font-weight:700;color:#5DCAA5;}
+.hstat-l{font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;}
+
+/* ── FEATURES ── */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.feat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;position:relative;overflow:hidden;}
+.feat-icon{width:42px;height:42px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.feat-icon svg{width:22px;height:22px;}
+.feat-title{font-size:14px;font-weight:600;margin-bottom:7px;}
+.feat-desc{font-size:12px;color:#777;line-height:1.65;}
+.feat-line{position:absolute;top:0;left:0;width:3px;height:100%;}
+
+/* ── ABOUT ── */
+.mission-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;border-left:3px solid var(--ep-teal);}
+.team-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;text-align:center;}
+.team-av{width:54px;height:54px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;}
+.value-card{padding:16px;border-radius:var(--radius-md);background:#f8f9fa;border-left:3px solid transparent;}
+
+/* ── TESTIMONIALS ── */
+.testi-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;}
+.testi-quote{font-size:36px;color:var(--ep-teal-mid);line-height:1;margin-bottom:6px;font-family:Georgia,serif;}
+.testi-text{font-size:13px;color:#333;line-height:1.75;margin-bottom:16px;font-style:italic;}
+.testi-author{display:flex;align-items:center;gap:12px;}
+.stars{color:var(--ep-gold);font-size:14px;margin-bottom:7px;}
+
+/* ── FOOTER ── */
+.ep-footer{background:var(--ep-navy);color:rgba(255,255,255,.75);padding:36px 28px 22px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:28px;margin-bottom:28px;}
+.footer-logo{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;}
+.footer-logo span{color:#5DCAA5;}
+.footer-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:14px;}
+.footer-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:5px 10px;font-size:11px;color:rgba(255,255,255,.6);margin-right:6px;margin-bottom:6px;}
+.footer-col-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.9);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;}
+.footer-link{display:block;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:8px;cursor:pointer;text-decoration:none;}
+.footer-link:hover{color:rgba(255,255,255,.85);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.footer-legal{font-size:11px;color:rgba(255,255,255,.35);}
+.footer-socials{display:flex;gap:8px;}
+.social-btn{width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;color:rgba(255,255,255,.6);font-weight:600;}
+.cert-badge{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,.45);}
+.certif{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+/* ── FORM PAGES ── */
+.form-header{background:var(--ep-navy);color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
+.form-body{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 20px;}
+.form-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:520px;}
+.form-card-wide{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:720px;}
+.form-title{font-size:18px;font-weight:700;margin-bottom:4px;}
+.form-sub{font-size:13px;color:#888;margin-bottom:22px;}
+.form-section{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.07em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;}
+.form-section:first-of-type{margin-top:0;}
+.select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:var(--radius-md);font-size:13px;margin-bottom:12px;background:#fff;outline:none;}
+.select:focus{border-color:var(--ep-teal);}
+.check-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;font-size:12px;color:#555;line-height:1.5;}
+.check-row input{margin-top:2px;flex-shrink:0;}
+.step-bar{display:flex;gap:0;margin-bottom:24px;}
+.step{flex:1;text-align:center;}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid #ddd;background:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 5px;font-size:11px;font-weight:700;color:#aaa;}
+.step.done .step-dot{background:var(--ep-teal);border-color:var(--ep-teal);color:#fff;}
+.step.active .step-dot{border-color:var(--ep-teal);color:var(--ep-teal);}
+.step-lbl{font-size:10px;color:#999;}
+.step.done .step-lbl,.step.active .step-lbl{color:var(--ep-teal);}
+.step-line{flex:1;height:2px;background:#eee;margin-top:13px;}
+.step.done + .step .step-line,.step.done .step-line{background:var(--ep-teal);}
+.textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:var(--radius-md);font-size:13px;margin-bottom:12px;resize:vertical;min-height:80px;outline:none;font-family:inherit;}
+.textarea:focus{border-color:var(--ep-teal);}
+
+/* ── APP LAYOUT (dashboard) ── */
+.app-header{background:var(--ep-navy);color:#fff;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;}
+.app-body{display:flex;min-height:calc(100vh - 94px);}
+.sidebar{width:200px;flex-shrink:0;padding:14px;background:#fff;border-right:1px solid var(--border);}
+.main-content{flex:1;padding:22px 24px;background:#f5f6f7;overflow-y:auto;}
+
+/* ── PAYMENT ── */
+.pay-page{background:#f1f3f5;min-height:calc(100vh - 94px);padding:24px 28px;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     SVG ICON HELPERS (inline, reused via JS)
+══════════════════════════════════════════════════════════ -->
+<svg style="display:none">
+  <symbol id="ic-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
+  <symbol id="ic-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></symbol>
+  <symbol id="ic-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></symbol>
+  <symbol id="ic-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></symbol>
+  <symbol id="ic-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+  <symbol id="ic-school" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+  <symbol id="ic-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></symbol>
+  <symbol id="ic-plus-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></symbol>
+  <symbol id="ic-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15"/><polyline points="16 2 12 7 8 2"/></symbol>
+  <symbol id="ic-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></symbol>
+  <symbol id="ic-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></symbol>
+  <symbol id="ic-bar-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></symbol>
+  <symbol id="ic-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="ic-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+  <symbol id="ic-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+  <symbol id="ic-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+  <symbol id="ic-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></symbol>
+  <symbol id="ic-dollar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></symbol>
+  <symbol id="ic-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></symbol>
+  <symbol id="ic-trend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
+  <symbol id="ic-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
+  <symbol id="ic-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
+  <symbol id="ic-ticket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 010-6h20a3 3 0 010 6"/><path d="M2 15a3 3 0 000 6h20a3 3 0 000-6"/><line x1="2" y1="12" x2="22" y2="12"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+</svg>
+
+<!-- ══════════════════════════════════════════════════════════
+     TOP NAVIGATION
+══════════════════════════════════════════════════════════ -->
+<div class="topnav" id="topnav">
+  <button class="nbtn on" onclick="go('landing')"><svg><use href="#ic-home"/></svg>Accueil</button>
+  <button class="nbtn" onclick="go('about')"><svg><use href="#ic-info"/></svg>À propos</button>
+  <button class="nbtn" onclick="go('testi')"><svg><use href="#ic-chat"/></svg>Témoignages</button>
+  <button class="nbtn" onclick="go('login')"><svg><use href="#ic-lock"/></svg>Connexion</button>
+  <button class="nbtn" onclick="go('register-parent')"><svg><use href="#ic-plus-user"/></svg>Inscription Parent</button>
+  <button class="nbtn" onclick="go('register-school')"><svg><use href="#ic-building"/></svg>Inscription École</button>
+  <button class="nbtn" onclick="go('parent')"><svg><use href="#ic-users"/></svg>Dashboard Parent</button>
+  <button class="nbtn" onclick="go('payment')"><svg><use href="#ic-card"/></svg>Paiement</button>
+  <button class="nbtn" onclick="go('school')"><svg><use href="#ic-school"/></svg>Back-office École</button>
+  <button class="nbtn" onclick="go('admin')"><svg><use href="#ic-settings"/></svg>Super Admin</button>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 1 — LANDING
+════════════════════════════════════════════ -->
+<div class="screen on" id="s-landing">
+  <div class="hero-band">
+    <div class="hero-top">
+      <div class="logo-t">Edu<span>Pay</span> Cameroun</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;" onclick="go('about')">À propos</button>
+        <button style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;" onclick="go('login')">Connexion</button>
+        <button style="background:var(--ep-teal);color:#fff;border:none;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;" onclick="go('register-parent')">S'inscrire gratuitement →</button>
+      </div>
+    </div>
+    <div class="hero-main">
+      <div class="hero-tag"><span style="width:7px;height:7px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span>Plateforme 100% camerounaise · EdTech × FinTech</div>
+      <div class="hero-h1">Payez les frais scolaires<br>en <em>2 minutes</em>,<br>depuis votre téléphone.</div>
+      <div class="hero-sub">EduPay Cameroun connecte les établissements scolaires aux familles via MTN MoMo, Orange Money et carte bancaire. Zéro file d'attente. Reçu PDF immédiat.</div>
+      <div class="hero-btns">
+        <button class="hbtn-main" onclick="go('register-parent')">Créer un compte parent</button>
+        <button class="hbtn-ghost" onclick="go('register-school')">Inscrire mon établissement</button>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-v">30 000+</div><div class="hstat-l">Établissements ciblés</div></div>
+      <div class="hstat"><div class="hstat-v">6 000 000</div><div class="hstat-l">Apprenants au Cameroun</div></div>
+      <div class="hstat"><div class="hstat-v">12M</div><div class="hstat-l">Abonnés Mobile Money</div></div>
+      <div class="hstat"><div class="hstat-v">99,5%</div><div class="hstat-l">Uptime garanti</div></div>
+    </div>
+  </div>
+
+  <div class="ep-body2">
+    <div class="seclbl" style="margin-top:4px;">Pourquoi choisir EduPay ?</div>
+    <div class="feat-grid" style="margin-bottom:24px;">
+      <div class="feat-card"><div class="feat-line" style="background:var(--ep-teal);"></div><div class="feat-icon" style="background:var(--ep-teal-lt);"><svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-phone"/></svg></div><div class="feat-title">Mobile Money natif</div><div class="feat-desc">Intégration directe MTN Mobile Money & Orange Money Cameroun. Confirmation USSD instantanée.</div></div>
+      <div class="feat-card"><div class="feat-line" style="background:var(--ep-gold);"></div><div class="feat-icon" style="background:var(--ep-gold-lt);"><svg viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2"><use href="#ic-receipt"/></svg></div><div class="feat-title">Reçu PDF automatique</div><div class="feat-desc">Chaque paiement validé génère un reçu signé électroniquement, envoyé par email et SMS.</div></div>
+      <div class="feat-card"><div class="feat-line" style="background:#185FA5;"></div><div class="feat-icon" style="background:var(--ep-blue-lt);"><svg viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><use href="#ic-bar-chart"/></svg></div><div class="feat-title">Dashboard temps réel</div><div class="feat-desc">Directeurs et comptables suivent encaissements, impayés et relances depuis un seul écran.</div></div>
+      <div class="feat-card"><div class="feat-line" style="background:#7C3AED;"></div><div class="feat-icon" style="background:var(--ep-purple-lt);"><svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><use href="#ic-shield"/></svg></div><div class="feat-title">Sécurité PCI-DSS</div><div class="feat-desc">Chiffrement TLS 1.3, authentification 2FA, conformité COBAC/BEAC et protection anti-fraude.</div></div>
+      <div class="feat-card"><div class="feat-line" style="background:var(--ep-red);"></div><div class="feat-icon" style="background:var(--ep-red-lt);"><svg viewBox="0 0 24 24" fill="none" stroke="#D94040" stroke-width="2"><use href="#ic-calendar"/></svg></div><div class="feat-title">Paiement fractionné</div><div class="feat-desc">Payez en 2 ou 3 tranches selon l'échéancier de l'établissement. Rappels SMS automatiques.</div></div>
+      <div class="feat-card"><div class="feat-line" style="background:var(--ep-teal);"></div><div class="feat-icon" style="background:var(--ep-teal-lt);"><svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-layers"/></svg></div><div class="feat-title">Multi-établissements</div><div class="feat-desc">Un parent peut gérer plusieurs enfants dans plusieurs écoles depuis un seul compte EduPay.</div></div>
+    </div>
+
+    <div class="seclbl">Conçu pour tout le système éducatif</div>
+    <div class="g4" style="margin-bottom:24px;">
+      <div class="epcard" style="text-align:center;border-top:3px solid var(--ep-teal);"><div style="width:36px;height:36px;background:var(--ep-teal-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-school"/></svg></div><div style="font-weight:600;font-size:13px;">Maternelle &amp; Primaire</div><div style="font-size:11px;color:#888;margin-top:4px;">Inscription, frais scolaires, cantine</div></div>
+      <div class="epcard" style="text-align:center;border-top:3px solid var(--ep-gold);"><div style="width:36px;height:36px;background:var(--ep-gold-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2"><use href="#ic-file"/></svg></div><div style="font-weight:600;font-size:13px;">Collèges &amp; Lycées</div><div style="font-size:11px;color:#888;margin-top:4px;">Scolarité, examens, internat</div></div>
+      <div class="epcard" style="text-align:center;border-top:3px solid #185FA5;"><div style="width:36px;height:36px;background:var(--ep-blue-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><use href="#ic-building"/></svg></div><div style="font-weight:600;font-size:13px;">Universités &amp; Instituts</div><div style="font-size:11px;color:#888;margin-top:4px;">Frais d'inscription, concours</div></div>
+      <div class="epcard" style="text-align:center;border-top:3px solid #7C3AED;"><div style="width:36px;height:36px;background:var(--ep-purple-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><use href="#ic-users"/></svg></div><div style="font-weight:600;font-size:13px;">Parents &amp; Étudiants</div><div style="font-size:11px;color:#888;margin-top:4px;">Paiement 24h/24 depuis partout</div></div>
+    </div>
+
+    <div style="background:var(--ep-navy);border-radius:var(--radius-lg);padding:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:4px;">
+      <div><div style="font-size:18px;font-weight:600;color:#fff;margin-bottom:5px;">Votre établissement n'est pas encore sur EduPay ?</div><div style="font-size:13px;color:rgba(255,255,255,.55);">Inscription gratuite · Onboarding en 24h · Support dédié · Aucun engagement</div></div>
+      <button style="background:var(--ep-teal);color:#fff;border:none;padding:13px 26px;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;" onclick="go('register-school')">Inscrire mon établissement →</button>
+    </div>
+  </div>
+
+  <div class="ep-footer">
+    <div class="footer-grid">
+      <div><div class="footer-logo">Edu<span>Pay</span> Cameroun</div><div class="footer-desc">La première plateforme de paiement électronique des frais de scolarité pensée pour les réalités camerounaises. Mobile Money · Sécurisé · Accessible.</div><div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div></div>
+      <div><div class="footer-col-title">Produit</div><a class="footer-link" onclick="go('landing')">Fonctionnalités</a><a class="footer-link" onclick="go('testi')">Témoignages</a><a class="footer-link">Tarifs</a><a class="footer-link">API Développeurs</a></div>
+      <div><div class="footer-col-title">Établissements</div><a class="footer-link" onclick="go('register-school')">Inscrire mon école</a><a class="footer-link" onclick="go('school')">Back-office</a><a class="footer-link">Guide d'utilisation</a><a class="footer-link">Support dédié</a></div>
+      <div><div class="footer-col-title">Informations</div><a class="footer-link" onclick="go('about')">À propos</a><a class="footer-link">Contact</a><a class="footer-link">Politique de confidentialité</a><a class="footer-link">Conditions d'utilisation</a></div>
+    </div>
+    <div class="footer-bottom"><div><div class="footer-legal">© 2026 EduPay Cameroun — Tous droits réservés · Réf. CDC-EDUPAY-CM-2026-001</div><div class="certif"><span class="cert-badge">MTN Mobile Money Partner</span><span class="cert-badge">Orange Money Intégré</span><span class="cert-badge">CinetPay Certifié</span><span class="cert-badge">COBAC Conforme</span></div></div><div class="footer-socials"><div class="social-btn">in</div><div class="social-btn">X</div><div class="social-btn">W</div><div class="social-btn">f</div></div></div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 2 — À PROPOS
+════════════════════════════════════════════ -->
+<div class="screen" id="s-about">
+  <div class="hero-band">
+    <div class="hero-top">
+      <div class="logo-t">Edu<span>Pay</span> Cameroun</div>
+      <div style="display:flex;gap:8px;"><button style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;" onclick="go('landing')">← Accueil</button><button style="background:var(--ep-teal);color:#fff;border:none;padding:7px 16px;border-radius:20px;font-size:12px;cursor:pointer;" onclick="go('login')">Connexion</button></div>
+    </div>
+    <div style="padding:36px 28px 28px;text-align:center;">
+      <div class="hero-tag" style="justify-content:center;">Notre histoire &amp; notre mission</div>
+      <div style="font-size:28px;font-weight:700;color:#fff;margin:10px 0;line-height:1.3;">À propos d'<em style="font-style:normal;color:#5DCAA5;">EduPay Cameroun</em></div>
+      <div style="font-size:14px;color:rgba(255,255,255,.55);max-width:500px;margin:0 auto;line-height:1.7;">Nés d'un constat terrain, nous construisons l'infrastructure de paiement scolaire que le Cameroun méritait depuis longtemps.</div>
+    </div>
+  </div>
+  <div class="ep-body2">
+    <div class="seclbl" style="margin-top:4px;">Notre mission</div>
+    <div class="mission-card" style="margin-bottom:16px;"><div style="font-size:15px;font-weight:700;margin-bottom:8px;">Digitaliser la gestion financière des établissements scolaires camerounais</div><div style="font-size:13px;color:#555;line-height:1.75;">Le projet EduPay Cameroun est né d'un constat terrain effectué auprès de plusieurs dizaines d'établissements scolaires : la quasi-totalité gère encore les paiements de façon entièrement manuelle, en espèces, avec tous les risques que cela implique — détournements, files d'attente, perte de reçus, impossibilité de suivi en temps réel.</div></div>
+    <div class="seclbl">Nos valeurs</div>
+    <div class="g2" style="margin-bottom:20px;">
+      <div class="value-card" style="border-left-color:var(--ep-teal);"><div style="font-size:13px;font-weight:700;margin-bottom:5px;">Accessibilité</div><div style="font-size:12px;color:#666;line-height:1.6;">Conçu pour fonctionner sur 2G/3G, en zone rurale, sur tout smartphone Android ou iOS.</div></div>
+      <div class="value-card" style="border-left-color:var(--ep-gold);"><div style="font-size:13px;font-weight:700;margin-bottom:5px;">Sécurité absolue</div><div style="font-size:12px;color:#666;line-height:1.6;">Chaque transaction est chiffrée, tracée et conforme aux normes COBAC, BEAC et PCI-DSS.</div></div>
+      <div class="value-card" style="border-left-color:#185FA5;"><div style="font-size:13px;font-weight:700;margin-bottom:5px;">Ancrage local</div><div style="font-size:12px;color:#666;line-height:1.6;">Pensé pour le contexte africain, intégrant nativement MTN Mobile Money et Orange Money.</div></div>
+      <div class="value-card" style="border-left-color:#7C3AED;"><div style="font-size:13px;font-weight:700;margin-bottom:5px;">Impact social</div><div style="font-size:12px;color:#666;line-height:1.6;">Réduire les fraudes scolaires, améliorer le recouvrement, faciliter l'accès à l'éducation.</div></div>
+    </div>
+    <div class="seclbl">Contexte au Cameroun</div>
+    <div class="g4" style="margin-bottom:20px;">
+      <div class="kpi"><div class="kval">30 000+</div><div class="klbl">Établissements d'enseignement</div></div>
+      <div class="kpi"><div class="kval">6 000 000</div><div class="klbl">Apprenants du maternel au sup.</div></div>
+      <div class="kpi"><div class="kval">12 000 000</div><div class="klbl">Abonnés Mobile Money (2024)</div></div>
+      <div class="kpi"><div class="kval">45%</div><div class="klbl">Taux pénétration smartphone</div></div>
+    </div>
+    <div class="seclbl">L'équipe projet — Groupes 14 &amp; 15 · GSI · ESTLC Ambam</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;">
+      <div class="team-card"><div class="team-av" style="background:var(--ep-teal-lt);color:#085041;">MO</div><div style="font-size:12px;font-weight:700;">MEKONTSO OLIVIER</div><div style="font-size:10px;color:#888;margin-top:3px;">Chef de projet</div><span class="pill pg" style="margin-top:6px;font-size:10px;">Lead</span></div>
+      <div class="team-card"><div class="team-av" style="background:var(--ep-blue-lt);color:#1A4F8A;">WN</div><div style="font-size:12px;font-weight:700;">WANDJI NGUELE</div><div style="font-size:10px;color:#888;margin-top:3px;">Dev Back-end</div><span class="pill pb" style="margin-top:6px;font-size:10px;">API</span></div>
+      <div class="team-card"><div class="team-av" style="background:var(--ep-purple-lt);color:#5B21B6;">EB</div><div style="font-size:12px;font-weight:700;">EBODE BIKORO</div><div style="font-size:10px;color:#888;margin-top:3px;">Dev Front-end</div><span class="pill" style="background:var(--ep-purple-lt);color:#5B21B6;margin-top:6px;font-size:10px;">UI</span></div>
+      <div class="team-card"><div class="team-av" style="background:var(--ep-gold-lt);color:#8B5E10;">MN</div><div style="font-size:12px;font-weight:700;">MAKUETA NGAMBA</div><div style="font-size:10px;color:#888;margin-top:3px;">Dev Mobile</div><span class="pill pa" style="margin-top:6px;font-size:10px;">Mobile</span></div>
+      <div class="team-card"><div class="team-av" style="background:var(--ep-red-lt);color:#9B2C2C;">MN</div><div style="font-size:12px;font-weight:700;">MAFFO NDJOUMESSI</div><div style="font-size:10px;color:#888;margin-top:3px;">QA / DevOps</div><span class="pill pr" style="margin-top:6px;font-size:10px;">Tests</span></div>
+    </div>
+    <div class="seclbl">Feuille de route 2026</div>
+    <div class="epcard" style="margin-bottom:4px;">
+      <div class="row"><div style="display:flex;align-items:center;gap:12px;"><span class="pill pg">Phase 1 — Terminée</span><span>Cadrage, CDC, maquettes UI/UX</span></div><span style="font-size:12px;color:#999;">Fév. 2026</span></div>
+      <div class="row"><div style="display:flex;align-items:center;gap:12px;"><span class="pill pa">Phase 2 — En cours</span><span>Développement MVP (Laravel + Livewire)</span></div><span style="font-size:12px;color:#999;">Mars–Avr. 2026</span></div>
+      <div class="row"><div style="display:flex;align-items:center;gap:12px;"><span class="pill" style="background:var(--ep-purple-lt);color:#5B21B6;">Phase 3</span><span>Intégrations MTN MoMo &amp; Orange Money</span></div><span style="font-size:12px;color:#999;">Mai 2026</span></div>
+      <div class="row"><div style="display:flex;align-items:center;gap:12px;"><span class="pill pr">Phase 4</span><span>Pilote — 5 à 10 établissements partenaires</span></div><span style="font-size:12px;color:#999;">Juin 2026</span></div>
+      <div class="row"><div style="display:flex;align-items:center;gap:12px;"><span class="pill pb">Phase 5</span><span>Déploiement général — Cameroun</span></div><span style="font-size:12px;color:#999;">Juil. 2026+</span></div>
+    </div>
+  </div>
+  <div class="ep-footer">
+    <div class="footer-grid"><div><div class="footer-logo">Edu<span>Pay</span> Cameroun</div><div class="footer-desc">La première plateforme de paiement scolaire made in Cameroon.</div><div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div></div><div><div class="footer-col-title">Produit</div><a class="footer-link" onclick="go('landing')">Accueil</a><a class="footer-link" onclick="go('testi')">Témoignages</a></div><div><div class="footer-col-title">Établissements</div><a class="footer-link" onclick="go('register-school')">Inscription</a><a class="footer-link">Support</a></div><div><div class="footer-col-title">Légal</div><a class="footer-link">Confidentialité</a><a class="footer-link">CGU</a></div></div>
+    <div class="footer-bottom"><div class="footer-legal">© 2026 EduPay Cameroun — Tous droits réservés</div><div class="footer-socials"><div class="social-btn">in</div><div class="social-btn">X</div><div class="social-btn">W</div><div class="social-btn">f</div></div></div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 3 — TÉMOIGNAGES
+════════════════════════════════════════════ -->
+<div class="screen" id="s-testi">
+  <div class="hero-band">
+    <div class="hero-top"><div class="logo-t">Edu<span>Pay</span> Cameroun</div><div style="display:flex;gap:8px;"><button style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;" onclick="go('landing')">← Accueil</button><button style="background:var(--ep-teal);color:#fff;border:none;padding:7px 16px;border-radius:20px;font-size:12px;cursor:pointer;" onclick="go('login')">Connexion</button></div></div>
+    <div style="padding:32px 28px 24px;text-align:center;">
+      <div class="hero-tag" style="justify-content:center;">Ce qu'ils disent de nous</div>
+      <div style="font-size:26px;font-weight:700;color:#fff;margin:10px 0 8px;">Des utilisateurs satisfaits<br>à travers tout le <em style="font-style:normal;color:#5DCAA5;">Cameroun</em></div>
+      <div style="display:flex;justify-content:center;gap:32px;margin-top:18px;flex-wrap:wrap;">
+        <div><div style="font-size:22px;font-weight:700;color:#5DCAA5;">4,8/5</div><div style="font-size:11px;color:rgba(255,255,255,.5);">Note moyenne</div></div>
+        <div><div style="font-size:22px;font-weight:700;color:#5DCAA5;">127</div><div style="font-size:11px;color:rgba(255,255,255,.5);">Établissements actifs</div></div>
+        <div><div style="font-size:22px;font-weight:700;color:#5DCAA5;">3 847</div><div style="font-size:11px;color:rgba(255,255,255,.5);">Transactions ce mois</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="ep-body2">
+    <div class="seclbl" style="margin-top:4px;">Directeurs &amp; Administrateurs</div>
+    <div class="g2" style="margin-bottom:20px;">
+      <div class="testi-card"><div class="stars">★★★★★</div><div class="testi-quote">"</div><div class="testi-text">Avant EduPay, nos caissiers passaient 3 heures par matin à gérer les files d'attente. Maintenant 80% de nos parents paient depuis chez eux. Le taux de recouvrement est passé de 54% à 91% en 4 mois.</div><div class="testi-author"><div class="av" style="background:var(--ep-teal-lt);color:#085041;width:44px;height:44px;">DM</div><div><div style="font-size:13px;font-weight:700;">Directeur MBONGO Charles</div><div style="font-size:11px;color:#888;">Lycée Bilingue de Melen · Yaoundé</div><span class="pill pg" style="font-size:10px;margin-top:4px;display:inline-block;">Établissement pilote</span></div></div></div>
+      <div class="testi-card"><div class="stars">★★★★★</div><div class="testi-quote">"</div><div class="testi-text">La relance automatique par SMS m'économise 2 heures chaque semaine. Je sélectionne tous les impayés, je clique sur "Envoyer relances" et c'est fait. Les parents réagissent très vite au SMS.</div><div class="testi-author"><div class="av" style="background:var(--ep-gold-lt);color:#8B5E10;width:44px;height:44px;">CF</div><div><div style="font-size:13px;font-weight:700;">Mme FOUDA Caroline</div><div style="font-size:11px;color:#888;">Comptable · Collège Saint-André · Douala</div><span class="pill pa" style="font-size:10px;margin-top:4px;display:inline-block;">6 mois d'utilisation</span></div></div></div>
+      <div class="testi-card"><div class="stars">★★★★☆</div><div class="testi-quote">"</div><div class="testi-text">Gérer 3 groupes scolaires depuis un seul tableau de bord, c'est exactement ce dont on avait besoin. Les rapports Excel nous font gagner un temps précieux lors des audits. Je recommande vivement.</div><div class="testi-author"><div class="av" style="background:var(--ep-blue-lt);color:#1A4F8A;width:44px;height:44px;">PN</div><div><div style="font-size:13px;font-weight:700;">Proviseur NKOA Pierre</div><div style="font-size:11px;color:#888;">Groupe Scolaire Excellence · Bafoussam</div><span class="pill pb" style="font-size:10px;margin-top:4px;display:inline-block;">Multi-établissements</span></div></div></div>
+      <div class="testi-card"><div class="stars">★★★★★</div><div class="testi-quote">"</div><div class="testi-text">Le paiement fractionné en 3 tranches a réduit les abandons scolaires. Les familles qui ne pouvaient pas régler d'un coup suivent maintenant un échéancier clair et adapté à leur situation.</div><div class="testi-author"><div class="av" style="background:var(--ep-purple-lt);color:#5B21B6;width:44px;height:44px;">AN</div><div><div style="font-size:13px;font-weight:700;">Directrice ABOMO Nathalie</div><div style="font-size:11px;color:#888;">Lycée Technique de Ngaoundéré</div><span class="pill" style="background:var(--ep-purple-lt);color:#5B21B6;font-size:10px;margin-top:4px;display:inline-block;">Zone rurale</span></div></div></div>
+    </div>
+    <div class="seclbl">Parents &amp; Étudiants</div>
+    <div class="g2" style="margin-bottom:20px;">
+      <div class="testi-card"><div class="stars">★★★★★</div><div class="testi-quote">"</div><div class="testi-text">J'habite à Kribi, l'école de mes enfants est à Yaoundé. Avant je devais envoyer l'argent par transfert et appeler la secrétaire. Maintenant je paie en 2 min via MTN MoMo et le reçu arrive par email immédiatement.</div><div class="testi-author"><div class="av" style="background:var(--ep-teal-lt);color:#085041;width:44px;height:44px;">BT</div><div><div style="font-size:13px;font-weight:700;">M. BELINGA Thomas</div><div style="font-size:11px;color:#888;">Parent de 2 élèves · Kribi</div><span class="pill pg" style="font-size:10px;margin-top:4px;display:inline-block;">3 mois d'utilisation</span></div></div></div>
+      <div class="testi-card"><div class="stars">★★★★★</div><div class="testi-quote">"</div><div class="testi-text">En tant qu'étudiante à l'IUT, payer mes frais universitaires depuis mon téléphone sans me déplacer à la banque, c'est révolutionnaire. Le paiement Orange Money est immédiat et le reçu PDF est accepté partout.</div><div class="testi-author"><div class="av" style="background:var(--ep-gold-lt);color:#8B5E10;width:44px;height:44px;">KA</div><div><div style="font-size:13px;font-weight:700;">Mme KAMGA Aurélie</div><div style="font-size:11px;color:#888;">Étudiante IUT · Université de Douala</div><span class="pill pa" style="font-size:10px;margin-top:4px;display:inline-block;">Orange Money</span></div></div></div>
+    </div>
+    <div style="background:var(--ep-navy);border-radius:var(--radius-lg);padding:32px 28px;text-align:center;margin-bottom:4px;">
+      <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;">Rejoignez les établissements qui font confiance à EduPay</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:22px;">Inscription gratuite · Mise en ligne en 24h · Support dédié</div>
+      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;"><button class="hbtn-main" onclick="go('register-parent')">Créer mon compte parent</button><button class="hbtn-ghost" onclick="go('register-school')">Inscrire mon établissement</button></div>
+    </div>
+  </div>
+  <div class="ep-footer"><div class="footer-grid"><div><div class="footer-logo">Edu<span>Pay</span> Cameroun</div><div class="footer-desc">La première plateforme de paiement scolaire made in Cameroon.</div><div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div></div><div><div class="footer-col-title">Produit</div><a class="footer-link" onclick="go('landing')">Accueil</a><a class="footer-link" onclick="go('about')">À propos</a></div><div><div class="footer-col-title">Établissements</div><a class="footer-link" onclick="go('register-school')">Inscription</a><a class="footer-link">Guide</a></div><div><div class="footer-col-title">Légal</div><a class="footer-link">Confidentialité</a><a class="footer-link">CGU</a></div></div><div class="footer-bottom"><div class="footer-legal">© 2026 EduPay Cameroun</div><div class="footer-socials"><div class="social-btn">in</div><div class="social-btn">X</div><div class="social-btn">W</div><div class="social-btn">f</div></div></div></div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 4 — CONNEXION
+════════════════════════════════════════════ -->
+<div class="screen-form" id="s-login">
+  <div class="form-header">
+    <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> Cameroun</div>
+    <button style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:6px 13px;border-radius:20px;font-size:12px;cursor:pointer;" onclick="go('landing')">← Accueil</button>
+  </div>
+  <div class="form-body">
+    <div style="width:100%;max-width:420px;">
+      <div class="form-card">
+        <div style="text-align:center;margin-bottom:22px;">
+          <div style="width:48px;height:48px;background:var(--ep-teal-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-lock"/></svg></div>
+          <div class="form-title">Connexion à EduPay</div>
+          <div class="form-sub">Accédez à votre espace sécurisé</div>
+        </div>
+        <div class="lbl">Téléphone ou adresse email</div>
+        <input class="inp" placeholder="699 123 456 ou nom@email.com" />
+        <div class="lbl">Mot de passe</div>
+        <input class="inp" type="password" placeholder="••••••••" />
+        <div style="display:flex;justify-content:space-between;margin-bottom:18px;"><label style="font-size:12px;color:#888;display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" /> Rester connecté</label><span style="font-size:12px;color:var(--ep-teal);cursor:pointer;">Mot de passe oublié ?</span></div>
+        <button class="btn-p" style="margin-bottom:10px;" onclick="go('parent')">Se connecter</button>
+        <button class="btn-o">Connexion par OTP SMS</button>
+        <div class="divider"></div>
+        <div style="font-size:12px;color:#888;text-align:center;">Pas encore de compte ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('register-parent')">Créer un compte parent →</span></div>
+      </div>
+      <div class="epcard" style="background:#f8f9fa;margin-top:10px;">
+        <div style="font-size:12px;color:#888;text-align:center;margin-bottom:10px;">Vous représentez un établissement ?</div>
+        <button class="btn-o" onclick="go('school')">Accès back-office établissement →</button>
+        <div style="font-size:12px;color:#888;text-align:center;margin-top:10px;">Pas encore inscrit ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('register-school')">Inscrire mon établissement →</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="ep-footer" style="border-radius:0;"><div class="footer-bottom" style="border-top:none;padding-top:0;"><div class="footer-legal">© 2026 EduPay Cameroun · Connexion chiffrée TLS 1.3</div><div style="display:flex;gap:8px;"><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span></div></div></div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 5 — INSCRIPTION PARENT  ← NEW
+════════════════════════════════════════════ -->
+<div class="screen-form" id="s-register-parent">
+  <div class="form-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button style="background:transparent;color:rgba(255,255,255,.7);border:none;cursor:pointer;padding:0;" onclick="go('login')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><use href="#ic-arrow-left"/></svg></button>
+      <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> — Inscription Parent</div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,.5);">Déjà un compte ? <span style="color:#5DCAA5;cursor:pointer;" onclick="go('login')">Se connecter</span></div>
+  </div>
+  <div class="form-body" style="padding-top:28px;">
+    <div class="form-card-wide">
+      <!-- Étapes -->
+      <div style="display:flex;align-items:center;margin-bottom:24px;">
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">1</div><div style="font-size:11px;font-weight:600;color:var(--ep-teal);">Compte</div></div>
+        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">2</div><div style="font-size:11px;color:#aaa;">Enfant(s)</div></div>
+        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">3</div><div style="font-size:11px;color:#aaa;">Confirmation</div></div>
+      </div>
+
+      <div class="form-title">Créer votre compte parent</div>
+      <div class="form-sub">Renseignez vos informations pour commencer à payer les frais scolaires en ligne</div>
+
+      <div class="form-section">Informations personnelles</div>
+      <div class="inp-row">
+        <div><div class="lbl">Prénom *</div><input class="inp" placeholder="ex : Marie" /></div>
+        <div><div class="lbl">Nom *</div><input class="inp" placeholder="ex : FONO" /></div>
+      </div>
+      <div class="inp-row">
+        <div><div class="lbl">Numéro de téléphone *</div><input class="inp" placeholder="6XX XXX XXX" /></div>
+        <div><div class="lbl">Adresse email</div><input class="inp" placeholder="exemple@email.com" /></div>
+      </div>
+      <div class="inp-row">
+        <div><div class="lbl">Ville de résidence *</div>
+          <select class="select"><option value="">-- Choisir une ville --</option><option>Yaoundé</option><option>Douala</option><option>Bafoussam</option><option>Garoua</option><option>Maroua</option><option>Ngaoundéré</option><option>Kribi</option><option>Buea</option><option>Bamenda</option><option>Autre</option></select>
+        </div>
+        <div><div class="lbl">Quartier / Arrondissement</div><input class="inp" placeholder="ex : Melen, Biyem-Assi..." /></div>
+      </div>
+
+      <div class="form-section">Sécurité du compte</div>
+      <div class="inp-row">
+        <div><div class="lbl">Mot de passe *</div><input class="inp" type="password" placeholder="Min. 8 caractères" /></div>
+        <div><div class="lbl">Confirmer le mot de passe *</div><input class="inp" type="password" placeholder="Répétez le mot de passe" /></div>
+      </div>
+      <div style="background:#f8f9fa;border-radius:var(--radius-md);padding:12px;margin-bottom:14px;font-size:12px;color:#666;">
+        <div style="font-weight:600;margin-bottom:6px;">Le mot de passe doit contenir :</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <span>• 8 caractères minimum</span>
+          <span>• 1 majuscule</span>
+          <span>• 1 chiffre</span>
+          <span>• 1 caractère spécial</span>
+        </div>
+      </div>
+
+      <div class="form-section">Rattachement à un établissement (optionnel)</div>
+      <div class="inp-row">
+        <div><div class="lbl">Nom de l'établissement</div><input class="inp" placeholder="Rechercher un établissement..." /></div>
+        <div><div class="lbl">Code établissement (si connu)</div><input class="inp" placeholder="ex : LYC-MEL-2026" /></div>
+      </div>
+      <div style="background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#085041;display:flex;gap:10px;align-items:flex-start;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><use href="#ic-alert"/></svg>
+        <span>Vous pourrez ajouter ou modifier l'établissement de vos enfants plus tard depuis votre tableau de bord.</span>
+      </div>
+
+      <div class="form-section">Conditions d'utilisation</div>
+      <div class="check-row"><input type="checkbox" id="cgu1" /><label for="cgu1">J'accepte les <span style="color:var(--ep-teal);cursor:pointer;">Conditions Générales d'Utilisation</span> et la <span style="color:var(--ep-teal);cursor:pointer;">Politique de confidentialité</span> d'EduPay Cameroun.</label></div>
+      <div class="check-row"><input type="checkbox" id="cgu2" /><label for="cgu2">J'accepte de recevoir des notifications par SMS et email concernant les paiements et les rappels d'échéances.</label></div>
+
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;" onclick="go('login')">Annuler</button>
+        <button class="btn-p" onclick="go('parent')">Créer mon compte et continuer →</button>
+      </div>
+      <div style="text-align:center;margin-top:14px;font-size:12px;color:#888;">Déjà un compte ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('login')">Se connecter</span></div>
+    </div>
+  </div>
+  <div class="ep-footer" style="border-radius:0;margin-top:24px;"><div class="footer-bottom" style="border-top:none;padding-top:0;"><div class="footer-legal">© 2026 EduPay Cameroun · Vos données sont protégées et chiffrées AES-256</div><div style="display:flex;gap:8px;"><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">RGPD</span></div></div></div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 6 — INSCRIPTION ÉTABLISSEMENT  ← NEW
+════════════════════════════════════════════ -->
+<div class="screen-form" id="s-register-school">
+  <div class="form-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button style="background:transparent;color:rgba(255,255,255,.7);border:none;cursor:pointer;padding:0;" onclick="go('landing')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><use href="#ic-arrow-left"/></svg></button>
+      <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> — Inscrire mon établissement</div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,.5);">Déjà inscrit ? <span style="color:#5DCAA5;cursor:pointer;" onclick="go('school')">Accéder au back-office</span></div>
+  </div>
+  <div class="form-body" style="padding-top:28px;">
+    <div class="form-card-wide">
+      <!-- Étapes -->
+      <div style="display:flex;align-items:center;margin-bottom:24px;">
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">1</div><div style="font-size:11px;font-weight:600;color:var(--ep-teal);">Établissement</div></div>
+        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">2</div><div style="font-size:11px;color:#aaa;">Responsable</div></div>
+        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">3</div><div style="font-size:11px;color:#aaa;">Configuration</div></div>
+        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">4</div><div style="font-size:11px;color:#aaa;">Validation</div></div>
+      </div>
+
+      <div class="form-title">Informations de l'établissement</div>
+      <div class="form-sub">Renseignez les informations officielles de votre établissement pour commencer l'onboarding EduPay</div>
+
+      <div class="form-section">Identité de l'établissement</div>
+      <div class="lbl">Nom officiel de l'établissement *</div>
+      <input class="inp" placeholder="ex : Lycée Bilingue de Melen" />
+      <div class="inp-row">
+        <div>
+          <div class="lbl">Type d'établissement *</div>
+          <select class="select"><option value="">-- Choisir --</option><option>École maternelle</option><option>École primaire</option><option>Collège</option><option>Lycée général</option><option>Lycée technique</option><option>Université</option><option>Institut privé</option><option>Groupe scolaire (multi-niveaux)</option></select>
+        </div>
+        <div>
+          <div class="lbl">Statut juridique *</div>
+          <select class="select"><option value="">-- Choisir --</option><option>Public (État)</option><option>Privé laïc</option><option>Privé confessionnel (catholique)</option><option>Privé confessionnel (protestant)</option><option>Privé confessionnel (islamique)</option></select>
+        </div>
+      </div>
+      <div class="inp-row">
+        <div>
+          <div class="lbl">Numéro d'agrément / MINESEC *</div>
+          <input class="inp" placeholder="ex : 12345/MINESEC/2024" />
+        </div>
+        <div>
+          <div class="lbl">Nombre approximatif d'élèves</div>
+          <select class="select"><option>Moins de 100</option><option>100 – 300</option><option>300 – 500</option><option selected>500 – 1000</option><option>Plus de 1000</option></select>
+        </div>
+      </div>
+
+      <div class="form-section">Localisation</div>
+      <div class="inp-row">
+        <div>
+          <div class="lbl">Région *</div>
+          <select class="select"><option value="">-- Choisir une région --</option><option>Centre</option><option>Littoral</option><option>Ouest</option><option>Nord</option><option>Adamaoua</option><option>Est</option><option>Sud</option><option>Sud-Ouest</option><option>Nord-Ouest</option><option>Extrême-Nord</option></select>
+        </div>
+        <div>
+          <div class="lbl">Ville *</div>
+          <input class="inp" placeholder="ex : Yaoundé" />
+        </div>
+      </div>
+      <div class="inp-row">
+        <div><div class="lbl">Quartier / Arrondissement</div><input class="inp" placeholder="ex : Melen, Biyem-Assi..." /></div>
+        <div><div class="lbl">Boîte Postale</div><input class="inp" placeholder="ex : BP 1234 Yaoundé" /></div>
+      </div>
+
+      <div class="form-section">Coordonnées de contact</div>
+      <div class="inp-row">
+        <div><div class="lbl">Téléphone principal *</div><input class="inp" placeholder="6XX XXX XXX" /></div>
+        <div><div class="lbl">Email officiel *</div><input class="inp" placeholder="secretariat@lycee.cm" /></div>
+      </div>
+      <div class="inp-row">
+        <div><div class="lbl">Site web (si disponible)</div><input class="inp" placeholder="https://www.monlycee.cm" /></div>
+        <div><div class="lbl">Compte Mobile Money principal</div>
+          <select class="select"><option value="">-- Choisir --</option><option>MTN Mobile Money</option><option>Orange Money</option><option>Les deux</option></select>
+        </div>
+      </div>
+
+      <div class="form-section">Compte administrateur principal</div>
+      <div class="inp-row">
+        <div><div class="lbl">Prénom du directeur / responsable *</div><input class="inp" placeholder="ex : Jean-Pierre" /></div>
+        <div><div class="lbl">Nom *</div><input class="inp" placeholder="ex : MVONDO" /></div>
+      </div>
+      <div class="inp-row">
+        <div><div class="lbl">Téléphone du responsable *</div><input class="inp" placeholder="6XX XXX XXX" /></div>
+        <div><div class="lbl">Email du responsable *</div><input class="inp" placeholder="directeur@lycee.cm" /></div>
+      </div>
+      <div class="inp-row">
+        <div><div class="lbl">Mot de passe *</div><input class="inp" type="password" placeholder="Min. 8 caractères" /></div>
+        <div><div class="lbl">Confirmer le mot de passe *</div><input class="inp" type="password" placeholder="Répétez" /></div>
+      </div>
+
+      <div class="form-section">Document justificatif</div>
+      <div style="border:2px dashed #ddd;border-radius:var(--radius-md);padding:20px;text-align:center;margin-bottom:12px;cursor:pointer;background:#fafafa;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" style="display:block;margin:0 auto 8px;"><use href="#ic-upload"/></svg>
+        <div style="font-size:13px;font-weight:600;color:#888;">Déposer l'agrément ou l'autorisation d'ouverture</div>
+        <div style="font-size:11px;color:#aaa;margin-top:4px;">PDF, JPG, PNG · Max 5 Mo</div>
+      </div>
+
+      <div class="form-section">Informations supplémentaires</div>
+      <div class="lbl">Décrivez brièvement votre établissement (optionnel)</div>
+      <textarea class="textarea" placeholder="Historique, spécialités, niveaux enseignés, effectifs, particularités..."></textarea>
+
+      <div class="check-row"><input type="checkbox" id="cgu3" /><label for="cgu3">Je certifie que les informations fournies sont exactes et que je suis habilité(e) à représenter cet établissement sur EduPay Cameroun.</label></div>
+      <div class="check-row"><input type="checkbox" id="cgu4" /><label for="cgu4">J'accepte les <span style="color:var(--ep-teal);cursor:pointer;">Conditions Générales</span> et la <span style="color:var(--ep-teal);cursor:pointer;">Politique de confidentialité</span> d'EduPay Cameroun.</label></div>
+
+      <div style="background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:14px;margin-bottom:16px;font-size:12px;color:#085041;display:flex;gap:10px;align-items:flex-start;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><use href="#ic-alert"/></svg>
+        <div><strong>Activation sous 24h :</strong> après soumission, notre équipe vérifiera votre dossier et activera votre compte sous 24 heures ouvrables. Vous serez notifié par SMS et email.</div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;" onclick="go('landing')">Annuler</button>
+        <button class="btn-p" onclick="showSchoolSuccess()">Soumettre ma demande d'inscription →</button>
+      </div>
+
+      <div id="school-success" style="display:none;margin-top:18px;background:var(--ep-teal-lt);border-radius:var(--radius-lg);padding:24px;text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><use href="#ic-check"/></svg></div>
+        <div style="font-size:17px;font-weight:700;color:#085041;margin-bottom:6px;">Demande envoyée avec succès !</div>
+        <div style="font-size:13px;color:#1B9E75;margin-bottom:16px;">Notre équipe examinera votre dossier et vous contactera sous 24h ouvrables par SMS au numéro fourni.</div>
+        <div style="display:flex;justify-content:center;gap:10px;">
+          <button style="background:#0F6E56;color:#fff;border:none;padding:10px 20px;border-radius:var(--radius-md);font-size:13px;cursor:pointer;" onclick="go('landing')">Retour à l'accueil</button>
+          <button style="background:transparent;color:#0F6E56;border:2px solid #0F6E56;padding:10px 20px;border-radius:var(--radius-md);font-size:13px;cursor:pointer;" onclick="go('about')">En savoir plus</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ep-footer" style="border-radius:0;margin-top:24px;"><div class="footer-bottom" style="border-top:none;padding-top:0;"><div class="footer-legal">© 2026 EduPay Cameroun · Onboarding sous 24h garanti</div><div style="display:flex;gap:8px;"><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span></div></div></div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 7 — DASHBOARD PARENT
+════════════════════════════════════════════ -->
+<div class="screen" id="s-parent">
+  <div class="app-header">
+    <div class="logo-t" style="font-size:16px;">Edu<span>Pay</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:12px;color:rgba(255,255,255,.65);">Mme FONO Marie</span>
+      <div class="av" style="background:var(--ep-teal);color:#fff;width:34px;height:34px;">FM</div>
+    </div>
+  </div>
+  <div class="main-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div><div style="font-size:18px;font-weight:700;">Bonjour, Marie</div><div style="font-size:13px;color:#888;">2 paiements en attente · Yaoundé</div></div>
+      <button style="background:var(--ep-teal);color:#fff;border:none;padding:10px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;" onclick="go('payment')">Payer maintenant</button>
+    </div>
+    <div class="g4" style="margin-bottom:18px;">
+      <div class="kpi"><div class="kval" style="color:var(--ep-red);">87 500</div><div class="klbl">FCFA dus</div></div>
+      <div class="kpi"><div class="kval" style="color:var(--ep-teal);">45 000</div><div class="klbl">FCFA payés</div></div>
+      <div class="kpi"><div class="kval">2</div><div class="klbl">Enfants suivis</div></div>
+      <div class="kpi"><div class="kval">3</div><div class="klbl">Reçus PDF</div></div>
+    </div>
+    <div class="seclbl" style="margin-top:0;">Mes enfants</div>
+    <div class="g2" style="margin-bottom:18px;">
+      <div class="epcard" style="border-left:3px solid var(--ep-teal);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div><div style="font-size:15px;font-weight:700;">FONO Brice</div><div style="font-size:11px;color:#888;">Lycée de Melen · 3ème</div></div><span class="pill pa">Partiel</span></div>
+        <div style="font-size:12px;color:#666;margin-bottom:6px;">Reste : <strong>52 500 FCFA</strong> sur 95 000 FCFA</div>
+        <div class="prog"><div class="pfill" style="width:45%"></div></div>
+        <div style="font-size:10px;color:#888;margin-top:3px;margin-bottom:12px;">45% réglé · Tranche 2 due le 15 avr.</div>
+        <button class="btn-p" style="font-size:12px;padding:8px;" onclick="go('payment')">Payer la tranche 2 →</button>
+      </div>
+      <div class="epcard" style="border-left:3px solid var(--ep-red);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div><div style="font-size:15px;font-weight:700;">FONO Chloé</div><div style="font-size:11px;color:#888;">École Primaire NBC · CM2</div></div><span class="pill pr">Impayé</span></div>
+        <div style="font-size:12px;color:#666;margin-bottom:6px;">Reste : <strong>35 000 FCFA</strong></div>
+        <div class="prog"><div class="pfill" style="width:0%"></div></div>
+        <div style="font-size:10px;color:var(--ep-red);margin-top:3px;margin-bottom:12px;">Échéance dépassée — 31 mars 2026</div>
+        <button style="background:var(--ep-red);color:#fff;border:none;padding:8px;border-radius:var(--radius-md);font-size:12px;cursor:pointer;width:100%;" onclick="go('payment')">Payer maintenant →</button>
+      </div>
+    </div>
+    <div class="seclbl">Derniers paiements</div>
+    <div class="epcard">
+      <div class="row"><div><div style="font-size:13px;font-weight:600;">Scolarité T1 — Brice</div><div style="font-size:11px;color:#888;">12 mars 2026 · MTN MoMo</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">25 000 FCFA</div><span class="pill pg">Validé</span></div></div>
+      <div class="row"><div><div style="font-size:13px;font-weight:600;">Inscription 2026 — Brice</div><div style="font-size:11px;color:#888;">02 janv. 2026 · Orange Money</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">20 000 FCFA</div><span class="pill pg">Validé</span></div></div>
+      <div class="row"><div><div style="font-size:13px;font-weight:600;">Cantine T1 — Brice</div><div style="font-size:11px;color:#888;">05 janv. 2026</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">– 5 000 FCFA</div><span class="pill pa">Remboursé</span></div></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 8 — PAIEMENT
+════════════════════════════════════════════ -->
+<div class="screen" id="s-payment">
+  <div class="app-header">
+    <div style="display:flex;align-items:center;gap:10px;"><button style="background:transparent;border:none;cursor:pointer;padding:0;" onclick="go('parent')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><use href="#ic-arrow-left"/></svg></button><div class="logo-t" style="font-size:16px;">Paiement <span>sécurisé</span></div></div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,.6);"><span style="background:var(--ep-teal);width:7px;height:7px;border-radius:50%;display:inline-block;"></span>TLS 1.3</div>
+  </div>
+  <div class="pay-page">
+    <div style="max-width:600px;margin:0 auto;">
+      <div class="epcard" style="background:var(--ep-teal-lt);border-color:rgba(13,158,117,.2);margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:11px;color:#0F6E56;margin-bottom:3px;">Paiement pour</div><div style="font-size:15px;font-weight:700;color:#085041;">FONO Brice · Lycée de Melen</div><div style="font-size:12px;color:#1B9E75;">Scolarité — 2ème trimestre 2025-2026</div></div><div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#085041;">52 500</div><div style="font-size:11px;color:#0F6E56;">FCFA</div></div></div>
+      </div>
+      <div class="seclbl">Option de paiement</div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <div id="opt1" style="flex:1;padding:12px;border:2px solid var(--ep-teal);border-radius:var(--radius-md);cursor:pointer;background:var(--ep-teal-lt);text-align:center;" onclick="selOpt(1)"><div style="font-size:11px;font-weight:700;color:#0F6E56;">Paiement intégral</div><div style="font-size:18px;font-weight:700;color:#085041;">52 500 FCFA</div></div>
+        <div id="opt2" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;" onclick="selOpt(2)"><div style="font-size:11px;font-weight:700;color:#888;">Tranche 1/2</div><div style="font-size:18px;font-weight:700;">26 250 FCFA</div></div>
+      </div>
+      <div class="seclbl">Moyen de paiement</div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <div id="pm1" style="flex:1;padding:12px;border:2px solid #FFCC00;border-radius:var(--radius-md);background:#FFFBE6;cursor:pointer;text-align:center;" onclick="selPay(1)"><div style="font-size:12px;font-weight:700;color:#996600;">MTN</div><div style="font-size:11px;color:#664400;">Mobile Money</div></div>
+        <div id="pm2" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;" onclick="selPay(2)"><div style="font-size:12px;font-weight:700;color:#FF6600;">Orange</div><div style="font-size:11px;">Money</div></div>
+        <div id="pm3" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;" onclick="selPay(3)"><div style="font-size:12px;font-weight:700;color:#185FA5;">Carte</div><div style="font-size:11px;">Visa / MC</div></div>
+      </div>
+      <div class="lbl">Numéro MTN Mobile Money</div>
+      <input class="inp" placeholder="6XX XXX XXX" />
+      <div style="background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#854F0B;display:flex;gap:8px;align-items:flex-start;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2" style="flex-shrink:0;"><use href="#ic-alert"/></svg>Vous recevrez une notification USSD sur votre téléphone pour confirmer le paiement.</div>
+      <div style="font-size:13px;color:#888;margin-bottom:6px;display:flex;justify-content:space-between;"><span>Montant</span><span style="font-weight:600;color:#333;">52 500 FCFA</span></div>
+      <div style="font-size:13px;color:#888;margin-bottom:12px;display:flex;justify-content:space-between;"><span>Frais de transaction</span><span style="font-weight:600;color:var(--ep-teal);">Offerts</span></div>
+      <div style="border-top:1px solid #eee;padding-top:12px;margin-bottom:18px;display:flex;justify-content:space-between;"><span style="font-size:15px;font-weight:700;">Total à payer</span><span style="font-size:22px;font-weight:700;color:var(--ep-teal);">52 500 FCFA</span></div>
+      <button class="btn-p" onclick="showOK()">Confirmer et payer →</button>
+      <div id="ok-msg" style="display:none;margin-top:16px;background:var(--ep-teal-lt);border-radius:var(--radius-lg);padding:24px;text-align:center;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><use href="#ic-check"/></svg></div>
+        <div style="font-size:16px;font-weight:700;color:#085041;margin-bottom:6px;">Paiement validé avec succès !</div>
+        <div style="font-size:12px;color:#1B9E75;margin-bottom:16px;">Réf. #EP2026-04471 · Reçu PDF envoyé par email</div>
+        <button style="background:#0F6E56;color:#fff;border:none;padding:10px 22px;border-radius:var(--radius-md);font-size:13px;cursor:pointer;" onclick="go('parent')">Retour au tableau de bord</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 9 — BACK-OFFICE ÉCOLE
+════════════════════════════════════════════ -->
+<div class="screen" id="s-school">
+  <div class="app-header">
+    <div><div class="logo-t" style="font-size:16px;">Edu<span>Pay</span> · Back-office</div><div style="font-size:11px;color:rgba(255,255,255,.5);">Lycée de Melen — Yaoundé</div></div>
+    <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:12px;color:rgba(255,255,255,.65);">M. DJOMO (Comptable)</span><div class="av" style="background:rgba(255,255,255,.12);color:#fff;width:34px;height:34px;">DJ</div></div>
+  </div>
+  <div class="app-body">
+    <div class="sidebar">
+      <div class="sbar-item on"><svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-bar-chart"/></svg>Tableau de bord</div>
+      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-users"/></svg>Apprenants</div>
+      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-card"/></svg>Paiements</div>
+      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-alert"/></svg>Impayés <span class="badge-cnt">87</span></div>
+      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-file"/></svg>Rapports</div>
+      <div class="sbar-item" style="margin-top:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-settings"/></svg>Paramètres</div>
+      <div style="margin-top:16px;background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;">
+        <div style="font-size:11px;font-weight:600;color:#0F6E56;margin-bottom:4px;">Recouvrement</div>
+        <div style="font-size:24px;font-weight:700;color:#085041;">67%</div>
+        <div class="prog"><div class="pfill" style="width:67%"></div></div>
+        <div style="font-size:10px;color:#1B9E75;margin-top:3px;">Objectif : 80%</div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div style="font-size:17px;font-weight:700;margin-bottom:4px;">Tableau de bord financier</div>
+      <div style="font-size:12px;color:#888;margin-bottom:16px;">Année 2025-2026 · Mars 2026</div>
+      <div class="g4" style="margin-bottom:18px;">
+        <div class="kpi"><div class="kval" style="font-size:18px;color:var(--ep-teal);">4 872 000</div><div class="klbl">FCFA encaissés (mois)</div></div>
+        <div class="kpi"><div class="kval" style="font-size:18px;color:var(--ep-red);">2 385 000</div><div class="klbl">FCFA impayés</div></div>
+        <div class="kpi"><div class="kval">342</div><div class="klbl">Élèves inscrits</div></div>
+        <div class="kpi"><div class="kval" style="color:var(--ep-gold);">87</div><div class="klbl">Dossiers impayés</div></div>
+      </div>
+      <div class="seclbl" style="margin-top:0;">Derniers paiements reçus</div>
+      <div class="epcard" style="margin-bottom:14px;">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">MENGUE Serge · 4ème B</div><div style="font-size:11px;color:#888;">Scolarité T2 · MTN MoMo · 12 min</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">52 500 FCFA</div><span class="pill pg">Reçu</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">BIYONG Clara · Tle A</div><div style="font-size:11px;color:#888;">Inscription 2026 · Orange Money · 1h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">25 000 FCFA</div><span class="pill pg">Reçu</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">FOUDA Jean · 2nde C</div><div style="font-size:11px;color:#888;">Scolarité T2 · Carte · 3h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">52 500 FCFA</div><span class="pill pa">En attente</span></div></div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-p" style="font-size:12px;">Relancer les 87 impayés par SMS</button>
+        <button class="btn-o" style="font-size:12px;">Exporter rapport Excel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 10 — SUPER ADMIN
+════════════════════════════════════════════ -->
+<div class="screen" id="s-admin">
+  <div class="app-header">
+    <div><div class="logo-t" style="font-size:16px;">Edu<span>Pay</span> · <span style="color:var(--ep-gold);">Super Admin</span></div><div style="font-size:11px;color:rgba(255,255,255,.5);">Vue globale plateforme</div></div>
+    <div style="display:flex;align-items:center;gap:8px;"><span style="background:rgba(232,160,32,.15);color:var(--ep-gold);border:1px solid rgba(232,160,32,.3);padding:3px 10px;border-radius:20px;font-size:11px;">Admin système</span><div class="av" style="background:var(--ep-red);color:#fff;width:34px;height:34px;">MO</div></div>
+  </div>
+  <div class="app-body">
+    <div class="sidebar">
+      <div class="sbar-item on"><svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-globe"/></svg>Vue globale</div>
+      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-building"/></svg>Établissements</div>
+      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-card"/></svg>Transactions</div>
+      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-trend"/></svg>Commissions</div>
+      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-ticket"/></svg>Réclamations <span class="badge-cnt">3</span></div>
+      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-shield"/></svg>Logs sécurité</div>
+      <div class="sbar-item" style="margin-top:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-settings"/></svg>Paramètres sys.</div>
+      <div style="margin-top:16px;background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:12px;border-left:2px solid var(--ep-gold);">
+        <div style="font-size:11px;font-weight:600;color:#8B5E10;">Commission active</div>
+        <div style="font-size:24px;font-weight:700;color:#663E08;">0,5%</div>
+        <div style="font-size:10px;color:#8B5E10;margin-top:2px;">par transaction</div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div style="font-size:17px;font-weight:700;margin-bottom:4px;">KPIs globaux — Mars 2026</div>
+      <div style="font-size:12px;color:#888;margin-bottom:16px;">Toutes les écoles · Temps réel</div>
+      <div class="g4" style="margin-bottom:18px;">
+        <div class="kpi"><div class="kval" style="font-size:17px;color:var(--ep-teal);">48 250 000</div><div class="klbl">FCFA volume (mois)</div></div>
+        <div class="kpi"><div class="kval" style="color:var(--ep-gold);">241 250</div><div class="klbl">FCFA commissions</div></div>
+        <div class="kpi"><div class="kval">127</div><div class="klbl">Établissements actifs</div></div>
+        <div class="kpi"><div class="kval">3 847</div><div class="klbl">Transactions ce mois</div></div>
+      </div>
+      <div class="g2" style="margin-bottom:14px;">
+        <div class="epcard">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Répartition des paiements</div>
+          <div class="row"><div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span class="dot" style="background:#FFCC00;"></span>MTN Mobile Money</div><strong>58%</strong></div>
+          <div class="row"><div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span class="dot" style="background:#FF6600;"></span>Orange Money</div><strong>35%</strong></div>
+          <div class="row"><div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span class="dot" style="background:#185FA5;"></span>Carte bancaire</div><strong>7%</strong></div>
+        </div>
+        <div class="epcard">
+          <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Derniers établissements inscrits</div>
+          <div class="row"><div><div style="font-size:13px;font-weight:600;">Institut Saint-Michel · Douala</div><div style="font-size:10px;color:#888;">il y a 2 jours</div></div><span class="pill pg">Actif</span></div>
+          <div class="row"><div><div style="font-size:13px;font-weight:600;">Collège de l'Unité · Bafoussam</div><div style="font-size:10px;color:#888;">il y a 5 jours</div></div><span class="pill pa">En attente</span></div>
+          <div class="row"><div><div style="font-size:13px;font-weight:600;">Univ. de Ngaoundéré</div><div style="font-size:10px;color:#888;">il y a 1 sem.</div></div><span class="pill pg">Actif</span></div>
+        </div>
+      </div>
+      <div style="background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:16px;display:flex;justify-content:space-between;align-items:center;border-left:3px solid var(--ep-gold);">
+        <div><div style="font-size:13px;font-weight:700;color:#854F0B;">Taux de commission — configurable</div><div style="font-size:11px;color:#BA7517;margin-top:2px;">0,5% par transaction · Profil Standard</div></div>
+        <button style="background:#854F0B;color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-md);font-size:12px;cursor:pointer;">Modifier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+const FORM_SCREENS = ['login','register-parent','register-school'];
+const ids = {
+  'landing':'s-landing','about':'s-about','testi':'s-testi',
+  'login':'s-login','register-parent':'s-register-parent','register-school':'s-register-school',
+  'parent':'s-parent','payment':'s-payment','school':'s-school','admin':'s-admin'
+};
+const order = ['landing','about','testi','login','register-parent','register-school','parent','payment','school','admin'];
+
+function go(k) {
+  // hide all
+  document.querySelectorAll('.screen, .screen-form').forEach(el => el.classList.remove('on'));
+  // deactivate all nav buttons
+  document.querySelectorAll('.nbtn').forEach(b => b.classList.remove('on'));
+  // show target
+  const el = document.getElementById(ids[k]);
+  if (el) el.classList.add('on');
+  // activate nav button
+  const idx = order.indexOf(k);
+  if (idx >= 0) document.querySelectorAll('.nbtn')[idx].classList.add('on');
+  // reset confirmations
+  const okMsg = document.getElementById('ok-msg');
+  if (okMsg) okMsg.style.display = 'none';
+  const sSuccess = document.getElementById('school-success');
+  if (sSuccess) sSuccess.style.display = 'none';
+  // scroll to top
+  window.scrollTo(0, 0);
+}
+
+function selOpt(n) {
+  [1,2].forEach(i => {
+    const el = document.getElementById('opt'+i);
+    if (!el) return;
+    el.style.border = i===n ? '2px solid var(--ep-teal)' : '1px solid #ddd';
+    el.style.background = i===n ? 'var(--ep-teal-lt)' : '#fff';
+  });
+}
+
+function selPay(n) {
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('pm'+i);
+    if (!el) return;
+    el.style.border = i===n ? '2px solid var(--ep-teal)' : '1px solid #ddd';
+    el.style.background = i===n ? 'var(--ep-teal-lt)' : '#fff';
+  });
+}
+
+function showOK() {
+  const el = document.getElementById('ok-msg');
+  if (el) { el.style.display = 'block'; el.scrollIntoView({behavior:'smooth'}); }
+}
+
+function showSchoolSuccess() {
+  const el = document.getElementById('school-success');
+  if (el) { el.style.display = 'block'; el.scrollIntoView({behavior:'smooth'}); }
+}
+</script>
+</body>
+</html>
