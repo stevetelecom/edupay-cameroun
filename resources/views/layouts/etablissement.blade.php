@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>@yield('title', 'Tableau de bord') — EduPay Cameroun</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <style>
+        :root{
+            --ep-navy:#0B2545; --ep-teal:#0D9E75; --ep-teal2:#0A8562;
+            --ep-teal-lt:#E0F5EE; --ep-teal-mid:#9FE1CB;
+            --ep-gold:#E8A020; --ep-gold-lt:#FEF3DC;
+            --ep-red:#D94040; --ep-red-lt:#FBEAEA;
+            --ep-blue-lt:#E6F0FB; --ep-purple-lt:#EDE9FE;
+            --border:rgba(0,0,0,0.09); --radius-md:8px; --radius-lg:12px;
+        }
+        *{box-sizing:border-box;}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:#f1f3f5;color:#1a1a2e;}
+        .epcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
+        .pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
+        .pg{background:#E0F5EE;color:#085041;}.pa{background:#FEF3DC;color:#8B5E10;}
+        .pr{background:#FBEAEA;color:#9B2C2C;}.pb{background:#E6F0FB;color:#1A4F8A;}
+        .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+        .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+        .kpi{background:#f8f9fa;border-radius:var(--radius-md);padding:16px;text-align:center;}
+        .kval{font-size:22px;font-weight:700;color:#1a1a2e;}
+        .klbl{font-size:11px;color:#888;margin-top:4px;}
+        .seclbl{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;}
+        .btn-p{background:var(--ep-teal);color:#fff;border:none;padding:11px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;text-decoration:none;display:inline-block;text-align:center;}
+        .btn-p:hover{background:var(--ep-teal2);color:#fff;}
+        .btn-o{background:transparent;color:var(--ep-teal);border:2px solid var(--ep-teal);padding:9px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block;text-align:center;}
+        .btn-o:hover{background:var(--ep-teal-lt);}
+        .btn-r{background:var(--ep-red);color:#fff;border:none;padding:9px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;display:inline-block;text-align:center;}
+        .btn-r:hover{background:#C13333;}
+        .inp{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:var(--radius-md);font-size:13px;margin-bottom:12px;outline:none;transition:border .15s;}
+        .inp:focus{border-color:var(--ep-teal);}
+        .select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:var(--radius-md);font-size:13px;margin-bottom:12px;background:#fff;outline:none;}
+        .select:focus{border-color:var(--ep-teal);}
+        .lbl{font-size:11px;color:#666;margin-bottom:5px;font-weight:500;}
+        .divider{height:1px;background:#f0f0f0;margin:14px 0;}
+        .app-header{background:var(--ep-navy);color:#fff;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;}
+        .app-body{display:flex;min-height:calc(100vh - 58px);}
+        .sidebar{width:200px;flex-shrink:0;padding:14px;background:#fff;border-right:1px solid var(--border);}
+        .sbar-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-md);font-size:13px;color:#555;cursor:pointer;margin-bottom:2px;text-decoration:none;}
+        .sbar-item svg{width:15px;height:15px;flex-shrink:0;}
+        .sbar-item.on{background:var(--ep-teal-lt);color:#085041;font-weight:600;}
+        .sbar-item:hover:not(.on){background:#f0f0f0;}
+        .main-content{flex:1;padding:22px 24px;background:#f5f6f7;overflow-y:auto;}
+        .prog{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px;}
+        .pfill{height:100%;background:var(--ep-teal);border-radius:3px;}
+        .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+        .row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+        .row:last-child{border-bottom:none;}
+        .badge-cnt{background:#FBEAEA;color:#9B2C2C;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;}
+        .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}
+        table.ep-table{width:100%;border-collapse:collapse;font-size:13px;}
+        table.ep-table th{text-align:left;font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.05em;padding:10px 8px;border-bottom:2px solid #f0f0f0;}
+        table.ep-table td{padding:11px 8px;border-bottom:1px solid #f0f0f0;}
+        table.ep-table tr:last-child td{border-bottom:none;}
+        table.ep-table tr:hover td{background:#fafbfc;}
+    </style>
+
+    @stack('styles')
+</head>
+<body class="h-full">
+
+    {{-- ── Header établissement ── --}}
+    <div class="app-header">
+        <div>
+            <div class="logo-t" style="font-size:16px;font-weight:700;">
+                Edu<span style="color:#5DCAA5;">Pay</span> · Back-office
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,.5);">
+                {{ Auth::user()->etablissement->nom ?? 'Mon établissement' }}
+                @if(Auth::user()->etablissement->ville ?? false) — {{ Auth::user()->etablissement->ville }} @endif
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:12px;color:rgba(255,255,255,.65);">
+                {{ Auth::user()->name }}
+                @if(Auth::user()->roles->first())
+                    ({{ ucfirst(Auth::user()->roles->first()->name) }})
+                @endif
+            </span>
+            <div class="av" style="background:rgba(255,255,255,.12);color:#fff;">
+                {{ Str::of(Auth::user()->name)->explode(' ')->map(fn($w) => Str::substr($w,0,1))->join('') }}
+            </div>
+            <form method="POST" action="{{ route('logout') }}" class="inline">
+                @csrf
+                <button type="submit" style="background:transparent;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.2);padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer;">
+                    Déconnexion
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-body">
+        {{-- ── Sidebar ── --}}
+        <div class="sidebar">
+            <a href="{{ route('etablissement.dashboard') }}" class="sbar-item {{ request()->routeIs('etablissement.dashboard') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.dashboard') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                Tableau de bord
+            </a>
+            <a href="{{ route('etablissement.apprenants.index') }}" class="sbar-item {{ request()->routeIs('etablissement.apprenants.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.apprenants.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                Apprenants
+            </a>
+            <a href="{{ route('etablissement.paiements.index') }}" class="sbar-item {{ request()->routeIs('etablissement.paiements.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.paiements.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Paiements
+            </a>
+            <a href="{{ route('etablissement.impayes.index') }}" class="sbar-item {{ request()->routeIs('etablissement.impayes.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.impayes.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Impayés
+                @if(($countImpayes ?? 0) > 0)
+                    <span class="badge-cnt">{{ $countImpayes }}</span>
+                @endif
+            </a>
+            <a href="{{ route('etablissement.rapports.index') }}" class="sbar-item {{ request()->routeIs('etablissement.rapports.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.rapports.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Rapports
+            </a>
+            <a href="{{ route('etablissement.parametres.index') }}" class="sbar-item {{ request()->routeIs('etablissement.parametres.*') ? 'on' : '' }}" style="margin-top:4px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.parametres.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                Paramètres
+            </a>
+
+            {{-- Widget taux de recouvrement --}}
+            <div style="margin-top:16px;background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;">
+                <div style="font-size:11px;font-weight:600;color:#0F6E56;margin-bottom:4px;">Recouvrement</div>
+                <div style="font-size:24px;font-weight:700;color:#085041;">{{ $tauxRecouvrement ?? 0 }}%</div>
+                <div class="prog"><div class="pfill" style="width:{{ $tauxRecouvrement ?? 0 }}%"></div></div>
+                <div style="font-size:10px;color:#1B9E75;margin-top:3px;">Objectif : 80%</div>
+            </div>
+        </div>
+
+        {{-- ── Contenu principal ── --}}
+        <div class="main-content">
+
+            @if (session('success'))
+                <div style="margin-bottom:16px;background:#E0F5EE;border:1px solid #9FE1CB;color:#085041;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">
+                    {{ session('success') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div style="margin-bottom:16px;background:#FBEAEA;border:1px solid #f3c4c4;color:#9B2C2C;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">
+                    {{ session('error') }}
+                </div>
+            @endif
+            @if (session('info'))
+                <div style="margin-bottom:16px;background:#E6F0FB;border:1px solid #c4dbf3;color:#1A4F8A;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">
+                    {{ session('info') }}
+                </div>
+            @endif
+
+            @yield('content')
+        </div>
+    </div>
+
+    @stack('scripts')
+</body>
+</html>

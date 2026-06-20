@@ -100,7 +100,11 @@ class AdminAuthController extends Controller
 
         // En développement : log le code dans le fichier de log Laravel
         Log::channel('admin')->info('Code 2FA Super Admin pour ' . $admin->email . ' : ' . $otpCode);
+// // Après
+// $smsSent = app(\App\Services\SmsService::class)->envoyerOtp($admin->telephone, $otpCode);
 
+// // Garder le log en parallèle (utile pour debug même en prod)
+// Log::channel('admin')->info('Code 2FA Super Admin pour ' . $admin->email . ' : ' . $otpCode . ($smsSent ? ' [SMS envoyé]' : ' [SMS ECHEC]'));
         AuditLog::enregistrer(
             $admin,
             'LOGIN_2FA_ENVOYE',

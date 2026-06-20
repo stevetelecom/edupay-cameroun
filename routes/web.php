@@ -5,7 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterParentController;
 use App\Http\Controllers\Auth\RegisterEcolController;
 use App\Http\Controllers\Public\LandingController;
-
+use Illuminate\Support\Facades\Auth;
 /*
 |--------------------------------------------------------------------------
 | Routes publiques
@@ -50,13 +50,24 @@ Route::post('/deconnexion', [LoginController::class, 'logout'])->name('logout')-
 | Routes Payeur (Parent / Étudiant)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:payeur'])->prefix('espace')->name('payeur.')->group(function () {
+Route::middleware(['auth', 'role:parent'])->prefix('espace')->name('payeur.')->group(function () {
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Payeur\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/paiement/{fraisApprenant}', [\App\Http\Controllers\Payeur\PaiementController::class, 'show'])->name('paiement.show');
     Route::post('/paiement/{fraisApprenant}/initier', [\App\Http\Controllers\Payeur\PaiementController::class, 'initier'])->name('paiement.initier');
     Route::get('/historique', [\App\Http\Controllers\Payeur\PaiementController::class, 'historique'])->name('historique');
 });
 
+
+
+// Route::get('/debug-auth', function () {
+//     return [
+//         'check' => Auth::check(),
+//         'user_id' => Auth::id(),
+//         'user_name' => Auth::check() ? Auth::user()->name : null,
+//         'roles' => Auth::check() ? Auth::user()->getRoleNames() : null,
+//         'guard_default' => config('auth.defaults.guard'),
+//     ];
+// });
 /*
 |--------------------------------------------------------------------------
 | Routes Établissement
@@ -70,7 +81,9 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier'])->prefix('etabli
     Route::post('/impayes/relancer', [\App\Http\Controllers\Etablissement\ImpayeController::class, 'relancerSms'])->name('impayes.relancer');
     Route::get('/rapports',   [\App\Http\Controllers\Etablissement\RapportController::class, 'index'])->name('rapports.index');
     Route::get('/parametres', [\App\Http\Controllers\Etablissement\ParametreController::class, 'index'])->name('parametres.index');
+    Route::put('/parametres', [\App\Http\Controllers\Etablissement\ParametreController::class, 'update'])->name('parametres.update');
 });
+
 
 /*
 |--------------------------------------------------------------------------

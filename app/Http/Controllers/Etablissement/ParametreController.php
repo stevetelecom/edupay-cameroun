@@ -1,9 +1,41 @@
 <?php
+
 namespace App\Http\Controllers\Etablissement;
 
 use App\Http\Controllers\Controller;
+use App\Models\CategoriesFrais;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class ParametreController extends Controller
 {
-    public function index() { return view('etablissement.parametres.index'); }
+    public function index()
+    {
+        $etablissement = Auth::user()->etablissement;
+
+        $categoriesFrais = CategoriesFrais::where('etablissement_id', $etablissement->id)
+            ->orderBy('nom')
+            ->get();
+
+        return view('etablissement.parametres.index', compact('etablissement', 'categoriesFrais'));
+    }
+
+    public function update(Request $request)
+    {
+        $etablissement = Auth::user()->etablissement;
+
+        $validated = $request->validate([
+            'nom'                    => ['required', 'string', 'max:150'],
+            'telephone'              => ['required', 'string', 'max:20'],
+            'email'                  => ['required', 'email', 'max:150'],
+            'ville'                  => ['required', 'string', 'max:100'],
+            'quartier'               => ['nullable', 'string', 'max:100'],
+            'mobile_money_principal' => ['required', Rule::in(['mtn', 'orange', 'les_deux'])],
+        ]);
+
+        $etablissement->update($validated);
+
+        return back()->with('success', 'Paramètres de l\'établissement mis à jour avec succès.');
+    }
 }
