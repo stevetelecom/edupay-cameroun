@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Etablissement;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -19,7 +21,7 @@ class RegisterEcolController extends Controller
         ]);
     }
 
-    public function storeStep1(Request $request)
+    public function storeStep1(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'nom'              => 'required|string|max:150',
@@ -38,7 +40,7 @@ class RegisterEcolController extends Controller
         return redirect()->route('register.ecole.step2');
     }
 
-    public function step2(): View
+    public function step2(): View|RedirectResponse
     {
         if (!session()->has('register_ecole.step1')) {
             return redirect()->route('register.ecole.step1');
@@ -50,7 +52,7 @@ class RegisterEcolController extends Controller
         ]);
     }
 
-    public function storeStep2(Request $request)
+    public function storeStep2(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'telephone'              => 'required|string|max:20',
@@ -65,6 +67,8 @@ class RegisterEcolController extends Controller
             'resp_password'  => 'required|string|min:8|confirmed',
         ]);
 
+        // On hash le mot de passe avant de le stocker en session
+        // (le cast 'hashed' du modèle User détecte qu'il est déjà hashé et ne le re-hash pas)
         $validated['resp_password'] = Hash::make($validated['resp_password']);
 
         $request->session()->put('register_ecole.step2', $validated);
@@ -72,7 +76,7 @@ class RegisterEcolController extends Controller
         return redirect()->route('register.ecole.step3');
     }
 
-    public function step3(): View
+    public function step3(): View|RedirectResponse
     {
         if (!session()->has('register_ecole.step2')) {
             return redirect()->route('register.ecole.step1');
@@ -84,17 +88,14 @@ class RegisterEcolController extends Controller
         ]);
     }
 
-    public function storeStep3(Request $request)
+    public function storeStep3(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'document_agrement' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'document_agrement' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'description'       => 'nullable|string|max:1000',
         ]);
 
-        $documentPath = null;
-        if ($request->hasFile('document_agrement')) {
-            $documentPath = $request->file('document_agrement')->store('agrements', 'public');
-        }
+        $documentPath = $request->file('document_agrement')->store('agrements', 'public');
 
         $request->session()->put('register_ecole.step3', [
             'document_agrement' => $documentPath,
@@ -104,7 +105,7 @@ class RegisterEcolController extends Controller
         return redirect()->route('register.ecole.validation');
     }
 
-    public function validation(): View
+    public function validation(): View|RedirectResponse
     {
         if (!session()->has('register_ecole.step2')) {
             return redirect()->route('register.ecole.step1');
@@ -116,7 +117,7 @@ class RegisterEcolController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'cgu_accepted'            => 'required|accepted',
@@ -132,7 +133,7 @@ class RegisterEcolController extends Controller
                 ->with('error', 'Session expirée, merci de recommencer.');
         }
 
-        $prefixeType = match($step1['type']) {
+        $prefixeType = match ($step1['type']) {
             'lycee_general', 'lycee_technique' => 'LYC',
             'college'    => 'COL',
             'primaire'   => 'PRI',
@@ -143,6 +144,7 @@ class RegisterEcolController extends Controller
         $codeVille = Str::upper(Str::substr(preg_replace('/[^a-zA-Z]/', '', $step1['nom']), 0, 3));
         $codeEtablissement = $prefixeType . '-' . $codeVille . '-' . date('Y') . '-' . random_int(100, 999);
 
+        // ── Enregistrement n°1 : l'établissement ───────────────────────────
         $etablissement = Etablissement::create([
             'code_etablissement'     => $codeEtablissement,
             'nom'                    => $step1['nom'],
@@ -163,6 +165,7 @@ class RegisterEcolController extends Controller
             'statut'                 => 'en_attente',
         ]);
 
+        // ── Enregistrement n°2 : le compte du responsable (directeur) ──────
         $directeur = User::create([
             'name'             => $step2['resp_prenom'] . ' ' . $step2['resp_nom'],
             'telephone'        => $step2['resp_telephone'],

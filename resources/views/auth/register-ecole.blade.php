@@ -17,143 +17,229 @@
 
       {{-- Barre 4 étapes --}}
       <div style="display:flex;align-items:center;margin-bottom:24px;">
-        <div style="flex:1;text-align:center;">
-          <div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">1</div>
-          <div style="font-size:11px;font-weight:600;color:var(--ep-teal);">Établissement</div>
-        </div>
-        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
-        <div style="flex:1;text-align:center;">
-          <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">2</div>
-          <div style="font-size:11px;color:#aaa;">Responsable</div>
-        </div>
-        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
-        <div style="flex:1;text-align:center;">
-          <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">3</div>
-          <div style="font-size:11px;color:#aaa;">Configuration</div>
-        </div>
-        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
-        <div style="flex:1;text-align:center;">
-          <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">4</div>
-          <div style="font-size:11px;color:#aaa;">Validation</div>
-        </div>
+        @foreach (['Établissement', 'Responsable', 'Configuration', 'Validation'] as $i => $label)
+          @php $n = $i + 1; @endphp
+          <div style="flex:1;text-align:center;">
+            <div style="width:30px;height:30px;border-radius:50%;{{ $step >= $n ? 'background:var(--ep-teal);color:#fff;' : 'border:2px solid #ddd;color:#ccc;' }}display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">{{ $n }}</div>
+            <div style="font-size:11px;font-weight:{{ $step >= $n ? '600' : '400' }};color:{{ $step >= $n ? 'var(--ep-teal)' : '#aaa' }};">{{ $label }}</div>
+          </div>
+          @if (!$loop->last)
+            <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+          @endif
+        @endforeach
       </div>
 
-      <div class="form-title">Informations de l'établissement</div>
-      <div class="form-sub">Renseignez les informations officielles de votre établissement pour commencer l'onboarding EduPay</div>
+      @if (session('error'))
+        <div style="background:#fde8e8;color:#c0392b;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;">{{ session('error') }}</div>
+      @endif
 
-      <form method="POST" action="{{ route('register.ecole.step1.post') }}">
-        @csrf
+      @if ($errors->any())
+        <div style="background:#fde8e8;color:#c0392b;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;">
+          <strong>Merci de corriger :</strong>
+          <ul style="margin:6px 0 0 18px;">
+            @foreach ($errors->all() as $error)
+              <li>{{ $error }}</li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
 
-        <div class="form-section">Identité de l'établissement</div>
-        <div class="lbl">Nom officiel de l'établissement *</div>
-        <input class="inp" name="nom" placeholder="ex : Lycée Bilingue de Melen" required />
+      {{-- ───────────────────────── ÉTAPE 1 : ÉTABLISSEMENT ───────────────────────── --}}
+      @if ($step === 1)
+        <div class="form-title">Informations de l'établissement</div>
+        <div class="form-sub">Renseignez les informations officielles de votre établissement</div>
 
-        <div class="inp-row">
-          <div>
-            <div class="lbl">Type d'établissement *</div>
-            <select class="select" name="type" required>
-              <option value="">-- Choisir --</option>
-              <option>École maternelle</option><option>École primaire</option>
-              <option>Collège</option><option>Lycée général</option>
-              <option>Lycée technique</option><option>Université</option>
-              <option>Institut privé</option><option>Groupe scolaire (multi-niveaux)</option>
-            </select>
+        <form method="POST" action="{{ route('register.ecole.step1.post') }}">
+          @csrf
+
+          <div class="form-section">Identité de l'établissement</div>
+          <div class="lbl">Nom officiel de l'établissement *</div>
+          <input class="inp" name="nom" value="{{ old('nom', $old['nom'] ?? '') }}" placeholder="ex : Lycée Bilingue de Melen" required />
+
+          <div class="inp-row">
+            <div>
+              <div class="lbl">Type d'établissement *</div>
+              <select class="select" name="type" required>
+                <option value="">-- Choisir --</option>
+                @foreach ([
+                  'maternelle' => 'École maternelle', 'primaire' => 'École primaire',
+                  'college' => 'Collège', 'lycee_general' => 'Lycée général',
+                  'lycee_technique' => 'Lycée technique', 'universite' => 'Université',
+                  'institut_prive' => 'Institut privé', 'groupe_scolaire' => 'Groupe scolaire (multi-niveaux)',
+                ] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('type', $old['type'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div>
+              <div class="lbl">Statut juridique *</div>
+              <select class="select" name="statut_juridique" required>
+                <option value="">-- Choisir --</option>
+                @foreach ([
+                  'public' => 'Public (État)', 'prive_laic' => 'Privé laïc',
+                  'prive_catholique' => 'Privé confessionnel (catholique)',
+                  'prive_protestant' => 'Privé confessionnel (protestant)',
+                  'prive_islamique' => 'Privé confessionnel (islamique)',
+                ] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('statut_juridique', $old['statut_juridique'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
           </div>
-          <div>
-            <div class="lbl">Statut juridique *</div>
-            <select class="select" name="statut_juridique" required>
-              <option value="">-- Choisir --</option>
-              <option>Public (État)</option><option>Privé laïc</option>
-              <option>Privé confessionnel (catholique)</option>
-              <option>Privé confessionnel (protestant)</option>
-              <option>Privé confessionnel (islamique)</option>
-            </select>
+
+          <div class="inp-row">
+            <div><div class="lbl">Numéro d'agrément / MINESEC *</div><input class="inp" name="numero_agrement" value="{{ old('numero_agrement', $old['numero_agrement'] ?? '') }}" placeholder="ex : 12345/MINESEC/2024" required /></div>
+            <div>
+              <div class="lbl">Nombre approximatif d'élèves</div>
+              <select class="select" name="nb_eleves">
+                <option value="">-- Choisir --</option>
+                @foreach ([
+                  'moins_100' => 'Moins de 100', '100_300' => '100 – 300',
+                  '300_500' => '300 – 500', '500_1000' => '500 – 1000', 'plus_1000' => 'Plus de 1000',
+                ] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('nb_eleves', $old['nb_eleves'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
           </div>
-        </div>
 
-        <div class="inp-row">
-          <div><div class="lbl">Numéro d'agrément / MINESEC *</div><input class="inp" name="agrement" placeholder="ex : 12345/MINESEC/2024" required /></div>
-          <div>
-            <div class="lbl">Nombre approximatif d'élèves</div>
-            <select class="select" name="nb_eleves">
-              <option>Moins de 100</option><option>100 – 300</option>
-              <option>300 – 500</option><option selected>500 – 1000</option><option>Plus de 1000</option>
-            </select>
+          <div class="form-section">Localisation</div>
+          <div class="inp-row">
+            <div>
+              <div class="lbl">Région *</div>
+              <select class="select" name="region" required>
+                <option value="">-- Choisir une région --</option>
+                @foreach ([
+                  'centre' => 'Centre', 'littoral' => 'Littoral', 'ouest' => 'Ouest',
+                  'nord' => 'Nord', 'adamaoua' => 'Adamaoua', 'est' => 'Est',
+                  'sud' => 'Sud', 'sud_ouest' => 'Sud-Ouest', 'nord_ouest' => 'Nord-Ouest', 'extreme_nord' => 'Extrême-Nord',
+                ] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('region', $old['region'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div><div class="lbl">Ville *</div><input class="inp" name="ville" value="{{ old('ville', $old['ville'] ?? '') }}" placeholder="ex : Yaoundé" required /></div>
           </div>
-        </div>
-
-        <div class="form-section">Localisation</div>
-        <div class="inp-row">
-          <div>
-            <div class="lbl">Région *</div>
-            <select class="select" name="region" required>
-              <option value="">-- Choisir une région --</option>
-              <option>Centre</option><option>Littoral</option><option>Ouest</option>
-              <option>Nord</option><option>Adamaoua</option><option>Est</option>
-              <option>Sud</option><option>Sud-Ouest</option><option>Nord-Ouest</option><option>Extrême-Nord</option>
-            </select>
+          <div class="inp-row">
+            <div><div class="lbl">Quartier / Arrondissement</div><input class="inp" name="quartier" value="{{ old('quartier', $old['quartier'] ?? '') }}" placeholder="ex : Melen, Biyem-Assi..." /></div>
+            <div><div class="lbl">Boîte Postale</div><input class="inp" name="boite_postale" value="{{ old('boite_postale', $old['boite_postale'] ?? '') }}" placeholder="ex : BP 1234 Yaoundé" /></div>
           </div>
-          <div><div class="lbl">Ville *</div><input class="inp" name="ville" placeholder="ex : Yaoundé" required /></div>
-        </div>
-        <div class="inp-row">
-          <div><div class="lbl">Quartier / Arrondissement</div><input class="inp" name="quartier" placeholder="ex : Melen, Biyem-Assi..." /></div>
-          <div><div class="lbl">Boîte Postale</div><input class="inp" name="bp" placeholder="ex : BP 1234 Yaoundé" /></div>
-        </div>
 
-        <div class="form-section">Coordonnées de contact</div>
-        <div class="inp-row">
-          <div><div class="lbl">Téléphone principal *</div><input class="inp" name="telephone" placeholder="6XX XXX XXX" required /></div>
-          <div><div class="lbl">Email officiel *</div><input class="inp" name="email" placeholder="secretariat@lycee.cm" required /></div>
-        </div>
-        <div class="inp-row">
-          <div><div class="lbl">Site web (si disponible)</div><input class="inp" name="site_web" placeholder="https://www.monlycee.cm" /></div>
-          <div>
-            <div class="lbl">Compte Mobile Money principal</div>
-            <select class="select" name="mobile_money">
-              <option value="">-- Choisir --</option>
-              <option>MTN Mobile Money</option><option>Orange Money</option><option>Les deux</option>
-            </select>
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <a href="{{ route('landing') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">Annuler</a>
+            <button type="submit" class="btn-p">Continuer →</button>
           </div>
-        </div>
+        </form>
+      @endif
 
-        <div class="form-section">Compte administrateur principal</div>
-        <div class="inp-row">
-          <div><div class="lbl">Prénom du directeur / responsable *</div><input class="inp" name="directeur_prenom" placeholder="ex : Jean-Pierre" required /></div>
-          <div><div class="lbl">Nom *</div><input class="inp" name="directeur_nom" placeholder="ex : MVONDO" required /></div>
-        </div>
-        <div class="inp-row">
-          <div><div class="lbl">Téléphone du responsable *</div><input class="inp" name="directeur_telephone" placeholder="6XX XXX XXX" required /></div>
-          <div><div class="lbl">Email du responsable *</div><input class="inp" name="directeur_email" placeholder="directeur@lycee.cm" required /></div>
-        </div>
-        <div class="inp-row">
-          <div><div class="lbl">Mot de passe *</div><input class="inp" type="password" name="password" placeholder="Min. 8 caractères" required /></div>
-          <div><div class="lbl">Confirmer le mot de passe *</div><input class="inp" type="password" name="password_confirmation" placeholder="Répétez" required /></div>
-        </div>
+      {{-- ───────────────────────── ÉTAPE 2 : RESPONSABLE ───────────────────────── --}}
+      @if ($step === 2)
+        <div class="form-title">Contact & compte du responsable</div>
+        <div class="form-sub">Ces informations serviront à créer le compte qui gérera l'établissement</div>
 
-        <div class="form-section">Document justificatif</div>
-        <div style="border:2px dashed #ddd;border-radius:8px;padding:20px;text-align:center;margin-bottom:12px;cursor:pointer;background:#fafafa;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" style="display:block;margin:0 auto 8px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <div style="font-size:13px;font-weight:600;color:#888;">Déposer l'agrément ou l'autorisation d'ouverture</div>
-          <div style="font-size:11px;color:#aaa;margin-top:4px;">PDF, JPG, PNG · Max 5 Mo</div>
-        </div>
+        <form method="POST" action="{{ route('register.ecole.step2.post') }}">
+          @csrf
 
-        <div class="form-section">Informations supplémentaires</div>
-        <div class="lbl">Décrivez brièvement votre établissement (optionnel)</div>
-        <textarea class="textarea" name="description" placeholder="Historique, spécialités, niveaux enseignés, effectifs, particularités..."></textarea>
+          <div class="form-section">Coordonnées de l'établissement</div>
+          <div class="inp-row">
+            <div><div class="lbl">Téléphone principal *</div><input class="inp" name="telephone" value="{{ old('telephone', $old['telephone'] ?? '') }}" placeholder="6XX XXX XXX" required /></div>
+            <div><div class="lbl">Email officiel *</div><input class="inp" name="email" value="{{ old('email', $old['email'] ?? '') }}" placeholder="secretariat@lycee.cm" required /></div>
+          </div>
+          <div class="inp-row">
+            <div><div class="lbl">Site web (si disponible)</div><input class="inp" name="site_web" value="{{ old('site_web', $old['site_web'] ?? '') }}" placeholder="https://www.monlycee.cm" /></div>
+            <div>
+              <div class="lbl">Compte Mobile Money principal</div>
+              <select class="select" name="mobile_money_principal">
+                <option value="">-- Choisir --</option>
+                @foreach (['mtn' => 'MTN Mobile Money', 'orange' => 'Orange Money', 'les_deux' => 'Les deux'] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('mobile_money_principal', $old['mobile_money_principal'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
 
-        <div class="check-row"><input type="checkbox" required /><label>Je certifie que les informations fournies sont exactes et que je suis habilité(e) à représenter cet établissement sur EduPay Cameroun.</label></div>
-        <div class="check-row"><input type="checkbox" required /><label>J'accepte les <span style="color:var(--ep-teal);">Conditions Générales</span> et la <span style="color:var(--ep-teal);">Politique de confidentialité</span> d'EduPay Cameroun.</label></div>
+          <div class="form-section">Compte administrateur principal (responsable)</div>
+          <div class="inp-row">
+            <div><div class="lbl">Prénom du directeur / responsable *</div><input class="inp" name="resp_prenom" value="{{ old('resp_prenom', $old['resp_prenom'] ?? '') }}" placeholder="ex : Jean-Pierre" required /></div>
+            <div><div class="lbl">Nom *</div><input class="inp" name="resp_nom" value="{{ old('resp_nom', $old['resp_nom'] ?? '') }}" placeholder="ex : MVONDO" required /></div>
+          </div>
+          <div class="inp-row">
+            <div><div class="lbl">Téléphone du responsable *</div><input class="inp" name="resp_telephone" value="{{ old('resp_telephone', $old['resp_telephone'] ?? '') }}" placeholder="6XX XXX XXX" required /></div>
+            <div><div class="lbl">Email du responsable *</div><input class="inp" name="resp_email" value="{{ old('resp_email', $old['resp_email'] ?? '') }}" placeholder="directeur@lycee.cm" required /></div>
+          </div>
+          <div class="inp-row">
+            <div><div class="lbl">Mot de passe *</div><input class="inp" type="password" name="resp_password" placeholder="Min. 8 caractères" required /></div>
+            <div><div class="lbl">Confirmer le mot de passe *</div><input class="inp" type="password" name="resp_password_confirmation" placeholder="Répétez" required /></div>
+          </div>
 
-        <div style="background:var(--ep-teal-lt);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;color:#085041;display:flex;gap:10px;align-items:flex-start;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <div><strong>Activation sous 24h :</strong> après soumission, notre équipe vérifiera votre dossier et activera votre compte sous 24 heures ouvrables. Vous serez notifié par SMS et email.</div>
-        </div>
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <a href="{{ route('register.ecole.step1') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">← Retour</a>
+            <button type="submit" class="btn-p">Continuer →</button>
+          </div>
+        </form>
+      @endif
 
-        <div style="display:flex;gap:10px;">
-          <a href="{{ route('landing') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">Annuler</a>
-          <button type="submit" class="btn-p">Soumettre ma demande d'inscription →</button>
-        </div>
-      </form>
+      {{-- ───────────────────────── ÉTAPE 3 : CONFIGURATION / DOCUMENT ───────────────────────── --}}
+      @if ($step === 3)
+        <div class="form-title">Document justificatif</div>
+        <div class="form-sub">Joignez votre agrément ou autorisation d'ouverture</div>
+
+        <form method="POST" action="{{ route('register.ecole.step3.post') }}" enctype="multipart/form-data">
+          @csrf
+
+          <div class="form-section">Document justificatif</div>
+          <label style="display:block;border:2px dashed #ddd;border-radius:8px;padding:20px;text-align:center;margin-bottom:12px;cursor:pointer;background:#fafafa;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" style="display:block;margin:0 auto 8px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div style="font-size:13px;font-weight:600;color:#888;">Déposer l'agrément ou l'autorisation d'ouverture</div>
+            <div style="font-size:11px;color:#aaa;margin-top:4px;">PDF, JPG, PNG · Max 5 Mo</div>
+            <input type="file" name="document_agrement" accept=".pdf,.jpg,.jpeg,.png" required style="margin-top:10px;" />
+          </label>
+
+          <div class="form-section">Informations supplémentaires</div>
+          <div class="lbl">Décrivez brièvement votre établissement (optionnel)</div>
+          <textarea class="textarea" name="description" placeholder="Historique, spécialités, niveaux enseignés, effectifs, particularités...">{{ old('description', $old['description'] ?? '') }}</textarea>
+
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <a href="{{ route('register.ecole.step2') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">← Retour</a>
+            <button type="submit" class="btn-p">Continuer →</button>
+          </div>
+        </form>
+      @endif
+
+      {{-- ───────────────────────── ÉTAPE 4 : VALIDATION ───────────────────────── --}}
+      @if ($step === 4)
+        @if (session('success'))
+          <div class="form-title">🎉 Demande envoyée avec succès</div>
+          <div class="form-sub">Votre code établissement : <strong>{{ session('code_etablissement') }}</strong></div>
+          <div style="background:var(--ep-teal-lt);border-radius:8px;padding:14px;margin:16px 0;font-size:13px;color:#085041;">
+            Notre équipe vérifiera votre dossier et activera votre compte sous 24 heures ouvrables. Vous serez notifié par SMS et email.
+          </div>
+          <a href="{{ route('login') }}" class="btn-p" style="display:inline-block;text-decoration:none;text-align:center;">Aller à la connexion</a>
+        @else
+          <div class="form-title">Récapitulatif</div>
+          <div class="form-sub">Vérifiez vos informations avant de soumettre</div>
+
+          <div style="background:#fafafa;border-radius:8px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.8;">
+            <strong>Établissement :</strong> {{ $data['step1']['nom'] ?? '' }}<br>
+            <strong>Ville :</strong> {{ $data['step1']['ville'] ?? '' }}<br>
+            <strong>Email :</strong> {{ $data['step2']['email'] ?? '' }}<br>
+            <strong>Responsable :</strong> {{ ($data['step2']['resp_prenom'] ?? '') . ' ' . ($data['step2']['resp_nom'] ?? '') }}<br>
+            <strong>Email responsable :</strong> {{ $data['step2']['resp_email'] ?? '' }}
+          </div>
+
+          <form method="POST" action="{{ route('register.ecole.store') }}">
+            @csrf
+            <div class="check-row"><input type="checkbox" name="certification_accepted" value="1" required /><label>Je certifie que les informations fournies sont exactes et que je suis habilité(e) à représenter cet établissement sur EduPay Cameroun.</label></div>
+            <div class="check-row"><input type="checkbox" name="cgu_accepted" value="1" required /><label>J'accepte les <span style="color:var(--ep-teal);">Conditions Générales</span> et la <span style="color:var(--ep-teal);">Politique de confidentialité</span> d'EduPay Cameroun.</label></div>
+
+            <div style="display:flex;gap:10px;margin-top:14px;">
+              <a href="{{ route('register.ecole.step3') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">← Retour</a>
+              <button type="submit" class="btn-p">Soumettre ma demande d'inscription →</button>
+            </div>
+          </form>
+        @endif
+      @endif
+
     </div>
   </div>
 
