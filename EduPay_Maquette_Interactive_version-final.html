@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EduPay Cameroun — Maquettes v2 Pro</title>
+<title>EduPay Cameroun — Maquette Interactive v3 (Complète)</title>
 <style>
 :root {
   --ep-navy:#0B2545; --ep-teal:#0D9E75; --ep-teal2:#0A8562;
@@ -160,6 +160,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 </style>
 </head>
 <body>
+  <datalist id="etabs-list">
+    <option value="Lycée de Melen — Yaoundé (LYC-MEL-2026)"></option>
+    <option value="Lycée Bilingue de Melen — Yaoundé"></option>
+    <option value="Collège Saint-André — Douala"></option>
+    <option value="École Primaire NBC — Yaoundé"></option>
+    <option value="École Maternelle Les Bambins — Yaoundé"></option>
+    <option value="Groupe Scolaire Excellence — Bafoussam"></option>
+    <option value="Université de Douala — Faculté des Sciences"></option>
+    <option value="Université de Yaoundé I"></option>
+    <option value="IUT — Université de Douala"></option>
+    <option value="Institut Universitaire ESTLC — Ambam"></option>
+  </datalist>
 
 <!-- ══════════════════════════════════════════════════════════
      SVG ICON HELPERS (inline, reused via JS)
@@ -191,6 +203,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   <symbol id="ic-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></symbol>
   <symbol id="ic-ticket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 010-6h20a3 3 0 010 6"/><path d="M2 15a3 3 0 000 6h20a3 3 0 000-6"/><line x1="2" y1="12" x2="22" y2="12"/></symbol>
   <symbol id="ic-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+  <symbol id="ic-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 6a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2z"/><polyline points="22 6 12 13 2 6"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+  <symbol id="ic-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4z"/></symbol>
+  <symbol id="ic-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 012-2h2a2 2 0 012 2v2"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+  <symbol id="ic-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></symbol>
+  <symbol id="ic-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></symbol>
+  <symbol id="ic-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
 </svg>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -201,12 +222,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   <button class="nbtn" onclick="go('about')"><svg><use href="#ic-info"/></svg>À propos</button>
   <button class="nbtn" onclick="go('testi')"><svg><use href="#ic-chat"/></svg>Témoignages</button>
   <button class="nbtn" onclick="go('login')"><svg><use href="#ic-lock"/></svg>Connexion</button>
-  <button class="nbtn" onclick="go('register-parent')"><svg><use href="#ic-plus-user"/></svg>Inscription Parent</button>
+  <button class="nbtn" onclick="go('register-parent')"><svg><use href="#ic-plus-user"/></svg>Inscription Payeur</button>
   <button class="nbtn" onclick="go('register-school')"><svg><use href="#ic-building"/></svg>Inscription École</button>
-  <button class="nbtn" onclick="go('parent')"><svg><use href="#ic-users"/></svg>Dashboard Parent</button>
+  <button class="nbtn" onclick="go('parent')"><svg><use href="#ic-users"/></svg>Dashboard Payeur</button>
   <button class="nbtn" onclick="go('payment')"><svg><use href="#ic-card"/></svg>Paiement</button>
   <button class="nbtn" onclick="go('school')"><svg><use href="#ic-school"/></svg>Back-office École</button>
   <button class="nbtn" onclick="go('admin')"><svg><use href="#ic-settings"/></svg>Super Admin</button>
+  <button class="nbtn" onclick="go('adminlogin')" style="opacity:.55;"><svg><use href="#ic-shield"/></svg>Admin (2FA)</button>
+  <button class="nbtn" id="lang-toggle" onclick="toggleLang()" style="margin-left:auto;border-color:var(--ep-teal);color:var(--ep-teal);font-weight:700;"><svg style="stroke:var(--ep-teal);"><use href="#ic-globe"/></svg><span id="lang-label">FR</span> / EN</button>
 </div>
 
 
@@ -228,7 +251,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="hero-h1">Payez les frais scolaires<br>en <em>2 minutes</em>,<br>depuis votre téléphone.</div>
       <div class="hero-sub">EduPay Cameroun connecte les établissements scolaires aux familles via MTN MoMo, Orange Money et carte bancaire. Zéro file d'attente. Reçu PDF immédiat.</div>
       <div class="hero-btns">
-        <button class="hbtn-main" onclick="go('register-parent')">Créer un compte parent</button>
+        <button class="hbtn-main" onclick="go('register-parent')">Créer mon compte Payeur</button>
         <button class="hbtn-ghost" onclick="go('register-school')">Inscrire mon établissement</button>
       </div>
     </div>
@@ -255,8 +278,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="g4" style="margin-bottom:24px;">
       <div class="epcard" style="text-align:center;border-top:3px solid var(--ep-teal);"><div style="width:36px;height:36px;background:var(--ep-teal-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-school"/></svg></div><div style="font-weight:600;font-size:13px;">Maternelle &amp; Primaire</div><div style="font-size:11px;color:#888;margin-top:4px;">Inscription, frais scolaires, cantine</div></div>
       <div class="epcard" style="text-align:center;border-top:3px solid var(--ep-gold);"><div style="width:36px;height:36px;background:var(--ep-gold-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2"><use href="#ic-file"/></svg></div><div style="font-weight:600;font-size:13px;">Collèges &amp; Lycées</div><div style="font-size:11px;color:#888;margin-top:4px;">Scolarité, examens, internat</div></div>
-      <div class="epcard" style="text-align:center;border-top:3px solid #185FA5;"><div style="width:36px;height:36px;background:var(--ep-blue-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><use href="#ic-building"/></svg></div><div style="font-weight:600;font-size:13px;">Universités &amp; Instituts</div><div style="font-size:11px;color:#888;margin-top:4px;">Frais d'inscription, concours</div></div>
-      <div class="epcard" style="text-align:center;border-top:3px solid #7C3AED;"><div style="width:36px;height:36px;background:var(--ep-purple-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><use href="#ic-users"/></svg></div><div style="font-weight:600;font-size:13px;">Parents &amp; Étudiants</div><div style="font-size:11px;color:#888;margin-top:4px;">Paiement 24h/24 depuis partout</div></div>
+      <div class="epcard" style="text-align:center;border-top:3px solid #185FA5;"><div style="width:36px;height:36px;background:var(--ep-blue-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><use href="#ic-building"/></svg></div><div style="font-weight:600;font-size:13px;">Universités &amp; Instituts</div><div style="font-size:11px;color:#888;margin-top:4px;">Frais d'inscription, frais de scolarité</div></div>
+      <div class="epcard" style="text-align:center;border-top:3px solid #7C3AED;"><div style="width:36px;height:36px;background:var(--ep-purple-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><use href="#ic-users"/></svg></div><div style="font-weight:600;font-size:13px;">Payeurs : Parents, Élèves &amp; Étudiants</div><div style="font-size:11px;color:#888;margin-top:4px;">Paiement 24h/24 depuis partout</div></div>
     </div>
 
     <div style="background:var(--ep-navy);border-radius:var(--radius-lg);padding:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:4px;">
@@ -357,7 +380,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="testi-card"><div class="stars">★★★★☆</div><div class="testi-quote">"</div><div class="testi-text">Gérer 3 groupes scolaires depuis un seul tableau de bord, c'est exactement ce dont on avait besoin. Les rapports Excel nous font gagner un temps précieux lors des audits. Je recommande vivement.</div><div class="testi-author"><div class="av" style="background:var(--ep-blue-lt);color:#1A4F8A;width:44px;height:44px;">PN</div><div><div style="font-size:13px;font-weight:700;">Proviseur NKOA Pierre</div><div style="font-size:11px;color:#888;">Groupe Scolaire Excellence · Bafoussam</div><span class="pill pb" style="font-size:10px;margin-top:4px;display:inline-block;">Multi-établissements</span></div></div></div>
       <div class="testi-card"><div class="stars">★★★★★</div><div class="testi-quote">"</div><div class="testi-text">Le paiement fractionné en 3 tranches a réduit les abandons scolaires. Les familles qui ne pouvaient pas régler d'un coup suivent maintenant un échéancier clair et adapté à leur situation.</div><div class="testi-author"><div class="av" style="background:var(--ep-purple-lt);color:#5B21B6;width:44px;height:44px;">AN</div><div><div style="font-size:13px;font-weight:700;">Directrice ABOMO Nathalie</div><div style="font-size:11px;color:#888;">Lycée Technique de Ngaoundéré</div><span class="pill" style="background:var(--ep-purple-lt);color:#5B21B6;font-size:10px;margin-top:4px;display:inline-block;">Zone rurale</span></div></div></div>
     </div>
-    <div class="seclbl">Parents &amp; Étudiants</div>
+    <div class="seclbl">Payeurs : Parents, Élèves &amp; Étudiants</div>
     <div class="g2" style="margin-bottom:20px;">
       <div class="testi-card"><div class="stars">★★★★★</div><div class="testi-quote">"</div><div class="testi-text">J'habite à Kribi, l'école de mes enfants est à Yaoundé. Avant je devais envoyer l'argent par transfert et appeler la secrétaire. Maintenant je paie en 2 min via MTN MoMo et le reçu arrive par email immédiatement.</div><div class="testi-author"><div class="av" style="background:var(--ep-teal-lt);color:#085041;width:44px;height:44px;">BT</div><div><div style="font-size:13px;font-weight:700;">M. BELINGA Thomas</div><div style="font-size:11px;color:#888;">Parent de 2 élèves · Kribi</div><span class="pill pg" style="font-size:10px;margin-top:4px;display:inline-block;">3 mois d'utilisation</span></div></div></div>
       <div class="testi-card"><div class="stars">★★★★★</div><div class="testi-quote">"</div><div class="testi-text">En tant qu'étudiante à l'IUT, payer mes frais universitaires depuis mon téléphone sans me déplacer à la banque, c'est révolutionnaire. Le paiement Orange Money est immédiat et le reçu PDF est accepté partout.</div><div class="testi-author"><div class="av" style="background:var(--ep-gold-lt);color:#8B5E10;width:44px;height:44px;">KA</div><div><div style="font-size:13px;font-weight:700;">Mme KAMGA Aurélie</div><div style="font-size:11px;color:#888;">Étudiante IUT · Université de Douala</div><span class="pill pa" style="font-size:10px;margin-top:4px;display:inline-block;">Orange Money</span></div></div></div>
@@ -365,7 +388,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div style="background:var(--ep-navy);border-radius:var(--radius-lg);padding:32px 28px;text-align:center;margin-bottom:4px;">
       <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;">Rejoignez les établissements qui font confiance à EduPay</div>
       <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:22px;">Inscription gratuite · Mise en ligne en 24h · Support dédié</div>
-      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;"><button class="hbtn-main" onclick="go('register-parent')">Créer mon compte parent</button><button class="hbtn-ghost" onclick="go('register-school')">Inscrire mon établissement</button></div>
+      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;"><button class="hbtn-main" onclick="go('register-parent')">Créer mon compte Payeur</button><button class="hbtn-ghost" onclick="go('register-school')">Inscrire mon établissement</button></div>
     </div>
   </div>
   <div class="ep-footer"><div class="footer-grid"><div><div class="footer-logo">Edu<span>Pay</span> Cameroun</div><div class="footer-desc">La première plateforme de paiement scolaire made in Cameroon.</div><div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div></div><div><div class="footer-col-title">Produit</div><a class="footer-link" onclick="go('landing')">Accueil</a><a class="footer-link" onclick="go('about')">À propos</a></div><div><div class="footer-col-title">Établissements</div><a class="footer-link" onclick="go('register-school')">Inscription</a><a class="footer-link">Guide</a></div><div><div class="footer-col-title">Légal</div><a class="footer-link">Confidentialité</a><a class="footer-link">CGU</a></div></div><div class="footer-bottom"><div class="footer-legal">© 2026 EduPay Cameroun</div><div class="footer-socials"><div class="social-btn">in</div><div class="social-btn">X</div><div class="social-btn">W</div><div class="social-btn">f</div></div></div></div>
@@ -394,9 +417,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <input class="inp" type="password" placeholder="••••••••" />
         <div style="display:flex;justify-content:space-between;margin-bottom:18px;"><label style="font-size:12px;color:#888;display:flex;align-items:center;gap:7px;cursor:pointer;"><input type="checkbox" /> Rester connecté</label><span style="font-size:12px;color:var(--ep-teal);cursor:pointer;">Mot de passe oublié ?</span></div>
         <button class="btn-p" style="margin-bottom:10px;" onclick="go('parent')">Se connecter</button>
-        <button class="btn-o">Connexion par OTP SMS</button>
+        <button class="btn-o" onclick="document.getElementById('otp-box').style.display='block'">Connexion par OTP SMS</button>
+        <div id="otp-box" style="display:none;margin-top:12px;background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:14px;">
+          <div style="font-size:12px;color:#0F6E56;margin-bottom:10px;">Code à 6 chiffres envoyé au 699 123 456</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;"><input class="inp" style="margin:0;text-align:center;width:42px;padding:8px 0;" maxlength="1"/><input class="inp" style="margin:0;text-align:center;width:42px;padding:8px 0;" maxlength="1"/><input class="inp" style="margin:0;text-align:center;width:42px;padding:8px 0;" maxlength="1"/><input class="inp" style="margin:0;text-align:center;width:42px;padding:8px 0;" maxlength="1"/><input class="inp" style="margin:0;text-align:center;width:42px;padding:8px 0;" maxlength="1"/><input class="inp" style="margin:0;text-align:center;width:42px;padding:8px 0;" maxlength="1"/></div>
+          <button class="btn-p" onclick="go('parent')">Valider le code</button>
+        </div>
         <div class="divider"></div>
-        <div style="font-size:12px;color:#888;text-align:center;">Pas encore de compte ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('register-parent')">Créer un compte parent →</span></div>
+        <div style="font-size:12px;color:#888;text-align:center;">Pas encore de compte ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('register-parent')">Créer mon compte Payeur →</span></div>
       </div>
       <div class="epcard" style="background:#f8f9fa;margin-top:10px;">
         <div style="font-size:12px;color:#888;text-align:center;margin-bottom:10px;">Vous représentez un établissement ?</div>
@@ -416,7 +444,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   <div class="form-header">
     <div style="display:flex;align-items:center;gap:12px;">
       <button style="background:transparent;color:rgba(255,255,255,.7);border:none;cursor:pointer;padding:0;" onclick="go('login')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><use href="#ic-arrow-left"/></svg></button>
-      <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> — Inscription Parent</div>
+      <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> — Inscription Payeur</div>
     </div>
     <div style="font-size:12px;color:rgba(255,255,255,.5);">Déjà un compte ? <span style="color:#5DCAA5;cursor:pointer;" onclick="go('login')">Se connecter</span></div>
   </div>
@@ -426,18 +454,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div style="display:flex;align-items:center;margin-bottom:24px;">
         <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">1</div><div style="font-size:11px;font-weight:600;color:var(--ep-teal);">Compte</div></div>
         <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
-        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">2</div><div style="font-size:11px;color:#aaa;">Enfant(s)</div></div>
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">2</div><div style="font-size:11px;color:#aaa;" id="step2-label">Établissement</div></div>
         <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
         <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">3</div><div style="font-size:11px;color:#aaa;">Confirmation</div></div>
       </div>
 
-      <div class="form-title">Créer votre compte parent</div>
-      <div class="form-sub">Renseignez vos informations pour commencer à payer les frais scolaires en ligne</div>
+      <div class="form-title" id="reg-title">Créer votre compte Parent</div>
+      <div class="form-sub" id="reg-sub">Renseignez vos informations pour payer les frais scolaires de vos enfants</div>
+
+      <div class="form-section">Vous êtes :</div>
+      <div style="display:flex;gap:10px;margin-bottom:18px;">
+        <div class="payeur-type-card sel" data-type="parent" onclick="setPayeurType('parent')" style="flex:1;border:2px solid var(--ep-teal);border-radius:var(--radius-md);padding:12px;text-align:center;cursor:pointer;background:var(--ep-teal-lt);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-users"/></svg>
+          <div style="font-size:12px;font-weight:600;margin-top:4px;">Parent</div>
+          <div style="font-size:10px;color:#888;">Maternelle → Université</div>
+        </div>
+        <div class="payeur-type-card" data-type="eleve" onclick="setPayeurType('eleve')" style="flex:1;border:2px solid #e0e0e0;border-radius:var(--radius-md);padding:12px;text-align:center;cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><use href="#ic-school"/></svg>
+          <div style="font-size:12px;font-weight:600;margin-top:4px;">Élève</div>
+          <div style="font-size:10px;color:#888;">Primaire / Secondaire</div>
+        </div>
+        <div class="payeur-type-card" data-type="etudiant" onclick="setPayeurType('etudiant')" style="flex:1;border:2px solid #e0e0e0;border-radius:var(--radius-md);padding:12px;text-align:center;cursor:pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><use href="#ic-building"/></svg>
+          <div style="font-size:12px;font-weight:600;margin-top:4px;">Étudiant</div>
+          <div style="font-size:10px;color:#888;">Université / Institut</div>
+        </div>
+      </div>
 
       <div class="form-section">Informations personnelles</div>
       <div class="inp-row">
-        <div><div class="lbl">Prénom *</div><input class="inp" placeholder="ex : Marie" /></div>
-        <div><div class="lbl">Nom *</div><input class="inp" placeholder="ex : FONO" /></div>
+        <div><div class="lbl">Prénom *</div><input class="inp" id="reg-prenom" placeholder="ex : Marie" /></div>
+        <div><div class="lbl">Nom *</div><input class="inp" id="reg-nom" placeholder="ex : FONO" /></div>
       </div>
       <div class="inp-row">
         <div><div class="lbl">Numéro de téléphone *</div><input class="inp" placeholder="6XX XXX XXX" /></div>
@@ -465,25 +512,75 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         </div>
       </div>
 
-      <div class="form-section">Rattachement à un établissement (optionnel)</div>
-      <div class="inp-row">
-        <div><div class="lbl">Nom de l'établissement</div><input class="inp" placeholder="Rechercher un établissement..." /></div>
-        <div><div class="lbl">Code établissement (si connu)</div><input class="inp" placeholder="ex : LYC-MEL-2026" /></div>
-      </div>
-      <div style="background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#085041;display:flex;gap:10px;align-items:flex-start;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><use href="#ic-alert"/></svg>
-        <span>Vous pourrez ajouter ou modifier l'établissement de vos enfants plus tard depuis votre tableau de bord.</span>
-      </div>
-
       <div class="form-section">Conditions d'utilisation</div>
       <div class="check-row"><input type="checkbox" id="cgu1" /><label for="cgu1">J'accepte les <span style="color:var(--ep-teal);cursor:pointer;">Conditions Générales d'Utilisation</span> et la <span style="color:var(--ep-teal);cursor:pointer;">Politique de confidentialité</span> d'EduPay Cameroun.</label></div>
       <div class="check-row"><input type="checkbox" id="cgu2" /><label for="cgu2">J'accepte de recevoir des notifications par SMS et email concernant les paiements et les rappels d'échéances.</label></div>
 
       <div style="display:flex;gap:10px;margin-top:6px;">
         <button class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;" onclick="go('login')">Annuler</button>
-        <button class="btn-p" onclick="go('parent')">Créer mon compte et continuer →</button>
+        <button class="btn-p" onclick="goOnboarding()">Créer mon compte →</button>
       </div>
       <div style="text-align:center;margin-top:14px;font-size:12px;color:#888;">Déjà un compte ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('login')">Se connecter</span></div>
+    </div>
+  </div>
+  <div class="ep-footer" style="border-radius:0;margin-top:24px;"><div class="footer-bottom" style="border-top:none;padding-top:0;"><div class="footer-legal">© 2026 EduPay Cameroun · Vos données sont protégées et chiffrées AES-256</div><div style="display:flex;gap:8px;"><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">RGPD</span></div></div></div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+  SCREEN 5bis — ONBOARDING POST-INSCRIPTION (rattachement F04/E04)  ← NEW
+════════════════════════════════════════════ -->
+<div class="screen-form" id="s-onboarding">
+  <div class="form-header">
+    <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> — Bienvenue</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.5);">Étape 2 sur 3</div>
+  </div>
+  <div class="form-body" style="padding-top:28px;">
+    <div class="form-card-wide">
+      <!-- Étapes -->
+      <div style="display:flex;align-items:center;margin-bottom:24px;">
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><use href="#ic-check"/></svg></div><div style="font-size:11px;font-weight:600;color:var(--ep-teal);">Compte</div></div>
+        <div style="flex:1;height:2px;background:var(--ep-teal);margin-top:-16px;"></div>
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">2</div><div style="font-size:11px;font-weight:600;color:var(--ep-teal);" id="onb-step2-label">Établissement</div></div>
+        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div style="flex:1;text-align:center;"><div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">3</div><div style="font-size:11px;color:#aaa;">Confirmation</div></div>
+      </div>
+
+      <div class="form-title" id="onb-title">Rattachez vos enfants à leur établissement</div>
+      <div class="form-sub" id="onb-sub">Recherchez l'établissement de chaque enfant dans la liste des partenaires EduPay. Vous pourrez en ajouter d'autres plus tard depuis votre tableau de bord.</div>
+
+      <!-- BLOC PARENT : rattachement multi-enfants -->
+      <div id="onb-parent-block">
+        <div id="onb-children-list"></div>
+        <button class="btn-o" style="width:auto;padding:8px 16px;font-size:12px;margin-bottom:16px;" onclick="addChildRow()">+ Ajouter un autre enfant</button>
+        <div style="background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#085041;display:flex;gap:10px;align-items:flex-start;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><use href="#ic-alert"/></svg>
+          <span>Établissement absent de la liste ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('register-school')">Faites-le inscrire sur EduPay</span>. Apprenant introuvable dans l'annuaire de l'établissement ? Vous pourrez soumettre une demande de pré-rattachement, validée ensuite par l'établissement.</span>
+        </div>
+      </div>
+
+      <!-- BLOC ÉLÈVE / ÉTUDIANT : rattachement de son propre profil -->
+      <div id="onb-solo-block" style="display:none;">
+        <div class="form-section" style="margin-top:0;" id="onb-solo-title">Mon profil scolaire</div>
+        <div class="inp-row">
+          <div><div class="lbl">Nom de mon établissement *</div><input class="inp" id="onb-solo-etab" list="etabs-list" placeholder="Rechercher dans la liste des établissements partenaires..." /></div>
+          <div><div class="lbl">Matricule (si connu)</div><input class="inp" id="onb-solo-matricule" placeholder="ex : EP-1184" /></div>
+        </div>
+        <div class="inp-row">
+          <div><div class="lbl" id="onb-solo-niveau-lbl">Classe *</div><input class="inp" id="onb-solo-niveau" placeholder="ex : 3ème, Tle A..." /></div>
+          <div><div class="lbl">Code établissement (optionnel)</div><input class="inp" id="onb-solo-code" placeholder="Ex : UD-2026" /></div>
+        </div>
+        <div style="font-size:11px;color:#888;margin:-8px 0 14px;">Établissement absent de la liste ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('register-school')">Faites-le inscrire sur EduPay</span>.</div>
+        <div style="background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#085041;display:flex;gap:10px;align-items:flex-start;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><use href="#ic-alert"/></svg>
+          <span id="onb-solo-note">En tant qu'élève, vous êtes à la fois apprenant et payeur de votre propre compte : vous gérerez et payerez directement vos frais de scolarité.</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;" onclick="finishOnboarding()">Plus tard, depuis mon tableau de bord</button>
+        <button class="btn-p" onclick="finishOnboarding()">Terminer et accéder à mon tableau de bord →</button>
+      </div>
     </div>
   </div>
   <div class="ep-footer" style="border-radius:0;margin-top:24px;"><div class="footer-bottom" style="border-top:none;padding-top:0;"><div class="footer-legal">© 2026 EduPay Cameroun · Vos données sont protégées et chiffrées AES-256</div><div style="display:flex;gap:8px;"><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">RGPD</span></div></div></div>
@@ -518,6 +615,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="form-sub">Renseignez les informations officielles de votre établissement pour commencer l'onboarding EduPay</div>
 
       <div class="form-section">Identité de l'établissement</div>
+      <div class="lbl">Logo de l'établissement</div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+        <div id="school-logo-preview" style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--ep-teal-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-building"/></svg>
+        </div>
+        <div style="flex:1;">
+          <label for="school-logo-input" style="display:inline-block;background:#fff;border:1px solid #ddd;padding:9px 16px;border-radius:var(--radius-md);font-size:12px;font-weight:600;cursor:pointer;color:#333;">Choisir un fichier</label>
+          <input type="file" id="school-logo-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none;" onchange="previewSchoolLogo(this)" />
+          <div style="font-size:11px;color:#888;margin-top:6px;">PNG, JPG ou SVG · 2 Mo max · format carré recommandé</div>
+        </div>
+      </div>
       <div class="lbl">Nom officiel de l'établissement *</div>
       <input class="inp" placeholder="ex : Lycée Bilingue de Melen" />
       <div class="inp-row">
@@ -623,38 +731,92 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
 
 <!-- ════════════════════════════════════════════
+  SCREEN — CONNEXION SUPER ADMIN (2FA, URL cachée /admin-ep2026/login)
+════════════════════════════════════════════ -->
+<div class="screen-form" id="s-adminlogin">
+  <div class="form-header" style="background:#0a1a33;">
+    <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> · <span style="color:var(--ep-gold);">Administration</span></div>
+    <button style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:6px 13px;border-radius:20px;font-size:12px;cursor:pointer;" onclick="go('landing')">← Accueil</button>
+  </div>
+  <div class="form-body" style="background:#0B2545;">
+    <div style="width:100%;max-width:420px;">
+      <div class="form-card">
+        <div style="text-align:center;margin-bottom:22px;">
+          <div style="width:48px;height:48px;background:var(--ep-gold-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2"><use href="#ic-shield"/></svg></div>
+          <div class="form-title">Accès Super Administrateur</div>
+          <div class="form-sub">URL cachée · <code>/admin-ep2026/login</code> · 2FA obligatoire</div>
+        </div>
+        <div class="lbl">Identifiant administrateur</div>
+        <input class="inp" placeholder="admin@edupay.cm" />
+        <div class="lbl">Mot de passe</div>
+        <input class="inp" type="password" placeholder="••••••••" />
+        <button class="btn-p" style="margin-bottom:0;background:var(--ep-navy);" onclick="document.getElementById('admin-2fa-box').style.display='block'">Continuer →</button>
+        <div id="admin-2fa-box" style="display:none;margin-top:14px;background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:14px;">
+          <div style="font-size:12px;color:#8B5E10;margin-bottom:10px;font-weight:600;">Vérification en deux étapes (2FA) — code envoyé par SMS</div>
+          <input class="inp" placeholder="Code à 6 chiffres" style="margin-bottom:10px;"/>
+          <button class="btn-p" style="background:#854F0B;" onclick="go('admin')">Valider et accéder au tableau de bord</button>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.4);">Accès strictement réservé · Toute tentative non autorisée est journalisée</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════
   SCREEN 7 — DASHBOARD PARENT
 ════════════════════════════════════════════ -->
 <div class="screen" id="s-parent">
   <div class="app-header">
     <div class="logo-t" style="font-size:16px;">Edu<span>Pay</span></div>
     <div style="display:flex;align-items:center;gap:12px;">
-      <span style="font-size:12px;color:rgba(255,255,255,.65);">Mme FONO Marie</span>
-      <div class="av" style="background:var(--ep-teal);color:#fff;width:34px;height:34px;">FM</div>
+      <div style="display:flex;background:rgba(255,255,255,.1);border-radius:20px;padding:2px;font-size:11px;">
+        <span id="vue-parent-btn" onclick="setDashboardVue('parent')" style="padding:5px 12px;border-radius:18px;cursor:pointer;background:var(--ep-teal);color:#fff;font-weight:600;">Vue Famille (multi-enfants)</span>
+        <span id="vue-soi-btn" onclick="setDashboardVue('soi')" style="padding:5px 12px;border-radius:18px;cursor:pointer;color:rgba(255,255,255,.6);">Vue Élève / Étudiant</span>
+      </div>
+      <span style="font-size:12px;color:rgba(255,255,255,.65);" id="dash-username">Mme FONO Marie</span>
+      <div class="av" style="background:var(--ep-teal);color:#fff;width:34px;height:34px;" id="dash-avatar">FM</div>
     </div>
   </div>
-  <div class="main-content">
+  <div class="app-body">
+    <div class="sidebar">
+      <div class="sbar-item on" onclick="showTab('p','sv-p-dash',this)"><svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-bar-chart"/></svg>Tableau de bord</div>
+      <div class="sbar-item" id="tab-children" onclick="showTab('p','sv-p-children',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-plus-user"/></svg>Mes enfants</div>
+      <div class="sbar-item" onclick="showTab('p','sv-p-history',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-list"/></svg>Historique</div>
+      <div class="sbar-item" onclick="showTab('p','sv-p-certs',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-receipt"/></svg>Reçus &amp; Certificats</div>
+      <div class="sbar-item" onclick="showTab('p','sv-p-claims',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-ticket"/></svg>Réclamations <span class="badge-cnt">1</span></div>
+      <div class="sbar-item" style="margin-top:4px;" onclick="showTab('p','sv-p-profile',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-settings"/></svg>Profil &amp; notifications</div>
+      <div style="margin-top:16px;background:var(--ep-blue-lt);border-radius:var(--radius-md);padding:12px;">
+        <div style="font-size:11px;font-weight:600;color:#1A4F8A;margin-bottom:4px;">Langue de l'interface</div>
+        <div style="display:flex;gap:6px;"><span class="pill pb" style="cursor:pointer;">Français</span><span class="pill" style="background:#eee;color:#888;cursor:pointer;">English</span></div>
+      </div>
+    </div>
+    <div class="main-content">
+    <div class="sv-p on" id="sv-p-dash">
+
+    <!-- PANE FAMILLE (Parent) -->
+    <div id="dashpane-famille">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-      <div><div style="font-size:18px;font-weight:700;">Bonjour, Marie</div><div style="font-size:13px;color:#888;">2 paiements en attente · Yaoundé</div></div>
+      <div><div style="font-size:18px;font-weight:700;" id="dash-greeting-famille">Bonjour, Marie</div><div style="font-size:13px;color:#888;">2 paiements en attente · Yaoundé</div></div>
       <button style="background:var(--ep-teal);color:#fff;border:none;padding:10px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;" onclick="go('payment')">Payer maintenant</button>
     </div>
     <div class="g4" style="margin-bottom:18px;">
       <div class="kpi"><div class="kval" style="color:var(--ep-red);">87 500</div><div class="klbl">FCFA dus</div></div>
       <div class="kpi"><div class="kval" style="color:var(--ep-teal);">45 000</div><div class="klbl">FCFA payés</div></div>
-      <div class="kpi"><div class="kval">2</div><div class="klbl">Enfants suivis</div></div>
+      <div class="kpi"><div class="kval">3</div><div class="klbl">Enfants suivis</div></div>
       <div class="kpi"><div class="kval">3</div><div class="klbl">Reçus PDF</div></div>
     </div>
     <div class="seclbl" style="margin-top:0;">Mes enfants</div>
     <div class="g2" style="margin-bottom:18px;">
       <div class="epcard" style="border-left:3px solid var(--ep-teal);">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div><div style="font-size:15px;font-weight:700;">FONO Brice</div><div style="font-size:11px;color:#888;">Lycée de Melen · 3ème</div></div><span class="pill pa">Partiel</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div><div style="font-size:15px;font-weight:700;" id="childcard-1-name">FONO Brice</div><div style="font-size:11px;color:#888;" id="childcard-1-etab">Lycée de Melen · 3ème</div></div><span class="pill pa">Partiel</span></div>
         <div style="font-size:12px;color:#666;margin-bottom:6px;">Reste : <strong>52 500 FCFA</strong> sur 95 000 FCFA</div>
         <div class="prog"><div class="pfill" style="width:45%"></div></div>
         <div style="font-size:10px;color:#888;margin-top:3px;margin-bottom:12px;">45% réglé · Tranche 2 due le 15 avr.</div>
         <button class="btn-p" style="font-size:12px;padding:8px;" onclick="go('payment')">Payer la tranche 2 →</button>
       </div>
       <div class="epcard" style="border-left:3px solid var(--ep-red);">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div><div style="font-size:15px;font-weight:700;">FONO Chloé</div><div style="font-size:11px;color:#888;">École Primaire NBC · CM2</div></div><span class="pill pr">Impayé</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div><div style="font-size:15px;font-weight:700;" id="childcard-2-name">FONO Chloé</div><div style="font-size:11px;color:#888;" id="childcard-2-etab">École Primaire NBC · CM2</div></div><span class="pill pr">Impayé</span></div>
         <div style="font-size:12px;color:#666;margin-bottom:6px;">Reste : <strong>35 000 FCFA</strong></div>
         <div class="prog"><div class="pfill" style="width:0%"></div></div>
         <div style="font-size:10px;color:var(--ep-red);margin-top:3px;margin-bottom:12px;">Échéance dépassée — 31 mars 2026</div>
@@ -666,6 +828,136 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="row"><div><div style="font-size:13px;font-weight:600;">Scolarité T1 — Brice</div><div style="font-size:11px;color:#888;">12 mars 2026 · MTN MoMo</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">25 000 FCFA</div><span class="pill pg">Validé</span></div></div>
       <div class="row"><div><div style="font-size:13px;font-weight:600;">Inscription 2026 — Brice</div><div style="font-size:11px;color:#888;">02 janv. 2026 · Orange Money</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">20 000 FCFA</div><span class="pill pg">Validé</span></div></div>
       <div class="row"><div><div style="font-size:13px;font-weight:600;">Cantine T1 — Brice</div><div style="font-size:11px;color:#888;">05 janv. 2026</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">– 5 000 FCFA</div><span class="pill pa">Remboursé</span></div></div>
+    </div>
+    </div>
+
+    <!-- PANE SOLO (Élève / Étudiant) -->
+    <div id="dashpane-soi" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+      <div><div style="font-size:18px;font-weight:700;" id="dash-greeting-soi">Bonjour, Carine</div><div style="font-size:13px;color:#888;">1 paiement en attente · Université de Douala</div></div>
+      <button style="background:var(--ep-teal);color:#fff;border:none;padding:10px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;" onclick="go('payment')">Payer maintenant</button>
+    </div>
+    <div class="g4" style="margin-bottom:18px;">
+      <div class="kpi"><div class="kval" style="color:var(--ep-red);">35 000</div><div class="klbl">FCFA dus</div></div>
+      <div class="kpi"><div class="kval" style="color:var(--ep-teal);">60 000</div><div class="klbl">FCFA payés</div></div>
+      <div class="kpi"><div class="kval">63%</div><div class="klbl">Solde réglé</div></div>
+      <div class="kpi"><div class="kval">2</div><div class="klbl">Reçus PDF</div></div>
+    </div>
+    <div class="seclbl" style="margin-top:0;">Mon dossier scolaire</div>
+    <div class="epcard" style="border-left:3px solid var(--ep-teal);margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div><div style="font-size:15px;font-weight:700;" id="soloard-name">FONO Carine</div><div style="font-size:11px;color:#888;" id="soloard-etab">Université de Douala · Licence 2 GSI</div></div><span class="pill pa">Partiel</span></div>
+      <div style="font-size:12px;color:#666;margin-bottom:6px;">Reste : <strong>35 000 FCFA</strong> sur 95 000 FCFA</div>
+      <div class="prog"><div class="pfill" style="width:63%"></div></div>
+      <div style="font-size:10px;color:#888;margin-top:3px;margin-bottom:12px;">63% réglé · Tranche 2 due le 30 avr.</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-p" style="font-size:12px;padding:8px;" onclick="go('payment')">Payer la tranche 2 →</button>
+        <button class="btn-o" style="font-size:12px;padding:8px;width:auto;flex:0 0 auto;" onclick="editMonEtablissement()">✎ Modifier mon établissement</button>
+      </div>
+    </div>
+    <div id="solo-edit-etab-box" class="epcard" style="display:none;margin-bottom:18px;border-left:3px solid var(--ep-teal);">
+      <div class="seclbl" style="margin-top:0;">Modifier mon établissement</div>
+      <div class="inp-row"><div><div class="lbl">Établissement</div><input class="inp" id="solo-edit-etab-input" list="etabs-list" placeholder="Rechercher dans la liste des établissements partenaires..."/></div><div><div class="lbl">Code établissement (optionnel)</div><input class="inp" id="solo-edit-code-input" placeholder="Ex : UD-2026"/></div></div>
+      <div style="font-size:11px;color:#888;margin:-6px 0 12px;">Établissement absent de la liste ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('register-school')">Faites-le inscrire sur EduPay</span>.</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-p" style="width:auto;padding:9px 18px;font-size:12px;" onclick="saveMonEtablissement()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-check"/></svg>Enregistrer</button>
+        <button class="btn-o" style="width:auto;padding:9px 18px;font-size:12px;" onclick="document.getElementById('solo-edit-etab-box').style.display='none'">Annuler</button>
+      </div>
+    </div>
+    <div class="seclbl">Derniers paiements</div>
+    <div class="epcard">
+      <div class="row"><div><div style="font-size:13px;font-weight:600;">Scolarité S1</div><div style="font-size:11px;color:#888;">10 janv. 2026 · Orange Money</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">60 000 FCFA</div><span class="pill pg">Validé</span></div></div>
+      <div class="row"><div><div style="font-size:13px;font-weight:600;">Frais d'inscription 2026</div><div style="font-size:11px;color:#888;">03 janv. 2026 · MTN MoMo</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">15 000 FCFA</div><span class="pill pg">Validé</span></div></div>
+    </div>
+    </div>
+
+    </div>
+
+    <!-- SUB-VIEW : MES ENFANTS (F04 rattachement + F13 multi-enfants) -->
+    <div class="sv-p" id="sv-p-children" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-size:17px;font-weight:700;">Mes enfants</div><button class="btn-p" style="width:auto;padding:9px 16px;font-size:12px;" onclick="openAttachBox()">+ Rattacher un enfant</button></div>
+      <div id="attach-box" class="epcard" style="display:none;margin-bottom:16px;border-left:3px solid var(--ep-teal);">
+        <div class="seclbl" style="margin-top:0;" id="attach-box-title">Rattacher un apprenant à un établissement</div>
+        <div class="inp-row"><div><div class="lbl">Établissement (maternelle, primaire, secondaire, université, institut)</div><input class="inp" id="attach-etab-input" list="etabs-list" placeholder="Rechercher dans la liste des établissements partenaires..."/></div><div><div class="lbl">Matricule / Nom complet de l'apprenant</div><input class="inp" id="attach-nom-input" placeholder="Ex : FONO Brice"/></div></div>
+        <div style="font-size:11px;color:#888;margin:-6px 0 12px;">La liste déroulante affiche tous les établissements déjà partenaires EduPay. <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;" onclick="go('register-school')">Établissement absent ?</span><br/>Apprenant introuvable dans l'annuaire de l'établissement ? <span style="color:var(--ep-teal);cursor:pointer;font-weight:600;">Soumettre une demande de pré-rattachement</span> (validée ensuite par l'établissement).</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-p" id="attach-box-submit" style="width:auto;padding:9px 18px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-search"/></svg>Rechercher et rattacher</button>
+          <button class="btn-o" style="width:auto;padding:9px 18px;font-size:12px;" onclick="document.getElementById('attach-box').style.display='none'">Annuler</button>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="epcard" style="border-left:3px solid var(--ep-teal);"><div style="display:flex;justify-content:space-between;"><div><div style="font-size:15px;font-weight:700;">FONO Brice</div><div style="font-size:11px;color:#888;">Lycée de Melen · 3ème · Mat. EP-4471</div></div><span class="pill pa">Partiel</span></div><div class="divider"></div><div class="row"><span>Établissement</span><strong>Lycée de Melen, Yaoundé</strong></div><div class="row"><span>Frais d'inscription 2025-2026</span><strong style="color:var(--ep-teal);">20 000 FCFA · Payé</strong></div><div class="row"><span>Frais de scolarité (tranche 1)</span><strong style="color:var(--ep-teal);">25 000 FCFA · Payé</strong></div><div class="row"><span>Frais de scolarité (tranche 2)</span><strong style="color:var(--ep-red);">52 500 FCFA · Dû</strong></div><div class="row"><span>Cantine T1</span><strong style="color:var(--ep-gold);">5 000 FCFA · Remboursé</strong></div><button class="btn-o" style="margin-top:10px;font-size:11px;padding:7px;" onclick="editEnfantEtab('FONO Brice','Lycée de Melen — Yaoundé (LYC-MEL-2026)')">✎ Modifier l'établissement</button></div>
+        <div class="epcard" style="border-left:3px solid var(--ep-red);"><div style="display:flex;justify-content:space-between;"><div><div style="font-size:15px;font-weight:700;">FONO Chloé</div><div style="font-size:11px;color:#888;">École Primaire NBC · CM2 · Mat. EP-2290</div></div><span class="pill pr">Impayé</span></div><div class="divider"></div><div class="row"><span>Établissement</span><strong>École Primaire NBC</strong></div><div class="row"><span>Frais d'inscription 2025-2026</span><strong style="color:var(--ep-red);">15 000 FCFA · Dû</strong></div><div class="row"><span>Frais de scolarité (tranche 1)</span><strong style="color:var(--ep-red);">20 000 FCFA · Dû</strong></div><button class="btn-o" style="margin-top:10px;font-size:11px;padding:7px;" onclick="editEnfantEtab('FONO Chloé','École Primaire NBC — Yaoundé')">✎ Modifier l'établissement</button></div>
+        <div class="epcard" style="border-left:3px solid #185FA5;"><div style="display:flex;justify-content:space-between;"><div><div style="font-size:15px;font-weight:700;">FONO Carine</div><div style="font-size:11px;color:#888;">Université de Douala · Licence 2 · Mat. UD-88231</div></div><span class="pill pg">À jour</span></div><div class="divider"></div><div class="row"><span>Établissement</span><strong>Université de Douala</strong></div><div class="row"><span>Frais d'inscription 2025-2026</span><strong style="color:var(--ep-teal);">75 000 FCFA · Payé</strong></div><div class="row"><span>Frais de scolarité (tranche 1)</span><strong style="color:var(--ep-teal);">150 000 FCFA · Payé</strong></div><button class="btn-o" style="margin-top:10px;font-size:11px;padding:7px;" onclick="editEnfantEtab('FONO Carine','Université de Douala — Faculté des Sciences')">✎ Modifier l'établissement</button></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : HISTORIQUE COMPLET (F11) -->
+    <div class="sv-p" id="sv-p-history" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-size:17px;font-weight:700;">Historique des transactions</div><button class="btn-o" style="width:auto;padding:8px 14px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ep-teal)" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-download"/></svg>Exporter PDF</button></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;"><span class="pill pg" style="cursor:pointer;">Tous</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">Validés</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">En attente</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">Remboursés</span></div>
+      <div class="epcard">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Scolarité T2 — Brice</div><div style="font-size:11px;color:#888;">Réf. #EP2026-04471 · 18 mars 2026 · MTN MoMo</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">26 250 FCFA</div><span class="pill pg">Validé</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Scolarité T1 — Brice</div><div style="font-size:11px;color:#888;">Réf. #EP2026-03190 · 12 mars 2026 · MTN MoMo</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">25 000 FCFA</div><span class="pill pg">Validé</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Inscription 2026 — Brice</div><div style="font-size:11px;color:#888;">Réf. #EP2026-00087 · 02 janv. 2026 · Orange Money</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">20 000 FCFA</div><span class="pill pg">Validé</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Cantine T1 — Brice</div><div style="font-size:11px;color:#888;">Réf. #EP2026-00045 · 05 janv. 2026 · Carte bancaire</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">– 5 000 FCFA</div><span class="pill pa">Remboursé</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Scolarité T2 — Chloé</div><div style="font-size:11px;color:#888;">Réf. #EP2026-04502 · en attente de confirmation USSD</div></div><div style="text-align:right;"><div style="font-weight:600;color:#999;">35 000 FCFA</div><span class="pill pr">En attente</span></div></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : REÇUS & CERTIFICATS (F10, E14) -->
+    <div class="sv-p" id="sv-p-certs" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:4px;">Reçus &amp; certificats</div>
+      <div style="font-size:12px;color:#888;margin-bottom:16px;">Téléchargez vos justificatifs de paiement et attestations de scolarité</div>
+      <div class="seclbl" style="margin-top:0;">Reçus PDF</div>
+      <div class="epcard" style="margin-bottom:16px;">
+        <div class="row"><div style="display:flex;align-items:center;gap:10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ep-red)" stroke-width="2"><use href="#ic-file"/></svg><div><div style="font-size:13px;font-weight:600;">Reçu_EP2026-04471.pdf</div><div style="font-size:11px;color:#888;">Scolarité T2 — Brice · 26 250 FCFA</div></div></div><button class="btn-o" style="width:auto;padding:6px 12px;font-size:11px;">Télécharger</button></div>
+        <div class="row"><div style="display:flex;align-items:center;gap:10px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ep-red)" stroke-width="2"><use href="#ic-file"/></svg><div><div style="font-size:13px;font-weight:600;">Reçu_EP2026-03190.pdf</div><div style="font-size:11px;color:#888;">Scolarité T1 — Brice · 25 000 FCFA</div></div></div><button class="btn-o" style="width:auto;padding:6px 12px;font-size:11px;">Télécharger</button></div>
+      </div>
+      <div class="seclbl">Certificats de scolarité</div>
+      <div class="g2">
+        <div class="epcard" style="border-left:3px solid var(--ep-gold);"><div style="font-size:13px;font-weight:700;margin-bottom:4px;">FONO Brice — Lycée de Melen</div><div style="font-size:11px;color:#888;margin-bottom:10px;">Attestation de paiement à jour — 45% réglé</div><button class="btn-o" style="font-size:12px;">Générer le certificat</button></div>
+        <div class="epcard" style="border-left:3px solid #ccc;opacity:.6;"><div style="font-size:13px;font-weight:700;margin-bottom:4px;">FONO Chloé — École NBC</div><div style="font-size:11px;color:#888;margin-bottom:10px;">Indisponible — solde impayé</div><button class="btn-o" style="font-size:12px;" disabled>Régulariser pour générer</button></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : RÉCLAMATIONS (F14) -->
+    <div class="sv-p" id="sv-p-claims" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-size:17px;font-weight:700;">Mes réclamations</div><button class="btn-p" style="width:auto;padding:9px 16px;font-size:12px;" onclick="document.getElementById('claim-box').style.display='block'">+ Nouvelle réclamation</button></div>
+      <div id="claim-box" class="epcard" style="display:none;margin-bottom:16px;border-left:3px solid var(--ep-gold);">
+        <div class="seclbl" style="margin-top:0;">Décrire le problème</div>
+        <div class="lbl">Transaction concernée</div>
+        <select class="select"><option>Réf. #EP2026-00045 — Cantine T1 (5 000 FCFA)</option><option>Réf. #EP2026-04471 — Scolarité T2 (26 250 FCFA)</option><option>Autre / paiement introuvable</option></select>
+        <div class="lbl">Description</div>
+        <textarea class="textarea" placeholder="Expliquez le problème rencontré (montant débité deux fois, paiement non reconnu par l'école, etc.)"></textarea>
+        <button class="btn-p" style="width:auto;padding:9px 18px;font-size:12px;" onclick="document.getElementById('claim-box').style.display='none'">Envoyer la réclamation</button>
+      </div>
+      <div class="epcard">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">#TCK-2026-0142 — Paiement débité deux fois</div><div style="font-size:11px;color:#888;">Ouvert le 14 mars 2026 · Cantine T1</div></div><span class="pill pa">En cours</span></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">#TCK-2026-0098 — Reçu non reçu par email</div><div style="font-size:11px;color:#888;">Ouvert le 05 fév. 2026</div></div><span class="pill pg">Résolu</span></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : PROFIL & NOTIFICATIONS (F12 préférences) -->
+    <div class="sv-p" id="sv-p-profile" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Profil &amp; préférences de notification</div>
+      <div class="g2">
+        <div class="epcard">
+          <div class="seclbl" style="margin-top:0;">Informations personnelles</div>
+          <div class="lbl">Nom complet</div><input class="inp" value="FONO Marie"/>
+          <div class="lbl">Téléphone</div><input class="inp" value="699 123 456"/>
+          <div class="lbl">Email</div><input class="inp" value="marie.fono@email.cm"/>
+          <button class="btn-p" style="margin-top:4px;">Enregistrer</button>
+        </div>
+        <div class="epcard">
+          <div class="seclbl" style="margin-top:0;">Notifications</div>
+          <div class="row"><span style="display:flex;align-items:center;gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><use href="#ic-phone"/></svg>SMS de confirmation</span><input type="checkbox" checked/></div>
+          <div class="row"><span style="display:flex;align-items:center;gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><use href="#ic-mail"/></svg>Email reçu PDF</span><input type="checkbox" checked/></div>
+          <div class="row"><span style="display:flex;align-items:center;gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><use href="#ic-bell"/></svg>Rappel d'échéance (J-5)</span><input type="checkbox" checked/></div>
+          <div class="row"><span style="display:flex;align-items:center;gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><use href="#ic-lock"/></svg>Authentification à deux facteurs</span><input type="checkbox"/></div>
+        </div>
+      </div>
+    </div>
+
     </div>
   </div>
 </div>
@@ -695,9 +987,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <div id="pm2" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;" onclick="selPay(2)"><div style="font-size:12px;font-weight:700;color:#FF6600;">Orange</div><div style="font-size:11px;">Money</div></div>
         <div id="pm3" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;" onclick="selPay(3)"><div style="font-size:12px;font-weight:700;color:#185FA5;">Carte</div><div style="font-size:11px;">Visa / MC</div></div>
       </div>
-      <div class="lbl">Numéro MTN Mobile Money</div>
-      <input class="inp" placeholder="6XX XXX XXX" />
-      <div style="background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#854F0B;display:flex;gap:8px;align-items:flex-start;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2" style="flex-shrink:0;"><use href="#ic-alert"/></svg>Vous recevrez une notification USSD sur votre téléphone pour confirmer le paiement.</div>
+      <div id="pay-fields-momo">
+        <div class="lbl" id="pay-momo-lbl">Numéro MTN Mobile Money</div>
+        <input class="inp" id="pay-momo-input" placeholder="6XX XXX XXX" />
+        <div style="background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#854F0B;display:flex;gap:8px;align-items:flex-start;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2" style="flex-shrink:0;"><use href="#ic-alert"/></svg>Vous recevrez une notification USSD sur votre téléphone pour confirmer le paiement.</div>
+      </div>
+      <div id="pay-fields-card" style="display:none;">
+        <div class="lbl">Numéro de carte</div>
+        <input class="inp" placeholder="4242 4242 4242 4242" />
+        <div class="inp-row">
+          <div><div class="lbl">Date d'expiration</div><input class="inp" placeholder="MM/AA" /></div>
+          <div><div class="lbl">CVV</div><input class="inp" placeholder="123" /></div>
+        </div>
+        <div class="lbl">Nom du titulaire</div>
+        <input class="inp" placeholder="Tel qu'inscrit sur la carte" />
+        <div style="background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#085041;display:flex;gap:8px;align-items:flex-start;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;"><use href="#ic-alert"/></svg>Paiement sécurisé via passerelle certifiée CinetPay. Vos données bancaires ne sont jamais stockées par EduPay.</div>
+      </div>
       <div style="font-size:13px;color:#888;margin-bottom:6px;display:flex;justify-content:space-between;"><span>Montant</span><span style="font-weight:600;color:#333;">52 500 FCFA</span></div>
       <div style="font-size:13px;color:#888;margin-bottom:12px;display:flex;justify-content:space-between;"><span>Frais de transaction</span><span style="font-weight:600;color:var(--ep-teal);">Offerts</span></div>
       <div style="border-top:1px solid #eee;padding-top:12px;margin-bottom:18px;display:flex;justify-content:space-between;"><span style="font-size:15px;font-weight:700;">Total à payer</span><span style="font-size:22px;font-weight:700;color:var(--ep-teal);">52 500 FCFA</span></div>
@@ -723,12 +1028,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
   <div class="app-body">
     <div class="sidebar">
-      <div class="sbar-item on"><svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-bar-chart"/></svg>Tableau de bord</div>
-      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-users"/></svg>Apprenants</div>
-      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-card"/></svg>Paiements</div>
-      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-alert"/></svg>Impayés <span class="badge-cnt">87</span></div>
-      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-file"/></svg>Rapports</div>
-      <div class="sbar-item" style="margin-top:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-settings"/></svg>Paramètres</div>
+      <div class="sbar-item on" onclick="showTab('e','sv-e-dash',this)"><svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-bar-chart"/></svg>Tableau de bord</div>
+      <div class="sbar-item" onclick="showTab('e','sv-e-students',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-users"/></svg>Apprenants</div>
+      <div class="sbar-item" onclick="showTab('e','sv-e-fees',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-card"/></svg>Frais &amp; échéanciers</div>
+      <div class="sbar-item" onclick="showTab('e','sv-e-unpaid',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-alert"/></svg>Impayés <span class="badge-cnt">87</span></div>
+      <div class="sbar-item" onclick="showTab('e','sv-e-refunds',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-refresh"/></svg>Remboursements</div>
+      <div class="sbar-item" onclick="showTab('e','sv-e-reports',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-file"/></svg>Rapports</div>
+      <div class="sbar-item" onclick="showTab('e','sv-e-team',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-plus-user"/></svg>Utilisateurs internes</div>
+      <div class="sbar-item" onclick="showTab('e','sv-e-sites',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-layers"/></svg>Multi-sites</div>
+      <div class="sbar-item" style="margin-top:4px;" onclick="showTab('e','sv-e-settings',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-settings"/></svg>Paramètres</div>
       <div style="margin-top:16px;background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;">
         <div style="font-size:11px;font-weight:600;color:#0F6E56;margin-bottom:4px;">Recouvrement</div>
         <div style="font-size:24px;font-weight:700;color:#085041;">67%</div>
@@ -737,6 +1045,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
     </div>
     <div class="main-content">
+    <div class="sv-e on" id="sv-e-dash">
       <div style="font-size:17px;font-weight:700;margin-bottom:4px;">Tableau de bord financier</div>
       <div style="font-size:12px;color:#888;margin-bottom:16px;">Année 2025-2026 · Mars 2026</div>
       <div class="g4" style="margin-bottom:18px;">
@@ -752,9 +1061,116 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <div class="row"><div><div style="font-size:13px;font-weight:600;">FOUDA Jean · 2nde C</div><div style="font-size:11px;color:#888;">Scolarité T2 · Carte · 3h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">52 500 FCFA</div><span class="pill pa">En attente</span></div></div>
       </div>
       <div style="display:flex;gap:10px;">
-        <button class="btn-p" style="font-size:12px;">Relancer les 87 impayés par SMS</button>
+        <button class="btn-p" style="font-size:12px;" onclick="showTab('e','sv-e-unpaid',document.querySelectorAll('.sidebar .sbar-item')[3])">Relancer les 87 impayés par SMS</button>
         <button class="btn-o" style="font-size:12px;">Exporter rapport Excel</button>
       </div>
+    </div>
+
+    <!-- SUB-VIEW : APPRENANTS (E04 annuaire + E11 import) -->
+    <div class="sv-e" id="sv-e-students" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-size:17px;font-weight:700;">Annuaire des apprenants</div><div style="display:flex;gap:8px;"><button class="btn-o" style="width:auto;padding:8px 14px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ep-teal)" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-upload"/></svg>Importer CSV/Excel</button><button class="btn-p" style="width:auto;padding:8px 14px;font-size:12px;">+ Ajouter un apprenant</button></div></div>
+      <div class="epcard" style="margin-bottom:14px;display:flex;gap:10px;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><use href="#ic-search"/></svg><input class="inp" style="margin:0;" placeholder="Rechercher par nom, matricule ou classe..."/></div>
+      <div class="epcard">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">MENGUE Serge · Mat. EP-1182</div><div style="font-size:11px;color:#888;">4ème B · Parent : M. MENGUE Paul</div></div><span class="pill pg">À jour</span></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">BIYONG Clara · Mat. EP-1183</div><div style="font-size:11px;color:#888;">Tle A · Parent : Mme BIYONG Anne</div></div><span class="pill pg">À jour</span></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">FOUDA Jean · Mat. EP-1184</div><div style="font-size:11px;color:#888;">2nde C · Parent : M. FOUDA Eric</div></div><span class="pill pa">Partiel</span></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">FONO Brice · Mat. EP-4471</div><div style="font-size:11px;color:#888;">3ème · Parent : Mme FONO Marie</div></div><span class="pill pa">Partiel</span></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : FRAIS & ÉCHÉANCIERS (E02, E03) -->
+    <div class="sv-e" id="sv-e-fees" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Catégories de frais &amp; échéanciers — 2025-2026</div>
+      <div class="seclbl" style="margin-top:0;">Catégories de frais</div>
+      <div class="epcard" style="margin-bottom:16px;">
+        <div class="row"><span>Inscription</span><strong>20 000 FCFA</strong></div>
+        <div class="row"><span>Scolarité (par trimestre)</span><strong>25 000 FCFA</strong></div>
+        <div class="row"><span>Cantine (mensuelle)</span><strong>5 000 FCFA</strong></div>
+        <div class="row"><span>Internat (trimestre)</span><strong>45 000 FCFA</strong></div>
+        <div class="row"><span>Frais d'examen</span><strong>7 500 FCFA</strong></div>
+      </div>
+      <button class="btn-o" style="width:auto;padding:8px 14px;font-size:12px;margin-bottom:18px;">+ Ajouter une catégorie</button>
+      <div class="seclbl">Échéancier — paiement fractionné</div>
+      <div class="epcard">
+        <div class="row"><span>Tranche 1 — Inscription + 50%</span><strong>Avant le 30 sept. 2025</strong></div>
+        <div class="row"><span>Tranche 2 — 30%</span><strong>Avant le 15 janv. 2026</strong></div>
+        <div class="row"><span>Tranche 3 — Solde 20%</span><strong>Avant le 15 avr. 2026</strong></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : IMPAYÉS & RELANCES (E07) -->
+    <div class="sv-e" id="sv-e-unpaid" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-size:17px;font-weight:700;">Gestion des impayés <span class="badge-cnt">87</span></div><button class="btn-p" style="width:auto;padding:9px 16px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-bell"/></svg>Relance groupée SMS</button></div>
+      <div class="epcard">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">FOUDA Jean · 2nde C</div><div style="font-size:11px;color:#888;">Solde dû : 52 500 FCFA · Dernière relance : 2 mars 2026</div></div><div style="display:flex;gap:6px;"><button class="btn-o" style="width:auto;padding:6px 10px;font-size:11px;">Relancer</button></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">FONO Chloé · CM2</div><div style="font-size:11px;color:#888;">Solde dû : 35 000 FCFA · Échéance dépassée — 31 mars</div></div><div style="display:flex;gap:6px;"><button class="btn-o" style="width:auto;padding:6px 10px;font-size:11px;">Relancer</button></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">NTSAMA Hervé · 1ère D</div><div style="font-size:11px;color:#888;">Solde dû : 25 000 FCFA · Dernière relance : 10 mars 2026</div></div><div style="display:flex;gap:6px;"><button class="btn-o" style="width:auto;padding:6px 10px;font-size:11px;">Relancer</button></div></div>
+      </div>
+      <div class="seclbl">Taux de recouvrement — évolution</div>
+      <div class="epcard"><div class="row"><span>Janvier</span><strong>54%</strong></div><div class="row"><span>Février</span><strong>61%</strong></div><div class="row"><span>Mars (en cours)</span><strong style="color:var(--ep-teal);">67%</strong></div></div>
+    </div>
+
+    <!-- SUB-VIEW : REMBOURSEMENTS (E09) -->
+    <div class="sv-e" id="sv-e-refunds" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Demandes de remboursement</div>
+      <div class="epcard">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">FONO Brice — Cantine T1</div><div style="font-size:11px;color:#888;">5 000 FCFA · Motif : erreur de saisie · 04 mars 2026</div></div><div style="display:flex;gap:6px;"><button style="background:var(--ep-teal);color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;">Approuver</button><button class="btn-o" style="width:auto;padding:6px 10px;font-size:11px;">Refuser</button></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">MENGUE Serge — Double paiement</div><div style="font-size:11px;color:#888;">25 000 FCFA · Traité le 28 fév. 2026</div></div><span class="pill pg">Remboursé</span></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : RAPPORTS (E08) -->
+    <div class="sv-e" id="sv-e-reports" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Rapports financiers</div>
+      <div class="g4" style="margin-bottom:18px;">
+        <div class="kpi"><div class="kval" style="color:var(--ep-teal);">4 872 000</div><div class="klbl">FCFA — Mars 2026</div></div>
+        <div class="kpi"><div class="kval">13 940 000</div><div class="klbl">FCFA — Cumul T1+T2</div></div>
+        <div class="kpi"><div class="kval">67%</div><div class="klbl">Taux de recouvrement</div></div>
+        <div class="kpi"><div class="kval">342</div><div class="klbl">Élèves inscrits</div></div>
+      </div>
+      <div style="display:flex;gap:10px;"><button class="btn-o" style="width:auto;padding:9px 16px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ep-teal)" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-download"/></svg>Rapport mensuel PDF</button><button class="btn-o" style="width:auto;padding:9px 16px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ep-teal)" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-download"/></svg>Export Excel</button></div>
+    </div>
+
+    <!-- SUB-VIEW : UTILISATEURS INTERNES (E10 rôles) -->
+    <div class="sv-e" id="sv-e-team" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-size:17px;font-weight:700;">Utilisateurs internes &amp; rôles</div><button class="btn-p" style="width:auto;padding:9px 16px;font-size:12px;">+ Inviter un utilisateur</button></div>
+      <div class="epcard">
+        <div class="row"><div style="display:flex;align-items:center;gap:10px;"><div class="av" style="background:var(--ep-purple-lt);color:#5B21B6;">PN</div><div><div style="font-size:13px;font-weight:600;">NKOA Pierre</div><div style="font-size:11px;color:#888;">Directeur</div></div></div><span class="pill" style="background:var(--ep-purple-lt);color:#5B21B6;">Admin complet</span></div>
+        <div class="row"><div style="display:flex;align-items:center;gap:10px;"><div class="av" style="background:rgba(255,255,255,.12);color:#0F6E56;background:var(--ep-teal-lt);">DJ</div><div><div style="font-size:13px;font-weight:600;">DJOMO Albert</div><div style="font-size:11px;color:#888;">Comptable</div></div></div><span class="pill pg">Saisie + lecture</span></div>
+        <div class="row"><div style="display:flex;align-items:center;gap:10px;"><div class="av" style="background:var(--ep-gold-lt);color:#8B5E10;">CF</div><div><div style="font-size:13px;font-weight:600;">FOUDA Caroline</div><div style="font-size:11px;color:#888;">Caissière</div></div></div><span class="pill pa">Saisie seule</span></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : MULTI-SITES (E12) -->
+    <div class="sv-e" id="sv-e-sites" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Gestion multi-sites — Groupe scolaire</div>
+      <div class="g3">
+        <div class="epcard" style="border-left:3px solid var(--ep-teal);"><div style="font-size:13px;font-weight:700;">Lycée de Melen</div><div style="font-size:11px;color:#888;margin-bottom:8px;">Yaoundé · Site principal</div><span class="pill pg">Actif</span></div>
+        <div class="epcard"><div style="font-size:13px;font-weight:700;">Annexe Mvolyé</div><div style="font-size:11px;color:#888;margin-bottom:8px;">Yaoundé · Site secondaire</div><span class="pill pg">Actif</span></div>
+        <div class="epcard" style="border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;color:#999;font-size:12px;cursor:pointer;">+ Ajouter un site</div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : PARAMÈTRES (E13 notifications) -->
+    <div class="sv-e" id="sv-e-settings" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Paramètres de l'établissement</div>
+      <div class="g2">
+        <div class="epcard">
+          <div class="seclbl" style="margin-top:0;">Profil établissement</div>
+          <div class="lbl">Nom de l'établissement</div><input class="inp" value="Lycée de Melen"/>
+          <div class="lbl">Code EduPay</div><input class="inp" value="EP-MELEN-2026" disabled/>
+          <button class="btn-p" style="margin-top:4px;">Enregistrer</button>
+        </div>
+        <div class="epcard">
+          <div class="seclbl" style="margin-top:0;">Notifications automatiques aux familles</div>
+          <div class="row"><span>Confirmation de paiement (SMS)</span><input type="checkbox" checked/></div>
+          <div class="row"><span>Rappel d'échéance — J-5</span><input type="checkbox" checked/></div>
+          <div class="row"><span>Alerte impayé (mensuelle)</span><input type="checkbox" checked/></div>
+          <div class="row"><span>Notification email aux parents</span><input type="checkbox" checked/></div>
+        </div>
+      </div>
+    </div>
+
     </div>
   </div>
 </div>
@@ -770,13 +1186,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
   <div class="app-body">
     <div class="sidebar">
-      <div class="sbar-item on"><svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-globe"/></svg>Vue globale</div>
-      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-building"/></svg>Établissements</div>
-      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-card"/></svg>Transactions</div>
-      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-trend"/></svg>Commissions</div>
-      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-ticket"/></svg>Réclamations <span class="badge-cnt">3</span></div>
-      <div class="sbar-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-shield"/></svg>Logs sécurité</div>
-      <div class="sbar-item" style="margin-top:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-settings"/></svg>Paramètres sys.</div>
+      <div class="sbar-item on" onclick="showTab('a','sv-a-dash',this)"><svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-globe"/></svg>Vue globale</div>
+      <div class="sbar-item" onclick="showTab('a','sv-a-schools',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-building"/></svg>Établissements</div>
+      <div class="sbar-item" onclick="showTab('a','sv-a-tx',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-card"/></svg>Transactions</div>
+      <div class="sbar-item" onclick="showTab('a','sv-a-commissions',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-trend"/></svg>Commissions</div>
+      <div class="sbar-item" onclick="showTab('a','sv-a-claims',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-ticket"/></svg>Réclamations <span class="badge-cnt">3</span></div>
+      <div class="sbar-item" onclick="showTab('a','sv-a-logs',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-shield"/></svg>Logs sécurité</div>
+      <div class="sbar-item" onclick="showTab('a','sv-a-exports',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-file"/></svg>Exports réglementaires</div>
+      <div class="sbar-item" style="margin-top:4px;" onclick="showTab('a','sv-a-settings',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#ic-settings"/></svg>Paramètres sys.</div>
       <div style="margin-top:16px;background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:12px;border-left:2px solid var(--ep-gold);">
         <div style="font-size:11px;font-weight:600;color:#8B5E10;">Commission active</div>
         <div style="font-size:24px;font-weight:700;color:#663E08;">0,5%</div>
@@ -784,6 +1201,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
     </div>
     <div class="main-content">
+    <div class="sv-a on" id="sv-a-dash">
       <div style="font-size:17px;font-weight:700;margin-bottom:4px;">KPIs globaux — Mars 2026</div>
       <div style="font-size:12px;color:#888;margin-bottom:16px;">Toutes les écoles · Temps réel</div>
       <div class="g4" style="margin-bottom:18px;">
@@ -808,8 +1226,95 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       </div>
       <div style="background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:16px;display:flex;justify-content:space-between;align-items:center;border-left:3px solid var(--ep-gold);">
         <div><div style="font-size:13px;font-weight:700;color:#854F0B;">Taux de commission — configurable</div><div style="font-size:11px;color:#BA7517;margin-top:2px;">0,5% par transaction · Profil Standard</div></div>
-        <button style="background:#854F0B;color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-md);font-size:12px;cursor:pointer;">Modifier</button>
+        <button style="background:#854F0B;color:#fff;border:none;padding:8px 16px;border-radius:var(--radius-md);font-size:12px;cursor:pointer;" onclick="showTab('a','sv-a-commissions',document.querySelectorAll('.sidebar .sbar-item')[3])">Modifier</button>
       </div>
+    </div>
+
+    <!-- SUB-VIEW : ÉTABLISSEMENTS (S01) -->
+    <div class="sv-a" id="sv-a-schools" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-size:17px;font-weight:700;">Gestion des établissements</div><button class="btn-p" style="width:auto;padding:9px 16px;font-size:12px;">+ Ajouter manuellement</button></div>
+      <div class="epcard">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Lycée de Melen · Yaoundé</div><div style="font-size:11px;color:#888;">127 apprenants · Commission 0,5% · depuis fév. 2026</div></div><div style="display:flex;gap:6px;align-items:center;"><span class="pill pg">Actif</span><button class="btn-o" style="width:auto;padding:6px 10px;font-size:11px;">Suspendre</button><button style="background:#fff;color:var(--ep-red);border:1px solid var(--ep-red);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;" onclick="confirmDeleteSchool('Lycée de Melen · Yaoundé', this)">Supprimer</button></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Institut Saint-Michel · Douala</div><div style="font-size:11px;color:#888;">89 apprenants · Commission 0,5% · il y a 2 jours</div></div><div style="display:flex;gap:6px;align-items:center;"><span class="pill pg">Actif</span><button class="btn-o" style="width:auto;padding:6px 10px;font-size:11px;">Suspendre</button><button style="background:#fff;color:var(--ep-red);border:1px solid var(--ep-red);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;" onclick="confirmDeleteSchool('Institut Saint-Michel · Douala', this)">Supprimer</button></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Collège de l'Unité · Bafoussam</div><div style="font-size:11px;color:#888;">Dossier d'agrément MINESEC en vérification</div></div><div style="display:flex;gap:6px;align-items:center;"><span class="pill pa">En attente</span><button style="background:var(--ep-teal);color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;">Activer</button><button style="background:#fff;color:var(--ep-red);border:1px solid var(--ep-red);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;" onclick="confirmDeleteSchool('Collège de l\'Unité · Bafoussam', this)">Supprimer</button></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">École privée XYZ · Ebolowa</div><div style="font-size:11px;color:#888;">Suspendue pour défaut de paiement commission</div></div><div style="display:flex;gap:6px;align-items:center;"><span class="pill pr">Suspendu</span><button class="btn-o" style="width:auto;padding:6px 10px;font-size:11px;">Réactiver</button><button style="background:#fff;color:var(--ep-red);border:1px solid var(--ep-red);padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;" onclick="confirmDeleteSchool('École privée XYZ · Ebolowa', this)">Supprimer</button></div></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : TRANSACTIONS (S02) -->
+    <div class="sv-a" id="sv-a-tx" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-size:17px;font-weight:700;">Supervision des transactions</div><button class="btn-o" style="width:auto;padding:8px 14px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ep-teal)" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-download"/></svg>Exporter CSV</button></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;"><span class="pill pg" style="cursor:pointer;">Toutes</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">MTN MoMo</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">Orange Money</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">Carte</span></div>
+      <div class="epcard">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">#EP2026-04471 · Lycée de Melen</div><div style="font-size:11px;color:#888;">MTN MoMo · il y a 12 min</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">26 250 FCFA</div><span class="pill pg">Validé</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">#EP2026-04470 · Institut Saint-Michel</div><div style="font-size:11px;color:#888;">Orange Money · il y a 1h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">25 000 FCFA</div><span class="pill pg">Validé</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">#EP2026-04469 · Lycée de Melen</div><div style="font-size:11px;color:#888;">Carte bancaire · il y a 3h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">52 500 FCFA</div><span class="pill pa">En attente</span></div></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : COMMISSIONS (S03) -->
+    <div class="sv-a" id="sv-a-commissions" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Configuration des commissions</div>
+      <div class="g3" style="margin-bottom:18px;">
+        <div class="epcard" style="border-left:3px solid var(--ep-gold);"><div style="font-size:12px;color:#888;">Profil Standard</div><div style="font-size:24px;font-weight:700;">0,5%</div><div style="font-size:11px;color:#888;">par transaction</div></div>
+        <div class="epcard"><div style="font-size:12px;color:#888;">Profil Établissement pilote</div><div style="font-size:24px;font-weight:700;">0,3%</div><div style="font-size:11px;color:#888;">6 premiers mois</div></div>
+        <div class="epcard"><div style="font-size:12px;color:#888;">Profil Groupe scolaire</div><div style="font-size:24px;font-weight:700;">0,4%</div><div style="font-size:11px;color:#888;">volume &gt; 10M FCFA/mois</div></div>
+      </div>
+      <div class="epcard">
+        <div class="lbl">Modifier le taux par défaut</div>
+        <div style="display:flex;gap:10px;"><input class="inp" style="margin:0;" value="0.5"/><button class="btn-p" style="width:auto;padding:10px 20px;">Appliquer</button></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : RÉCLAMATIONS / LITIGES (S05) -->
+    <div class="sv-a" id="sv-a-claims" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Réclamations &amp; litiges <span class="badge-cnt">3</span></div>
+      <div class="epcard">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">#TCK-2026-0142 — FONO Marie</div><div style="font-size:11px;color:#888;">Paiement débité deux fois · Lycée de Melen</div></div><span class="pill pa">En cours</span></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">#TCK-2026-0140 — Institut Saint-Michel</div><div style="font-size:11px;color:#888;">Litige sur le taux de commission appliqué</div></div><span class="pill pr">Urgent</span></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">#TCK-2026-0098 — BELINGA Thomas</div><div style="font-size:11px;color:#888;">Reçu non reçu par email</div></div><span class="pill pg">Résolu</span></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : LOGS SÉCURITÉ (S06) -->
+    <div class="sv-a" id="sv-a-logs" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Journal d'audit &amp; sécurité</div>
+      <div class="epcard">
+        <div class="row"><div style="display:flex;align-items:center;gap:10px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><use href="#ic-shield"/></svg><div><div style="font-size:13px;font-weight:600;">Connexion réussie — admin@edupay.cm</div><div style="font-size:11px;color:#888;">2FA validé · IP 102.X.X.X · 21 juin 2026, 09:14</div></div></div></div>
+        <div class="row"><div style="display:flex;align-items:center;gap:10px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ep-gold)" stroke-width="2"><use href="#ic-edit"/></svg><div><div style="font-size:13px;font-weight:600;">Modification taux de commission</div><div style="font-size:11px;color:#888;">0,5% → appliqué par MEKONTSO O. · 20 juin 2026</div></div></div></div>
+        <div class="row"><div style="display:flex;align-items:center;gap:10px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ep-red)" stroke-width="2"><use href="#ic-alert"/></svg><div><div style="font-size:13px;font-weight:600;">Tentative de connexion échouée (x3)</div><div style="font-size:11px;color:#888;">IP suspecte bloquée automatiquement · 19 juin 2026</div></div></div></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : EXPORTS RÉGLEMENTAIRES (S08) -->
+    <div class="sv-a" id="sv-a-exports" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Exports réglementaires COBAC / BEAC</div>
+      <div class="epcard">
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Rapport mensuel des flux financiers — Mars 2026</div><div style="font-size:11px;color:#888;">Conforme directives BEAC</div></div><button class="btn-o" style="width:auto;padding:6px 12px;font-size:11px;">Générer PDF</button></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Déclaration trimestrielle COBAC — T1 2026</div><div style="font-size:11px;color:#888;">Volume, commissions, anomalies</div></div><button class="btn-o" style="width:auto;padding:6px 12px;font-size:11px;">Générer PDF</button></div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW : PARAMÈTRES SYSTÈME (S07) -->
+    <div class="sv-a" id="sv-a-settings" style="display:none;">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">Paramètres système</div>
+      <div class="g2">
+        <div class="epcard">
+          <div class="seclbl" style="margin-top:0;">Moyens de paiement actifs</div>
+          <div class="row"><span>MTN Mobile Money</span><input type="checkbox" checked/></div>
+          <div class="row"><span>Orange Money</span><input type="checkbox" checked/></div>
+          <div class="row"><span>Carte bancaire (CinetPay)</span><input type="checkbox" checked/></div>
+          <div class="row"><span>Virement bancaire</span><input type="checkbox"/></div>
+        </div>
+        <div class="epcard">
+          <div class="seclbl" style="margin-top:0;">Plateforme</div>
+          <div class="row"><span>Langues disponibles</span><strong>FR / EN</strong></div>
+          <div class="row"><span>2FA obligatoire (admin)</span><input type="checkbox" checked/></div>
+          <div class="row"><span>Mode maintenance</span><input type="checkbox"/></div>
+        </div>
+      </div>
+    </div>
+
     </div>
   </div>
 </div>
@@ -819,13 +1324,198 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   JAVASCRIPT
 ════════════════════════════════════════════ -->
 <script>
-const FORM_SCREENS = ['login','register-parent','register-school'];
+const FORM_SCREENS = ['login','register-parent','onboarding','register-school','adminlogin'];
 const ids = {
   'landing':'s-landing','about':'s-about','testi':'s-testi',
-  'login':'s-login','register-parent':'s-register-parent','register-school':'s-register-school',
+  'login':'s-login','register-parent':'s-register-parent','onboarding':'s-onboarding','register-school':'s-register-school',
+  'adminlogin':'s-adminlogin',
   'parent':'s-parent','payment':'s-payment','school':'s-school','admin':'s-admin'
 };
-const order = ['landing','about','testi','login','register-parent','register-school','parent','payment','school','admin'];
+const order = ['landing','about','testi','login','register-parent','register-school','parent','payment','school','admin','adminlogin'];
+
+function setDashboardVue(vue) {
+  const tabChildren = document.getElementById('tab-children');
+  const btnParent = document.getElementById('vue-parent-btn');
+  const btnSoi = document.getElementById('vue-soi-btn');
+  const uname = document.getElementById('dash-username');
+  const avatar = document.getElementById('dash-avatar');
+  const paneFamille = document.getElementById('dashpane-famille');
+  const paneSoi = document.getElementById('dashpane-soi');
+  if (vue === 'parent') {
+    tabChildren.style.display = 'flex';
+    btnParent.style.background = 'var(--ep-teal)'; btnParent.style.color = '#fff'; btnParent.style.fontWeight = '600';
+    btnSoi.style.background = 'transparent'; btnSoi.style.color = 'rgba(255,255,255,.6)'; btnSoi.style.fontWeight = '400';
+    uname.textContent = 'Mme FONO Marie';
+    avatar.textContent = 'FM';
+    if (paneFamille) paneFamille.style.display = 'block';
+    if (paneSoi) paneSoi.style.display = 'none';
+  } else {
+    tabChildren.style.display = 'none';
+    showTab('p','sv-p-dash', document.querySelectorAll('.sidebar .sbar-item')[0]);
+    btnSoi.style.background = 'var(--ep-teal)'; btnSoi.style.color = '#fff'; btnSoi.style.fontWeight = '600';
+    btnParent.style.background = 'transparent'; btnParent.style.color = 'rgba(255,255,255,.6)'; btnParent.style.fontWeight = '400';
+    uname.textContent = 'FONO Carine — Licence 2, Univ. Douala';
+    avatar.textContent = 'FC';
+    if (paneFamille) paneFamille.style.display = 'none';
+    if (paneSoi) paneSoi.style.display = 'block';
+  }
+}
+
+function editMonEtablissement() {
+  const box = document.getElementById('solo-edit-etab-box');
+  document.getElementById('solo-edit-etab-input').value = document.getElementById('soloard-etab').textContent;
+  box.style.display = 'block';
+  box.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function saveMonEtablissement() {
+  const val = document.getElementById('solo-edit-etab-input').value.trim();
+  if (val) document.getElementById('soloard-etab').textContent = val;
+  document.getElementById('solo-edit-etab-box').style.display = 'none';
+}
+
+function openAttachBox() {
+  document.getElementById('attach-box-title').textContent = 'Rattacher un apprenant à un établissement';
+  document.getElementById('attach-etab-input').value = '';
+  document.getElementById('attach-nom-input').value = '';
+  document.getElementById('attach-nom-input').disabled = false;
+  document.getElementById('attach-box-submit').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-search"/></svg>Rechercher et rattacher';
+  document.getElementById('attach-box').style.display = 'block';
+}
+function editEnfantEtab(nom, etabActuel) {
+  document.getElementById('attach-box-title').textContent = "Modifier l'établissement de " + nom;
+  document.getElementById('attach-etab-input').value = etabActuel;
+  document.getElementById('attach-nom-input').value = nom;
+  document.getElementById('attach-nom-input').disabled = true;
+  document.getElementById('attach-box-submit').innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-check"/></svg>Enregistrer la modification';
+  document.getElementById('attach-box').style.display = 'block';
+  document.getElementById('attach-box').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+let regPayeurType = 'parent';
+
+function setPayeurType(type) {
+  regPayeurType = type;
+  document.querySelectorAll('.payeur-type-card').forEach(c => {
+    const active = c.dataset.type === type;
+    c.style.border = active ? '2px solid var(--ep-teal)' : '2px solid #e0e0e0';
+    c.style.background = active ? 'var(--ep-teal-lt)' : 'transparent';
+  });
+  const title = document.getElementById('reg-title');
+  const sub = document.getElementById('reg-sub');
+  const step2 = document.getElementById('step2-label');
+
+  if (type === 'parent') {
+    title.textContent = 'Créer votre compte Parent';
+    sub.textContent = "Renseignez vos informations pour payer les frais scolaires de vos enfants";
+    step2.textContent = 'Établissement';
+  } else if (type === 'eleve') {
+    title.textContent = 'Créer votre compte Élève';
+    sub.textContent = "Vous êtes élève du primaire ou du secondaire et vous payez vous-même vos frais de scolarité";
+    step2.textContent = 'Établissement';
+  } else if (type === 'etudiant') {
+    title.textContent = 'Créer votre compte Étudiant';
+    sub.textContent = "Vous êtes étudiant d'une université ou d'un institut et vous payez vous-même vos frais de scolarité";
+    step2.textContent = 'Établissement';
+  }
+}
+
+
+// ── Onboarding post-inscription (F04/E04 — rattachement à un établissement) ──
+let childRowCount = 0;
+
+function childRowHTML(n) {
+  return `<div class="epcard onb-child-row" style="margin-bottom:12px;border-left:3px solid var(--ep-teal);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;">Enfant ${n}</div>
+      <span style="font-size:11px;color:var(--ep-red);cursor:pointer;${n > 1 ? '' : 'display:none;'}" onclick="this.closest('.onb-child-row').remove()">Retirer ×</span>
+    </div>
+    <div class="inp-row">
+      <div><div class="lbl">Établissement de l'enfant</div><input class="inp onb-child-etab" list="etabs-list" placeholder="Rechercher par nom dans la liste des établissements partenaires..." /></div>
+      <div><div class="lbl">Code établissement (optionnel)</div><input class="inp onb-child-code" placeholder="Ex : LYC-MEL-2026" /></div>
+    </div>
+    <div><div class="lbl">Matricule ou nom complet de l'enfant</div><input class="inp onb-child-name" placeholder="Ex : FONO Brice ou EP-1184" /></div>
+  </div>`;
+}
+
+function addChildRow() {
+  childRowCount++;
+  document.getElementById('onb-children-list').insertAdjacentHTML('beforeend', childRowHTML(childRowCount));
+}
+
+function resetChildRows() {
+  childRowCount = 0;
+  document.getElementById('onb-children-list').innerHTML = '';
+  addChildRow();
+}
+
+function goOnboarding() {
+  const title = document.getElementById('onb-title');
+  const sub = document.getElementById('onb-sub');
+  const parentBlock = document.getElementById('onb-parent-block');
+  const soloBlock = document.getElementById('onb-solo-block');
+  const soloTitle = document.getElementById('onb-solo-title');
+  const niveauLbl = document.getElementById('onb-solo-niveau-lbl');
+  const niveauInput = document.getElementById('onb-solo-niveau');
+  const note = document.getElementById('onb-solo-note');
+
+  if (regPayeurType === 'parent') {
+    title.textContent = 'Rattachez vos enfants à leur établissement';
+    sub.textContent = "Recherchez l'établissement de chaque enfant dans la liste des partenaires EduPay. Vous pourrez en ajouter d'autres plus tard depuis votre tableau de bord.";
+    parentBlock.style.display = 'block';
+    soloBlock.style.display = 'none';
+    resetChildRows();
+  } else {
+    const isEtudiant = regPayeurType === 'etudiant';
+    title.textContent = 'Rattachez votre profil à votre établissement';
+    sub.textContent = "Recherchez votre établissement dans la liste des partenaires EduPay pour accéder à votre dossier scolaire.";
+    parentBlock.style.display = 'none';
+    soloBlock.style.display = 'block';
+    soloTitle.textContent = isEtudiant ? 'Mon profil scolaire (Université / Institut)' : 'Mon profil scolaire (Primaire / Secondaire)';
+    niveauLbl.textContent = isEtudiant ? 'Niveau / Filière *' : 'Classe *';
+    niveauInput.placeholder = isEtudiant ? 'ex : Licence 2 GSI, Master 1...' : 'ex : 3ème, Tle A...';
+    note.textContent = `En tant qu'${isEtudiant ? 'étudiant' : 'élève'}, vous êtes à la fois apprenant et payeur de votre propre compte : vous gérerez et payerez directement vos frais de scolarité.`;
+  }
+  go('onboarding');
+}
+
+function finishOnboarding() {
+  const prenom = (document.getElementById('reg-prenom').value || '').trim();
+  const nom = (document.getElementById('reg-nom').value || '').trim();
+  const fullName = prenom ? (prenom + (nom ? ' ' + nom.toUpperCase() : '')) : '';
+  const initials = prenom ? (prenom[0] + (nom ? nom[0] : '')).toUpperCase() : '';
+
+  if (regPayeurType === 'parent') {
+    // Récupère les enfants rattachés pour personnaliser le tableau de bord
+    const names = Array.from(document.querySelectorAll('.onb-child-name')).map(i => i.value.trim()).filter(Boolean);
+    const etabs = Array.from(document.querySelectorAll('.onb-child-etab')).map(i => i.value.trim()).filter(Boolean);
+    if (names[0]) document.getElementById('childcard-1-name').textContent = names[0];
+    if (etabs[0]) document.getElementById('childcard-1-etab').textContent = etabs[0];
+    if (names[1]) document.getElementById('childcard-2-name').textContent = names[1];
+    if (etabs[1]) document.getElementById('childcard-2-etab').textContent = etabs[1];
+    if (fullName) {
+      document.getElementById('dash-greeting-famille').textContent = 'Bonjour, ' + prenom;
+    }
+    go('parent');
+    setDashboardVue('parent');
+    if (fullName) {
+      document.getElementById('dash-username').textContent = 'Mme/M. ' + fullName;
+      document.getElementById('dash-avatar').textContent = initials;
+    }
+  } else {
+    const etab = (document.getElementById('onb-solo-etab').value || '').trim();
+    const niveau = (document.getElementById('onb-solo-niveau').value || '').trim();
+    const etabLine = [etab, niveau].filter(Boolean).join(' · ');
+    if (fullName) document.getElementById('soloard-name').textContent = fullName;
+    if (etabLine) document.getElementById('soloard-etab').textContent = etabLine;
+    if (prenom) document.getElementById('dash-greeting-soi').textContent = 'Bonjour, ' + prenom;
+    go('parent');
+    setDashboardVue('soi');
+    if (fullName) {
+      document.getElementById('dash-username').textContent = fullName + (etabLine ? ' — ' + etabLine : '');
+      document.getElementById('dash-avatar').textContent = initials;
+    }
+  }
+}
 
 function go(k) {
   // hide all
@@ -837,14 +1527,52 @@ function go(k) {
   if (el) el.classList.add('on');
   // activate nav button
   const idx = order.indexOf(k);
-  if (idx >= 0) document.querySelectorAll('.nbtn')[idx].classList.add('on');
+  if (idx >= 0 && document.querySelectorAll('.nbtn')[idx]) document.querySelectorAll('.nbtn')[idx].classList.add('on');
   // reset confirmations
   const okMsg = document.getElementById('ok-msg');
   if (okMsg) okMsg.style.display = 'none';
   const sSuccess = document.getElementById('school-success');
   if (sSuccess) sSuccess.style.display = 'none';
+  const otpBox = document.getElementById('otp-box');
+  if (otpBox) otpBox.style.display = 'none';
+  const admin2fa = document.getElementById('admin-2fa-box');
+  if (admin2fa) admin2fa.style.display = 'none';
+  // reset dashboard sub-tabs to first tab
+  ['p','e','a'].forEach(scope => resetTabs(scope));
   // scroll to top
   window.scrollTo(0, 0);
+}
+
+// ── Sidebar sub-tab switching (Payeur 'p', École 'e', Super Admin 'a') ──
+const FIRST_TAB = { p:'sv-p-dash', e:'sv-e-dash', a:'sv-a-dash' };
+function showTab(scope, id, btn) {
+  document.querySelectorAll('.sv-' + scope).forEach(el => { el.style.display = 'none'; el.classList.remove('on'); });
+  const target = document.getElementById(id);
+  if (target) { target.style.display = 'block'; target.classList.add('on'); }
+  if (btn) {
+    const sidebar = btn.closest('.sidebar');
+    if (sidebar) sidebar.querySelectorAll('.sbar-item').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+}
+function resetTabs(scope) {
+  const first = FIRST_TAB[scope];
+  document.querySelectorAll('.sv-' + scope).forEach(el => { el.style.display = (el.id === first) ? 'block' : 'none'; });
+}
+
+// ── Language toggle (FR/EN demo — F15) ──
+let currentLang = 'fr';
+const LANG_STRINGS = {
+  fr: { tagline:"Payez les frais scolaires<br>en <em>2 minutes</em>,<br>depuis votre téléphone.", cta:"S'inscrire gratuitement →" },
+  en: { tagline:"Pay school fees<br>in <em>2 minutes</em>,<br>right from your phone.", cta:"Sign up for free →" }
+};
+function toggleLang() {
+  currentLang = currentLang === 'fr' ? 'en' : 'fr';
+  document.getElementById('lang-label').textContent = currentLang.toUpperCase();
+  document.documentElement.lang = currentLang;
+  const h1 = document.querySelector('.hero-h1');
+  if (h1) h1.innerHTML = LANG_STRINGS[currentLang].tagline;
+  document.querySelectorAll('.hbtn-main').forEach(b => { if (b.textContent.includes("S'inscrire") || b.textContent.includes('Sign up')) b.textContent = LANG_STRINGS[currentLang].cta; });
 }
 
 function selOpt(n) {
@@ -863,6 +1591,35 @@ function selPay(n) {
     el.style.border = i===n ? '2px solid var(--ep-teal)' : '1px solid #ddd';
     el.style.background = i===n ? 'var(--ep-teal-lt)' : '#fff';
   });
+  const momo = document.getElementById('pay-fields-momo');
+  const card = document.getElementById('pay-fields-card');
+  const momoLbl = document.getElementById('pay-momo-lbl');
+  const momoInput = document.getElementById('pay-momo-input');
+  if (n === 3) {
+    momo.style.display = 'none';
+    card.style.display = 'block';
+  } else {
+    momo.style.display = 'block';
+    card.style.display = 'none';
+    momoLbl.textContent = n === 2 ? 'Numéro Orange Money' : 'Numéro MTN Mobile Money';
+    momoInput.placeholder = '6XX XXX XXX';
+  }
+}
+
+function previewSchoolLogo(input) {
+  const preview = document.getElementById('school-logo-preview');
+  if (!preview || !input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => { preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;" />`; };
+  reader.readAsDataURL(file);
+}
+
+function confirmDeleteSchool(name, btn) {
+  const ok = confirm('Supprimer définitivement « ' + name + ' » ?\n\nCette action est irréversible : toutes les données associées (apprenants rattachés, historique de transactions) seront supprimées de la plateforme EduPay.');
+  if (!ok) return;
+  const row = btn.closest('.row');
+  if (row) row.remove();
 }
 
 function showOK() {
