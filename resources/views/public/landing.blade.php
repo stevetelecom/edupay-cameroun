@@ -23,7 +23,7 @@
     <div class="hero-h1">Payez les frais scolaires<br>en <em>2 minutes</em>,<br>depuis votre téléphone.</div>
     <div class="hero-sub">EduPay Cameroun connecte les établissements scolaires aux familles via MTN MoMo, Orange Money et carte bancaire. Zéro file d'attente. Reçu PDF immédiat.</div>
     <div class="hero-btns">
-      <a href="{{ route('register.parent.step1') }}" class="hbtn-main">Créer un compte parent</a>
+      <a href="{{ route('register.parent.step1') }}" class="hbtn-main">Créer mon compte payeur</a>
       <a href="{{ route('register.ecole.step1') }}" class="hbtn-ghost">Inscrire mon établissement</a>
     </div>
   </div>

@@ -15,9 +15,25 @@
         <div class="epcard">
             <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Informations générales</div>
 
-            <form method="POST" action="{{ route('etablissement.parametres.update') }}">
+            <form method="POST" action="{{ route('etablissement.parametres.update') }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+
+                <div class="lbl">Logo de l'établissement</div>
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                    <div id="logo-preview" style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--ep-teal-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
+                        @if($etab->logo)
+                            <img src="{{ Storage::url($etab->logo) }}" style="width:100%;height:100%;object-fit:cover;" />
+                        @else
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>
+                        @endif
+                    </div>
+                    <div style="flex:1;">
+                        <label for="logo-input" style="display:inline-block;background:#fff;border:1px solid #ddd;padding:9px 16px;border-radius:var(--radius-md);font-size:12px;font-weight:600;cursor:pointer;color:#333;">Changer le logo</label>
+                        <input type="file" name="logo" id="logo-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none;" onchange="previewLogo(this)" />
+                        <div style="font-size:11px;color:#888;margin-top:6px;">PNG, JPG ou SVG · 2 Mo max · optionnel</div>
+                    </div>
+                </div>
 
                 <div class="lbl">Nom de l'établissement</div>
                 <input type="text" name="nom" value="{{ old('nom', $etab->nom ?? '') }}" class="inp" required>
@@ -105,4 +121,16 @@
         </div>
     </div>
 
+
+@push('scripts')
+<script>
+function previewLogo(input) {
+    const preview = document.getElementById('logo-preview');
+    if (!preview || !input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => { preview.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;" />'; };
+    reader.readAsDataURL(input.files[0]);
+}
+</script>
+@endpush
 @endsection

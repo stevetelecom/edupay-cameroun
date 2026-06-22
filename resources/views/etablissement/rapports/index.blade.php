@@ -73,10 +73,10 @@
         <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Exporter les données</div>
         <div style="font-size:12px;color:#888;margin-bottom:14px;">Téléchargez un rapport détaillé au format Excel ou PDF.</div>
         <div style="display:flex;gap:10px;">
-            <a href="{{ route('etablissement.rapports.index', ['export' => 'excel']) }}" class="btn-p" style="width:auto;">
-                Exporter en Excel
+            <a href="{{ route('etablissement.rapports.export.excel') }}" class="btn-p" style="width:auto;">
+                Exporter en Excel (CSV)
             </a>
-            <a href="{{ route('etablissement.rapports.index', ['export' => 'pdf']) }}" class="btn-o" style="width:auto;">
+            <a href="{{ route('etablissement.rapports.export.pdf') }}" class="btn-o" style="width:auto;">
                 Exporter en PDF
             </a>
         </div>

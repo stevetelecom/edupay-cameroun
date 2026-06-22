@@ -126,4 +126,128 @@ class ApprenantController extends Controller
             abort(403, 'Accès non autorisé à cet apprenant.');
         }
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // E11 — Import CSV apprenants
+    // ─────────────────────────────────────────────────────────────
+
+    public function importTemplate(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        $file = public_path('templates/apprenants_template.csv');
+        return response()->download($file, 'modele_import_apprenants.csv');
+    }
+
+    public function import(\Illuminate\Http\Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $request->validate([
+            'fichier_csv' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ], [
+            'fichier_csv.required' => 'Veuillez sélectionner un fichier CSV.',
+            'fichier_csv.mimes'    => 'Le fichier doit être au format CSV (.csv).',
+            'fichier_csv.max'      => 'Le fichier ne doit pas dépasser 2 Mo.',
+        ]);
+
+        $etablissementId = Auth::user()->etablissement_id;
+
+        if (! $etablissementId) {
+            return back()->with('error', 'Aucun établissement associé à votre compte.');
+        }
+
+        $handle = fopen($request->file('fichier_csv')->getRealPath(), 'r');
+
+        if ($handle === false) {
+            return back()->with('error', 'Impossible de lire le fichier CSV.');
+        }
+
+        // Sauter la ligne d'en-tête
+        $header = fgetcsv($handle, 1000, ',');
+        if ($header === false) {
+            fclose($handle);
+            return back()->with('error', 'Le fichier CSV est vide ou corrompu.');
+        }
+
+        $succes   = 0;
+        $doublons = 0;
+        $erreurs  = [];
+        $ligne    = 1;
+
+        while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+            $ligne++;
+            $row = array_map('trim', $row);
+
+            if (count($row) < 3) {
+                $erreurs[] = "Ligne $ligne : données insuffisantes (nom, prénom, classe obligatoires).";
+                continue;
+            }
+
+            $nom           = $row[0] ?? null;
+            $prenom        = $row[1] ?? null;
+            $classe        = $row[2] ?? null;
+            $matricule     = ! empty($row[3]) ? strtoupper($row[3]) : null;
+            $dateNaissance = ! empty($row[4]) ? $row[4] : null;
+            $sexe          = ! empty($row[5]) ? strtoupper(substr(trim($row[5]), 0, 1)) : null;
+
+            if (empty($nom) || empty($prenom) || empty($classe)) {
+                $erreurs[] = "Ligne $ligne : nom, prénom et classe sont obligatoires.";
+                continue;
+            }
+
+            // Validation date
+            if ($dateNaissance) {
+                $d = \DateTime::createFromFormat('Y-m-d', $dateNaissance);
+                if (! $d || $d->format('Y-m-d') !== $dateNaissance) {
+                    $erreurs[] = "Ligne $ligne : date_naissance invalide — format attendu AAAA-MM-JJ.";
+                    continue;
+                }
+            }
+
+            // Sexe : on ignore silencieusement si invalide
+            if ($sexe && ! in_array($sexe, ['M', 'F'])) {
+                $sexe = null;
+            }
+
+            // Unicité : matricule OU (nom + prénom + classe + établissement)
+            if ($matricule) {
+                $search = ['etablissement_id' => $etablissementId, 'matricule' => $matricule];
+            } else {
+                $search = [
+                    'etablissement_id' => $etablissementId,
+                    'nom'              => strtoupper($nom),
+                    'prenom'           => $prenom,
+                    'classe'           => $classe,
+                ];
+            }
+
+            $donnees = [
+                'etablissement_id' => $etablissementId,
+                'nom'              => strtoupper($nom),
+                'prenom'           => $prenom,
+                'classe'           => $classe,
+                'matricule'        => $matricule,
+                'date_naissance'   => $dateNaissance,
+                'sexe'             => $sexe,
+                'statut_paiement'  => 'impaye',
+                'actif'            => true,
+            ];
+
+            [, $created] = Apprenant::firstOrCreate($search, $donnees);
+
+            $created ? $succes++ : $doublons++;
+        }
+
+        fclose($handle);
+
+        $message = "$succes apprenant(s) importé(s) avec succès.";
+        if ($doublons > 0) {
+            $message .= " $doublons doublon(s) ignoré(s).";
+        }
+        if ($erreurs) {
+            session()->flash('import_erreurs', $erreurs);
+        }
+
+        return redirect()
+            ->route('etablissement.apprenants.index')
+            ->with('success', $message);
+    }
+
 }

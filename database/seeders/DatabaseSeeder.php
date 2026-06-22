@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
         // ────────────────────────────────────────────
 
         // Rôles pour le guard 'web' (table users)
-        $rolesWeb = ['directeur', 'comptable', 'caissier', 'parent'];
+        $rolesWeb = ['directeur', 'comptable', 'caissier', 'parent', 'eleve'];
         foreach ($rolesWeb as $role) {
             \Spatie\Permission\Models\Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
         }
@@ -71,7 +71,8 @@ class DatabaseSeeder extends Seeder
         $parent = \App\Models\User::firstOrCreate(
             ['email' => 'parent@test.cm'],
             [
-                'name'      => 'FONO Marie',
+                'prenom'    => 'Marie',
+                'nom'       => 'FONO',
                 'telephone' => '699123456',
                 'ville'     => 'Yaoundé',
                 'quartier'  => 'Biyem-Assi',
@@ -88,7 +89,8 @@ class DatabaseSeeder extends Seeder
         $directeur = \App\Models\User::firstOrCreate(
             ['email' => 'directeur@test.cm'],
             [
-                'name'             => 'MVONDO Jean-Pierre',
+                'prenom'           => 'Jean-Pierre',
+                'nom'              => 'MVONDO',
                 'telephone'        => '677000001',
                 'ville'            => 'Yaoundé',
                 'password'         => Hash::make('password'),

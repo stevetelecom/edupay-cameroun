@@ -181,6 +181,46 @@ class PayeurTestSeeder extends Seeder
         );
 
         // ────────────────────────────────────────────
+        // 5. APPRENANT 3 — FONO Junior (Maternelle) — À jour (100% payé)
+        // ────────────────────────────────────────────
+        $junior = Apprenant::firstOrCreate(
+            ['matricule' => 'LYC-MEL-2026-003'],
+            [
+                'etablissement_id' => $lycee->id,
+                'nom'              => 'FONO',
+                'prenom'           => 'Junior',
+                'classe'           => 'Maternelle',
+                'date_naissance'   => '2019-11-02',
+                'sexe'             => 'M',
+                'statut_paiement'  => 'regle',
+                'actif'            => true,
+            ]
+        );
+
+        $parent->apprenants()->syncWithoutDetaching([$junior->id => ['lien' => 'parent']]);
+
+        $fraisInscriptionJunior = FraisApprenant::firstOrCreate(
+            ['apprenant_id' => $junior->id, 'categorie_frais_id' => $inscription->id, 'annee_scolaire' => '2025-2026'],
+            ['montant_total' => 20000, 'montant_paye' => 20000, 'statut' => 'regle']
+        );
+
+        Paiement::firstOrCreate(
+            ['reference' => 'EP2026-TEST4'],
+            [
+                'user_id'             => $parent->id,
+                'apprenant_id'        => $junior->id,
+                'frais_apprenant_id'  => $fraisInscriptionJunior->id,
+                'montant'             => 20000,
+                'mode_paiement'       => 'mtn_momo',
+                'type_paiement'       => 'integral',
+                'statut'              => 'valide',
+                'telephone_paiement'  => '699123456',
+                'date_paiement'       => now()->subDays(15),
+                'date_validation'     => now()->subDays(15),
+            ]
+        );
+
+        // ────────────────────────────────────────────
         // RÉCAPITULATIF
         // ────────────────────────────────────────────
         $this->command->info('✅ Données de test Payeur créées avec succès.');

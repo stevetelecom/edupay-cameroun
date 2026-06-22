@@ -20,7 +20,7 @@
         *{box-sizing:border-box;}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:#f1f3f5;color:#1a1a2e;}
         .epcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
-        .pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
+        .pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;white-space:nowrap;line-height:1.4;}
         .pg{background:#E0F5EE;color:#085041;}.pa{background:#FEF3DC;color:#8B5E10;}
         .pr{background:#FBEAEA;color:#9B2C2C;}.pb{background:#E6F0FB;color:#1A4F8A;}
         .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -39,10 +39,23 @@
         .inp:focus{border-color:var(--ep-teal);}
         .lbl{font-size:11px;color:#666;margin-bottom:5px;font-weight:500;}
         .app-header{background:var(--ep-navy);color:#fff;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;}
-        .main-content{flex:1;padding:22px 24px;background:#f5f6f7;}
+        .app-body{display:flex;min-height:calc(100vh - 58px);}
+        .sidebar{width:200px;flex-shrink:0;padding:14px;background:#fff;border-right:1px solid var(--border);}
+        .main-content{flex:1;padding:22px 24px;background:#f5f6f7;overflow-y:auto;}
+        .sbar-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-md);font-size:13px;color:#555;cursor:pointer;margin-bottom:2px;text-decoration:none;}
+        .sbar-item svg{width:15px;height:15px;flex-shrink:0;}
+        .sbar-item.on{background:var(--ep-teal-lt);color:#085041;font-weight:600;}
+        .sbar-item.on svg{stroke:#0D9E75;}
+        .sbar-item:hover:not(.on){background:#f0f0f0;}
+        .sbar-item.disabled{color:#bbb;cursor:not-allowed;}
+        .sbar-item.disabled:hover{background:transparent;}
+        .badge-cnt{background:var(--ep-red-lt);color:#9B2C2C;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:auto;}
+        .badge-soon{background:#eee;color:#999;border-radius:10px;padding:1px 7px;font-size:9px;margin-left:auto;}
         .prog{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px;}
         .pfill{height:100%;background:var(--ep-teal);border-radius:3px;}
-        .row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+        .row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+        .row span{flex-shrink:0;color:#666;}
+        .row strong{text-align:right;}
         .row:last-child{border-bottom:none;}
         .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}
         .pay-page{background:#f1f3f5;min-height:calc(100vh - 58px);padding:24px 28px;}
@@ -53,19 +66,35 @@
         table.ep-table tr:hover td{background:#fafbfc;}
         .logo-t{font-size:16px;font-weight:700;}
         .logo-t span{color:#5DCAA5;}
+        .toast-wrap{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+        .toast{display:flex;align-items:flex-start;gap:10px;min-width:280px;max-width:360px;padding:13px 16px;border-radius:var(--radius-md);box-shadow:0 6px 20px rgba(0,0,0,.15);font-size:13px;font-weight:500;animation:toast-in .25s ease-out;}
+        .toast.t-success{background:#085041;color:#fff;}
+        .toast.t-error{background:#9B2C2C;color:#fff;}
+        .toast.t-info{background:#1A4F8A;color:#fff;}
+        .toast svg{flex-shrink:0;margin-top:1px;}
+        .toast.closing{animation:toast-out .2s ease-in forwards;}
+        @keyframes toast-in{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+        @keyframes toast-out{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(30px);}}
     </style>
 
     @stack('styles')
 </head>
 <body class="h-full">
 
+    @php
+        $estSoloLayout = in_array(Auth::user()->profil ?? 'parent', ['eleve', 'etudiant']);
+        $headerLabel = $estSoloLayout
+            ? Auth::user()->name . (Auth::user()->etablissement ? ' — ' . Auth::user()->etablissement->nom : '')
+            : Auth::user()->name;
+    @endphp
+
     {{-- ── Header parent ── --}}
     <div class="app-header">
         <div class="logo-t">Edu<span>Pay</span></div>
         <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:12px;color:rgba(255,255,255,.65);">{{ Auth::user()->name }}</span>
+            <span style="font-size:12px;color:rgba(255,255,255,.65);">{{ $headerLabel }}</span>
             <div class="av" style="background:var(--ep-teal);color:#fff;">
-                {{ Str::of(Auth::user()->name)->explode(' ')->map(fn($w) => Str::substr($w,0,1))->join('') }}
+                {{ Auth::user()->initiales }}
             </div>
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
@@ -76,26 +105,90 @@
         </div>
     </div>
 
-    <div class="main-content">
+    <div class="app-body">
 
+        {{-- ── Sidebar ── --}}
+        <div class="sidebar">
+            <a href="{{ route('payeur.dashboard') }}" id="tab-dashboard" class="sbar-item {{ request()->routeIs('payeur.dashboard') ? 'on' : '' }}"
+               @if(request()->routeIs('payeur.dashboard')) onclick="if(window.showVuePane){showVuePane('resume');return false;}" @endif>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                Tableau de bord
+            </a>
+
+            @unless($estSoloLayout)
+            <a href="{{ route('payeur.dashboard') }}#mes-enfants" id="tab-children" class="sbar-item"
+               @if(request()->routeIs('payeur.dashboard')) onclick="if(window.showVuePane){showVuePane('enfants');return false;}" @endif>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Mes enfants
+            </a>
+            @endunless
+
+            <a href="{{ route('payeur.historique') }}" class="sbar-item {{ request()->routeIs('payeur.historique') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Historique
+            </a>
+
+            <a href="{{ route('payeur.recus.index') }}" class="sbar-item {{ request()->routeIs('payeur.recus.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Reçus &amp; Certificats
+            </a>
+
+            <a href="{{ route('payeur.reclamations.index') }}" class="sbar-item {{ request()->routeIs('payeur.reclamations.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Réclamations
+                @php
+                    $nbReclamationsOuvertes = \App\Models\Reclamation::where('user_id', Auth::id())
+                        ->whereIn('statut', ['ouvert', 'en_cours'])
+                        ->count();
+                @endphp
+                @if($nbReclamationsOuvertes > 0)
+                    <span class="badge-cnt">{{ $nbReclamationsOuvertes }}</span>
+                @endif
+            </a>
+
+            <a href="{{ route('payeur.profil.index') }}" class="sbar-item {{ request()->routeIs('payeur.profil.*') ? 'on' : '' }}" style="margin-top:4px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Profil &amp; notifications
+            </a>
+        </div>
+
+        {{-- ── Contenu principal ── --}}
+        <div class="main-content">
+
+            @yield('content')
+        </div>
+    </div>
+
+    {{-- ── Toasts de notification ── --}}
+    <div class="toast-wrap" id="toast-wrap">
         @if (session('success'))
-            <div style="margin-bottom:16px;background:#E0F5EE;border:1px solid #9FE1CB;color:#085041;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">
-                {{ session('success') }}
+            <div class="toast t-success" data-toast>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span>{{ session('success') }}</span>
             </div>
         @endif
         @if (session('error'))
-            <div style="margin-bottom:16px;background:#FBEAEA;border:1px solid #f3c4c4;color:#9B2C2C;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">
-                {{ session('error') }}
+            <div class="toast t-error" data-toast>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{{ session('error') }}</span>
             </div>
         @endif
         @if (session('info'))
-            <div style="margin-bottom:16px;background:#E6F0FB;border:1px solid #c4dbf3;color:#1A4F8A;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">
-                {{ session('info') }}
+            <div class="toast t-info" data-toast>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>{{ session('info') }}</span>
             </div>
         @endif
-
-        @yield('content')
     </div>
+
+    <script>
+        document.querySelectorAll('[data-toast]').forEach(function (toast) {
+            setTimeout(function () {
+                toast.classList.add('closing');
+                setTimeout(function () { toast.remove(); }, 200);
+            }, 4000);
+        });
+    </script>
 
     @stack('scripts')
 </body>

@@ -187,6 +187,19 @@
         <form method="POST" action="{{ route('register.ecole.step3.post') }}" enctype="multipart/form-data">
           @csrf
 
+          <div class="form-section" style="margin-top:0;">Identité visuelle</div>
+          <div class="lbl">Logo de l'établissement</div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+            <div id="school-logo-preview" style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--ep-teal-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>
+            </div>
+            <div style="flex:1;">
+              <label for="school-logo-input" style="display:inline-block;background:#fff;border:1px solid #ddd;padding:9px 16px;border-radius:var(--radius-md);font-size:12px;font-weight:600;cursor:pointer;color:#333;">Choisir un fichier</label>
+              <input type="file" name="logo" id="school-logo-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none;" onchange="previewSchoolLogo(this)" />
+              <div style="font-size:11px;color:#888;margin-top:6px;">PNG, JPG ou SVG · 2 Mo max · format carré recommandé · optionnel</div>
+            </div>
+          </div>
+
           <div class="form-section">Document justificatif</div>
           <label style="display:block;border:2px dashed #ddd;border-radius:8px;padding:20px;text-align:center;margin-bottom:12px;cursor:pointer;background:#fafafa;">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" style="display:block;margin:0 auto 8px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -248,4 +261,17 @@
     <div style="display:flex;gap:8px;"><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span></div>
   </div>
 </div>
+
+<script>
+function previewSchoolLogo(input) {
+    const preview = document.getElementById('school-logo-preview');
+    if (!preview || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+        preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;" />`;
+    };
+    reader.readAsDataURL(file);
+}
+</script>
 @endsection

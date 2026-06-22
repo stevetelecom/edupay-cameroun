@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
+    $middleware->validateCsrfTokens(except: [
+        'webhook/aangaraapay',
+    ]);
+
         // Middleware alias
         $middleware->alias([
             'super.admin' => \App\Http\Middleware\SuperAdminMiddleware::class,

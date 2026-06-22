@@ -28,5 +28,6 @@ class Paiement extends Model
     public function echeancier() { return $this->belongsTo(Echeancier::class); }
     public function transaction() { return $this->hasOne(Transaction::class); }
     public function commission() { return $this->hasOne(Commission::class); }
+    public function remboursements() { return $this->hasMany(Remboursement::class); }
 }
 

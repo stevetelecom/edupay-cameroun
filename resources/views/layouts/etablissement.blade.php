@@ -62,6 +62,15 @@
         table.ep-table td{padding:11px 8px;border-bottom:1px solid #f0f0f0;}
         table.ep-table tr:last-child td{border-bottom:none;}
         table.ep-table tr:hover td{background:#fafbfc;}
+        .toast-wrap{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+        .toast{display:flex;align-items:flex-start;gap:10px;min-width:280px;max-width:360px;padding:13px 16px;border-radius:var(--radius-md);box-shadow:0 6px 20px rgba(0,0,0,.15);font-size:13px;font-weight:500;animation:toast-in .25s ease-out;}
+        .toast.t-success{background:#085041;color:#fff;}
+        .toast.t-error{background:#9B2C2C;color:#fff;}
+        .toast.t-info{background:#1A4F8A;color:#fff;}
+        .toast svg{flex-shrink:0;margin-top:1px;}
+        .toast.closing{animation:toast-out .2s ease-in forwards;}
+        @keyframes toast-in{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+        @keyframes toast-out{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(30px);}}
     </style>
 
     @stack('styles')
@@ -70,13 +79,24 @@
 
     {{-- ── Header établissement ── --}}
     <div class="app-header">
-        <div>
-            <div class="logo-t" style="font-size:16px;font-weight:700;">
-                Edu<span style="color:#5DCAA5;">Pay</span> · Back-office
-            </div>
-            <div style="font-size:11px;color:rgba(255,255,255,.5);">
-                {{ Auth::user()->etablissement->nom ?? 'Mon établissement' }}
-                @if(Auth::user()->etablissement->ville ?? false) — {{ Auth::user()->etablissement->ville }} @endif
+        <div style="display:flex;align-items:center;gap:10px;">
+            @if(Auth::user()->etablissement->logo ?? false)
+                <img src="{{ asset('storage/' . Auth::user()->etablissement->logo) }}"
+                     alt="Logo {{ Auth::user()->etablissement->nom }}"
+                     style="width:36px;height:36px;border-radius:8px;object-fit:cover;background:#fff;flex-shrink:0;" />
+            @else
+                <div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;color:#fff;">
+                    {{ Str::substr(Auth::user()->etablissement->nom ?? 'E', 0, 1) }}
+                </div>
+            @endif
+            <div>
+                <div class="logo-t" style="font-size:16px;font-weight:700;">
+                    Edu<span style="color:#5DCAA5;">Pay</span> · Back-office
+                </div>
+                <div style="font-size:11px;color:rgba(255,255,255,.5);">
+                    {{ Auth::user()->etablissement->nom ?? 'Mon établissement' }}
+                    @if(Auth::user()->etablissement->ville ?? false) — {{ Auth::user()->etablissement->ville }} @endif
+                </div>
             </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
@@ -109,8 +129,12 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.apprenants.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
                 Apprenants
             </a>
+            <a href="{{ route('etablissement.frais.index') }}" class="sbar-item {{ request()->routeIs('etablissement.frais.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.frais.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                Frais &amp; échéanciers
+            </a>
             <a href="{{ route('etablissement.paiements.index') }}" class="sbar-item {{ request()->routeIs('etablissement.paiements.*') ? 'on' : '' }}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.paiements.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.paiements.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                 Paiements
             </a>
             <a href="{{ route('etablissement.impayes.index') }}" class="sbar-item {{ request()->routeIs('etablissement.impayes.*') ? 'on' : '' }}">
@@ -124,9 +148,28 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.rapports.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Rapports
             </a>
+            <a href="{{ route('etablissement.remboursements.index') }}" class="sbar-item {{ request()->routeIs('etablissement.remboursements.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.remboursements.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                Remboursements
+            </a>
+            @php
+                $etCourant = Auth::user()->etablissement;
+                $siteGroupe = $etCourant?->parent_etablissement_id ? $etCourant->siteParent : $etCourant;
+                $faitPartieDunGroupe = $siteGroupe && $siteGroupe->sites()->exists();
+            @endphp
+            @if($faitPartieDunGroupe)
+            <a href="{{ route('etablissement.sites.index') }}" class="sbar-item {{ request()->routeIs('etablissement.sites.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.sites.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Multi-sites
+            </a>
+            @endif
             <a href="{{ route('etablissement.parametres.index') }}" class="sbar-item {{ request()->routeIs('etablissement.parametres.*') ? 'on' : '' }}" style="margin-top:4px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.parametres.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
                 Paramètres
+            </a>
+            <a href="{{ route('etablissement.utilisateurs.index') }}" class="sbar-item {{ request()->routeIs('etablissement.utilisateurs.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('etablissement.utilisateurs.*') ? '#0D9E75' : 'currentColor' }}" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                Utilisateurs internes
             </a>
 
             {{-- Widget taux de recouvrement --}}
@@ -141,25 +184,40 @@
         {{-- ── Contenu principal ── --}}
         <div class="main-content">
 
-            @if (session('success'))
-                <div style="margin-bottom:16px;background:#E0F5EE;border:1px solid #9FE1CB;color:#085041;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">
-                    {{ session('success') }}
-                </div>
-            @endif
-            @if (session('error'))
-                <div style="margin-bottom:16px;background:#FBEAEA;border:1px solid #f3c4c4;color:#9B2C2C;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">
-                    {{ session('error') }}
-                </div>
-            @endif
-            @if (session('info'))
-                <div style="margin-bottom:16px;background:#E6F0FB;border:1px solid #c4dbf3;color:#1A4F8A;padding:12px 16px;border-radius:var(--radius-md);font-size:13px;">
-                    {{ session('info') }}
-                </div>
-            @endif
-
             @yield('content')
         </div>
     </div>
+
+    {{-- ── Toasts de notification ── --}}
+    <div class="toast-wrap" id="toast-wrap">
+        @if (session('success'))
+            <div class="toast t-success" data-toast>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="toast t-error" data-toast>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+        @if (session('info'))
+            <div class="toast t-info" data-toast>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>{{ session('info') }}</span>
+            </div>
+        @endif
+    </div>
+
+    <script>
+        document.querySelectorAll('[data-toast]').forEach(function (toast) {
+            setTimeout(function () {
+                toast.classList.add('closing');
+                setTimeout(function () { toast.remove(); }, 200);
+            }, 4000);
+        });
+    </script>
 
     @stack('scripts')
 </body>

@@ -54,7 +54,7 @@ class LoginController extends Controller
             return route('etablissement.dashboard');
         }
 
-        if ($user->hasRole('parent')) {
+        if ($user->hasRole('parent') || $user->hasRole('eleve')) {
             return route('payeur.dashboard');
         }
 

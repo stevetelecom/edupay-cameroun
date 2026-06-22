@@ -50,11 +50,34 @@ Route::post('/deconnexion', [LoginController::class, 'logout'])->name('logout')-
 | Routes Payeur (Parent / Étudiant)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:parent'])->prefix('espace')->name('payeur.')->group(function () {
+
+/*
+|--------------------------------------------------------------------------
+| Webhook AangaraaPay — public, sans CSRF
+|--------------------------------------------------------------------------
+*/
+Route::post('/webhook/aangaraapay',
+    [\App\Http\Controllers\Payeur\PaiementController::class, 'webhook']
+)->name('payeur.paiement.webhook');
+
+Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur.')->group(function () {
+    Route::get('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'index'])->name('onboarding');
+    Route::post('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'store'])->name('onboarding.store');
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Payeur\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/paiement/{fraisApprenant}', [\App\Http\Controllers\Payeur\PaiementController::class, 'show'])->name('paiement.show');
     Route::post('/paiement/{fraisApprenant}/initier', [\App\Http\Controllers\Payeur\PaiementController::class, 'initier'])->name('paiement.initier');
+    Route::get('/paiement/{paiement}/attente',  [\App\Http\Controllers\Payeur\PaiementController::class, 'attente'])->name('paiement.attente');
+    Route::get('/paiement/{paiement}/statut',   [\App\Http\Controllers\Payeur\PaiementController::class, 'verifierStatut'])->name('paiement.statut');
     Route::get('/historique', [\App\Http\Controllers\Payeur\PaiementController::class, 'historique'])->name('historique');
+    Route::get('/recus', [\App\Http\Controllers\Payeur\RecuController::class, 'index'])->name('recus.index');
+    Route::get('/recus/{paiement}/telecharger', [\App\Http\Controllers\Payeur\RecuController::class, 'telechargerRecu'])->name('recus.telecharger');
+    Route::get('/certificat/{apprenant}', [\App\Http\Controllers\Payeur\RecuController::class, 'genererCertificat'])->name('recus.certificat');
+    Route::get('/reclamations', [\App\Http\Controllers\Payeur\ReclamationController::class, 'index'])->name('reclamations.index');
+    Route::post('/reclamations', [\App\Http\Controllers\Payeur\ReclamationController::class, 'store'])->name('reclamations.store');
+    Route::get('/profil', [\App\Http\Controllers\Payeur\ProfilController::class, 'index'])->name('profil.index');
+    Route::put('/profil/infos', [\App\Http\Controllers\Payeur\ProfilController::class, 'updateInfos'])->name('profil.infos');
+    Route::put('/profil/notifications', [\App\Http\Controllers\Payeur\ProfilController::class, 'updateNotifications'])->name('profil.notifications');
+    Route::put('/profil/password', [\App\Http\Controllers\Payeur\ProfilController::class, 'updatePassword'])->name('profil.password');
 });
 
 
@@ -76,12 +99,37 @@ Route::middleware(['auth', 'role:parent'])->prefix('espace')->name('payeur.')->g
 Route::middleware(['auth', 'role:directeur|comptable|caissier'])->prefix('etablissement')->name('etablissement.')->group(function () {
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Etablissement\DashboardController::class, 'index'])->name('dashboard');
     Route::resource('apprenants', \App\Http\Controllers\Etablissement\ApprenantController::class);
+
+    // Frais & Échéanciers (E02 / E03)
+    Route::get('/frais',                    [\App\Http\Controllers\Etablissement\FraisController::class, 'index'])->name('frais.index');
+    Route::get('/frais/create',             [\App\Http\Controllers\Etablissement\FraisController::class, 'create'])->name('frais.create');
+    Route::post('/frais',                   [\App\Http\Controllers\Etablissement\FraisController::class, 'store'])->name('frais.store');
+    Route::get('/frais/{categorie}/edit',   [\App\Http\Controllers\Etablissement\FraisController::class, 'edit'])->name('frais.edit');
+    Route::put('/frais/{categorie}',        [\App\Http\Controllers\Etablissement\FraisController::class, 'update'])->name('frais.update');
+    Route::delete('/frais/{categorie}',     [\App\Http\Controllers\Etablissement\FraisController::class, 'destroy'])->name('frais.destroy');
+
+    Route::get('/apprenants/import/template', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'importTemplate'])
+         ->name('apprenants.import.template');
+    Route::post('/apprenants/import', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'import'])
+         ->name('apprenants.import');
     Route::get('/paiements',  [\App\Http\Controllers\Etablissement\PaiementController::class, 'index'])->name('paiements.index');
     Route::get('/impayes',    [\App\Http\Controllers\Etablissement\ImpayeController::class, 'index'])->name('impayes.index');
     Route::post('/impayes/relancer', [\App\Http\Controllers\Etablissement\ImpayeController::class, 'relancerSms'])->name('impayes.relancer');
     Route::get('/rapports',   [\App\Http\Controllers\Etablissement\RapportController::class, 'index'])->name('rapports.index');
+    Route::get('/rapports/export/pdf', [\App\Http\Controllers\Etablissement\RapportController::class, 'exportPdf'])->name('rapports.export.pdf');
+    Route::get('/rapports/export/excel', [\App\Http\Controllers\Etablissement\RapportController::class, 'exportExcel'])->name('rapports.export.excel');
     Route::get('/parametres', [\App\Http\Controllers\Etablissement\ParametreController::class, 'index'])->name('parametres.index');
     Route::put('/parametres', [\App\Http\Controllers\Etablissement\ParametreController::class, 'update'])->name('parametres.update');
+    Route::get('/utilisateurs', [\App\Http\Controllers\Etablissement\UtilisateurController::class, 'index'])->name('utilisateurs.index');
+    Route::post('/utilisateurs', [\App\Http\Controllers\Etablissement\UtilisateurController::class, 'store'])->name('utilisateurs.store');
+    Route::put('/utilisateurs/{utilisateur}/role', [\App\Http\Controllers\Etablissement\UtilisateurController::class, 'updateRole'])->name('utilisateurs.role');
+    Route::delete('/utilisateurs/{utilisateur}', [\App\Http\Controllers\Etablissement\UtilisateurController::class, 'destroy'])->name('utilisateurs.destroy');
+    Route::get('/remboursements', [\App\Http\Controllers\Etablissement\RemboursementController::class, 'index'])->name('remboursements.index');
+    Route::post('/remboursements', [\App\Http\Controllers\Etablissement\RemboursementController::class, 'store'])->name('remboursements.store');
+    Route::post('/remboursements/{remboursement}/approuver', [\App\Http\Controllers\Etablissement\RemboursementController::class, 'approuver'])->name('remboursements.approuver');
+    Route::post('/remboursements/{remboursement}/refuser', [\App\Http\Controllers\Etablissement\RemboursementController::class, 'refuser'])->name('remboursements.refuser');
+    Route::get('/sites', [\App\Http\Controllers\Etablissement\SiteController::class, 'index'])->name('sites.index');
+    Route::post('/sites', [\App\Http\Controllers\Etablissement\SiteController::class, 'store'])->name('sites.store');
 });
 
 

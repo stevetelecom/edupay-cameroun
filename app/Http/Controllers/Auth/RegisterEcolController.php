@@ -92,13 +92,19 @@ class RegisterEcolController extends Controller
     {
         $validated = $request->validate([
             'document_agrement' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'logo'               => 'nullable|file|mimes:png,jpg,jpeg,svg|max:2048',
             'description'       => 'nullable|string|max:1000',
         ]);
 
         $documentPath = $request->file('document_agrement')->store('agrements', 'public');
 
+        $logoPath = $request->hasFile('logo')
+            ? $request->file('logo')->store('logos', 'public')
+            : null;
+
         $request->session()->put('register_ecole.step3', [
             'document_agrement' => $documentPath,
+            'logo'              => $logoPath,
             'description'       => $validated['description'] ?? null,
         ]);
 
@@ -161,13 +167,15 @@ class RegisterEcolController extends Controller
             'site_web'               => $step2['site_web'] ?? null,
             'mobile_money_principal' => $step2['mobile_money_principal'] ?? null,
             'document_agrement'      => $step3['document_agrement'] ?? null,
-            'description'            => $step3['description'] ?? null,
+            'logo'                    => $step3['logo'] ?? null,
+            'description'             => $step3['description'] ?? null,
             'statut'                 => 'en_attente',
         ]);
 
         // ── Enregistrement n°2 : le compte du responsable (directeur) ──────
         $directeur = User::create([
-            'name'             => $step2['resp_prenom'] . ' ' . $step2['resp_nom'],
+            'prenom'           => $step2['resp_prenom'],
+            'nom'              => $step2['resp_nom'],
             'telephone'        => $step2['resp_telephone'],
             'email'            => $step2['resp_email'],
             'password'         => $step2['resp_password'],

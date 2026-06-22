@@ -43,6 +43,12 @@
                                     'valide' => 'Validé', 'en_attente' => 'En attente', 'echoue' => 'Échoué', 'rembourse' => 'Remboursé', default => $paiement->statut,
                                 } }}
                             </span>
+                            @if($paiement->statut !== 'rembourse' && $paiement->remboursements->isNotEmpty())
+                                @php $totalRembourse = $paiement->remboursements->sum('montant'); @endphp
+                                <div style="font-size:10px;color:#1A4F8A;margin-top:3px;">
+                                    dont {{ number_format($totalRembourse, 0, ',', ' ') }} FCFA remboursés
+                                </div>
+                            @endif
                         </td>
                     </tr>
                 @empty

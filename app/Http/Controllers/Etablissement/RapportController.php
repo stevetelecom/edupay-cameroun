@@ -6,12 +6,68 @@ use App\Http\Controllers\Controller;
 use App\Models\Apprenant;
 use App\Models\FraisApprenant;
 use App\Models\Paiement;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class RapportController extends Controller
 {
     public function index(Request $request)
+    {
+        $data = $this->genererDonneesRapport();
+
+        return view('etablissement.rapports.index', $data);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $data = $this->genererDonneesRapport();
+
+        $pdf = Pdf::loadView('pdf.rapport', $data);
+
+        return $pdf->download('rapport-financier-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $data = $this->genererDonneesRapport();
+        $nomFichier = 'rapport-financier-' . now()->format('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($data) {
+            $handle = fopen('php://output', 'w');
+            // BOM UTF-8 pour que les accents s'affichent bien dans Excel
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, ['Rapport financier — Année ' . $data['anneeScolaire']], ';');
+            fputcsv($handle, [], ';');
+
+            fputcsv($handle, ['Indicateur', 'Valeur'], ';');
+            fputcsv($handle, ['FCFA encaissés (année)', $data['totalEncaisseAnnee']], ';');
+            fputcsv($handle, ['FCFA impayés (année)', $data['totalImpayeAnnee']], ';');
+            fputcsv($handle, ['Taux de recouvrement', $data['tauxRecouvrement'] . '%'], ';');
+            fputcsv($handle, ['Apprenants suivis', $data['nbApprenants']], ';');
+            fputcsv($handle, [], ';');
+
+            fputcsv($handle, ['Répartition par moyen de paiement'], ';');
+            fputcsv($handle, ['Moyen', 'Pourcentage'], ';');
+            foreach ($data['repartitionMoyens'] as $m) {
+                fputcsv($handle, [$m['mode'], $m['pourcentage'] . '%'], ';');
+            }
+            fputcsv($handle, [], ';');
+
+            fputcsv($handle, ['Recouvrement par classe'], ';');
+            fputcsv($handle, ['Classe', 'Nb apprenants', 'Taux'], ';');
+            foreach ($data['repartitionClasses'] as $c) {
+                fputcsv($handle, [$c['nom'], $c['nb_apprenants'], $c['taux'] . '%'], ';');
+            }
+
+            fclose($handle);
+        }, $nomFichier, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    private function genererDonneesRapport(): array
     {
         $etablissementId = Auth::user()->etablissement_id;
         $anneeScolaire   = '2025-2026';
@@ -35,7 +91,6 @@ class RapportController extends Controller
 
         $nbApprenants = Apprenant::where('etablissement_id', $etablissementId)->count();
 
-        // Répartition par moyen de paiement (sur paiements validés)
         $totalValideTous = Paiement::where('statut', 'valide')
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
             ->sum('montant');
@@ -53,7 +108,6 @@ class RapportController extends Controller
             })
             ->toArray();
 
-        // Recouvrement par classe
         $repartitionClasses = Apprenant::where('etablissement_id', $etablissementId)
             ->selectRaw('classe, COUNT(*) as nb_apprenants')
             ->groupBy('classe')
@@ -75,14 +129,14 @@ class RapportController extends Controller
             })
             ->toArray();
 
-        return view('etablissement.rapports.index', compact(
-            'totalEncaisseAnnee',
-            'totalImpayeAnnee',
-            'tauxRecouvrement',
-            'nbApprenants',
-            'repartitionMoyens',
-            'repartitionClasses',
-            'anneeScolaire',
-        ));
+        return [
+            'totalEncaisseAnnee' => $totalEncaisseAnnee,
+            'totalImpayeAnnee'   => $totalImpayeAnnee,
+            'tauxRecouvrement'   => $tauxRecouvrement,
+            'nbApprenants'       => $nbApprenants,
+            'repartitionMoyens'  => $repartitionMoyens,
+            'repartitionClasses' => $repartitionClasses,
+            'anneeScolaire'      => $anneeScolaire,
+        ];
     }
 }

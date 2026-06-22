@@ -43,6 +43,16 @@ class DashboardController extends Controller
             ->where('statut', 'valide')
             ->count();
 
+        // Vue Famille (parent, plusieurs enfants) vs Vue Solo (élève/étudiant, son propre dossier)
+        $estSolo = in_array($user->profil, ['eleve', 'etudiant']);
+
+        // En vue solo, l'apprenant "soi-même" est le premier (et normalement unique) apprenant rattaché
+        $monDossier = $estSolo ? $apprenants->first() : null;
+
+        // % global réglé (utilisé en vue solo pour le KPI "Solde réglé")
+        $totalGlobal = $totalDu + $totalPaye;
+        $pourcentageGlobal = $totalGlobal > 0 ? round(($totalPaye / $totalGlobal) * 100) : 0;
+
         return view('payeur.dashboard', [
             'apprenants'          => $apprenants,
             'totalDu'             => $totalDu,
@@ -51,6 +61,9 @@ class DashboardController extends Controller
             'premierFraisImpaye'  => $premierFraisImpaye,
             'derniersPaiements'   => $derniersPaiements,
             'nbRecus'             => $nbRecus,
+            'estSolo'             => $estSolo,
+            'monDossier'          => $monDossier,
+            'pourcentageGlobal'   => $pourcentageGlobal,
             'pageTitle'           => 'Mon espace — EduPay',
         ]);
     }
