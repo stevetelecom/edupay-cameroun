@@ -78,6 +78,14 @@ Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur
     Route::put('/profil/infos', [\App\Http\Controllers\Payeur\ProfilController::class, 'updateInfos'])->name('profil.infos');
     Route::put('/profil/notifications', [\App\Http\Controllers\Payeur\ProfilController::class, 'updateNotifications'])->name('profil.notifications');
     Route::put('/profil/password', [\App\Http\Controllers\Payeur\ProfilController::class, 'updatePassword'])->name('profil.password');
+
+    // F04 — Modifier/détacher un rattachement apprenant
+    Route::get('/mes-apprenants/{apprenant}/modifier', [\App\Http\Controllers\Payeur\OnboardingController::class, 'editApprenant'])->name('apprenant.edit');
+    Route::put('/mes-apprenants/{apprenant}/modifier', [\App\Http\Controllers\Payeur\OnboardingController::class, 'updateApprenant'])->name('apprenant.update');
+    Route::delete('/mes-apprenants/{apprenant}',       [\App\Http\Controllers\Payeur\OnboardingController::class, 'detachApprenant'])->name('apprenant.detach');
+
+    // F05 — Vue frais détaillés par apprenant
+    Route::get('/mes-apprenants/{apprenant}/frais',    [\App\Http\Controllers\Payeur\PaiementController::class, 'fraisApprenant'])->name('frais.apprenant');
 });
 
 
@@ -104,9 +112,9 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier'])->prefix('etabli
     Route::get('/frais',                    [\App\Http\Controllers\Etablissement\FraisController::class, 'index'])->name('frais.index');
     Route::get('/frais/create',             [\App\Http\Controllers\Etablissement\FraisController::class, 'create'])->name('frais.create');
     Route::post('/frais',                   [\App\Http\Controllers\Etablissement\FraisController::class, 'store'])->name('frais.store');
-    Route::get('/frais/{categorie}/edit',   [\App\Http\Controllers\Etablissement\FraisController::class, 'edit'])->name('frais.edit');
-    Route::put('/frais/{categorie}',        [\App\Http\Controllers\Etablissement\FraisController::class, 'update'])->name('frais.update');
-    Route::delete('/frais/{categorie}',     [\App\Http\Controllers\Etablissement\FraisController::class, 'destroy'])->name('frais.destroy');
+    Route::get('/frais/{frais}/edit',   [\App\Http\Controllers\Etablissement\FraisController::class, 'edit'])->name('frais.edit');
+    Route::put('/frais/{frais}',        [\App\Http\Controllers\Etablissement\FraisController::class, 'update'])->name('frais.update');
+    Route::delete('/frais/{frais}',     [\App\Http\Controllers\Etablissement\FraisController::class, 'destroy'])->name('frais.destroy');
 
     Route::get('/apprenants/import/template', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'importTemplate'])
          ->name('apprenants.import.template');
@@ -115,6 +123,7 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier'])->prefix('etabli
     Route::get('/paiements',  [\App\Http\Controllers\Etablissement\PaiementController::class, 'index'])->name('paiements.index');
     Route::get('/impayes',    [\App\Http\Controllers\Etablissement\ImpayeController::class, 'index'])->name('impayes.index');
     Route::post('/impayes/relancer', [\App\Http\Controllers\Etablissement\ImpayeController::class, 'relancerSms'])->name('impayes.relancer');
+    Route::post('/impayes/{apprenant}/relancer', [\App\Http\Controllers\Etablissement\ImpayeController::class, 'relancerApprenant'])->name('impayes.relancer.apprenant');
     Route::get('/rapports',   [\App\Http\Controllers\Etablissement\RapportController::class, 'index'])->name('rapports.index');
     Route::get('/rapports/export/pdf', [\App\Http\Controllers\Etablissement\RapportController::class, 'exportPdf'])->name('rapports.export.pdf');
     Route::get('/rapports/export/excel', [\App\Http\Controllers\Etablissement\RapportController::class, 'exportExcel'])->name('rapports.export.excel');
@@ -141,3 +150,4 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier'])->prefix('etabli
 Route::prefix(env('ADMIN_URL_PREFIX', 'admin-ep2026'))
     ->name('admin.')
     ->group(base_path('routes/admin.php'));
+

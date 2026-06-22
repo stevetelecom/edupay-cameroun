@@ -104,8 +104,8 @@
                         Payer maintenant →
                     </a>
                 @endif
-                <a href="{{ route('payeur.onboarding') }}" class="btn-o" style="font-size:12px;padding:8px;width:auto;flex:0 0 auto;">
-                    ✎ Modifier mon établissement
+                <a href="{{ route('payeur.apprenant.edit', $monDossier) }}" class="btn-o" style="font-size:12px;padding:8px;width:auto;flex:0 0 auto;">
+                    ✎ Modifier mon profil
                 </a>
             </div>
         </div>
@@ -250,6 +250,10 @@
                         <div style="font-size:10px;color:#888;margin-top:3px;margin-bottom:12px;">
                             {{ $pourcentage }}% réglé
                         </div>
+                    <a href="{{ route('payeur.frais.apprenant', $apprenant) }}"
+                       style="font-size:11px;color:var(--ep-teal);text-decoration:none;display:block;text-align:center;margin-bottom:8px;">
+                        Voir le détail des frais →
+                    </a>
                         @if($premierFraisImpayeEnfant)
                             @if($statut === 'impaye')
                                 <a href="{{ route('payeur.paiement.show', $premierFraisImpayeEnfant) }}"
@@ -385,8 +389,8 @@
                             <div class="row"><span style="color:#999;">Aucun frais enregistré pour le moment.</span></div>
                         @endforelse
 
-                        <a href="{{ route('payeur.onboarding') }}" class="btn-o" style="margin-top:10px;font-size:11px;padding:7px;display:block;text-align:center;">
-                            ✎ Modifier l'établissement
+                        <a href="{{ route('payeur.apprenant.edit', $apprenant) }}" class="btn-o" style="margin-top:10px;font-size:11px;padding:7px;display:block;text-align:center;">
+                            ✎ Modifier
                         </a>
                     </div>
                 @endforeach

@@ -1,8 +1,7 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+use App\Jobs\SendSmsRelanceImpaye;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// E07 — Relances automatiques impayés J-5 avant chaque echeance
+Schedule::job(new SendSmsRelanceImpaye)->dailyAt('07:00');

@@ -117,7 +117,7 @@ class FraisController extends Controller
 
     private function autoriser(CategoriesFrais $frais)
     {
-        if ($frais->etablissement_id !== Auth::user()->etablissement->id) {
+        if ($frais->etablissement_id != Auth::user()->etablissement->id) {
             abort(403, 'Accès non autorisé.');
         }
     }

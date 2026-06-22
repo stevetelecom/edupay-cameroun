@@ -221,4 +221,26 @@ class PaiementController extends Controller
             abort(403, 'Vous n\'êtes pas autorisé à accéder à ce dossier de paiement.');
         }
     }
+
+    // ─────────────────────────────────────────────
+    // F05 — Vue frais détaillés par apprenant
+    // ─────────────────────────────────────────────
+    public function fraisApprenant(\App\Models\Apprenant $apprenant)
+    {
+        $estRattache = Auth::user()
+            ->apprenants()
+            ->where('apprenant_id', $apprenant->id)
+            ->exists();
+
+        abort_unless($estRattache, 403);
+
+        $apprenant->load([
+            'etablissement',
+            'frais.categorieFrais.echeanciers',
+            'frais.paiements' => fn($q) => $q->where('statut', 'valide')->latest(),
+        ]);
+
+        return view('payeur.frais_apprenant', compact('apprenant'));
+    }
+
 }

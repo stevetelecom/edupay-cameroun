@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Etablissement;
 
 use App\Http\Controllers\Controller;
+use App\Models\Apprenant;
 use App\Models\FraisApprenant;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
@@ -31,35 +32,30 @@ class ImpayeController extends Controller
 
         $totalImpaye = FraisApprenant::where('annee_scolaire', $anneeScolaire)
             ->where('statut', '!=', 'regle')
-            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('apprenant', fn($q) => $q->where('etablissement_id', $etablissementId))
             ->get()
-            ->sum(fn ($f) => $f->montant_total - $f->montant_paye);
+            ->sum(fn($f) => $f->montant_total - $f->montant_paye);
 
         $totalAttendu = FraisApprenant::where('annee_scolaire', $anneeScolaire)
-            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('apprenant', fn($q) => $q->where('etablissement_id', $etablissementId))
             ->sum('montant_total');
 
         $totalPaye = FraisApprenant::where('annee_scolaire', $anneeScolaire)
-            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('apprenant', fn($q) => $q->where('etablissement_id', $etablissementId))
             ->sum('montant_paye');
 
         $tauxRecouvrement = $totalAttendu > 0
             ? round(($totalPaye / $totalAttendu) * 100)
             : 0;
 
-        $classes = \App\Models\Apprenant::where('etablissement_id', $etablissementId)
-            ->distinct()
-            ->orderBy('classe')
-            ->pluck('classe');
+        $classes = Apprenant::where('etablissement_id', $etablissementId)
+            ->distinct()->orderBy('classe')->pluck('classe');
 
         return view('etablissement.impayes.index', compact(
             'fraisImpayes', 'totalImpaye', 'tauxRecouvrement', 'classes'
         ));
     }
 
-    /**
-     * Envoie un SMS de relance à tous les parents des apprenants en situation d'impayé.
-     */
     public function relancerSms(Request $request, SmsService $smsService)
     {
         $etablissementId = Auth::user()->etablissement_id;
@@ -68,41 +64,69 @@ class ImpayeController extends Controller
         $fraisImpayes = FraisApprenant::with('apprenant.parents')
             ->where('annee_scolaire', $anneeScolaire)
             ->where('statut', '!=', 'regle')
-            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('apprenant', fn($q) => $q->where('etablissement_id', $etablissementId))
             ->get();
 
+        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes, $smsService);
+
+        Log::channel('admin')->info("E07 relance groupée — Étab #{$etablissementId} : {$nbEnvoyes} envoyés, {$nbEchecs} échecs.");
+
+        return back()->with(
+            $nbEnvoyes > 0 ? 'success' : 'error',
+            $nbEnvoyes > 0
+                ? "{$nbEnvoyes} SMS envoyé(s)." . ($nbEchecs > 0 ? " ({$nbEchecs} échec(s))" : '')
+                : 'Aucun SMS envoyé. Vérifiez les numéros et les préférences de notification.'
+        );
+    }
+
+    public function relancerApprenant(Apprenant $apprenant, SmsService $smsService)
+    {
+        if ($apprenant->etablissement_id !== Auth::user()->etablissement_id) {
+            abort(403);
+        }
+
+        $fraisImpayes = FraisApprenant::with('apprenant.parents')
+            ->where('apprenant_id', $apprenant->id)
+            ->where('annee_scolaire', '2025-2026')
+            ->where('statut', '!=', 'regle')
+            ->get();
+
+        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes, $smsService);
+
+        return back()->with(
+            $nbEnvoyes > 0 ? 'success' : 'error',
+            $nbEnvoyes > 0
+                ? "SMS de relance envoyé à {$apprenant->prenom} {$apprenant->nom}."
+                : 'Échec — vérifiez le numéro du parent ou ses préférences SMS.'
+        );
+    }
+
+    private function envoyerRelancesGroupe($fraisCollection, SmsService $smsService): array
+    {
         $nbEnvoyes = 0;
         $nbEchecs  = 0;
 
-        foreach ($fraisImpayes as $frais) {
+        foreach ($fraisCollection as $frais) {
             $reste = $frais->montant_total - $frais->montant_paye;
+            if ($reste <= 0) continue;
 
             foreach ($frais->apprenant->parents as $parent) {
-                if (!$parent->telephone) {
-                    continue;
-                }
+                if (!$parent->telephone) { $nbEchecs++; continue; }
 
                 $message = sprintf(
-                    "EduPay: %s %s a un solde impaye de %s FCFA (%s). Merci de regulariser via l'app EduPay.",
+                    "EduPay: %s %s - solde impaye %s FCFA (%s). Regularisez sur l'app EduPay Cameroun.",
                     $frais->apprenant->nom,
                     $frais->apprenant->prenom,
                     number_format($reste, 0, ',', ' '),
                     $frais->categorieFrais->nom ?? 'frais scolaires'
                 );
 
-                $envoye = $smsService->envoyerRelance($parent->telephone, $message);
-
-                $envoye ? $nbEnvoyes++ : $nbEchecs++;
+                $smsService->envoyerRelance($parent->telephone, $message)
+                    ? $nbEnvoyes++
+                    : $nbEchecs++;
             }
         }
 
-        Log::channel('admin')->info("Relance SMS impayés — Établissement #{$etablissementId} : {$nbEnvoyes} envoyés, {$nbEchecs} échecs.");
-
-        return back()->with(
-            $nbEnvoyes > 0 ? 'success' : 'error',
-            $nbEnvoyes > 0
-                ? "{$nbEnvoyes} SMS de relance envoyé(s) avec succès." . ($nbEchecs > 0 ? " ({$nbEchecs} échec(s))" : '')
-                : "Aucun SMS n'a pu être envoyé. Vérifiez les numéros de téléphone des parents."
-        );
+        return [$nbEnvoyes, $nbEchecs];
     }
 }

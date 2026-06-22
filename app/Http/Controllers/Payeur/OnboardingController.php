@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class OnboardingController extends Controller
 {
-    // Affiche la page de rattachement (maquette s-onboarding)
+    // ── F04 : Affiche la page de rattachement initial ──
     public function index(): View
     {
         $etablissements = Etablissement::where('statut', 'actif')
@@ -21,7 +21,7 @@ class OnboardingController extends Controller
         return view('payeur.onboarding', compact('etablissements'));
     }
 
-    // POST — Rattacher un apprenant à un établissement
+    // ── F04 : POST — Rattacher un apprenant ──
     public function store(Request $request): RedirectResponse
     {
         $user = Auth::user();
@@ -37,42 +37,21 @@ class OnboardingController extends Controller
             'lien'               => 'required|in:parent,soi-meme',
         ], [
             'etablissement_nom.required_without' => 'Veuillez indiquer ou choisir un établissement.',
-            'etablissement_id.exists'            => 'Établissement introuvable, merci de le sélectionner dans la liste.',
-            'prenom_apprenant.required_unless'   => 'Le prénom de l\'apprenant est obligatoire.',
-            'nom_apprenant.required_unless'      => 'Le nom de l\'apprenant est obligatoire.',
+            'prenom_apprenant.required_unless'   => "Le prénom de l'apprenant est obligatoire.",
+            'nom_apprenant.required_unless'      => "Le nom de l'apprenant est obligatoire.",
             'classe.required'                    => 'La classe est obligatoire.',
-            'lien.required'                      => 'Veuillez préciser le lien avec l\'apprenant.',
         ]);
 
-        // Résolution de l'établissement : par ID caché (choix exact via datalist),
-        // sinon par code établissement, sinon par nom exact (secours).
-        $etablissement = null;
-
-        if (!empty($validated['etablissement_id'])) {
-            $etablissement = Etablissement::find($validated['etablissement_id']);
-        }
-
-        if (!$etablissement && !empty($validated['code_etablissement'])) {
-            $etablissement = Etablissement::where('code_etablissement', $validated['code_etablissement'])->first();
-        }
-
-        if (!$etablissement && !empty($validated['etablissement_nom'])) {
-            $etablissement = Etablissement::where('nom', $validated['etablissement_nom'])
-                ->where('statut', 'actif')
-                ->first();
-        }
+        $etablissement = $this->resoudreEtablissement($validated);
 
         if (!$etablissement) {
-            return back()
-                ->withInput()
-                ->withErrors(['etablissement_nom' => 'Établissement introuvable. Merci de le sélectionner dans la liste proposée.']);
+            return back()->withInput()
+                ->withErrors(['etablissement_nom' => 'Établissement introuvable. Sélectionnez-le dans la liste.']);
         }
 
-        // Profil solo (élève / étudiant) : prénom/nom = ceux du compte lui-même
         $prenomApprenant = $validated['lien'] === 'soi-meme' ? $user->prenom : $validated['prenom_apprenant'];
-        $nomApprenant     = $validated['lien'] === 'soi-meme' ? $user->nom    : $validated['nom_apprenant'];
+        $nomApprenant    = $validated['lien'] === 'soi-meme' ? $user->nom    : $validated['nom_apprenant'];
 
-        // Chercher si l'apprenant existe déjà par matricule
         $apprenant = null;
         if (!empty($validated['matricule'])) {
             $apprenant = Apprenant::where('matricule', $validated['matricule'])
@@ -80,7 +59,6 @@ class OnboardingController extends Controller
                 ->first();
         }
 
-        // Sinon le créer (pré-rattachement — validé ensuite par l'école)
         if (!$apprenant) {
             $apprenant = Apprenant::create([
                 'etablissement_id' => $etablissement->id,
@@ -93,17 +71,110 @@ class OnboardingController extends Controller
             ]);
         }
 
-        // Rattacher au user (pivot user_apprenant)
         $user->apprenants()->syncWithoutDetaching([
             $apprenant->id => ['lien' => $validated['lien']]
         ]);
 
-        // Si élève/étudiant solo → mettre à jour etablissement_id sur le user
         if ($validated['lien'] === 'soi-meme') {
             $user->update(['etablissement_id' => $etablissement->id]);
         }
 
         return redirect()->route('payeur.dashboard')
             ->with('success', 'Rattachement effectué avec succès !');
+    }
+
+    // ── F04 : GET — Formulaire de modification d'un rattachement ──
+    public function editApprenant(Apprenant $apprenant): View
+    {
+        $this->autoriserAccesApprenant($apprenant);
+
+        $etablissements = Etablissement::where('statut', 'actif')
+            ->orderBy('nom')
+            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement']);
+
+        $lien = Auth::user()->apprenants()
+            ->where('apprenant_id', $apprenant->id)
+            ->first()?->pivot->lien ?? 'parent';
+
+        return view('payeur.apprenant_edit', compact('apprenant', 'etablissements', 'lien'));
+    }
+
+    // ── F04 : PUT — Enregistrer les modifications ──
+    public function updateApprenant(Request $request, Apprenant $apprenant): RedirectResponse
+    {
+        $this->autoriserAccesApprenant($apprenant);
+
+        $validated = $request->validate([
+            'etablissement_id'  => 'nullable|exists:etablissements,id',
+            'etablissement_nom' => 'required_without:etablissement_id|nullable|string|max:150',
+            'classe'            => 'required|string|max:50',
+            'matricule'         => 'nullable|string|max:50',
+            'prenom'            => 'required|string|max:100',
+            'nom'               => 'required|string|max:100',
+        ]);
+
+        $etablissement = $this->resoudreEtablissement($validated);
+
+        if (!$etablissement) {
+            return back()->withInput()
+                ->withErrors(['etablissement_nom' => 'Établissement introuvable.']);
+        }
+
+        // Bloquer le changement d'établissement si des paiements existent
+        $aPaiements = $apprenant->paiements()->exists();
+        if ($aPaiements && $apprenant->etablissement_id !== $etablissement->id) {
+            return back()->withInput()
+                ->withErrors(['etablissement_nom' => "Impossible de changer l'établissement : des paiements sont déjà enregistrés pour cet apprenant."]);
+        }
+
+        $apprenant->update([
+            'etablissement_id' => $etablissement->id,
+            'prenom'           => $validated['prenom'],
+            'nom'              => $validated['nom'],
+            'classe'           => $validated['classe'],
+            'matricule'        => $validated['matricule'] ?? $apprenant->matricule,
+        ]);
+
+        return redirect()->route('payeur.dashboard')
+            ->with('success', 'Informations de ' . $apprenant->prenom . ' mises à jour.');
+    }
+
+    // ── F04 : DELETE — Détacher un apprenant (sans supprimer si paiements) ──
+    public function detachApprenant(Apprenant $apprenant): RedirectResponse
+    {
+        $this->autoriserAccesApprenant($apprenant);
+
+        if ($apprenant->paiements()->exists()) {
+            return back()->with('error',
+                'Impossible de retirer ' . $apprenant->prenom . ' : des paiements sont enregistrés. Contactez votre établissement.');
+        }
+
+        Auth::user()->apprenants()->detach($apprenant->id);
+
+        return redirect()->route('payeur.dashboard')
+            ->with('success', $apprenant->prenom . ' a été retiré de votre compte.');
+    }
+
+    // ── Helpers privés ──
+    private function resoudreEtablissement(array $validated): ?Etablissement
+    {
+        if (!empty($validated['etablissement_id'])) {
+            $et = Etablissement::find($validated['etablissement_id']);
+            if ($et) return $et;
+        }
+        if (!empty($validated['etablissement_nom'])) {
+            $et = Etablissement::where('nom', $validated['etablissement_nom'])
+                ->where('statut', 'actif')->first();
+            if ($et) return $et;
+        }
+        return null;
+    }
+
+    private function autoriserAccesApprenant(Apprenant $apprenant): void
+    {
+        $rattache = Auth::user()->apprenants()
+            ->where('apprenant_id', $apprenant->id)
+            ->exists();
+        abort_unless($rattache, 403, 'Cet apprenant ne vous est pas rattaché.');
     }
 }
