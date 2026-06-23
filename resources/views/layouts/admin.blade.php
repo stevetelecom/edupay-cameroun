@@ -175,6 +175,12 @@
         </main>
     </div>
 
+    {{-- Modals injectés par les pages --}}
+    @stack('modals')
+
+    {{-- Modals injectés par les pages --}}
+    @stack('modals')
+
     {{-- CSS sidebar-link utilitaire --}}
     <style>
         .sidebar-link {
@@ -197,5 +203,185 @@
         .sidebar-link.active svg { stroke: #0D9E75; }
     </style>
 
+
+    {{-- Scripts injectés par les pages --}}
+    @stack('scripts')
+
+    {{-- Système epModal admin --}}
+    <style>
+        .ep-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(0,0,0,0.45);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .ep-modal-overlay.open { display: flex; }
+        .ep-modal {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: epSlideUp .2s ease;
+        }
+        .ep-modal-sm  { max-width: 420px; }
+        .ep-modal-md  { max-width: 560px; }
+        .ep-modal-lg  { max-width: 720px; }
+        .ep-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 15px;
+            font-weight: 700;
+            color: #111;
+        }
+        .ep-modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 4px;
+        }
+        .ep-modal-close:hover { color: #333; }
+        .ep-modal-body  { padding: 20px; }
+        .ep-modal-foot  {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 14px 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        @keyframes epSlideUp {
+            from { transform: translateY(16px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+    </style>
+
+    <script>
+    const epModal = {
+        open(id) {
+            const el = document.getElementById(id);
+            if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        },
+        close(id) {
+            const el = document.getElementById(id);
+            if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+        }
+    };
+    // Fermer en cliquant sur l'overlay
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('ep-modal-overlay')) {
+            e.target.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    });
+    // Fermer avec Echap
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.ep-modal-overlay.open').forEach(m => {
+                m.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+        }
+    });
+    </script>
+
+    {{-- Scripts injectés par les pages --}}
+    @stack('scripts')
+
+    {{-- Système epModal admin --}}
+    <style>
+        .ep-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(0,0,0,0.45);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .ep-modal-overlay.open { display: flex; }
+        .ep-modal {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: epSlideUp .2s ease;
+        }
+        .ep-modal-sm  { max-width: 420px; }
+        .ep-modal-md  { max-width: 560px; }
+        .ep-modal-lg  { max-width: 720px; }
+        .ep-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 15px;
+            font-weight: 700;
+            color: #111;
+        }
+        .ep-modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 4px;
+        }
+        .ep-modal-close:hover { color: #333; }
+        .ep-modal-body  { padding: 20px; }
+        .ep-modal-foot  {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 14px 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+        @keyframes epSlideUp {
+            from { transform: translateY(16px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
+        }
+    </style>
+
+    <script>
+    const epModal = {
+        open(id) {
+            const el = document.getElementById(id);
+            if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        },
+        close(id) {
+            const el = document.getElementById(id);
+            if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+        }
+    };
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('ep-modal-overlay')) {
+            e.target.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.ep-modal-overlay.open').forEach(m => {
+                m.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+        }
+    });
+    </script>
 </body>
 </html>

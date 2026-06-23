@@ -1,6 +1,7 @@
 <?php
 namespace App\Models;
 
+use App\Jobs\SendConfirmationPaiement;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -18,6 +19,14 @@ class Paiement extends Model
         static::creating(function ($paiement) {
             if (empty($paiement->reference)) {
                 $paiement->reference = 'EP' . date('Y') . '-' . strtoupper(Str::random(5));
+            }
+        });
+
+        // Dispatcher l'événement quand le statut devient 'valide'
+        static::updated(function ($paiement) {
+            if ($paiement->isDirty('statut') && $paiement->statut === 'valide') {
+                // Envoyer confirmation de paiement (Email + SMS)
+                dispatch(new SendConfirmationPaiement($paiement));
             }
         });
     }

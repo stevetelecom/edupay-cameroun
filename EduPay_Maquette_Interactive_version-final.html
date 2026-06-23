@@ -158,6 +158,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 /* ── PAYMENT ── */
 .pay-page{background:#f1f3f5;min-height:calc(100vh - 94px);padding:24px 28px;}
 </style>
+<style>@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}</style>
 </head>
 <body>
   <datalist id="etabs-list">
@@ -249,7 +250,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="hero-main">
       <div class="hero-tag"><span style="width:7px;height:7px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span>Plateforme 100% camerounaise · EdTech × FinTech</div>
       <div class="hero-h1">Payez les frais scolaires<br>en <em>2 minutes</em>,<br>depuis votre téléphone.</div>
-      <div class="hero-sub">EduPay Cameroun connecte les établissements scolaires aux familles via MTN MoMo, Orange Money et carte bancaire. Zéro file d'attente. Reçu PDF immédiat.</div>
+      <div class="hero-sub">EduPay Cameroun connecte les établissements scolaires aux familles via MTN MoMo et Orange Money. Zéro file d'attente. Reçu PDF immédiat.</div>
       <div class="hero-btns">
         <button class="hbtn-main" onclick="go('register-parent')">Créer mon compte Payeur</button>
         <button class="hbtn-ghost" onclick="go('register-school')">Inscrire mon établissement</button>
@@ -295,7 +296,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div><div class="footer-col-title">Établissements</div><a class="footer-link" onclick="go('register-school')">Inscrire mon école</a><a class="footer-link" onclick="go('school')">Back-office</a><a class="footer-link">Guide d'utilisation</a><a class="footer-link">Support dédié</a></div>
       <div><div class="footer-col-title">Informations</div><a class="footer-link" onclick="go('about')">À propos</a><a class="footer-link">Contact</a><a class="footer-link">Politique de confidentialité</a><a class="footer-link">Conditions d'utilisation</a></div>
     </div>
-    <div class="footer-bottom"><div><div class="footer-legal">© 2026 EduPay Cameroun — Tous droits réservés · Réf. CDC-EDUPAY-CM-2026-001</div><div class="certif"><span class="cert-badge">MTN Mobile Money Partner</span><span class="cert-badge">Orange Money Intégré</span><span class="cert-badge">CinetPay Certifié</span><span class="cert-badge">COBAC Conforme</span></div></div><div class="footer-socials"><div class="social-btn">in</div><div class="social-btn">X</div><div class="social-btn">W</div><div class="social-btn">f</div></div></div>
+    <div class="footer-bottom"><div><div class="footer-legal">© 2026 EduPay Cameroun — Tous droits réservés · Réf. CDC-EDUPAY-CM-2026-001</div><div class="certif"><span class="cert-badge">MTN Mobile Money</span><span class="cert-badge">Orange Money</span><span class="cert-badge">Propulsé par AangaraaPay</span><span class="cert-badge">COBAC Conforme</span></div></div><div class="footer-socials"><div class="social-btn">in</div><div class="social-btn">X</div><div class="social-btn">W</div><div class="social-btn">f</div></div></div>
   </div>
 </div>
 
@@ -899,7 +900,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <div class="row"><div><div style="font-size:13px;font-weight:600;">Scolarité T2 — Brice</div><div style="font-size:11px;color:#888;">Réf. #EP2026-04471 · 18 mars 2026 · MTN MoMo</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">26 250 FCFA</div><span class="pill pg">Validé</span></div></div>
         <div class="row"><div><div style="font-size:13px;font-weight:600;">Scolarité T1 — Brice</div><div style="font-size:11px;color:#888;">Réf. #EP2026-03190 · 12 mars 2026 · MTN MoMo</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">25 000 FCFA</div><span class="pill pg">Validé</span></div></div>
         <div class="row"><div><div style="font-size:13px;font-weight:600;">Inscription 2026 — Brice</div><div style="font-size:11px;color:#888;">Réf. #EP2026-00087 · 02 janv. 2026 · Orange Money</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">20 000 FCFA</div><span class="pill pg">Validé</span></div></div>
-        <div class="row"><div><div style="font-size:13px;font-weight:600;">Cantine T1 — Brice</div><div style="font-size:11px;color:#888;">Réf. #EP2026-00045 · 05 janv. 2026 · Carte bancaire</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">– 5 000 FCFA</div><span class="pill pa">Remboursé</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">Cantine T1 — Brice</div><div style="font-size:11px;color:#888;">Réf. #EP2026-00045 · 05 janv. 2026 · Orange Money</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">– 5 000 FCFA</div><span class="pill pa">Remboursé</span></div></div>
         <div class="row"><div><div style="font-size:13px;font-weight:600;">Scolarité T2 — Chloé</div><div style="font-size:11px;color:#888;">Réf. #EP2026-04502 · en attente de confirmation USSD</div></div><div style="text-align:right;"><div style="font-weight:600;color:#999;">35 000 FCFA</div><span class="pill pr">En attente</span></div></div>
       </div>
     </div>
@@ -977,41 +978,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         <div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:11px;color:#0F6E56;margin-bottom:3px;">Paiement pour</div><div style="font-size:15px;font-weight:700;color:#085041;">FONO Brice · Lycée de Melen</div><div style="font-size:12px;color:#1B9E75;">Scolarité — 2ème trimestre 2025-2026</div></div><div style="text-align:right;"><div style="font-size:26px;font-weight:700;color:#085041;">52 500</div><div style="font-size:11px;color:#0F6E56;">FCFA</div></div></div>
       </div>
       <div class="seclbl">Option de paiement</div>
+      <div style="font-size:11px;color:#888;margin-bottom:8px;">Échéancier défini par l'établissement — <strong style="color:#0F6E56;">2 tranches restantes</strong></div>
       <div style="display:flex;gap:10px;margin-bottom:16px;">
-        <div id="opt1" style="flex:1;padding:12px;border:2px solid var(--ep-teal);border-radius:var(--radius-md);cursor:pointer;background:var(--ep-teal-lt);text-align:center;" onclick="selOpt(1)"><div style="font-size:11px;font-weight:700;color:#0F6E56;">Paiement intégral</div><div style="font-size:18px;font-weight:700;color:#085041;">52 500 FCFA</div></div>
-        <div id="opt2" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;" onclick="selOpt(2)"><div style="font-size:11px;font-weight:700;color:#888;">Tranche 1/2</div><div style="font-size:18px;font-weight:700;">26 250 FCFA</div></div>
+        <div id="opt1" style="flex:1;padding:12px;border:2px solid var(--ep-teal);border-radius:var(--radius-md);cursor:pointer;background:var(--ep-teal-lt);text-align:center;" onclick="selOpt(1)"><div style="font-size:11px;font-weight:700;color:#0F6E56;">Paiement intégral</div><div style="font-size:10px;color:#1B9E75;margin-bottom:2px;">Solde total restant dû</div><div style="font-size:18px;font-weight:700;color:#085041;">52 500 FCFA</div></div>
+        <div id="opt2" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;" onclick="selOpt(2)"><div style="font-size:11px;font-weight:700;color:#888;">Tranche suivante (2/3)</div><div style="font-size:10px;color:#aaa;margin-bottom:2px;">Montant calculé automatiquement</div><div style="font-size:18px;font-weight:700;">26 250 FCFA</div><div style="font-size:10px;color:#aaa;margin-top:2px;">Échéance : 15 jan. 2026</div></div>
       </div>
       <div class="seclbl">Moyen de paiement</div>
       <div style="display:flex;gap:10px;margin-bottom:16px;">
         <div id="pm1" style="flex:1;padding:12px;border:2px solid #FFCC00;border-radius:var(--radius-md);background:#FFFBE6;cursor:pointer;text-align:center;" onclick="selPay(1)"><div style="font-size:12px;font-weight:700;color:#996600;">MTN</div><div style="font-size:11px;color:#664400;">Mobile Money</div></div>
         <div id="pm2" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;" onclick="selPay(2)"><div style="font-size:12px;font-weight:700;color:#FF6600;">Orange</div><div style="font-size:11px;">Money</div></div>
-        <div id="pm3" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;" onclick="selPay(3)"><div style="font-size:12px;font-weight:700;color:#185FA5;">Carte</div><div style="font-size:11px;">Visa / MC</div></div>
       </div>
       <div id="pay-fields-momo">
         <div class="lbl" id="pay-momo-lbl">Numéro MTN Mobile Money</div>
         <input class="inp" id="pay-momo-input" placeholder="6XX XXX XXX" />
         <div style="background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#854F0B;display:flex;gap:8px;align-items:flex-start;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2" style="flex-shrink:0;"><use href="#ic-alert"/></svg>Vous recevrez une notification USSD sur votre téléphone pour confirmer le paiement.</div>
       </div>
-      <div id="pay-fields-card" style="display:none;">
-        <div class="lbl">Numéro de carte</div>
-        <input class="inp" placeholder="4242 4242 4242 4242" />
-        <div class="inp-row">
-          <div><div class="lbl">Date d'expiration</div><input class="inp" placeholder="MM/AA" /></div>
-          <div><div class="lbl">CVV</div><input class="inp" placeholder="123" /></div>
-        </div>
-        <div class="lbl">Nom du titulaire</div>
-        <input class="inp" placeholder="Tel qu'inscrit sur la carte" />
-        <div style="background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;margin-bottom:16px;font-size:12px;color:#085041;display:flex;gap:8px;align-items:flex-start;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;"><use href="#ic-alert"/></svg>Paiement sécurisé via passerelle certifiée CinetPay. Vos données bancaires ne sont jamais stockées par EduPay.</div>
-      </div>
-      <div style="font-size:13px;color:#888;margin-bottom:6px;display:flex;justify-content:space-between;"><span>Montant</span><span style="font-weight:600;color:#333;">52 500 FCFA</span></div>
+
+      <div style="font-size:13px;color:#888;margin-bottom:6px;display:flex;justify-content:space-between;"><span>Montant</span><span id="pay-montant-recap" style="font-weight:600;color:#333;">52 500 FCFA</span></div>
+      <div style="font-size:13px;color:#888;margin-bottom:6px;display:flex;justify-content:space-between;"><span>Tranche</span><span id="pay-tranche-recap" style="font-weight:600;color:#888;">Intégral</span></div>
       <div style="font-size:13px;color:#888;margin-bottom:12px;display:flex;justify-content:space-between;"><span>Frais de transaction</span><span style="font-weight:600;color:var(--ep-teal);">Offerts</span></div>
-      <div style="border-top:1px solid #eee;padding-top:12px;margin-bottom:18px;display:flex;justify-content:space-between;"><span style="font-size:15px;font-weight:700;">Total à payer</span><span style="font-size:22px;font-weight:700;color:var(--ep-teal);">52 500 FCFA</span></div>
-      <button class="btn-p" onclick="showOK()">Confirmer et payer →</button>
-      <div id="ok-msg" style="display:none;margin-top:16px;background:var(--ep-teal-lt);border-radius:var(--radius-lg);padding:24px;text-align:center;">
-        <div style="width:52px;height:52px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><use href="#ic-check"/></svg></div>
-        <div style="font-size:16px;font-weight:700;color:#085041;margin-bottom:6px;">Paiement validé avec succès !</div>
-        <div style="font-size:12px;color:#1B9E75;margin-bottom:16px;">Réf. #EP2026-04471 · Reçu PDF envoyé par email</div>
-        <button style="background:#0F6E56;color:#fff;border:none;padding:10px 22px;border-radius:var(--radius-md);font-size:13px;cursor:pointer;" onclick="go('parent')">Retour au tableau de bord</button>
+      <div style="border-top:1px solid #eee;padding-top:12px;margin-bottom:18px;display:flex;justify-content:space-between;"><span style="font-size:15px;font-weight:700;">Total à payer</span><span id="pay-total-recap" style="font-size:22px;font-weight:700;color:var(--ep-teal);">52 500 FCFA</span></div>
+      <div id="pay-operateur-recap" style="font-size:12px;color:#888;margin-bottom:14px;display:flex;align-items:center;gap:6px;"><span id="pay-op-dot" style="width:8px;height:8px;border-radius:50%;background:#FFCC00;display:inline-block;"></span><span id="pay-op-label">MTN Mobile Money sélectionné</span></div>
+      <button class="btn-p" onclick="showOK()">Confirmer et payer via AangaraaPay →</button>
+      <div id="ok-msg" style="display:none;margin-top:16px;">
+        <div id="ok-pending" style="background:#FFF9E6;border:1px solid #FFCC00;border-radius:var(--radius-lg);padding:20px;text-align:center;margin-bottom:12px;">
+          <div style="font-size:14px;font-weight:700;color:#854F0B;margin-bottom:6px;">⏳ En attente de confirmation USSD…</div>
+          <div style="font-size:12px;color:#BA7517;margin-bottom:10px;">Confirmez sur votre téléphone. Vérification automatique toutes les 5s (timeout : 2 min).</div>
+          <div style="display:flex;justify-content:center;gap:4px;margin-bottom:8px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#FFCC00;display:inline-block;animation:pulse 1s infinite;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#FFCC00;display:inline-block;animation:pulse 1s .3s infinite;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#FFCC00;display:inline-block;animation:pulse 1s .6s infinite;"></span>
+          </div>
+          <button style="background:transparent;color:#854F0B;border:1px solid #FFCC00;padding:7px 18px;border-radius:var(--radius-md);font-size:12px;cursor:pointer;" onclick="showOKConfirmed()">Simuler confirmation ✓</button>
+        </div>
+        <div id="ok-confirmed" style="display:none;background:var(--ep-teal-lt);border-radius:var(--radius-lg);padding:24px;text-align:center;">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><use href="#ic-check"/></svg></div>
+          <div style="font-size:16px;font-weight:700;color:#085041;margin-bottom:4px;">Paiement validé avec succès !</div>
+          <div style="font-size:12px;color:#1B9E75;margin-bottom:4px;">Statut AangaraaPay : <strong>SUCCESSFUL</strong></div>
+          <div style="font-size:12px;color:#1B9E75;margin-bottom:16px;">Réf. #EP2026-04471 · paiements.statut → <strong>valide</strong> · Reçu PDF envoyé par email</div>
+          <button style="background:#0F6E56;color:#fff;border:none;padding:10px 22px;border-radius:var(--radius-md);font-size:13px;cursor:pointer;" onclick="go('parent')">Retour au tableau de bord</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1058,7 +1064,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="epcard" style="margin-bottom:14px;">
         <div class="row"><div><div style="font-size:13px;font-weight:600;">MENGUE Serge · 4ème B</div><div style="font-size:11px;color:#888;">Scolarité T2 · MTN MoMo · 12 min</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">52 500 FCFA</div><span class="pill pg">Reçu</span></div></div>
         <div class="row"><div><div style="font-size:13px;font-weight:600;">BIYONG Clara · Tle A</div><div style="font-size:11px;color:#888;">Inscription 2026 · Orange Money · 1h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">25 000 FCFA</div><span class="pill pg">Reçu</span></div></div>
-        <div class="row"><div><div style="font-size:13px;font-weight:600;">FOUDA Jean · 2nde C</div><div style="font-size:11px;color:#888;">Scolarité T2 · Carte · 3h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">52 500 FCFA</div><span class="pill pa">En attente</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">FOUDA Jean · 2nde C</div><div style="font-size:11px;color:#888;">Scolarité T2 · Orange Money · 3h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">52 500 FCFA</div><span class="pill pa">En attente</span></div></div>
       </div>
       <div style="display:flex;gap:10px;">
         <button class="btn-p" style="font-size:12px;" onclick="showTab('e','sv-e-unpaid',document.querySelectorAll('.sidebar .sbar-item')[3])">Relancer les 87 impayés par SMS</button>
@@ -1215,7 +1221,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
           <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Répartition des paiements</div>
           <div class="row"><div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span class="dot" style="background:#FFCC00;"></span>MTN Mobile Money</div><strong>58%</strong></div>
           <div class="row"><div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span class="dot" style="background:#FF6600;"></span>Orange Money</div><strong>35%</strong></div>
-          <div class="row"><div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span class="dot" style="background:#185FA5;"></span>Carte bancaire</div><strong>7%</strong></div>
+          <div class="row"><div style="display:flex;align-items:center;gap:9px;font-size:13px;"><span class="dot" style="background:#AAAAAA;"></span>Virement bancaire</div><strong>7%</strong></div>
         </div>
         <div class="epcard">
           <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Derniers établissements inscrits</div>
@@ -1244,11 +1250,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <!-- SUB-VIEW : TRANSACTIONS (S02) -->
     <div class="sv-a" id="sv-a-tx" style="display:none;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;"><div style="font-size:17px;font-weight:700;">Supervision des transactions</div><button class="btn-o" style="width:auto;padding:8px 14px;font-size:12px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ep-teal)" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><use href="#ic-download"/></svg>Exporter CSV</button></div>
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;"><span class="pill pg" style="cursor:pointer;">Toutes</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">MTN MoMo</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">Orange Money</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">Carte</span></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;"><span class="pill pg" style="cursor:pointer;">Toutes</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">MTN MoMo</span><span class="pill" style="background:#eee;color:#666;cursor:pointer;">Orange Money</span></div>
       <div class="epcard">
         <div class="row"><div><div style="font-size:13px;font-weight:600;">#EP2026-04471 · Lycée de Melen</div><div style="font-size:11px;color:#888;">MTN MoMo · il y a 12 min</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">26 250 FCFA</div><span class="pill pg">Validé</span></div></div>
         <div class="row"><div><div style="font-size:13px;font-weight:600;">#EP2026-04470 · Institut Saint-Michel</div><div style="font-size:11px;color:#888;">Orange Money · il y a 1h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-teal);">25 000 FCFA</div><span class="pill pg">Validé</span></div></div>
-        <div class="row"><div><div style="font-size:13px;font-weight:600;">#EP2026-04469 · Lycée de Melen</div><div style="font-size:11px;color:#888;">Carte bancaire · il y a 3h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">52 500 FCFA</div><span class="pill pa">En attente</span></div></div>
+        <div class="row"><div><div style="font-size:13px;font-weight:600;">#EP2026-04469 · Lycée de Melen</div><div style="font-size:11px;color:#888;">Orange Money · il y a 3h</div></div><div style="text-align:right;"><div style="font-weight:600;color:var(--ep-gold);">52 500 FCFA</div><span class="pill pa">En attente</span></div></div>
       </div>
     </div>
 
@@ -1301,10 +1307,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="g2">
         <div class="epcard">
           <div class="seclbl" style="margin-top:0;">Moyens de paiement actifs</div>
-          <div class="row"><span>MTN Mobile Money</span><input type="checkbox" checked/></div>
-          <div class="row"><span>Orange Money</span><input type="checkbox" checked/></div>
-          <div class="row"><span>Carte bancaire (CinetPay)</span><input type="checkbox" checked/></div>
-          <div class="row"><span>Virement bancaire</span><input type="checkbox"/></div>
+          <div class="row"><span>MTN Mobile Money (via AangaraaPay)</span><input type="checkbox" checked/></div>
+          <div class="row"><span>Orange Money (via AangaraaPay)</span><input type="checkbox" checked/></div>
+          <div class="row"><span>Virement bancaire (F08 — optionnel)</span><input type="checkbox"/></div>
         </div>
         <div class="epcard">
           <div class="seclbl" style="margin-top:0;">Plateforme</div>
@@ -1581,29 +1586,39 @@ function selOpt(n) {
     if (!el) return;
     el.style.border = i===n ? '2px solid var(--ep-teal)' : '1px solid #ddd';
     el.style.background = i===n ? 'var(--ep-teal-lt)' : '#fff';
+    const lbl = el.querySelector('div:first-child');
+    if (lbl) lbl.style.color = i===n ? '#0F6E56' : '#888';
   });
+  const montant = n === 1 ? '52 500 FCFA' : '26 250 FCFA';
+  const tranche = n === 1 ? 'Intégral' : 'Tranche 2/3 — calculée par Laravel (reste / nb_tranches)';
+  const mr = document.getElementById('pay-montant-recap');
+  const tr = document.getElementById('pay-tranche-recap');
+  const tot = document.getElementById('pay-total-recap');
+  if (mr) mr.textContent = montant;
+  if (tr) { tr.textContent = tranche; tr.style.color = n===2 ? '#0F6E56' : '#888'; }
+  if (tot) tot.textContent = montant;
 }
 
 function selPay(n) {
-  [1,2,3].forEach(i => {
+  const colors = {1: '#FFCC00', 2: '#FF6600'};
+  const borders = {1: '2px solid #FFCC00', 2: '2px solid #FF6600'};
+  const bgs = {1: '#FFFBE6', 2: '#FFF3ED'};
+  [1,2].forEach(i => {
     const el = document.getElementById('pm'+i);
     if (!el) return;
-    el.style.border = i===n ? '2px solid var(--ep-teal)' : '1px solid #ddd';
-    el.style.background = i===n ? 'var(--ep-teal-lt)' : '#fff';
+    el.style.border = i===n ? borders[i] : '1px solid #ddd';
+    el.style.background = i===n ? bgs[i] : '#fff';
   });
   const momo = document.getElementById('pay-fields-momo');
-  const card = document.getElementById('pay-fields-card');
   const momoLbl = document.getElementById('pay-momo-lbl');
   const momoInput = document.getElementById('pay-momo-input');
-  if (n === 3) {
-    momo.style.display = 'none';
-    card.style.display = 'block';
-  } else {
-    momo.style.display = 'block';
-    card.style.display = 'none';
-    momoLbl.textContent = n === 2 ? 'Numéro Orange Money' : 'Numéro MTN Mobile Money';
-    momoInput.placeholder = '6XX XXX XXX';
-  }
+  const opDot = document.getElementById('pay-op-dot');
+  const opLbl = document.getElementById('pay-op-label');
+  if (momo) momo.style.display = 'block';
+  if (momoLbl) momoLbl.textContent = n === 2 ? 'Numéro Orange Money' : 'Numéro MTN Mobile Money';
+  if (momoInput) momoInput.placeholder = n === 2 ? '655-659 / 690-699' : '650-654 / 670-683';
+  if (opDot) opDot.style.background = colors[n];
+  if (opLbl) opLbl.textContent = n === 2 ? 'Orange Money sélectionné — prompt USSD envoyé par AangaraaPay' : 'MTN Mobile Money sélectionné — prompt USSD envoyé par AangaraaPay';
 }
 
 function previewSchoolLogo(input) {
@@ -1623,8 +1638,21 @@ function confirmDeleteSchool(name, btn) {
 }
 
 function showOK() {
+  const tel = document.getElementById('pay-momo-input');
+  if (tel && !tel.value.trim()) { tel.focus(); tel.style.border='1.5px solid var(--ep-red)'; setTimeout(()=>tel.style.border='',2000); return; }
   const el = document.getElementById('ok-msg');
+  const pending = document.getElementById('ok-pending');
+  const confirmed = document.getElementById('ok-confirmed');
   if (el) { el.style.display = 'block'; el.scrollIntoView({behavior:'smooth'}); }
+  if (pending) pending.style.display = 'block';
+  if (confirmed) confirmed.style.display = 'none';
+}
+
+function showOKConfirmed() {
+  const pending = document.getElementById('ok-pending');
+  const confirmed = document.getElementById('ok-confirmed');
+  if (pending) pending.style.display = 'none';
+  if (confirmed) { confirmed.style.display = 'block'; confirmed.scrollIntoView({behavior:'smooth'}); }
 }
 
 function showSchoolSuccess() {

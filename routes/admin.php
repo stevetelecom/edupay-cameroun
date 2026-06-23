@@ -35,13 +35,13 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     // Gestion des établissements
-    // Route::prefix('etablissements')->name('etablissements.')->group(function () {
-    //     Route::get('/',                          [EtablissementAdminController::class, 'index'])->name('index');
-    //     Route::get('/{etablissement}',           [EtablissementAdminController::class, 'show'])->name('show');
-    //     Route::patch('/{etablissement}/activer', [EtablissementAdminController::class, 'activer'])->name('activer');
-    //     Route::patch('/{etablissement}/suspendre',[EtablissementAdminController::class, 'suspendre'])->name('suspendre');
-    //     Route::delete('/{etablissement}',        [EtablissementAdminController::class, 'destroy'])->name('destroy');
-    // });
+    Route::prefix('etablissements')->name('etablissements.')->group(function () {
+        Route::get('/',                           [EtablissementAdminController::class, 'index'])->name('index');
+        Route::get('/{etablissement}',            [EtablissementAdminController::class, 'show'])->name('show');
+        Route::patch('/{etablissement}/activer',  [EtablissementAdminController::class, 'activer'])->name('activer');
+        Route::patch('/{etablissement}/suspendre',[EtablissementAdminController::class, 'suspendre'])->name('suspendre');
+        Route::delete('/{etablissement}',         [EtablissementAdminController::class, 'destroy'])->name('destroy');
+    });
 
     // Transactions globales
     //Route::get('transactions',    [TransactionAdminController::class, 'index'])->name('transactions.index');

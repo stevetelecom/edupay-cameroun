@@ -16,14 +16,31 @@ class LoginController extends Controller
             'login'    => 'required|string',
             'password' => 'required|string',
         ]);
-        $credentials = filter_var($request->login, FILTER_VALIDATE_EMAIL)
-            ? ['email' => $request->login, 'password' => $request->password]
-            : ['telephone' => $request->login, 'password' => $request->password];
+
+        $login = $request->login;
+
+        // Si c'est un email, chercher directement
+        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            $credentials = ['email' => $login, 'password' => $request->password];
+        } else {
+            // C'est un numéro de téléphone — normaliser pour la recherche en BD
+            // La BD stocke "699123456" mais le formulaire envoie "+237699123456"
+            $telephone = preg_replace('/[\s\-\+]/', '', $login); // Retire espaces, tirets, +
+            
+            // Garder juste les 9 derniers chiffres (Cameroun)
+            if (strlen($telephone) > 9) {
+                $telephone = substr($telephone, -9);
+            }
+            
+            $credentials = ['telephone' => $telephone, 'password' => $request->password];
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
             return redirect()->intended($this->redirectionParRole($request->user()));
         }
+
         return back()->withErrors([
             'login' => 'Identifiants incorrects.',
         ])->withInput();

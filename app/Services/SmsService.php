@@ -40,7 +40,7 @@ class SmsService
     /**
      * Envoi générique — utilisé par envoyerOtp() et envoyerRelance().
      */
-    private function envoyer(string $telephone, string $message): bool
+    public function envoyer(string $telephone, string $message): bool
     {
         try {
             $numero = $this->normaliserNumero($telephone);

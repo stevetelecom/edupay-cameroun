@@ -2,6 +2,36 @@
 
 @section('title', 'Modifier — ' . $apprenant->prenom . ' ' . $apprenant->nom)
 
+@push('modals')
+
+{{-- ══ MODAL : Confirmer le détachement ══ --}}
+<div id="modal-detach-apprenant" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm ep-modal-danger">
+    <div class="ep-modal-head">
+      <h3>Retirer {{ $apprenant->prenom }} ?</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-detach-apprenant')">×</button>
+    </div>
+    <div class="ep-modal-body">
+      <p style="font-size:13px;color:#555;line-height:1.6;">
+        Vous allez retirer <strong>{{ $apprenant->prenom }} {{ $apprenant->nom }}</strong> de votre compte.<br><br>
+        Cette action est irréversible. L'apprenant ne sera plus visible depuis votre espace.
+      </p>
+    </div>
+    <div class="ep-modal-foot">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
+              onclick="epModal.close('modal-detach-apprenant')">Annuler</button>
+      <form method="POST" action="{{ route('payeur.apprenant.detach', $apprenant) }}" style="display:inline;">
+        @csrf @method('DELETE')
+        <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">
+          Retirer {{ $apprenant->prenom }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+@endpush
+
 @section('content')
 
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
@@ -30,7 +60,6 @@
 
         <div class="epcard">
 
-            {{-- Recherche établissement --}}
             <div style="margin-bottom:16px;">
                 <div class="lbl">Établissement *</div>
                 <div style="position:relative;margin-bottom:8px;">
@@ -53,8 +82,7 @@
                              data-nom="{{ $etab->nom }}"
                              data-ville="{{ $etab->ville }}"
                              onclick="selectionnerEtab(this)"
-                             style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;justify-content:space-between;
-                             {{ $apprenant->etablissement_id == $etab->id ? 'background:#f0fdf4;' : '' }}">
+                             style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;justify-content:space-between;{{ $apprenant->etablissement_id == $etab->id ? 'background:#f0fdf4;' : '' }}">
                             <div>
                                 <div style="font-size:13px;font-weight:600;">{{ $etab->nom }}</div>
                                 <div style="font-size:11px;color:#888;">{{ $etab->ville }} · {{ $etab->type }}</div>
@@ -69,14 +97,13 @@
             </div>
 
             <form method="POST" action="{{ route('payeur.apprenant.update', $apprenant) }}">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="etablissement_id"  id="h-etab-id"
+                @csrf @method('PUT')
+                <input type="hidden" name="etablissement_id" id="h-etab-id"
                        value="{{ old('etablissement_id', $apprenant->etablissement_id) }}">
                 <input type="hidden" name="etablissement_nom" id="h-etab-nom"
                        value="{{ old('etablissement_nom', $apprenant->etablissement->nom ?? '') }}">
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;">
+                <div class="g2">
                     <div>
                         <div class="lbl">Prénom *</div>
                         <input type="text" name="prenom" class="inp"
@@ -116,17 +143,12 @@
 
         </div>
 
-        {{-- Détacher l'apprenant --}}
         @unless($apprenant->paiements()->exists())
             <div style="margin-top:16px;text-align:center;">
-                <form method="POST" action="{{ route('payeur.apprenant.detach', $apprenant) }}"
-                      onsubmit="return confirm('Retirer {{ $apprenant->prenom }} de votre compte ?');">
-                    @csrf @method('DELETE')
-                    <button type="submit"
-                            style="background:none;border:none;color:var(--ep-red);font-size:12px;cursor:pointer;text-decoration:underline;">
-                        Retirer {{ $apprenant->prenom }} de mon compte
-                    </button>
-                </form>
+                <button onclick="epModal.open('modal-detach-apprenant')"
+                        style="background:none;border:none;color:var(--ep-red);font-size:12px;cursor:pointer;text-decoration:underline;">
+                    Retirer {{ $apprenant->prenom }} de mon compte
+                </button>
             </div>
         @endunless
 
@@ -163,7 +185,7 @@ function selectionnerEtab(el) {
 document.addEventListener('click', function(e) {
     var liste  = document.getElementById('etab-liste');
     var search = document.getElementById('etab-search');
-    if (!liste.contains(e.target) && e.target !== search) {
+    if (liste && search && !liste.contains(e.target) && e.target !== search) {
         liste.style.display = 'none';
     }
 });

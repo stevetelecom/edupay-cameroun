@@ -77,6 +77,25 @@
         @keyframes toast-out{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(30px);}}
     </style>
 
+
+    <style>
+        /* ── Système Modal EduPay ── */
+        .ep-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center;padding:16px;}
+        .ep-modal-overlay.open{display:flex;}
+        .ep-modal{background:#fff;border-radius:var(--radius-lg);width:100%;display:flex;flex-direction:column;max-height:90vh;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+        .ep-modal-sm{max-width:420px;}
+        .ep-modal-md{max-width:560px;}
+        .ep-modal-lg{max-width:720px;}
+        .ep-modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #f0f0f0;flex-shrink:0;}
+        .ep-modal-head h3{font-size:15px;font-weight:700;margin:0;}
+        .ep-modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;line-height:1;padding:2px 6px;border-radius:4px;}
+        .ep-modal-close:hover{background:#f5f5f5;color:#333;}
+        .ep-modal-body{padding:20px;overflow-y:auto;flex:1;}
+        .ep-modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid #f0f0f0;flex-shrink:0;}
+        .ep-modal-danger .ep-modal-head{border-bottom-color:#FBEAEA;}
+        .ep-modal-danger .ep-modal-head h3{color:var(--ep-red);}
+    </style>
+
     @stack('styles')
 </head>
 <body class="h-full">
@@ -187,6 +206,37 @@
                 toast.classList.add('closing');
                 setTimeout(function () { toast.remove(); }, 200);
             }, 4000);
+        });
+    </script>
+
+
+    @stack('modals')
+
+    <script>
+        // Ouvrir  : epModal.open('monModalId')
+        // Fermer  : epModal.close('monModalId')  ou  epModal.closeAll()
+        var epModal = {
+            open: function(id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                el.classList.add('open');
+                var handler = function(e) {
+                    if (e.target === el) { epModal.close(id); el.removeEventListener('click', handler); }
+                };
+                el.addEventListener('click', handler);
+            },
+            close: function(id) {
+                var el = document.getElementById(id);
+                if (el) el.classList.remove('open');
+            },
+            closeAll: function() {
+                document.querySelectorAll('.ep-modal-overlay.open').forEach(function(el) {
+                    el.classList.remove('open');
+                });
+            }
+        };
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') epModal.closeAll();
         });
     </script>
 

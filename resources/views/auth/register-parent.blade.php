@@ -118,7 +118,7 @@
         <div class="inp-row">
           <div>
             <div class="lbl">Numéro de téléphone *</div>
-            <input class="inp" name="telephone" value="{{ old('telephone') }}" placeholder="6XX XXX XXX" required />
+            <input class="inp phone-input-parent" name="telephone" value="{{ old('telephone') }}" placeholder="6XX XXX XXX" required />
           </div>
           <div>
             <div class="lbl">Adresse email</div>
@@ -243,6 +243,38 @@ function togglePwd(id) {
   inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 
+// Formatage +237 pour téléphone
+function formatPhoneNumber(input) {
+  let value = input.value.trim();
+  
+  // Si c'est un email, ne pas modifier
+  if (value.includes('@')) return;
+  
+  // Enlever tous les caractères non-numériques sauf le +
+  value = value.replace(/[^\d+]/g, '');
+  
+  // Si commence par +237, c'est bon
+  if (value.startsWith('+237')) {
+    input.value = value;
+    return;
+  }
+  
+  // Si commence par 237 sans +, ajouter le +
+  if (value.startsWith('237')) {
+    input.value = '+' + value;
+    return;
+  }
+  
+  // Si commence par 6 ou 7, ajouter +237
+  if (value && /^[67]/.test(value)) {
+    input.value = '+237' + value;
+    return;
+  }
+  
+  // Sinon laisser tel quel
+  input.value = value;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   var checked = document.querySelector('input[name="profil"]:checked');
   switchProfil(checked ? checked.value : 'parent');
@@ -254,6 +286,18 @@ document.addEventListener('DOMContentLoaded', function() {
       switchProfil(p);
     });
   });
+
+  // Formatage +237 pour le téléphone
+  const phoneInputParent = document.querySelector('.phone-input-parent');
+  if (phoneInputParent) {
+    // Formater au chargement (old('telephone'))
+    formatPhoneNumber(phoneInputParent);
+    
+    // Formater à chaque saisie
+    phoneInputParent.addEventListener('input', function(e) {
+      formatPhoneNumber(e.target);
+    });
+  }
 });
 </script>
 @endsection

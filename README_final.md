@@ -29,7 +29,7 @@
 
 ## 🎯 Présentation du projet
 
-**EduPay Cameroun** est une plateforme web de paiement électronique des frais de scolarité, conçue pour les réalités camerounaises. Elle connecte les établissements scolaires aux parents et étudiants via **MTN Mobile Money**, **Orange Money** et **carte bancaire (CinetPay)**.
+**EduPay Cameroun** est une plateforme web de paiement électronique des frais de scolarité, conçue pour les réalités camerounaises. Elle connecte les établissements scolaires aux parents et étudiants via **MTN Mobile Money** et **Orange Money**, agrégés via **AangaraaPay**.
 
 > **Développeur solo :** MEKONTSO OLIVIER STEVE  
 > **Établissement :** ESTLC Ambam — GSI Niveau 3/4  
@@ -50,7 +50,7 @@ La quasi-totalité des établissements scolaires camerounais gère encore les pa
 │  MODULE PAYEUR                 │  MODULE ÉTABLISSEMENT         │
 │  (Parents / Élèves)            │  (Directeur / Comptable)      │
 │  - Inscription multi-profil    │  - Config frais & échéanciers │
-│  - Paiement MoMo / Carte       │  - Annuaire des apprenants    │
+│  - Paiement MTN MoMo / Orange Money   │  - Annuaire des apprenants    │
 │  - Paiement fractionné 2–3×    │  - Suivi impayés & relances   │
 │  - Historique & reçus PDF      │  - Rapports PDF & Excel       │
 │  - Réclamations en ligne       │  - Multi-sites & équipe       │
@@ -93,7 +93,7 @@ La quasi-totalité des établissements scolaires camerounais gère encore les pa
 | # | ID Maquette | Module | Onglets disponibles |
 |---|-------------|--------|---------------------|
 | 09 | `s-parent` | **Dashboard Parent / Élève** | Tableau de bord · Mes enfants · Historique · Reçus & Certificats · Réclamations · Profil |
-| 10 | `s-payment` | **Tunnel de paiement** | Choix montant (intégral / tranche) · MTN / Orange / Carte · Confirmation |
+| 10 | `s-payment` | **Tunnel de paiement** | Choix montant (intégral / tranche dynamique N×) · MTN MoMo / Orange Money · USSD · Confirmation |
 | 11 | `s-school` | **Back-office École** | Tableau de bord · Apprenants · Frais & Échéanciers · Impayés · Remboursements · Rapports · Utilisateurs · Multi-sites · Paramètres |
 | 12 | `s-admin` | **Super Admin** | Vue globale · Établissements · Transactions · Commissions · Réclamations · Logs sécurité · Exports réglementaires · Paramètres sys. |
 
@@ -120,7 +120,7 @@ La quasi-totalité des établissements scolaires camerounais gère encore les pa
 ┌──────────────────── COUCHE MÉTIER / API ──────────────────────┐
 │   Laravel 13 — PHP 8.5 (Contrôleurs, Services, Policies)     │
 │   Laravel Sanctum (Auth API + tokens)                         │
-│   Spatie Laravel Permission (5 rôles, guard : admin)          │
+│   Spatie Laravel Permission (6 rôles, guard : admin)          │
 │   Laravel Queues + Jobs (Notifications async)                 │
 │   Guard dédié : admin — prefix routes : admin-ep2026          │
 └───────────────────────────────────────────────────────────────┘
@@ -132,13 +132,13 @@ La quasi-totalité des établissements scolaires camerounais gère encore les pa
 └───────────────────────────────────────────────────────────────┘
                                │
 ┌──────────────────── INTÉGRATIONS PAIEMENT ────────────────────┐
-│   MTN Mobile Money API — Cameroun (sandbox → production)      │
-│   Orange Money API — Cameroun (sandbox → production)          │
-│   CinetPay — Carte Visa / Mastercard                          │
+│   AangaraaPay — MTN MoMo + Orange Money                          │
 └───────────────────────────────────────────────────────────────┘
 ```
 
 ### Stack complet
+
+> 📄 Le détail complet du flux de paiement Mobile Money (étapes, routes, webhook, statuts) est documenté dans `PAIEMENT_AANGARAAPAY.md`.
 
 | Couche | Technologie | Version |
 |--------|-------------|---------|
@@ -148,6 +148,7 @@ La quasi-totalité des établissements scolaires camerounais gère encore les pa
 | Composants réactifs | Livewire | 3.x |
 | Base de données | MySQL | 8.0 |
 | Auth & rôles | Sanctum + Spatie Permission | — |
+| Agrégateur Paiement | AangaraaPay (MTN MoMo + Orange Money) | API v1 |
 | PDF | barryvdh/laravel-dompdf | — |
 | SMS | Africa's Talking API | — |
 | Email dev | Mailtrap | — |
@@ -217,9 +218,7 @@ edupay-cameroun/
 │   │   └── Reclamation.php
 │   │
 │   ├── Services/
-│   │   ├── MtnMomoService.php
-│   │   ├── OrangeMoneyService.php
-│   │   ├── CinetPayService.php
+│   │   ├── AangaraaPayService.php          # MTN MoMo + Orange Money
 │   │   ├── PdfService.php
 │   │   └── SmsService.php
 │   │
@@ -312,13 +311,13 @@ test:      Ajout ou modification de tests
 docs:      Documentation uniquement
 chore:     Config, dépendances, .env
 db:        Migration ou seeder
-api:       Intégration API externe (MoMo, Orange, CinetPay)
+api:       Intégration API externe (AangaraaPay)
 
 Exemples :
   feat: dashboard parent avec vue famille et vue solo
   fix: calcul commission arrondi FCFA
   db: migration table otpcodes
-  api: intégration MTN MoMo sandbox Cameroun
+  api: intégration AangaraaPay (MTN MoMo + Orange Money) sandbox
   test: feature paiement fractionné 2 tranches
   docs: mise à jour README et DOCUMENTATION_API
 ```
@@ -386,7 +385,7 @@ php artisan queue:work
 -- Utilisateurs et rôles
 users                    → Parents, élèves, staff école (guard: web)
 admins                   → Super administrateur (guard: admin)
-roles                    → Rôles Spatie Permission
+roles                    → payeur, directeur, comptable, caissier, staff_ecole, super_admin
 permissions              → Permissions granulaires
 model_has_roles          → Liaison user ↔ rôle
 
@@ -401,7 +400,8 @@ echeanciers              → Calendrier de paiement par tranche
 frais_apprenant          → Montant dû par apprenant et par catégorie
 
 -- Paiements et transactions
-paiements                → Chaque paiement initié (statut, montant, mode, tranche)
+paiements                → Chaque paiement initié (statut, montant, mode, tranche,
+                            pay_token, aangaraa_transaction_id, operateur)
 transactions             → Réponse technique API opérateur (ref, callback, statut final)
 otp_codes                → OTP SMS temporaires (connexion + vérification paiement)
 commissions              → Commission EduPay prélevée par transaction
@@ -463,21 +463,9 @@ AT_API_KEY=
 AT_USERNAME=sandbox
 AT_SENDER_ID=EduPay
 
-# ── MTN Mobile Money (Cameroun) ───────────────
-MTN_MOMO_SUBSCRIPTION_KEY=
-MTN_MOMO_API_USER=
-MTN_MOMO_API_KEY=
-MTN_MOMO_ENV=sandbox
-
-# ── Orange Money (Cameroun) ───────────────────
-ORANGE_CLIENT_ID=
-ORANGE_CLIENT_SECRET=
-ORANGE_MOMO_ENV=sandbox
-
-# ── CinetPay (Carte bancaire) ─────────────────
-CINETPAY_API_KEY=
-CINETPAY_SITE_ID=
-CINETPAY_ENV=sandbox
+# ── AangaraaPay (MTN MoMo + Orange Money) ─
+AANGARAA_API_URL=https://api-production.aangaraa-pay.com/api/v1
+AANGARAA_APP_KEY=
 
 # ── Super Admin ───────────────────────────────
 ADMIN_URL_PREFIX=admin-ep2026
@@ -552,7 +540,7 @@ const TAUX_COMMISSION_DEFAULT = 0.005;
 | **Phase 2** | Auth multi-rôles (Sanctum + Spatie), OTP SMS, inscription parent/école | 🔴 Critique |
 | **Phase 3** | Module Établissement : config frais, annuaire, échéanciers | 🔴 Critique |
 | **Phase 4** | Dashboard Parent : vue famille, vue élève, tunnel paiement Livewire | 🔴 Critique |
-| **Phase 5** | Intégrations MoMo sandbox (MTN + Orange) + CinetPay | 🟡 Important |
+| **Phase 5** | Intégration AangaraaPay (MTN MoMo + Orange Money) — flux USSD + poll + webhook | 🟡 Important |
 | **Phase 6** | Génération reçus PDF (DomPDF) + notifications SMS/email | 🟡 Important |
 | **Phase 7** | Super Admin (guard admin, 2FA, KPIs, commissions, logs) | 🟡 Important |
 | **Phase 8** | Rapports PDF & Excel, exports COBAC/BEAC | 🟠 Souhaitable |

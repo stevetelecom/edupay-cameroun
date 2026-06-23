@@ -142,7 +142,7 @@
 
           <div class="form-section">Coordonnées de l'établissement</div>
           <div class="inp-row">
-            <div><div class="lbl">Téléphone principal *</div><input class="inp" name="telephone" value="{{ old('telephone', $old['telephone'] ?? '') }}" placeholder="6XX XXX XXX" required /></div>
+            <div><div class="lbl">Téléphone principal *</div><input class="inp phone-input-ecole" name="telephone" value="{{ old('telephone', $old['telephone'] ?? '') }}" placeholder="6XX XXX XXX" required /></div>
             <div><div class="lbl">Email officiel *</div><input class="inp" name="email" value="{{ old('email', $old['email'] ?? '') }}" placeholder="secretariat@lycee.cm" required /></div>
           </div>
           <div class="inp-row">
@@ -164,12 +164,28 @@
             <div><div class="lbl">Nom *</div><input class="inp" name="resp_nom" value="{{ old('resp_nom', $old['resp_nom'] ?? '') }}" placeholder="ex : MVONDO" required /></div>
           </div>
           <div class="inp-row">
-            <div><div class="lbl">Téléphone du responsable *</div><input class="inp" name="resp_telephone" value="{{ old('resp_telephone', $old['resp_telephone'] ?? '') }}" placeholder="6XX XXX XXX" required /></div>
+            <div><div class="lbl">Téléphone du responsable *</div><input class="inp phone-input-ecole" name="resp_telephone" value="{{ old('resp_telephone', $old['resp_telephone'] ?? '') }}" placeholder="6XX XXX XXX" required /></div>
             <div><div class="lbl">Email du responsable *</div><input class="inp" name="resp_email" value="{{ old('resp_email', $old['resp_email'] ?? '') }}" placeholder="directeur@lycee.cm" required /></div>
           </div>
           <div class="inp-row">
-            <div><div class="lbl">Mot de passe *</div><input class="inp" type="password" name="resp_password" placeholder="Min. 8 caractères" required /></div>
-            <div><div class="lbl">Confirmer le mot de passe *</div><input class="inp" type="password" name="resp_password_confirmation" placeholder="Répétez" required /></div>
+            <div>
+              <div class="lbl">Mot de passe *</div>
+              <div style="position:relative;">
+                <input class="inp" type="password" name="resp_password" id="resp-pwd" placeholder="Min. 8 caractères" required style="padding-right:40px;" />
+                <span onclick="togglePwdEcole('resp-pwd')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:#aaa;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </span>
+              </div>
+            </div>
+            <div>
+              <div class="lbl">Confirmer le mot de passe *</div>
+              <div style="position:relative;">
+                <input class="inp" type="password" name="resp_password_confirmation" id="resp-pwd2" placeholder="Répétez" required style="padding-right:40px;" />
+                <span onclick="togglePwdEcole('resp-pwd2')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:#aaa;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </span>
+              </div>
+            </div>
           </div>
 
           <div style="display:flex;gap:10px;margin-top:10px;">
@@ -272,6 +288,58 @@ function previewSchoolLogo(input) {
         preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;" />`;
     };
     reader.readAsDataURL(file);
+}
+
+// Afficher/cacher mot de passe
+function togglePwdEcole(id) {
+  var inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// Formatage +237 pour téléphone
+document.addEventListener('DOMContentLoaded', function() {
+  const phoneInputsEcole = document.querySelectorAll('.phone-input-ecole');
+  
+  phoneInputsEcole.forEach(function(input) {
+    // Formater au chargement (old('telephone') ou old('resp_telephone'))
+    formatPhoneNumber(input);
+    
+    // Formater à chaque saisie
+    input.addEventListener('input', function(e) {
+      formatPhoneNumber(e.target);
+    });
+  });
+});
+
+function formatPhoneNumber(input) {
+  let value = input.value.trim();
+  
+  // Si c'est un email, ne pas modifier
+  if (value.includes('@')) return;
+  
+  // Enlever tous les caractères non-numériques sauf le +
+  value = value.replace(/[^\d+]/g, '');
+  
+  // Si commence par +237, c'est bon
+  if (value.startsWith('+237')) {
+    input.value = value;
+    return;
+  }
+  
+  // Si commence par 237 sans +, ajouter le +
+  if (value.startsWith('237')) {
+    input.value = '+' + value;
+    return;
+  }
+  
+  // Si commence par 6 ou 7, ajouter +237
+  if (value && /^[67]/.test(value)) {
+    input.value = '+237' + value;
+    return;
+  }
+  
+  // Sinon laisser tel quel
+  input.value = value;
 }
 </script>
 @endsection

@@ -53,6 +53,11 @@ class DashboardController extends Controller
         $totalGlobal = $totalDu + $totalPaye;
         $pourcentageGlobal = $totalGlobal > 0 ? round(($totalPaye / $totalGlobal) * 100) : 0;
 
+        
+        $etablissements = \App\Models\Etablissement::where('statut', 'actif')
+            ->orderBy('nom')
+            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement']);
+
         return view('payeur.dashboard', [
             'apprenants'          => $apprenants,
             'totalDu'             => $totalDu,
@@ -65,6 +70,7 @@ class DashboardController extends Controller
             'monDossier'          => $monDossier,
             'pourcentageGlobal'   => $pourcentageGlobal,
             'pageTitle'           => 'Mon espace — EduPay',
+            'etablissements'      => $etablissements,
         ]);
     }
 }

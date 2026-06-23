@@ -2,6 +2,103 @@
 
 @section('title', 'Mon espace')
 
+
+@push('modals')
+
+{{-- ══ MODAL : Rattacher un enfant / apprenant ══ --}}
+<div id="modal-rattacher" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-lg">
+    <div class="ep-modal-head">
+      <h3>+ Rattacher un enfant / apprenant</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-rattacher')">×</button>
+    </div>
+    <div class="ep-modal-body">
+
+      {{-- Recherche établissement --}}
+      <div style="margin-bottom:16px;">
+        <div class="lbl">Rechercher un établissement *</div>
+        <div style="position:relative;margin-bottom:8px;">
+          <input type="text" id="m-etab-search"
+                 placeholder="Tapez le nom ou la ville…"
+                 style="width:100%;padding:11px 12px 11px 36px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"
+                 oninput="mFiltrerEtabs(this.value)"
+                 onfocus="document.getElementById('m-etab-liste').style.display='block'" />
+          <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#aaa;"
+               width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+        <div id="m-etab-liste"
+             style="border:1px solid #e0e0e0;border-radius:8px;background:#fff;max-height:180px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1);">
+          @foreach($etablissements ?? [] as $etab)
+            <div class="m-etab-item"
+                 data-id="{{ $etab->id }}"
+                 data-nom="{{ $etab->nom }}"
+                 data-ville="{{ $etab->ville ?? '' }}"
+                 data-code="{{ $etab->code_etablissement ?? '' }}"
+                 data-type="{{ $etab->type ?? '' }}"
+                 onclick="mSelectionnerEtab(this)"
+                 style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;justify-content:space-between;">
+              <div>
+                <div style="font-size:13px;font-weight:600;">{{ $etab->nom }}</div>
+                <div style="font-size:11px;color:#888;">
+                  @if($etab->code_etablissement)
+                    [{{ $etab->code_etablissement }}]
+                  @endif
+                  {{ $etab->ville ?? '' }} {{ $etab->type ? '· ' . $etab->type : '' }}
+                </div>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"
+                   class="m-etab-check" style="opacity:0;flex-shrink:0;">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          @endforeach
+        </div>
+      </div>
+
+      <form method="POST" action="{{ route('payeur.onboarding.store') }}" id="m-onb-form">
+        @csrf
+        <input type="hidden" name="lien" value="parent" />
+        <input type="hidden" name="etablissement_id"  id="m-h-etab-id"  value="" />
+        <input type="hidden" name="etablissement_nom" id="m-h-etab-nom" value="" />
+
+        <div class="g2">
+          <div>
+            <div class="lbl">Prénom de l'enfant *</div>
+            <input class="inp" name="prenom_apprenant" placeholder="Brice" required />
+          </div>
+          <div>
+            <div class="lbl">Nom *</div>
+            <input class="inp" name="nom_apprenant" placeholder="FONO" required />
+          </div>
+          <div>
+            <div class="lbl">Classe *</div>
+            <input class="inp" name="classe" placeholder="3ème A" required />
+          </div>
+          <div>
+            <div class="lbl">Matricule (si connu)</div>
+            <input class="inp" name="matricule" placeholder="EP-0001" />
+          </div>
+        </div>
+
+        <div style="background:var(--ep-teal-lt);border-radius:8px;padding:10px 14px;font-size:12px;color:#085041;margin-top:4px;">
+          Apprenant introuvable ? Votre demande sera en pré-rattachement, validée par l'établissement.
+        </div>
+
+      </form>
+    </div>
+    <div class="ep-modal-foot">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
+              onclick="epModal.close('modal-rattacher')">Annuler</button>
+      <button type="button" class="btn-p" style="width:auto;padding:8px 20px;"
+              onclick="mSoumettre()">Rattacher →</button>
+    </div>
+  </div>
+</div>
+
+@endpush
+
 @section('content')
 
 @if($estSolo)
@@ -52,7 +149,7 @@
         <div class="epcard" style="text-align:center;color:#999;padding:30px 0;margin-bottom:18px;">
             Vous n'êtes pas encore rattaché(e) à un établissement.
             <div style="margin-top:10px;">
-                <a href="{{ route('payeur.onboarding') }}" class="btn-p" style="width:auto;">Me rattacher maintenant</a>
+                <button onclick="epModal.open('modal-rattacher')" class="btn-p" style="width:auto;">Me rattacher maintenant</button>
             </div>
         </div>
     @else
@@ -208,7 +305,7 @@
         <div class="epcard" style="text-align:center;color:#999;padding:30px 0;margin-bottom:18px;">
             Aucun enfant rattaché à votre compte pour le moment.
             <div style="margin-top:10px;">
-                <a href="{{ route('payeur.onboarding') }}" class="btn-p" style="width:auto;">Rattacher un enfant</a>
+                <button onclick="epModal.open('modal-rattacher')" class="btn-p" style="width:auto;">+ Rattacher un enfant</button>
             </div>
         </div>
     @else
@@ -327,9 +424,7 @@
     <div id="vue-enfants" style="display:none;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
             <div style="font-size:17px;font-weight:700;">Mes enfants</div>
-            <a href="{{ route('payeur.onboarding') }}" class="btn-p" style="width:auto;padding:9px 16px;font-size:12px;">
-                + Rattacher un enfant
-            </a>
+            <button onclick="epModal.open('modal-rattacher')" class="btn-p" style="width:auto;padding:9px 16px;font-size:12px;">+ Rattacher un enfant</button>
         </div>
 
         @if($apprenants->isEmpty())
@@ -423,6 +518,114 @@
     document.addEventListener('DOMContentLoaded', function () {
         if (window.location.hash === '#mes-enfants') {
             showVuePane('enfants');
+        }
+    });
+
+    // ══════════════════════════════════════════════════════════════
+    // Fonctions pour le modal de rattachement d'établissement
+    // ══════════════════════════════════════════════════════════════
+
+    // Filtrer la liste des établissements
+    function mFiltrerEtabs(searchValue) {
+        const items = document.querySelectorAll('.m-etab-item');
+        const searchLower = searchValue.toLowerCase().trim();
+
+        // Si recherche vide, afficher tous les items
+        if (!searchLower) {
+            items.forEach(item => item.style.display = '');
+            return;
+        }
+
+        let hasMatch = false;
+        items.forEach(item => {
+            const nom = item.getAttribute('data-nom').toLowerCase();
+            const ville = item.getAttribute('data-ville').toLowerCase();
+            const code = item.getAttribute('data-code').toLowerCase();
+
+            // Chercher dans nom, ville, ou code
+            const match = nom.includes(searchLower) || 
+                         ville.includes(searchLower) || 
+                         code.includes(searchLower);
+
+            item.style.display = match ? '' : 'none';
+            if (match) hasMatch = true;
+        });
+    }
+
+    // Sélectionner un établissement
+    function mSelectionnerEtab(element) {
+        const etabId = element.getAttribute('data-id');
+        const etabNom = element.getAttribute('data-nom');
+
+        // Remplir les champs cachés
+        document.getElementById('m-h-etab-id').value = etabId;
+        document.getElementById('m-h-etab-nom').value = etabNom;
+
+        // Mettre à jour l'affichage (checkmark)
+        document.querySelectorAll('.m-etab-item').forEach(item => {
+            const checkmark = item.querySelector('.m-etab-check');
+            if (item === element) {
+                checkmark.style.opacity = '1';
+                item.style.background = '#f8f8f8';
+            } else {
+                checkmark.style.opacity = '0';
+                item.style.background = '';
+            }
+        });
+
+        // Mettre à jour le champ de recherche avec le nom sélectionné
+        document.getElementById('m-etab-search').value = etabNom;
+
+        // Fermer la dropdown
+        document.getElementById('m-etab-liste').style.display = 'none';
+    }
+
+    // Soumettre le formulaire
+    function mSoumettre() {
+        const etabId = document.getElementById('m-h-etab-id').value;
+        const prenomApprenant = document.querySelector('input[name="prenom_apprenant"]').value.trim();
+        const nomApprenant = document.querySelector('input[name="nom_apprenant"]').value.trim();
+        const classe = document.querySelector('input[name="classe"]').value.trim();
+
+        // Validation
+        if (!etabId) {
+            alert('Veuillez sélectionner un établissement');
+            return;
+        }
+        if (!prenomApprenant) {
+            alert('Veuillez entrer le prénom de l\'enfant');
+            return;
+        }
+        if (!nomApprenant) {
+            alert('Veuillez entrer le nom de l\'enfant');
+            return;
+        }
+        if (!classe) {
+            alert('Veuillez entrer la classe');
+            return;
+        }
+
+        // Soumettre le formulaire
+        document.getElementById('m-onb-form').submit();
+    }
+
+    // Gérer l'affichage/masquage de la dropdown au focus/blur
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('m-etab-search');
+        const listDiv = document.getElementById('m-etab-liste');
+
+        if (searchInput && listDiv) {
+            // Masquer la liste au blur
+            searchInput.addEventListener('blur', function () {
+                setTimeout(() => {
+                    listDiv.style.display = 'none';
+                }, 150); // Délai pour laisser le temps de cliquer
+            });
+
+            // Afficher la liste au focus
+            searchInput.addEventListener('focus', function () {
+                listDiv.style.display = 'block';
+            });
         }
     });
 </script>
