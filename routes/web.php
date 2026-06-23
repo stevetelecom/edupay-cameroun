@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterParentController;
 use App\Http\Controllers\Auth\RegisterEcolController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Public\LandingController;
 use Illuminate\Support\Facades\Auth;
 /*
@@ -22,6 +23,15 @@ Route::middleware('guest')->group(function () {
     Route::post('/connexion',         [LoginController::class, 'login'])->name('login.post');
     Route::get('/connexion/otp',      [LoginController::class, 'showOtpForm'])->name('login.otp');
     Route::post('/connexion/otp',     [LoginController::class, 'verifyOtp'])->name('login.otp.verify');
+
+    // Mot de passe oublié / Réinitialisation
+    Route::get('/mot-de-passe-oublie',               [PasswordResetController::class, 'showForgotForm'])->name('password.forgot');
+    Route::post('/mot-de-passe-oublie',              [PasswordResetController::class, 'sendResetCode'])->name('password.send.code');
+    Route::get('/verifier-code',                     [PasswordResetController::class, 'showVerifyForm'])->name('password.verify.form');
+    Route::post('/verifier-code',                    [PasswordResetController::class, 'verifyCode'])->name('password.verify.code');
+    Route::post('/renvoyer-code',                    [PasswordResetController::class, 'resendCode'])->name('password.resend.code');
+    Route::get('/reinitialiser-mot-de-passe',       [PasswordResetController::class, 'showResetForm'])->name('password.reset.form');
+    Route::post('/reinitialiser-mot-de-passe',      [PasswordResetController::class, 'resetPassword'])->name('password.reset');
 
     // Inscription Parent (3 étapes)
     Route::get('/inscription/parent',            [RegisterParentController::class, 'step1'])->name('register.parent.step1');

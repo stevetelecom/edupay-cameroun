@@ -6,7 +6,9 @@ use App\Http\Controllers\Admin\EtablissementAdminController;
 use App\Http\Controllers\Admin\TransactionAdminController;
 use App\Http\Controllers\Admin\CommissionController;
 use App\Http\Controllers\Admin\LogSecuriteController;
+use App\Http\Controllers\Admin\ReclamationAdminController;
 use App\Http\Controllers\Admin\ParametreSystemeController;
+use App\Http\Controllers\Admin\ExportController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -44,20 +46,43 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
     });
 
     // Transactions globales
-    //Route::get('transactions',    [TransactionAdminController::class, 'index'])->name('transactions.index');
+    Route::prefix('transactions')->name('transactions.')->group(function () {
+        Route::get('/',          [TransactionAdminController::class, 'index'])->name('index');
+        Route::get('/{paiement}',[TransactionAdminController::class, 'show'])->name('show');
+    });
 
     // Commissions
-    // Route::prefix('commissions')->name('commissions.')->group(function () {
-    //     Route::get('/',                                      [CommissionController::class, 'index'])->name('index');
-    //     Route::get('/{etablissement}/modifier',              [CommissionController::class, 'edit'])->name('edit');
-    //     Route::patch('/{etablissement}/modifier',            [CommissionController::class, 'update'])->name('update');
-    // });
+    Route::prefix('commissions')->name('commissions.')->group(function () {
+        Route::get('/',                              [CommissionController::class, 'index'])->name('index');
+        Route::get('/{etablissement}/modifier',      [CommissionController::class, 'edit'])->name('edit');
+        Route::patch('/{etablissement}/modifier',    [CommissionController::class, 'update'])->name('update');
+        Route::patch('/{commission}/prelever',       [CommissionController::class, 'marquerPrelevee'])->name('prelever');
+    });
 
-    // Logs de sécurité
-    // Route::get('logs-securite',   [LogSecuriteController::class, 'index'])->name('logs.index');
-    // Route::get('logs-securite/{log}', [LogSecuriteController::class, 'show'])->name('logs.show');
+    // Reclamations
+    Route::prefix('reclamations')->name('reclamations.')->group(function () {
+        Route::get('/',                            [ReclamationAdminController::class, 'index'])->name('index');
+        Route::get('/{reclamation}',               [ReclamationAdminController::class, 'show'])->name('show');
+        Route::patch('/{reclamation}/repondre',    [ReclamationAdminController::class, 'repondre'])->name('repondre');
+    });
 
-    // Paramètres système
-    // Route::get('parametres',      [ParametreSystemeController::class, 'index'])->name('parametres.index');
-    // Route::post('parametres',     [ParametreSystemeController::class, 'update'])->name('parametres.update');
+    // Logs de securite
+    Route::prefix('logs-securite')->name('logs.')->group(function () {
+        Route::get('/',        [LogSecuriteController::class, 'index'])->name('index');
+        Route::get('/{log}',   [LogSecuriteController::class, 'show'])->name('show');
+    });
+
+    // Exports reglementaires
+    Route::prefix('exports')->name('exports.')->group(function () {
+        Route::get('/',                  [ExportController::class, 'index'])->name('index');
+        Route::get('/rapport-mensuel',   [ExportController::class, 'rapportMensuelBeac'])->name('mensuel');
+        Route::get('/declaration-cobac', [ExportController::class, 'declarationCobac'])->name('cobac');
+    });
+
+    // Parametres systeme
+    Route::prefix('parametres')->name('parametres.')->group(function () {
+        Route::get('/',        [ParametreSystemeController::class, 'index'])->name('index');
+        Route::post('/',       [ParametreSystemeController::class, 'update'])->name('update');
+        Route::post('/cache',  [ParametreSystemeController::class, 'viderCache'])->name('cache');
+    });
 });

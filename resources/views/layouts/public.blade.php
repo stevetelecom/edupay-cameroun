@@ -84,7 +84,68 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .social-btn{width:32px;height:32px;border-radius:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;color:rgba(255,255,255,.6);font-weight:600;}
 .cert-badge{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,.45);}
 .certif{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
-/* FORM */
+
+/* ───────────────────────── MEDIA QUERIES RESPONSIVITÉ ───────────────────────── */
+
+/* Tablette (768px et moins) */
+@media (max-width: 768px) {
+  .g2, .g3, .g4 { grid-template-columns: 1fr !important; }
+  .feat-grid { grid-template-columns: 1fr !important; }
+  .footer-grid { grid-template-columns: 1fr !important; gap: 20px; }
+  .inp-row { grid-template-columns: 1fr !important; }
+  .hero-stats { flex-direction: column; }
+  .hstat { border-right: none !important; border-bottom: 1px solid rgba(255,255,255,.08); padding: 14px 28px; }
+  .hstat:last-child { border-bottom: none; }
+  .hero-h1 { font-size: 28px; }
+  .form-body { padding: 24px 16px; }
+  .form-card, .form-card-wide { padding: 20px; max-width: 100%; }
+  .form-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .form-header .logo-t { font-size: 16px; }
+}
+
+/* Mobile (480px et moins) */
+@media (max-width: 480px) {
+  body { font-size: 13px; }
+  .hero-main { padding: 32px 16px 24px; }
+  .hero-h1 { font-size: 22px; margin-bottom: 10px; }
+  .hero-sub { font-size: 13px; margin-bottom: 20px; }
+  .hero-btns { flex-direction: column; gap: 8px; }
+  .hbtn-main, .hbtn-ghost { width: 100%; }
+  .ep-body2 { padding: 16px 16px; }
+  .form-body { padding: 16px 12px; }
+  .form-card, .form-card-wide { padding: 16px; }
+  .form-title { font-size: 16px; margin-bottom: 6px; }
+  .form-sub { font-size: 12px; margin-bottom: 16px; }
+  .btn-p, .btn-o { padding: 10px 16px; font-size: 12px; }
+  .inp { padding: 9px 10px; font-size: 12px; margin-bottom: 10px; }
+  .lbl { font-size: 10px; margin-bottom: 4px; }
+  .select { padding: 9px 10px; font-size: 12px; margin-bottom: 10px; }
+  .seclbl { font-size: 10px; margin: 14px 0 8px; }
+  .check-row { font-size: 11px; gap: 8px; }
+  .feat-title { font-size: 13px; }
+  .feat-desc { font-size: 11px; }
+  .footer-col-title { font-size: 10px; }
+  .footer-link { font-size: 11px; }
+  .footer-legal { font-size: 10px; }
+  .logo-t { font-size: 16px; }
+  .app-header { padding: 10px 16px; }
+  .sidebar { width: 0; display: none; }
+  .app-body { flex-direction: column; }
+  .main-content { padding: 16px 12px; }
+  .pay-page { padding: 16px 12px; }
+}
+
+/* Très petit mobile (320px) */
+@media (max-width: 320px) {
+  .hero-h1 { font-size: 18px; }
+  .form-card, .form-card-wide { padding: 12px; }
+  .form-title { font-size: 14px; }
+  .btn-p, .btn-o { padding: 8px 12px; font-size: 11px; }
+  .inp { padding: 8px 8px; font-size: 11px; }
+}
+
+/* ───────────────────────── FIN MEDIA QUERIES ───────────────────────── */
+
 .form-header{background:var(--ep-navy);color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
 .form-body{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 20px;}
 .form-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:520px;}

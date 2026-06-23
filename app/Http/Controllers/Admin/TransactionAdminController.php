@@ -14,7 +14,7 @@ class TransactionAdminController extends Controller
         $query = Paiement::with([
                 'apprenant',
                 'fraisApprenant.categorieFrais',
-                'fraisApprenant.etablissement',
+                'fraisApprenant.categorieFrais.etablissement',
             ])
             ->orderByDesc('created_at');
 
@@ -66,7 +66,7 @@ class TransactionAdminController extends Controller
         $paiement->load([
             'apprenant',
             'fraisApprenant.categorieFrais',
-            'fraisApprenant.etablissement',
+            'fraisApprenant.categorieFrais.etablissement',
             'user',
         ]);
         return view('admin.transactions.show', compact('paiement'));
@@ -81,7 +81,7 @@ class TransactionAdminController extends Controller
         ]);
 
         foreach ($paiements as $p) {
-            $ecole     = $p->fraisApprenant->etablissement->nom ?? '—';
+            $ecole     = $p->fraisApprenant?->categorieFrais?->etablissement?->nom ?? '—';
             $apprenant = $p->apprenant
                 ? ($p->apprenant->nom . ' ' . $p->apprenant->prenom)
                 : '—';

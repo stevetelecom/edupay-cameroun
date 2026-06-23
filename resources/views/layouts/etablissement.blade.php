@@ -114,6 +114,55 @@
         /* Danger zone dans modal */
         .ep-modal-danger .ep-modal-head{border-bottom-color:#FBEAEA;}
         .ep-modal-danger .ep-modal-head h3{color:var(--ep-red);}
+
+        /* ───────────────────────── MEDIA QUERIES RESPONSIVITÉ ───────────────────────── */
+
+        @media (max-width: 1024px) {
+            .g4 { grid-template-columns: repeat(2,1fr) !important; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 0; display: none; }
+            .app-body { flex-direction: column; }
+            .main-content { padding: 16px 12px; }
+            .g2, .g3, .g4 { grid-template-columns: 1fr !important; }
+            table.ep-table { font-size: 12px; }
+            table.ep-table th { font-size: 10px; padding: 8px 6px; }
+            table.ep-table td { padding: 8px 6px; }
+            .app-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        }
+
+        @media (max-width: 480px) {
+            body { font-size: 13px; }
+            .app-header { padding: 10px 12px; }
+            .main-content { padding: 12px 10px; }
+            .epcard { padding: 12px; }
+            .kpi { padding: 12px; }
+            .kval { font-size: 18px; }
+            .klbl { font-size: 10px; }
+            .btn-p, .btn-o, .btn-r { padding: 9px 14px; font-size: 12px; }
+            .inp { padding: 8px 10px; font-size: 12px; margin-bottom: 8px; }
+            .lbl { font-size: 10px; margin-bottom: 3px; }
+            .select { padding: 8px 10px; font-size: 12px; margin-bottom: 8px; }
+            .seclbl { font-size: 10px; margin: 12px 0 6px; }
+            .row { font-size: 12px; padding: 8px 0; }
+            .badge-cnt { font-size: 9px; padding: 1px 5px; }
+            table.ep-table { font-size: 11px; }
+            table.ep-table th { font-size: 9px; padding: 6px 4px; }
+            table.ep-table td { padding: 6px 4px; }
+            .toast { min-width: 260px; max-width: 300px; padding: 10px 12px; font-size: 12px; }
+            .ep-modal-sm, .ep-modal-md, .ep-modal-lg, .ep-modal-xl { max-width: 100% !important; }
+            .ep-modal-body { padding: 14px; }
+            .ep-modal-foot { padding: 10px 14px; gap: 6px; }
+        }
+
+        @media (max-width: 320px) {
+            .btn-p, .btn-o, .btn-r { padding: 7px 10px; font-size: 11px; }
+            .inp { padding: 6px 8px; font-size: 11px; }
+            .kval { font-size: 16px; }
+        }
+
+        /* ───────────────────────── FIN MEDIA QUERIES ───────────────────────── */
     </style>
     @stack('styles')
 </head>

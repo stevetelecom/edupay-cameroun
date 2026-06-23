@@ -42,7 +42,7 @@
             <label style="font-size:12px;color:#888;display:flex;align-items:center;gap:7px;cursor:pointer;">
               <input type="checkbox" name="remember" /> Rester connecté
             </label>
-            <span style="font-size:12px;color:var(--ep-teal);cursor:pointer;">Mot de passe oublié ?</span>
+            <a href="{{ route('password.forgot') }}" style="font-size:12px;color:var(--ep-teal);cursor:pointer;text-decoration:none;">Mot de passe oublié ?</a>
           </div>
           <button type="submit" class="btn-p" style="margin-bottom:10px;">Se connecter</button>
         </form>
