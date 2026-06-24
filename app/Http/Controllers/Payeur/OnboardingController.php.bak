@@ -1,0 +1,80 @@
+<?php
+namespace App\Http\Controllers\Payeur;
+
+use App\Http\Controllers\Controller;
+use App\Models\Etablissement;
+use App\Models\Apprenant;
+use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
+
+class OnboardingController extends Controller
+{
+    // Affiche la page de rattachement (maquette s-onboarding)
+    public function index(): View
+    {
+        $etablissements = Etablissement::where('statut', 'actif')
+            ->orderBy('nom')
+            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement']);
+
+        return view('payeur.onboarding', compact('etablissements'));
+    }
+
+    // POST — Rattacher un apprenant à un établissement
+    public function store(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'etablissement_id'  => 'required|exists:etablissements,id',
+            'prenom_apprenant'  => 'required|string|max:100',
+            'nom_apprenant'     => 'required|string|max:100',
+            'classe'            => 'required|string|max:50',
+            'matricule'         => 'nullable|string|max:50',
+            'code_etablissement'=> 'nullable|string|max:50',
+            'lien'              => 'required|in:parent,soi-meme',
+        ], [
+            'etablissement_id.required' => 'Veuillez choisir un établissement.',
+            'etablissement_id.exists'   => 'Établissement introuvable.',
+            'prenom_apprenant.required' => 'Le prénom de l\'apprenant est obligatoire.',
+            'nom_apprenant.required'    => 'Le nom de l\'apprenant est obligatoire.',
+            'classe.required'           => 'La classe est obligatoire.',
+            'lien.required'             => 'Veuillez préciser le lien avec l\'apprenant.',
+        ]);
+
+        // Chercher si l'apprenant existe déjà par matricule
+        $apprenant = null;
+        if (!empty($validated['matricule'])) {
+            $apprenant = Apprenant::where('matricule', $validated['matricule'])
+                ->where('etablissement_id', $validated['etablissement_id'])
+                ->first();
+        }
+
+        // Sinon le créer (pré-rattachement — validé ensuite par l'école)
+        if (!$apprenant) {
+            $apprenant = Apprenant::create([
+                'etablissement_id' => $validated['etablissement_id'],
+                'prenom'           => $validated['prenom_apprenant'],
+                'nom'              => $validated['nom_apprenant'],
+                'classe'           => $validated['classe'],
+                'matricule'        => $validated['matricule'] ?? null,
+                'statut_paiement'  => 'en_attente',
+                'actif'            => true,
+            ]);
+        }
+
+        // Rattacher au user (pivot user_apprenant)
+        $user->apprenants()->syncWithoutDetaching([
+            $apprenant->id => ['lien' => $validated['lien']]
+        ]);
+
+        // Si élève/étudiant solo → mettre à jour etablissement_id sur le user
+        if ($validated['lien'] === 'soi-meme') {
+            $user->update(['etablissement_id' => $validated['etablissement_id']]);
+        }
+
+        return redirect()->route('payeur.dashboard')
+            ->with('success', 'Apprenant rattaché avec succès !');
+    }
+}

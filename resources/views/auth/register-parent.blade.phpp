@@ -1,0 +1,104 @@
+@extends('layouts.public')
+@section('title', 'Inscription Parent — EduPay Cameroun')
+@section('content')
+<div style="min-height:100vh;background:#f1f3f5;display:flex;flex-direction:column;">
+  <div class="form-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="{{ route('login') }}" style="background:transparent;color:rgba(255,255,255,.7);border:none;cursor:pointer;padding:0;text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+      <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> — Inscription Parent</div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,.5);">Déjà un compte ? <a href="{{ route('login') }}" style="color:#5DCAA5;">Se connecter</a></div>
+  </div>
+
+  <div class="form-body" style="padding-top:28px;">
+    <div class="form-card-wide">
+
+      {{-- Barre d'étapes --}}
+      <div style="display:flex;align-items:center;margin-bottom:24px;">
+        <div style="flex:1;text-align:center;">
+          <div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">1</div>
+          <div style="font-size:11px;font-weight:600;color:var(--ep-teal);">Compte</div>
+        </div>
+        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div style="flex:1;text-align:center;">
+          <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">2</div>
+          <div style="font-size:11px;color:#aaa;">Enfant(s)</div>
+        </div>
+        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div style="flex:1;text-align:center;">
+          <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">3</div>
+          <div style="font-size:11px;color:#aaa;">Confirmation</div>
+        </div>
+      </div>
+
+      <div class="form-title">Créer votre compte parent</div>
+      <div class="form-sub">Renseignez vos informations pour commencer à payer les frais scolaires en ligne</div>
+
+      <form method="POST" action="{{ route('register.parent.step1.post') }}">
+        @csrf
+
+        <div class="form-section">Informations personnelles</div>
+        <div class="inp-row">
+          <div><div class="lbl">Prénom *</div><input class="inp" name="prenom" value="{{ old('prenom') }}" placeholder="ex : Marie" required /></div>
+          <div><div class="lbl">Nom *</div><input class="inp" name="nom" value="{{ old('nom') }}" placeholder="ex : FONO" required /></div>
+        </div>
+        <div class="inp-row">
+          <div><div class="lbl">Numéro de téléphone *</div><input class="inp" name="telephone" value="{{ old('telephone') }}" placeholder="6XX XXX XXX" required /></div>
+          <div><div class="lbl">Adresse email</div><input class="inp" name="email" value="{{ old('email') }}" placeholder="exemple@email.com" /></div>
+        </div>
+        <div class="inp-row">
+          <div>
+            <div class="lbl">Ville de résidence *</div>
+            <select class="select" name="ville" required>
+              <option value="">-- Choisir une ville --</option>
+              <option>Yaoundé</option><option>Douala</option><option>Bafoussam</option>
+              <option>Garoua</option><option>Maroua</option><option>Ngaoundéré</option>
+              <option>Kribi</option><option>Buea</option><option>Bamenda</option><option>Autre</option>
+            </select>
+          </div>
+          <div><div class="lbl">Quartier / Arrondissement</div><input class="inp" name="quartier" placeholder="ex : Melen, Biyem-Assi..." /></div>
+        </div>
+
+        <div class="form-section">Sécurité du compte</div>
+        <div class="inp-row">
+          <div><div class="lbl">Mot de passe *</div><input class="inp" type="password" name="password" placeholder="Min. 8 caractères" required /></div>
+          <div><div class="lbl">Confirmer le mot de passe *</div><input class="inp" type="password" name="password_confirmation" placeholder="Répétez le mot de passe" required /></div>
+        </div>
+        <div style="background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:#666;">
+          <div style="font-weight:600;margin-bottom:6px;">Le mot de passe doit contenir :</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
+            <span>• 8 caractères minimum</span><span>• 1 majuscule</span><span>• 1 chiffre</span><span>• 1 caractère spécial</span>
+          </div>
+        </div>
+
+        <div class="form-section">Rattachement à un établissement (optionnel)</div>
+        <div class="inp-row">
+          <div><div class="lbl">Nom de l'établissement</div><input class="inp" name="etablissement" placeholder="Rechercher un établissement..." /></div>
+          <div><div class="lbl">Code établissement (si connu)</div><input class="inp" name="code_etablissement" placeholder="ex : LYC-MEL-2026" /></div>
+        </div>
+        <div style="background:var(--ep-teal-lt);border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:#085041;display:flex;gap:10px;align-items:flex-start;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Vous pourrez ajouter ou modifier l'établissement de vos enfants plus tard depuis votre tableau de bord.</span>
+        </div>
+
+        <div class="form-section">Conditions d'utilisation</div>
+        <div class="check-row"><input type="checkbox" required /><label>J'accepte les <span style="color:var(--ep-teal);">Conditions Générales d'Utilisation</span> et la <span style="color:var(--ep-teal);">Politique de confidentialité</span> d'EduPay Cameroun.</label></div>
+        <div class="check-row"><input type="checkbox" /><label>J'accepte de recevoir des notifications par SMS et email concernant les paiements et les rappels d'échéances.</label></div>
+
+        <div style="display:flex;gap:10px;margin-top:6px;">
+          <a href="{{ route('login') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">Annuler</a>
+          <button type="submit" class="btn-p">Créer mon compte et continuer →</button>
+        </div>
+        <div style="text-align:center;margin-top:14px;font-size:12px;color:#888;">Déjà un compte ? <a href="{{ route('login') }}" style="color:var(--ep-teal);font-weight:600;">Se connecter</a></div>
+      </form>
+    </div>
+  </div>
+
+  <div style="background:var(--ep-navy);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;margin-top:24px;">
+    <div style="font-size:11px;color:rgba(255,255,255,.35);">© 2026 EduPay Cameroun · Vos données sont protégées et chiffrées AES-256</div>
+    <div style="display:flex;gap:8px;"><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">RGPD</span></div>
+  </div>
+</div>
+@endsection

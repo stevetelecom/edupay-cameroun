@@ -1,0 +1,74 @@
+<?php
+namespace App\Models;
+
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable, HasRoles;
+
+    protected $fillable = [
+        'name',
+        'prenom',
+        'nom',
+        'email',
+        'telephone',
+        'ville',
+        'quartier',
+        'profil',
+        'notif_sms',
+        'notif_email',
+        'password',
+        'etablissement_id',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password'          => 'hashed',
+            'notif_sms'         => 'boolean',
+            'notif_email'       => 'boolean',
+        ];
+    }
+
+    // Accessor : nom complet
+    public function getNomCompletAttribute(): string
+    {
+        return trim($this->prenom . ' ' . $this->nom);
+    }
+
+    // Accessor : initiales pour l'avatar
+    public function getInitialesAttribute(): string
+    {
+        $p = strtoupper(substr($this->prenom ?? '', 0, 1));
+        $n = strtoupper(substr($this->nom ?? '', 0, 1));
+        return $p . $n;
+    }
+
+    public function etablissement()
+    {
+        return $this->belongsTo(Etablissement::class);
+    }
+
+    public function apprenants()
+    {
+        return $this->belongsToMany(Apprenant::class, 'user_apprenant')
+                    ->withPivot('lien')
+                    ->withTimestamps();
+    }
+
+    public function paiements()
+    {
+        return $this->hasMany(Paiement::class);
+    }
+}

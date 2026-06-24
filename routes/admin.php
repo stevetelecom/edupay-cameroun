@@ -1,0 +1,88 @@
+<?php
+
+use App\Http\Controllers\Admin\AdminAuthController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EtablissementAdminController;
+use App\Http\Controllers\Admin\TransactionAdminController;
+use App\Http\Controllers\Admin\CommissionController;
+use App\Http\Controllers\Admin\LogSecuriteController;
+use App\Http\Controllers\Admin\ReclamationAdminController;
+use App\Http\Controllers\Admin\ParametreSystemeController;
+use App\Http\Controllers\Admin\ExportController;
+use Illuminate\Support\Facades\Route;
+
+
+/*
+|--------------------------------------------------------------------------
+| Authentification Super Admin
+|--------------------------------------------------------------------------
+*/
+Route::middleware('guest:admin')->group(function () {
+    Route::get('/login',          [AdminAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login',         [AdminAuthController::class, 'login'])->name('login.post');
+    Route::get('/login/2fa',      [AdminAuthController::class, 'show2fa'])->name('login.2fa');
+    Route::post('/login/2fa',     [AdminAuthController::class, 'verify2fa'])->name('login.2fa.verify');
+});
+
+Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+
+/*
+|--------------------------------------------------------------------------
+| Dashboard & modules Super Admin — auth:admin obligatoire
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:admin', 'super.admin'])->group(function () {
+
+    // Dashboard KPIs globaux
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Gestion des établissements
+    Route::prefix('etablissements')->name('etablissements.')->group(function () {
+        Route::get('/',                           [EtablissementAdminController::class, 'index'])->name('index');
+        Route::get('/{etablissement}',            [EtablissementAdminController::class, 'show'])->name('show');
+        Route::patch('/{etablissement}/activer',  [EtablissementAdminController::class, 'activer'])->name('activer');
+        Route::patch('/{etablissement}/suspendre',[EtablissementAdminController::class, 'suspendre'])->name('suspendre');
+        Route::delete('/{etablissement}',         [EtablissementAdminController::class, 'destroy'])->name('destroy');
+    });
+
+    // Transactions globales
+    Route::prefix('transactions')->name('transactions.')->group(function () {
+        Route::get('/',          [TransactionAdminController::class, 'index'])->name('index');
+        Route::get('/{paiement}',[TransactionAdminController::class, 'show'])->name('show');
+    });
+
+    // Commissions
+    Route::prefix('commissions')->name('commissions.')->group(function () {
+        Route::get('/',                              [CommissionController::class, 'index'])->name('index');
+        Route::get('/{etablissement}/modifier',      [CommissionController::class, 'edit'])->name('edit');
+        Route::patch('/{etablissement}/modifier',    [CommissionController::class, 'update'])->name('update');
+        Route::patch('/{commission}/prelever',       [CommissionController::class, 'marquerPrelevee'])->name('prelever');
+    });
+
+    // Reclamations
+    Route::prefix('reclamations')->name('reclamations.')->group(function () {
+        Route::get('/',                            [ReclamationAdminController::class, 'index'])->name('index');
+        Route::get('/{reclamation}',               [ReclamationAdminController::class, 'show'])->name('show');
+        Route::patch('/{reclamation}/repondre',    [ReclamationAdminController::class, 'repondre'])->name('repondre');
+    });
+
+    // Logs de securite
+    Route::prefix('logs-securite')->name('logs.')->group(function () {
+        Route::get('/',        [LogSecuriteController::class, 'index'])->name('index');
+        Route::get('/{log}',   [LogSecuriteController::class, 'show'])->name('show');
+    });
+
+    // Exports reglementaires
+    Route::prefix('exports')->name('exports.')->group(function () {
+        Route::get('/',                  [ExportController::class, 'index'])->name('index');
+        Route::get('/rapport-mensuel',   [ExportController::class, 'rapportMensuelBeac'])->name('mensuel');
+        Route::get('/declaration-cobac', [ExportController::class, 'declarationCobac'])->name('cobac');
+    });
+
+    // Parametres systeme
+    Route::prefix('parametres')->name('parametres.')->group(function () {
+        Route::get('/',        [ParametreSystemeController::class, 'index'])->name('index');
+        Route::post('/',       [ParametreSystemeController::class, 'update'])->name('update');
+        Route::post('/cache',  [ParametreSystemeController::class, 'viderCache'])->name('cache');
+    });
+});
