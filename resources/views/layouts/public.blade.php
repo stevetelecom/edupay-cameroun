@@ -176,9 +176,48 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .row:last-child{border-bottom:none;}
 .badge-cnt{background:#FBEAEA;color:#9B2C2C;border-radius:10px;padding:1px 7px;font-size:10px;margin-left:4px;}
 .pay-page{background:#f1f3f5;min-height:calc(100vh - 58px);padding:24px 28px;}
+.toast-wrap{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+.toast{display:flex;align-items:flex-start;gap:10px;min-width:280px;max-width:360px;padding:13px 16px;border-radius:var(--radius-md);box-shadow:0 6px 20px rgba(0,0,0,.15);font-size:13px;font-weight:500;animation:toast-in .25s ease-out;}
+.toast.t-success{background:#085041;color:#fff;}
+.toast.t-error{background:#9B2C2C;color:#fff;}
+.toast.t-info{background:#1A4F8A;color:#fff;}
+.toast svg{flex-shrink:0;margin-top:1px;}
+.toast.closing{animation:toast-out .2s ease-in forwards;}
+@keyframes toast-in{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+@keyframes toast-out{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(30px);}}
 </style>
 </head>
 <body>
+
+{{-- ══ TOASTS ══ --}}
+<div class="toast-wrap" id="toast-wrap">
+    @if(session('success'))
+    <div class="toast t-success" data-toast>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>{{ session('success') }}</span>
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="toast t-error" data-toast>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>{{ session('error') }}</span>
+    </div>
+    @endif
+    @if(session('info'))
+    <div class="toast t-info" data-toast>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>{{ session('info') }}</span>
+    </div>
+    @endif
+</div>
+
 @yield('content')
+
+<script>
+// ── Toasts auto-dismiss (4 secondes) ──
+document.querySelectorAll('[data-toast]').forEach(function(t){
+    setTimeout(function(){ t.classList.add('closing'); setTimeout(function(){ t.remove(); },200); },4000);
+});
+</script>
 </body>
 </html>

@@ -35,6 +35,7 @@
           <div>
             <div class="lbl">Nb tranches max</div>
             <input class="inp" type="number" name="nb_tranches_max" value="{{ old('nb_tranches_max', 2) }}" min="1" max="12" />
+            <div style="font-size:12px;color:#666;margin-top:6px;">Les échéances sont facultatives à la création. Vous pouvez créer la catégorie maintenant et ajouter les tranches plus tard.</div>
           </div>
         </div>
         <div style="display:flex;gap:20px;align-items:center;">
@@ -187,7 +188,15 @@
           Laisse "Classe" vide pour affecter à <strong>tout l'établissement</strong>.
         </div>
         <div class="lbl">Filtrer par classe (optionnel)</div>
-        <input class="inp" name="classe" placeholder="ex : 3ème B — vide = tous" />
+        <select class="select" name="classe">
+          <option value="">Toutes les classes</option>
+          @foreach(($classes ?? []) as $classe)
+            <option value="{{ $classe }}">{{ $classe }}</option>
+          @endforeach
+        </select>
+        @if(empty($classes->count()))
+          <div style="font-size:12px;color:#666;margin-top:8px;">Aucune classe encore définie. Ajoutez des apprenants pour pouvoir filtrer par classe.</div>
+        @endif
       </div>
       <div class="ep-modal-foot">
         <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-affecter')">Annuler</button>
@@ -211,20 +220,128 @@
   </div>
 </div>
 
+{{-- ══ MODAL : Éditer une tranche ══ --}}
+<div id="modal-edit-tranche" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-md">
+    <div class="ep-modal-head">
+      <h3>✎ Modifier la tranche</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-edit-tranche')">×</button>
+    </div>
+    <form id="edit-tranche-form" method="POST">
+      @csrf @method('PUT')
+      <div class="ep-modal-body">
+        <div class="g2">
+          <div>
+            <div class="lbl">N° tranche *</div>
+            <input class="inp" type="number" name="numero_tranche" id="edit-tranche-num" min="1" required />
+          </div>
+          <div>
+            <div class="lbl">Montant (FCFA) *</div>
+            <input class="inp" type="number" name="montant" id="edit-tranche-montant" required />
+          </div>
+        </div>
+        <div class="g2">
+          <div>
+            <div class="lbl">Date d'échéance *</div>
+            <input class="inp" type="date" name="date_echeance" id="edit-tranche-date" required />
+          </div>
+          <div>
+            <div class="lbl">Libellé</div>
+            <input class="inp" name="libelle" id="edit-tranche-libelle" />
+          </div>
+        </div>
+      </div>
+      <div class="ep-modal-foot">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-edit-tranche')">Annuler</button>
+        <button type="submit" class="btn-p" style="width:auto;padding:8px 20px;">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- ══ MODAL : Supprimer une tranche ══ --}}
+<div id="modal-delete-tranche" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm ep-modal-danger">
+    <div class="ep-modal-head">
+      <h3>🗑 Supprimer la tranche</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-delete-tranche')">×</button>
+    </div>
+    <div class="ep-modal-body">
+      <p style="font-size:13px;color:#555;line-height:1.6;">Vous allez supprimer la tranche <strong id="delete-tranche-nom" style="color:var(--ep-red);"></strong>.</p>
+    </div>
+    <div class="ep-modal-foot">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-delete-tranche')">Annuler</button>
+      <form id="delete-tranche-form" method="POST" style="display:inline;">
+        @csrf @method('DELETE')
+        <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">Supprimer</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{{-- ══ MODAL : Editer une tranche ══ --}}
+<div id="modal-edit-tranche" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-md">
+    <div class="ep-modal-head">
+      <h3>✎ Modifier la tranche</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-edit-tranche')">×</button>
+    </div>
+    <form id="edit-tranche-form" method="POST">
+      @csrf @method('PUT')
+      <div class="ep-modal-body">
+        <div class="g2">
+          <div>
+            <div class="lbl">N° tranche *</div>
+            <input class="inp" type="number" name="numero_tranche" id="edit-tranche-num" min="1" required />
+          </div>
+          <div>
+            <div class="lbl">Montant (FCFA) *</div>
+            <input class="inp" type="number" name="montant" id="edit-tranche-montant" required />
+          </div>
+        </div>
+        <div class="g2">
+          <div>
+            <div class="lbl">Date d'échéance *</div>
+            <input class="inp" type="date" name="date_echeance" id="edit-tranche-date" required />
+          </div>
+          <div>
+            <div class="lbl">Libellé</div>
+            <input class="inp" name="libelle" id="edit-tranche-libelle" />
+          </div>
+        </div>
+      </div>
+      <div class="ep-modal-foot">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-edit-tranche')">Annuler</button>
+        <button type="submit" class="btn-p" style="width:auto;padding:8px 20px;">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{-- ══ MODAL : Supprimer une tranche ══ --}}
+<div id="modal-delete-tranche" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm ep-modal-danger">
+    <div class="ep-modal-head">
+      <h3>🗑 Supprimer la tranche</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-delete-tranche')">×</button>
+    </div>
+    <div class="ep-modal-body">
+      <p style="font-size:13px;color:#555;line-height:1.6;">Vous allez supprimer la tranche <strong id="delete-tranche-nom" style="color:var(--ep-red);"></strong>.</p>
+    </div>
+    <div class="ep-modal-foot">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-delete-tranche')">Annuler</button>
+      <form id="delete-tranche-form" method="POST" style="display:inline;">
+        @csrf @method('DELETE')
+        <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">Supprimer</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 @endpush
 
 @section('content')
 
-@if(session('success'))
-  <div class="epcard" style="background:#d1fae5;border-left:4px solid #059669;color:#065f46;margin-bottom:16px;padding:12px 16px;">
-    ✓ {{ session('success') }}
-  </div>
-@endif
-@if(session('error'))
-  <div class="epcard" style="background:#fbeaea;border-left:4px solid var(--ep-red);color:#9b2c2c;margin-bottom:16px;padding:12px 16px;">
-    ✗ {{ session('error') }}
-  </div>
-@endif
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
   <div>
@@ -332,18 +449,44 @@ function affecterFrais(id, nom) {
 
 function voirEcheancier(id, nom, echeances) {
     document.getElementById('voir-frais-titre').textContent = '📅 Échéancier — ' + nom;
-    var html = '<table class="ep-table"><thead><tr><th>Tranche</th><th>Libellé</th><th>Montant</th><th>Échéance</th></tr></thead><tbody>';
-    echeances.forEach(function(e) {
-        html += '<tr>'
-            + '<td><span class="pill pb">T' + e.numero_tranche + '</span></td>'
-            + '<td>' + (e.libelle || 'Tranche ' + e.numero_tranche) + '</td>'
-            + '<td style="font-weight:600;">' + Number(e.montant).toLocaleString('fr-FR') + ' FCFA</td>'
-            + '<td>' + (e.date_echeance ? new Date(e.date_echeance).toLocaleDateString('fr-FR') : '—') + '</td>'
-            + '</tr>';
-    });
-    html += '</tbody></table>';
+  var html = '<table class="ep-table"><thead><tr><th>Tranche</th><th>Libellé</th><th>Montant</th><th>Échéance</th><th>Actions</th></tr></thead><tbody>';
+  echeances.forEach(function(e) {
+    html += '<tr>'
+      + '<td><span class="pill pb">T' + e.numero_tranche + '</span></td>'
+      + '<td>' + (e.libelle || 'Tranche ' + e.numero_tranche) + '</td>'
+      + '<td style="font-weight:600;">' + Number(e.montant).toLocaleString('fr-FR') + ' FCFA</td>'
+      + '<td>' + (e.date_echeance ? new Date(e.date_echeance).toLocaleDateString('fr-FR') : '—') + '</td>'
+      + '<td style="white-space:nowrap;">'
+      + '<button class="btn-o" style="padding:6px 10px;margin-right:6px;font-size:12px;" onclick="editTranche(' + id + ',' + e.id + ',' + e.numero_tranche + ', \'' + (e.libelle ? addslashes(e.libelle) : '') + '\',' + e.montant + ', \'' + (e.date_echeance ? e.date_echeance : '') + '\')">✎</button>'
+      + '<button class="btn-r" style="padding:6px 10px;font-size:12px;" onclick="deleteTranche(' + id + ',' + e.id + ', \'' + (e.libelle ? addslashes(e.libelle) : '') + '\')">🗑</button>'
+      + '</td>'
+      + '</tr>';
+  });
+  html += '</tbody></table>';
     document.getElementById('voir-frais-body').innerHTML = html;
     epModal.open('modal-voir-frais');
+}
+
+function editTranche(catId, echeId, numero, libelle, montant, date) {
+  // action: PUT to /etablissement/frais/{catId}/echeancier/{echeId}
+  document.getElementById('edit-tranche-form').action = "{{ url('etablissement/frais') }}/" + catId + "/echeancier/" + echeId;
+  document.getElementById('edit-tranche-num').value = numero;
+  document.getElementById('edit-tranche-libelle').value = libelle || '';
+  document.getElementById('edit-tranche-montant').value = montant || '';
+  document.getElementById('edit-tranche-date').value = date || '';
+  epModal.open('modal-edit-tranche');
+}
+
+function deleteTranche(catId, echeId, libelle) {
+  document.getElementById('delete-tranche-nom').textContent = libelle || ('Tranche ' + echeId);
+  document.getElementById('delete-tranche-form').action = "{{ url('etablissement/frais') }}/" + catId + "/echeancier/" + echeId;
+  epModal.open('modal-delete-tranche');
+}
+
+// helper to escape quotes inside JS-generated attributes
+function addslashes(str) {
+  if (!str) return '';
+  return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\"/g, '\\"').replace(/\n/g, '\\n');
 }
 </script>
 @endpush

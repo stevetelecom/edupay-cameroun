@@ -17,13 +17,10 @@
           </div>
           <div class="form-title">Connexion à EduPay</div>
           <div class="form-sub">Accédez à votre espace sécurisé</div>
+          @if(request('role') === 'etablissement')
+            <div style="font-size:12px;color:var(--ep-teal);margin-top:8px;">Connectez-vous avec vos identifiants d'établissement.</div>
+          @endif
         </div>
-
-        @if($errors->any())
-        <div style="background:#FBEAEA;border-left:3px solid #D94040;border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:#9B2C2C;">
-          {{ $errors->first() }}
-        </div>
-        @endif
 
         <form method="POST" action="{{ route('login.post') }}">
           @csrf
@@ -45,15 +42,18 @@
             <a href="{{ route('password.forgot') }}" style="font-size:12px;color:var(--ep-teal);cursor:pointer;text-decoration:none;">Mot de passe oublié ?</a>
           </div>
           <button type="submit" class="btn-p" style="margin-bottom:10px;">Se connecter</button>
+          <input type="hidden" name="login_type" value="{{ request('role') }}" />
         </form>
-        <a href="{{ route('login.otp') }}" class="btn-o">Connexion par OTP SMS</a>
-        <div class="divider"></div>
-        <div style="font-size:12px;color:#888;text-align:center;">Pas encore de compte ? <a href="{{ route('register.parent.step1') }}" style="color:var(--ep-teal);font-weight:600;">Créer un compte parent →</a></div>
+        @unless(request('role') === 'etablissement')
+          <a href="{{ route('login.otp') }}" class="btn-o">Connexion par OTP SMS</a>
+          <div class="divider"></div>
+          <div style="font-size:12px;color:#888;text-align:center;">Pas encore de compte ? <a href="{{ route('register.parent.step1') }}" style="color:var(--ep-teal);font-weight:600;">Créer un compte parent →</a></div>
+        @endunless
       </div>
 
       <div class="epcard" style="background:#f8f9fa;margin-top:10px;">
         <div style="font-size:12px;color:#888;text-align:center;margin-bottom:10px;">Vous représentez un établissement ?</div>
-        <a href="{{ route('login') }}" class="btn-o">Accès back-office établissement →</a>
+        <a href="{{ route('login', ['role' => 'etablissement']) }}" class="btn-o">Accès back-office établissement →</a>
         <div style="font-size:12px;color:#888;text-align:center;margin-top:10px;">Pas encore inscrit ? <a href="{{ route('register.ecole.step1') }}" style="color:var(--ep-teal);font-weight:600;">Inscrire mon établissement →</a></div>
       </div>
     </div>

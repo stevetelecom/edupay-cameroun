@@ -4,7 +4,7 @@
 
 @push('modals')
 <div id="modal-modifier-apprenant" class="ep-modal-overlay">
-  <div class="ep-modal">
+  <div class="ep-modal ep-modal-lg">
     <div class="ep-modal-head">
       <h3>Modifier mon dossier</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-modifier-apprenant')">×</button>

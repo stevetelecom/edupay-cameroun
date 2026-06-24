@@ -9,6 +9,7 @@ use App\Models\Admin;
 use App\Models\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
@@ -60,7 +61,10 @@ class PasswordResetController extends Controller
             'code' => $code,
         ]);
 
-        // Envoyer l'email avec le code
+        // Pour test local, on écrit le code dans le log sans toucher à Mailtrap
+        Log::info("Password reset code for {$email}: {$code}");
+
+        // Envoyer l'email avec le code (Mailtrap / opérateur réel)
         try {
             Mail::to($email)->send(new PasswordResetCode(
                 code: $code,
@@ -239,6 +243,9 @@ class PasswordResetController extends Controller
             'guard' => $guard,
             'code' => $code,
         ]);
+
+        // Pour test local, on écrit le code dans le log sans toucher à Mailtrap
+        Log::info("Password reset code for {$email}: {$code}");
 
         try {
             Mail::to($email)->send(new PasswordResetCode(

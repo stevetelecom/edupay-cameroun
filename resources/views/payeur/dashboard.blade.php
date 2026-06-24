@@ -217,7 +217,7 @@
 
 {{-- ══ MODAL : Modifier mon dossier apprenant ══ --}}
 <div id="modal-modifier-apprenant" class="ep-modal-overlay">
-  <div class="ep-modal">
+  <div class="ep-modal ep-modal-lg">
     <div class="ep-modal-head">
       <h3>Modifier mon dossier</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-modifier-apprenant')">×</button>
@@ -269,7 +269,11 @@
         Bonjour, {{ Auth::user()->prenom ?? Str::of(Auth::user()->name)->explode(' ')->first() }}
       </div>
       <div style="font-size:13px;color:#888;">
-        {{ $nbEnfantsDus > 0 ? $nbEnfantsDus . ' paiement(s) en attente' : 'Tout est à jour ✓' }}
+        @if($estSolo && $monDossier && $monDossier->frais->isEmpty())
+          Aucun frais enregistré pour le moment
+        @else
+          {{ $nbEnfantsDus > 0 ? $nbEnfantsDus . ' paiement(s) en attente' : 'Tout est à jour ✓' }}
+        @endif
         @if($monDossier && $monDossier->etablissement) · {{ $monDossier->etablissement->nom }} @endif
       </div>
     </div>
@@ -326,11 +330,11 @@
       $payeSolo    = $monDossier->frais->sum('montant_paye');
       $resteSolo   = $totalSolo - $payeSolo;
       $pctSolo     = $totalSolo > 0 ? round(($payeSolo / $totalSolo) * 100) : 0;
-      $statutSolo  = $resteSolo <= 0 ? 'regle' : ($payeSolo > 0 ? 'partiel' : 'impaye');
+      $statutSolo  = $totalSolo <= 0 ? 'aucun' : ($resteSolo <= 0 ? 'regle' : ($payeSolo > 0 ? 'partiel' : 'impaye'));
     @endphp
 
     <div class="epcard" style="border-left:3px solid {{ match($statutSolo) {
-        'regle' => 'var(--ep-teal)', 'partiel' => 'var(--ep-gold)', 'impaye' => 'var(--ep-red)', default => '#ddd',
+        'regle' => 'var(--ep-teal)', 'partiel' => 'var(--ep-gold)', 'impaye' => 'var(--ep-red)', 'aucun' => 'var(--ep-blue-lt)', default => '#ddd',
     } }};margin-bottom:18px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
         <div>
@@ -340,8 +344,8 @@
             @if($monDossier->matricule) · Mat. {{ $monDossier->matricule }} @endif
           </div>
         </div>
-        <span class="pill {{ match($statutSolo) { 'regle' => 'pg', 'partiel' => 'pa', 'impaye' => 'pr', default => 'pa' } }}">
-          {{ match($statutSolo) { 'regle' => 'À jour', 'partiel' => 'Partiel', 'impaye' => 'Impayé', default => $statutSolo } }}
+        <span class="pill {{ match($statutSolo) { 'regle' => 'pg', 'partiel' => 'pa', 'impaye' => 'pr', 'aucun' => 'pb', default => 'pa' } }}">
+          {{ match($statutSolo) { 'regle' => 'À jour', 'partiel' => 'Partiel', 'impaye' => 'Impayé', 'aucun' => 'Aucun frais', default => $statutSolo } }}
         </span>
       </div>
       <div class="prog" style="margin-bottom:4px;">
@@ -354,12 +358,11 @@
         <a href="{{ route('payeur.frais.apprenant', $monDossier) }}" class="btn-o" style="font-size:12px;padding:8px 14px;width:auto;">
           Voir tous mes frais →
         </a>
-        <button type="button" onclick="epModal.open('modal-modifier-apprenant');"
-                class="btn-o" style="font-size:12px;padding:8px 14px;width:auto;cursor:pointer;">
+        <button type="button" onclick="epModal.open('modal-modifier-apprenant')"
+                class="btn-o" style="width:auto;font-size:12px;padding:8px 14px;">
           ✎ Modifier
         </button>
       </div>
-    </div>
 
     {{-- ── F05 : Frais ventilés par catégorie ── --}}
     <div class="seclbl">Mes frais par catégorie</div>
@@ -450,7 +453,11 @@
         Bonjour, {{ Auth::user()->prenom ?? Str::of(Auth::user()->name)->explode(' ')->first() }}
       </div>
       <div style="font-size:13px;color:#888;">
-        {{ $nbEnfantsDus > 0 ? $nbEnfantsDus . ' paiement(s) en attente' : 'Tout est à jour ✓' }}
+        @if($totalDu <= 0)
+          Aucun frais enregistré pour le moment
+        @else
+          {{ $nbEnfantsDus > 0 ? $nbEnfantsDus . ' paiement(s) en attente' : 'Tout est à jour ✓' }}
+        @endif
         @if(Auth::user()->ville) · {{ Auth::user()->ville }} @endif
       </div>
     </div>
@@ -506,11 +513,11 @@
           $payeA   = $apprenant->frais->sum('montant_paye');
           $resteA  = $totalA - $payeA;
           $pctA    = $totalA > 0 ? round(($payeA / $totalA) * 100) : 0;
-          $statutA = $resteA <= 0 ? 'regle' : ($payeA > 0 ? 'partiel' : 'impaye');
+          $statutA = $totalA <= 0 ? 'aucun' : ($resteA <= 0 ? 'regle' : ($payeA > 0 ? 'partiel' : 'impaye'));
           $premierImpayeA = $apprenant->frais->first(fn($f) => $f->statut !== 'regle');
         @endphp
         <div class="epcard" style="border-left:3px solid {{ match($statutA) {
-            'regle' => 'var(--ep-teal)', 'partiel' => 'var(--ep-gold)', 'impaye' => 'var(--ep-red)', default => '#ddd',
+            'regle' => 'var(--ep-teal)', 'partiel' => 'var(--ep-gold)', 'impaye' => 'var(--ep-red)', 'aucun' => 'var(--ep-blue-lt)', default => '#ddd',
         } }};">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
             <div>

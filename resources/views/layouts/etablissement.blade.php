@@ -122,8 +122,24 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar { width: 0; display: none; }
             .app-body { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                padding: 12px 14px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                background: #fff;
+            }
+            .sbar-item {
+                flex: 1 1 calc(50% - 8px);
+                min-width: 140px;
+                padding: 10px 12px;
+                border-radius: var(--radius-md);
+            }
+            .sbar-item svg { margin-right: 6px; }
             .main-content { padding: 16px 12px; }
             .g2, .g3, .g4 { grid-template-columns: 1fr !important; }
             table.ep-table { font-size: 12px; }

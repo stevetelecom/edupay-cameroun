@@ -71,10 +71,10 @@
     </header>
 
     {{-- ── Corps principal ── --}}
-    <div class="flex min-h-[calc(100vh-64px)]">
+    <div class="flex min-h-[calc(100vh-64px)] admin-body">
 
         {{-- Sidebar navigation --}}
-        <aside class="w-52 shrink-0 bg-white border-r border-gray-200 pt-4 px-3">
+        <aside class="w-52 shrink-0 bg-white border-r border-gray-200 pt-4 px-3 sidebar">
 
             <nav class="space-y-0.5">
                 {{-- Vue globale --}}
@@ -214,6 +214,22 @@
             font-weight: 600;
         }
         .sidebar-link.active svg { stroke: #0D9E75; }
+
+        @media (max-width: 1024px) {
+            .admin-body { flex-direction: column; }
+            .sidebar { width: 100% !important; border-right: none; border-bottom: 1px solid #E5E7EB; padding: 14px 12px; display: flex; flex-wrap: wrap; gap: 10px; }
+            .sidebar-link { flex: 1 1 calc(50% - 10px); min-width: 160px; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { padding: 12px 10px; }
+            .sidebar-link { flex: 1 1 100%; }
+            main { padding: 16px !important; }
+            header { flex-wrap: wrap; gap: 12px; align-items: flex-start; }
+        }
+        @media (max-width: 480px) {
+            .sidebar { gap: 8px; }
+            .sidebar-link { min-width: 0; }
+        }
     </style>
 
 

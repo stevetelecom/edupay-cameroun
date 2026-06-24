@@ -125,6 +125,10 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier'])->prefix('etabli
     Route::post('/frais',                   [\App\Http\Controllers\Etablissement\FraisController::class, 'store'])->name('frais.store');
     Route::get('/frais/{frais}/edit',   [\App\Http\Controllers\Etablissement\FraisController::class, 'edit'])->name('frais.edit');
     Route::put('/frais/{frais}',        [\App\Http\Controllers\Etablissement\FraisController::class, 'update'])->name('frais.update');
+    Route::post('/frais/{frais}/affecter', [\App\Http\Controllers\Etablissement\FraisController::class, 'affecter'])->name('frais.affecter');
+    Route::post('/frais/{frais}/echeancier', [\App\Http\Controllers\Etablissement\FraisController::class, 'storeEcheancier'])->name('frais.echeancier.store');
+    Route::put('/frais/{frais}/echeancier/{echeancier}', [\App\Http\Controllers\Etablissement\FraisController::class, 'updateEcheancier'])->name('frais.echeancier.update');
+    Route::delete('/frais/{frais}/echeancier/{echeancier}', [\App\Http\Controllers\Etablissement\FraisController::class, 'destroyEcheancier'])->name('frais.echeancier.destroy');
     Route::delete('/frais/{frais}',     [\App\Http\Controllers\Etablissement\FraisController::class, 'destroy'])->name('frais.destroy');
 
     Route::get('/apprenants/import/template', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'importTemplate'])
