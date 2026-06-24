@@ -25,9 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // Middleware groupes
-        // $middleware->web(append: [
-        //     \App\Http\Middleware\SetLocale::class,
-        // ]);
+        $middleware->web(append: [
+            \App\Http\Middleware\CheckMaintenanceMode::class,
+        ]);
 
     })
     ->withExceptions(function (Exceptions $exceptions) {

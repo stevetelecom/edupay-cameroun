@@ -83,44 +83,31 @@ togglePasswordBtn.addEventListener('click', (e) => {
   }
 });
 
-// ── Format Téléphone avec +237 ──
+// ── Format Telephone avec +237 (au blur uniquement) ──
 const loginInput = document.getElementById('login-input');
 
-loginInput.addEventListener('input', (e) => {
+loginInput.addEventListener('blur', (e) => {
   let value = e.target.value.trim();
-  
-  // Si ce n'est pas un email
-  if (!value.includes('@')) {
-    // Retirer tous les caractères non numériques sauf +
-    value = value.replace(/[^\d+]/g, '');
-    
-    // Si commence par +237, laisser comme ça
-    if (value.startsWith('+237')) {
-      // OK
-    } 
-    // Si commence par 237 (sans +), ajouter +
-    else if (value.startsWith('237')) {
-      value = '+' + value;
+  if (!value.includes('@') && value.length > 0) {
+    let cleaned = value.replace(/[^\d+]/g, '');
+    if (cleaned.startsWith('+237')) {
+      // deja formate
+    } else if (cleaned.startsWith('237')) {
+      cleaned = '+' + cleaned;
+    } else if (/^[67]/.test(cleaned)) {
+      cleaned = '+237' + cleaned;
     }
-    // Si c'est un numéro camerounais simple (6 ou 7), ajouter +237
-    else if (value && /^[67]/.test(value)) {
-      value = '+237' + value;
-    }
-    
-    e.target.value = value;
+    e.target.value = cleaned;
   }
 });
 
-// Au chargement, formater la valeur existante (si old('login') contient un tel)
+// Au chargement formater si old('login') est un tel
 window.addEventListener('load', () => {
-  const currentValue = loginInput.value;
-  if (currentValue && !currentValue.includes('@') && !currentValue.startsWith('+237')) {
-    let cleaned = currentValue.replace(/[^\d]/g, '');
-    if (/^[67]/.test(cleaned) && !cleaned.startsWith('237')) {
-      loginInput.value = '+237' + cleaned;
-    } else if (cleaned.startsWith('237') && !cleaned.startsWith('+237')) {
-      loginInput.value = '+' + cleaned;
-    }
+  const val = loginInput.value;
+  if (val && !val.includes('@') && !val.startsWith('+')) {
+    let cleaned = val.replace(/[^\d]/g, '');
+    if (/^[67]/.test(cleaned)) loginInput.value = '+237' + cleaned;
+    else if (cleaned.startsWith('237')) loginInput.value = '+' + cleaned;
   }
 });
 </script>

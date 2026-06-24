@@ -2,6 +2,43 @@
 
 @section('title', 'Frais — ' . $apprenant->prenom . ' ' . $apprenant->nom)
 
+@push('modals')
+<div id="modal-modifier-apprenant" class="ep-modal-overlay">
+  <div class="ep-modal">
+    <div class="ep-modal-head">
+      <h3>Modifier mon dossier</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-modifier-apprenant')">×</button>
+    </div>
+    <form method="POST" action="{{ route('payeur.apprenant.update', $apprenant) }}">
+      @csrf @method('PUT')
+      <div class="ep-modal-body">
+        <div class="g2">
+          <div>
+            <div class="lbl">Prénom</div>
+            <input class="inp" name="prenom" value="{{ $apprenant->prenom }}" required />
+          </div>
+          <div>
+            <div class="lbl">Nom</div>
+            <input class="inp" name="nom" value="{{ $apprenant->nom }}" required />
+          </div>
+        </div>
+        <div class="lbl">Classe / Niveau</div>
+        <input class="inp" name="classe" value="{{ $apprenant->classe }}" required />
+        <div class="lbl">Matricule</div>
+        <input class="inp" name="matricule" value="{{ $apprenant->matricule }}" placeholder="EP-XXXX" />
+      </div>
+      <div class="ep-modal-foot">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
+                onclick="epModal.close('modal-modifier-apprenant')">Annuler</button>
+        <button type="submit" class="btn-p" style="width:auto;padding:8px 20px;">
+          Enregistrer →
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+@endpush
+
 @section('content')
 
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
@@ -20,10 +57,10 @@
                     @if($apprenant->matricule) · Mat. {{ $apprenant->matricule }} @endif
                 </div>
             </div>
-            <a href="{{ route('payeur.apprenant.edit', $apprenant) }}"
-               class="btn-o" style="width:auto;font-size:12px;padding:8px 14px;">
+            <button type="button" onclick="epModal.open('modal-modifier-apprenant')"
+                    class="btn-o" style="width:auto;font-size:12px;padding:8px 14px;">
                 ✎ Modifier
-            </a>
+            </button>
         </div>
     </div>
 

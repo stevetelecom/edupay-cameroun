@@ -53,6 +53,11 @@ class DashboardController extends Controller
         $totalGlobal = $totalDu + $totalPaye;
         $pourcentageGlobal = $totalGlobal > 0 ? round(($totalPaye / $totalGlobal) * 100) : 0;
 
+        // F05 — Premier frais impayé du dossier solo
+        $premierFraisImpayeSolo = $monDossier
+            ? $monDossier->frais->first(fn ($f) => $f->statut !== 'regle')
+            : null;
+
         
         $etablissements = \App\Models\Etablissement::where('statut', 'actif')
             ->orderBy('nom')
@@ -69,6 +74,7 @@ class DashboardController extends Controller
             'estSolo'             => $estSolo,
             'monDossier'          => $monDossier,
             'pourcentageGlobal'   => $pourcentageGlobal,
+            'premierFraisImpayeSolo' => $premierFraisImpayeSolo,
             'pageTitle'           => 'Mon espace — EduPay',
             'etablissements'      => $etablissements,
         ]);

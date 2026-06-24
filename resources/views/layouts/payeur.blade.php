@@ -185,8 +185,14 @@
             </a>
 
             @unless($estSoloLayout)
-            <a href="{{ route('payeur.dashboard') }}#mes-enfants" id="tab-children" class="sbar-item"
-               @if(request()->routeIs('payeur.dashboard')) onclick="if(window.showVuePane){showVuePane('enfants');return false;}" @endif>
+            <a href="{{ route('payeur.dashboard') }}#mes-enfants" id="tab-children"
+               class="sbar-item {{ request()->routeIs('payeur.dashboard') && request()->server('QUERY_STRING') === '' ? '' : '' }}"
+               onclick="
+                 const sec = document.getElementById('mes-enfants');
+                 if(sec){ sec.scrollIntoView({behavior:'smooth', block:'start'}); }
+                 document.querySelectorAll('.sbar-item').forEach(el => el.classList.remove('on'));
+                 this.classList.add('on');
+               ">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 Mes enfants
             </a>
@@ -270,6 +276,13 @@
                 var el = document.getElementById(id);
                 if (!el) return;
                 el.classList.add('open');
+                // Si modal rattacher → afficher liste établissements
+                if (id === 'modal-rattacher') {
+                    setTimeout(function() {
+                        var liste = document.getElementById('m-etab-liste');
+                        if (liste) liste.style.display = 'block';
+                    }, 80);
+                }
                 var handler = function(e) {
                     if (e.target === el) { epModal.close(id); el.removeEventListener('click', handler); }
                 };
@@ -285,11 +298,30 @@
                 });
             }
         };
+        window.epModal = epModal;
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') epModal.closeAll();
         });
     </script>
 
     @stack('scripts')
+<script>
+// Auto-scroll vers #mes-enfants si present dans l'URL
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.hash === '#mes-enfants') {
+        const sec = document.getElementById('mes-enfants');
+        if (sec) {
+            setTimeout(() => {
+                sec.scrollIntoView({behavior: 'smooth', block: 'start'});
+                const tab = document.getElementById('tab-children');
+                if (tab) {
+                    document.querySelectorAll('.sbar-item').forEach(el => el.classList.remove('on'));
+                    tab.classList.add('on');
+                }
+            }, 200);
+        }
+    }
+});
+</script>
 </body>
 </html>

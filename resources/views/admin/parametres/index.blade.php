@@ -43,31 +43,38 @@
 <div id="modal-maintenance" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3>Mode maintenance</h3>
+      <h3>{{ $parametres['maintenance'] ? 'Desactiver la maintenance' : 'Activer la maintenance' }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-maintenance')">x</button>
     </div>
     <div class="ep-modal-body">
-      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
-        <p style="font-size:12px;color:#b91c1c;margin:0;">
-          En activant le mode maintenance, la plateforme sera inaccessible pour tous les utilisateurs sauf les admins.
-        </p>
+      @if($parametres['maintenance'])
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+        <p style="font-size:12px;color:#166534;margin:0;">La plateforme redeviendra accessible a tous les utilisateurs immediatement.</p>
       </div>
+      @else
+      <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+        <p style="font-size:12px;color:#b91c1c;margin:0;">La plateforme sera inaccessible pour tous les utilisateurs sauf les admins.</p>
+      </div>
+      @endif
       <p style="font-size:13px;color:#555;margin-bottom:16px;">Confirmez-vous cette action ?</p>
       <form id="form-maintenance" method="POST" action="{{ route('admin.parametres.update') }}">
         @csrf @method('POST')
         <input type="hidden" name="taux_commission" value="{{ $parametres['taux_commission'] }}">
         <input type="hidden" name="timeout_paiement" value="{{ $parametres['timeout_paiement'] }}">
         <input type="hidden" name="max_tranches" value="{{ $parametres['max_tranches'] }}">
+        <input type="hidden" name="langue_defaut" value="{{ $parametres['langue_defaut'] }}">
         <input type="hidden" name="sms_actif" value="{{ $parametres['sms_actif'] ? '1' : '' }}">
-        <input type="hidden" name="maintenance" id="maintenance-val" value="1">
+        <input type="hidden" name="mtn_actif" value="{{ $parametres['mtn_actif'] ? '1' : '' }}">
+        <input type="hidden" name="orange_actif" value="{{ $parametres['orange_actif'] ? '1' : '' }}">
+        <input type="hidden" name="maintenance" id="maintenance-val" value="{{ $parametres['maintenance'] ? '' : '1' }}">
         <div style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" onclick="epModal.close('modal-maintenance')"
                   style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
             Annuler
           </button>
           <button type="submit"
-                  style="padding:8px 20px;font-size:13px;font-weight:600;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">
-            Confirmer
+                  style="padding:8px 20px;font-size:13px;font-weight:600;background:{{ $parametres['maintenance'] ? '#16a34a' : '#dc2626' }};color:#fff;border:none;border-radius:8px;cursor:pointer;">
+            {{ $parametres['maintenance'] ? 'Confirmer — Desactiver' : 'Confirmer — Activer' }}
           </button>
         </div>
       </form>
@@ -112,6 +119,8 @@
 {{-- Formulaire parametres --}}
 <form method="POST" action="{{ route('admin.parametres.update') }}">
   @csrf
+  {{-- Conserver l'etat maintenance lors de l'enregistrement general --}}
+  <input type="hidden" name="maintenance" value="{{ $parametres['maintenance'] ? '1' : '0' }}">
 
   <div class="grid grid-cols-2 gap-5">
 
@@ -173,6 +182,48 @@
           <div style="font-size:11px;color:#aaa;margin-top:4px;">Maximum de tranches par frais apprenant</div>
         </div>
       </div>
+
+      {{-- Modes de paiement actifs (S07) --}}
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <h2 style="font-size:14px;font-weight:700;color:#111;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D94040" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Modes de paiement actifs
+        </h2>
+
+        {{-- Toggle MTN --}}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #f5f5f5;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#FFCC00;display:inline-block;"></span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#111;">MTN Mobile Money</div>
+              <div style="font-size:11px;color:#888;margin-top:2px;">Operateur AangaraaPay — MTN_Cameroon</div>
+            </div>
+          </div>
+          <label class="ep-toggle">
+            <input type="checkbox" name="mtn_actif" value="1" {{ $parametres['mtn_actif'] ? 'checked' : '' }}>
+            <span class="ep-toggle-track"><span class="ep-toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        {{-- Toggle Orange --}}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#FF6600;display:inline-block;"></span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#111;">Orange Money</div>
+              <div style="font-size:11px;color:#888;margin-top:2px;">Operateur AangaraaPay — Orange_Cameroon</div>
+            </div>
+          </div>
+          <label class="ep-toggle">
+            <input type="checkbox" name="orange_actif" value="1" {{ $parametres['orange_actif'] ? 'checked' : '' }}>
+            <span class="ep-toggle-track"><span class="ep-toggle-thumb"></span></span>
+          </label>
+        </div>
+
+        @error('mtn_actif')
+          <div style="font-size:11px;color:#dc2626;margin-top:8px;">{{ $message }}</div>
+        @enderror
+      </div>
     </div>
 
     {{-- Colonne droite --}}
@@ -191,31 +242,47 @@
             <div style="font-size:13px;font-weight:600;color:#111;">Notifications SMS</div>
             <div style="font-size:11px;color:#888;margin-top:2px;">Africa's Talking — confirmations et relances</div>
           </div>
-          <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;">
-            <input type="checkbox" name="sms_actif" value="1"
-                   {{ $parametres['sms_actif'] ? 'checked' : '' }}
-                   style="opacity:0;width:0;height:0;">
-            <span style="position:absolute;inset:0;background:{{ $parametres['sms_actif'] ? '#0D9E75' : '#ddd' }};border-radius:24px;transition:.3s;">
-              <span style="position:absolute;height:18px;width:18px;left:{{ $parametres['sms_actif'] ? '23px' : '3px' }};bottom:3px;background:#fff;border-radius:50%;transition:.3s;"></span>
-            </span>
+          <label class="ep-toggle">
+            <input type="checkbox" name="sms_actif" value="1" {{ $parametres['sms_actif'] ? 'checked' : '' }}>
+            <span class="ep-toggle-track"><span class="ep-toggle-thumb"></span></span>
           </label>
         </div>
-
         {{-- Mode maintenance --}}
         <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;">
           <div>
             <div style="font-size:13px;font-weight:600;color:#111;">Mode maintenance</div>
-            <div style="font-size:11px;color:#888;margin-top:2px;">Bloquer l'acces a la plateforme</div>
+            <div style="font-size:11px;margin-top:2px;">
+              @if($parametres['maintenance'])
+                <span style="color:#dc2626;font-weight:600;">Actif</span> — plateforme inaccessible aux utilisateurs
+              @else
+                <span style="color:#16a34a;font-weight:600;">Inactif</span> — plateforme accessible normalement
+              @endif
+            </div>
           </div>
-          <button type="button"
-                  onclick="epModal.open('modal-maintenance')"
-                  style="padding:6px 14px;font-size:12px;font-weight:600;
-                         background:{{ $parametres['maintenance'] ? '#dc2626' : '#f3f4f6' }};
-                         color:{{ $parametres['maintenance'] ? '#fff' : '#555' }};
-                         border:none;border-radius:8px;cursor:pointer;">
-            {{ $parametres['maintenance'] ? 'Actif — Desactiver' : 'Inactif — Activer' }}
+          <button type="button" onclick="epModal.open('modal-maintenance')"
+                  style="padding:6px 16px;font-size:12px;font-weight:600;border:none;border-radius:8px;cursor:pointer;
+                         background:{{ $parametres['maintenance'] ? '#16a34a' : '#dc2626' }};color:#fff;">
+            {{ $parametres['maintenance'] ? 'Desactiver' : 'Activer' }}
           </button>
         </div>
+        </div>
+      </div>
+
+      {{-- Langue de la plateforme (S07 / F15 / E13) --}}
+      <div class="bg-white border border-gray-200 rounded-xl p-5">
+        <h2 style="font-size:14px;font-weight:700;color:#111;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          Langue de la plateforme
+        </h2>
+        <label style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">
+          Langue par defaut (nouveaux comptes)
+        </label>
+        <select name="langue_defaut"
+                style="width:100%;padding:10px 12px;font-size:14px;border:1px solid #ddd;border-radius:8px;outline:none;box-sizing:border-box;background:#fff;">
+          <option value="fr" {{ $parametres['langue_defaut'] === 'fr' ? 'selected' : '' }}>Francais</option>
+          <option value="en" {{ $parametres['langue_defaut'] === 'en' ? 'selected' : '' }}>English</option>
+        </select>
+        <div style="font-size:11px;color:#aaa;margin-top:6px;">Applique a l'interface payeur et etablissement (bilingue camerounais — F15, E13).</div>
       </div>
 
       {{-- Bouton sauvegarder --}}

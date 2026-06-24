@@ -72,6 +72,7 @@ Route::post('/webhook/aangaraapay',
 
 Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur.')->group(function () {
     Route::get('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'index'])->name('onboarding');
+    Route::get('/apprenants/search', [\App\Http\Controllers\Payeur\OnboardingController::class, 'searchApprenants'])->name('onboarding.search');
     Route::post('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'store'])->name('onboarding.store');
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Payeur\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/paiement/{fraisApprenant}', [\App\Http\Controllers\Payeur\PaiementController::class, 'show'])->name('paiement.show');

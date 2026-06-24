@@ -19,6 +19,23 @@
             --ep-gold:   #E8A020;
             --ep-red:    #D94040;
         }
+        /* ══ TOGGLE SWITCH REACTIF — CSS pur, reagit instantanement au clic ══ */
+        .ep-toggle { position:relative; display:inline-block; width:44px; height:24px; cursor:pointer; flex-shrink:0; }
+        .ep-toggle input { opacity:0; width:0; height:0; position:absolute; }
+        .ep-toggle-track { position:absolute; inset:0; background:#ddd; border-radius:24px; transition:background .2s; }
+        .ep-toggle-thumb { position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 1px 2px rgba(0,0,0,.2); }
+        .ep-toggle input:checked ~ .ep-toggle-track { background:#0D9E75; }
+        .ep-toggle input:checked ~ .ep-toggle-track .ep-toggle-thumb { transform: translateX(20px); }
+        /* ══ TOASTS ══ */
+        .toast-wrap{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+        .toast{display:flex;align-items:flex-start;gap:10px;min-width:280px;max-width:360px;padding:13px 16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.15);font-size:13px;font-weight:500;animation:toast-in .25s ease-out;}
+        .toast.t-success{background:#085041;color:#fff;}
+        .toast.t-error{background:#9B2C2C;color:#fff;}
+        .toast.t-info{background:#1A4F8A;color:#fff;}
+        .toast svg{flex-shrink:0;margin-top:1px;}
+        .toast.closing{animation:toast-out .2s ease-in forwards;}
+        @keyframes toast-in{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
+        @keyframes toast-out{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(30px);}}
     </style>
 </head>
 <body class="h-full bg-gray-100 font-sans text-gray-900 antialiased">
@@ -111,8 +128,7 @@
                 <a href="{{ route('admin.reclamations.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.reclamations.*') ? 'active' : '' }}">
                     <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                        <polyline points="17 6 23 6 23 12"/>
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
                     </svg>
                     Réclamations
                 </a>
@@ -166,34 +182,6 @@
 
         {{-- Contenu principal --}}
         <main class="flex-1 overflow-y-auto p-6">
-
-            {{-- Notifications flash --}}
-            @if (session('success'))
-                <div class="mb-4 flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3 rounded-lg">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="mb-4 flex items-center gap-3 bg-red-50 border border-red-200 text-red-800 text-sm px-4 py-3 rounded-lg">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                    </svg>
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            @if (session('info'))
-                <div class="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-3 rounded-lg">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
-                    </svg>
-                    {{ session('info') }}
-                </div>
-            @endif
 
             {{-- Contenu de la page --}}
             @yield('content')
@@ -408,5 +396,36 @@
         }
     });
     </script>
+    {{-- ══ TOASTS ══ --}}
+    <div class="toast-wrap" id="toast-wrap">
+        @if (session('success'))
+        <div class="toast t-success" data-toast>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
+        @if (session('error'))
+        <div class="toast t-error" data-toast>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{ session('error') }}</span>
+        </div>
+        @endif
+        @if (session('info'))
+        <div class="toast t-info" data-toast>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>{{ session('info') }}</span>
+        </div>
+        @endif
+    </div>
+
+    <script>
+    document.querySelectorAll('[data-toast]').forEach(function (t) {
+        setTimeout(function () {
+            t.classList.add('closing');
+            setTimeout(function () { t.remove(); }, 200);
+        }, 4000);
+    });
+    </script>
+
 </body>
 </html>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\ParametreSysteme;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
@@ -13,12 +14,15 @@ class ParametreSystemeController extends Controller
     public function index()
     {
         $parametres = [
-            'taux_commission'     => config('services.edupay.taux_commission', 0.025),
-            'timeout_paiement'    => config('services.edupay.timeout_paiement', 120),
-            'sms_actif'           => config('services.edupay.sms_actif', true),
-            'maintenance'         => config('services.edupay.maintenance', false),
-            'max_tranches'        => config('services.edupay.max_tranches', 3),
-            'aangaraa_api_url'    => config('services.aangaraa.api_url', env('AANGARAA_API_URL', '')),
+            'taux_commission'  => (float) ParametreSysteme::obtenir('taux_commission', 0.025),
+            'timeout_paiement' => (int) ParametreSysteme::obtenir('timeout_paiement', 120),
+            'max_tranches'     => (int) ParametreSysteme::obtenir('max_tranches', 3),
+            'sms_actif'        => ParametreSysteme::obtenirBool('sms_actif', true),
+            'maintenance'      => ParametreSysteme::obtenirBool('maintenance', false),
+            'mtn_actif'        => ParametreSysteme::obtenirBool('mtn_actif', true),
+            'orange_actif'     => ParametreSysteme::obtenirBool('orange_actif', true),
+            'langue_defaut'    => ParametreSysteme::obtenir('langue_defaut', 'fr'),
+            'aangaraa_api_url' => config('services.aangaraa.api_url', ''),
         ];
 
         $stats = [
@@ -39,31 +43,44 @@ class ParametreSystemeController extends Controller
             'taux_commission'  => ['required', 'numeric', 'min:0', 'max:0.1'],
             'timeout_paiement' => ['required', 'integer', 'min:30', 'max:600'],
             'max_tranches'     => ['required', 'integer', 'min:1', 'max:12'],
+            'langue_defaut'    => ['required', 'in:fr,en'],
         ], [
             'taux_commission.required'  => 'Le taux est obligatoire.',
             'taux_commission.max'       => 'Le taux maximum est 10%.',
             'timeout_paiement.required' => 'Le timeout est obligatoire.',
             'max_tranches.required'     => 'Le nombre de tranches est obligatoire.',
+            'langue_defaut.in'          => 'Langue invalide (fr ou en uniquement).',
         ]);
 
-        // Mettre a jour le .env
-        $this->updateEnv([
-            'EDUPAY_TAUX_COMMISSION'  => $request->taux_commission,
-            'EDUPAY_TIMEOUT_PAIEMENT' => $request->timeout_paiement,
-            'EDUPAY_MAX_TRANCHES'     => $request->max_tranches,
-            'EDUPAY_SMS_ACTIF'        => $request->has('sms_actif') ? 'true' : 'false',
-            'EDUPAY_MAINTENANCE'      => $request->has('maintenance') ? 'true' : 'false',
-        ]);
+        $mtnActif    = $request->has('mtn_actif');
+        $orangeActif = $request->has('orange_actif');
 
-        // Vider le cache de config
-        Artisan::call('config:clear');
+        if (! $mtnActif && ! $orangeActif) {
+            return back()
+                ->withErrors(['mtn_actif' => 'Au moins un mode de paiement (MTN ou Orange) doit rester actif.'])
+                ->withInput();
+        }
+
+        ParametreSysteme::definir([
+            'taux_commission'  => $request->taux_commission,
+            'timeout_paiement' => $request->timeout_paiement,
+            'max_tranches'     => $request->max_tranches,
+            'sms_actif'        => $request->has('sms_actif') ? '1' : '0',
+            'maintenance'      => $request->input('maintenance', '0') === '1' ? '1' : '0',
+            'mtn_actif'        => $mtnActif ? '1' : '0',
+            'orange_actif'     => $orangeActif ? '1' : '0',
+            'langue_defaut'    => $request->langue_defaut,
+        ]);
 
         AuditLog::enregistrer(
             Auth::guard('admin')->user(),
             'PARAMETRES_MODIFIES',
             'Parametres systeme mis a jour : taux=' . $request->taux_commission
                 . ', timeout=' . $request->timeout_paiement
-                . ', max_tranches=' . $request->max_tranches,
+                . ', max_tranches=' . $request->max_tranches
+                . ', mtn=' . ($mtnActif ? 'on' : 'off')
+                . ', orange=' . ($orangeActif ? 'on' : 'off')
+                . ', langue=' . $request->langue_defaut,
             $request,
             'WARNING'
         );
@@ -74,7 +91,6 @@ class ParametreSystemeController extends Controller
     public function viderCache(Request $request)
     {
         Artisan::call('cache:clear');
-        Artisan::call('config:clear');
         Artisan::call('view:clear');
 
         AuditLog::enregistrer(
@@ -86,22 +102,5 @@ class ParametreSystemeController extends Controller
         );
 
         return back()->with('success', 'Cache vide avec succes.');
-    }
-
-    private function updateEnv(array $values)
-    {
-        $envPath = base_path('.env');
-        $content = file_get_contents($envPath);
-
-        foreach ($values as $key => $value) {
-            if (preg_match("/^{$key}=/m", $content)) {
-                $content = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $content);
-            } else {
-                $content .= "
-{$key}={$value}";
-            }
-        }
-
-        file_put_contents($envPath, $content);
     }
 }

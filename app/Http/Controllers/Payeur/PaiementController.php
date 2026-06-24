@@ -7,6 +7,7 @@ use App\Models\FraisApprenant;
 use App\Models\Paiement;
 use App\Services\AangaraaPayService;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
@@ -198,15 +199,23 @@ class PaiementController extends Controller
     // ─────────────────────────────────────────────
     // Historique
     // ─────────────────────────────────────────────
-    public function historique()
+    public function historique(Request $request)
     {
-        $paiements = Paiement::with(['apprenant', 'fraisApprenant.categorieFrais', 'remboursements' => function ($q) {
+        $query = Paiement::with(['apprenant', 'fraisApprenant.categorieFrais', 'remboursements' => function ($q) {
                 $q->where('statut', 'approuve');
             }])
             ->where('user_id', Auth::id())
-            ->latest('date_paiement')
-            ->paginate(15);
+            ->latest('date_paiement');
 
+        if ($request->get('export') === 'pdf') {
+            $paiements = $query->get();
+            $user      = Auth::user();
+            $pdf = Pdf::loadView('pdf.historique_paiements', compact('paiements', 'user'))
+                      ->setPaper('a4', 'portrait');
+            return $pdf->download('historique_edupay_' . now()->format('Ymd') . '.pdf');
+        }
+
+        $paiements = $query->paginate(15);
         return view('payeur.historique', compact('paiements'));
     }
 

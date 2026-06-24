@@ -1,12 +1,15 @@
 @extends('layouts.payeur')
 
 @section('title', 'Historique des paiements')
-
 @section('content')
-
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">← Retour au tableau de bord</a>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">&#8592; Retour au tableau de bord</a>
+        <a href="{{ route('payeur.historique') }}?export=pdf" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:#fff;border:1px solid #ddd !important;border-radius:8px;font-size:13px;font-weight:500;color:#444 !important;text-decoration:none;outline:none;box-shadow:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exporter PDF
+        </a>
     </div>
+
 
     <div style="font-size:17px;font-weight:700;margin-bottom:4px;">Historique des paiements</div>
     <div style="font-size:12px;color:#888;margin-bottom:18px;">{{ $paiements->total() ?? $paiements->count() }} transaction(s) effectuée(s)</div>

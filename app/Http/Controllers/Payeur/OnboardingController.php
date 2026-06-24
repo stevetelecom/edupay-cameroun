@@ -34,6 +34,7 @@ class OnboardingController extends Controller
             'nom_apprenant'      => 'required_unless:lien,soi-meme|nullable|string|max:100',
             'classe'             => 'required|string|max:50',
             'matricule'          => 'nullable|string|max:50',
+            'apprenant_id'       => 'nullable|exists:apprenants,id',
             'lien'               => 'required|in:parent,soi-meme',
         ], [
             'etablissement_nom.required_without' => 'Veuillez indiquer ou choisir un établissement.',
@@ -53,12 +54,22 @@ class OnboardingController extends Controller
         $nomApprenant    = $validated['lien'] === 'soi-meme' ? $user->nom    : $validated['nom_apprenant'];
 
         $apprenant = null;
-        if (!empty($validated['matricule'])) {
+
+        // Cas 1 : apprenant sélectionné directement depuis l'annuaire
+        if (!empty($validated['apprenant_id'])) {
+            $apprenant = Apprenant::where('id', $validated['apprenant_id'])
+                ->where('etablissement_id', $etablissement->id)
+                ->first();
+        }
+
+        // Cas 2 : recherche par matricule
+        if (!$apprenant && !empty($validated['matricule'])) {
             $apprenant = Apprenant::where('matricule', $validated['matricule'])
                 ->where('etablissement_id', $etablissement->id)
                 ->first();
         }
 
+        // Cas 3 : créer (pré-rattachement)
         if (!$apprenant) {
             $apprenant = Apprenant::create([
                 'etablissement_id' => $etablissement->id,
@@ -153,6 +164,33 @@ class OnboardingController extends Controller
 
         return redirect()->route('payeur.dashboard')
             ->with('success', $apprenant->prenom . ' a été retiré de votre compte.');
+    }
+
+    // ── F04 : API — Recherche apprenants par etablissement ──
+    public function searchApprenants(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $etablissementId = $request->input('etablissement_id');
+        $search          = $request->input('q', '');
+
+        if (!$etablissementId) {
+            return response()->json([]);
+        }
+
+        $apprenants = \App\Models\Apprenant::where('etablissement_id', $etablissementId)
+            ->where('actif', true)
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($sub) use ($search) {
+                    $sub->where('nom',       'like', "%{$search}%")
+                        ->orWhere('prenom',  'like', "%{$search}%")
+                        ->orWhere('classe',  'like', "%{$search}%")
+                        ->orWhere('matricule','like', "%{$search}%");
+                });
+            })
+            ->orderBy('nom')
+            ->limit(30)
+            ->get(['id', 'nom', 'prenom', 'classe', 'matricule']);
+
+        return response()->json($apprenants);
     }
 
     // ── Helpers privés ──
