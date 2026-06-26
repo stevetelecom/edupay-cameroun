@@ -28,7 +28,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p ${{ secrets.REMOTE_PORT }} ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -T 60 -p ${{ secrets.REMOTE_PORT }} ${{ secrets.REMOTE_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
 
       - name: Sync files via rsync
         run: |
@@ -38,12 +39,13 @@ jobs:
             --exclude='node_modules' \
             --exclude='.env' \
             --exclude='storage/logs/*.log' \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.REMOTE_PORT }}" \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.REMOTE_PORT }}" \
             ./ ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.DEPLOY_PATH }}
 
       - name: Post-deploy
         run: |
           ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
               -p ${{ secrets.REMOTE_PORT }} \
               ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} \
               "cd ${{ secrets.DEPLOY_PATH }} && \
