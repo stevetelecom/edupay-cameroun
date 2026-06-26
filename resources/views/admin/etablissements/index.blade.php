@@ -186,7 +186,7 @@
   <form method="GET" action="{{ route('admin.etablissements.index') }}" class="flex items-center gap-3 flex-wrap">
     <input type="text" name="search" value="{{ request('search') }}"
            placeholder="Rechercher par nom, ville, email..."
-           class="flex-1 min-w-[200px] px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+           class="flex-1 min-w-50 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
     <select name="statut" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
       <option value="">Tous les statuts</option>
       <option value="actif"      {{ request('statut')==='actif'      ? 'selected' : '' }}>Actif</option>

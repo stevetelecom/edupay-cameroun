@@ -152,7 +152,7 @@
   <form method="GET" action="{{ route('admin.commissions.index') }}" class="flex items-center gap-3 flex-wrap">
     <input type="text" name="search" value="{{ request('search') }}"
            placeholder="Rechercher par ecole..."
-           class="flex-1 min-w-[180px] px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#E8A020]" />
+           class="flex-1 min-w-45 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#E8A020]" />
     <select name="etablissement_id" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#E8A020]">
       <option value="">Tous les etablissements</option>
       @foreach($etablissements as $e)

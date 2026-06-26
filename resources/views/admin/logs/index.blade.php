@@ -73,7 +73,7 @@
   <form method="GET" action="{{ route('admin.logs.index') }}" class="flex items-center gap-3 flex-wrap">
     <input type="text" name="search" value="{{ request('search') }}"
            placeholder="Action, detail, IP..."
-           class="flex-1 min-w-[200px] px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+           class="flex-1 min-w-50 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
     <select name="niveau" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
       <option value="">Tous niveaux</option>
       <option value="INFO"     {{ request('niveau')==='INFO'     ? 'selected' : '' }}>INFO</option>
@@ -96,7 +96,7 @@
 {{-- Table --}}
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
   <div class="overflow-x-auto">
-    <table class="min-w-[900px] w-full text-sm">
+    <table class="min-w-255 w-full text-sm">
     <thead class="bg-gray-50 border-b border-gray-200">
       <tr>
         <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
@@ -130,7 +130,7 @@
           <div class="font-mono text-xs font-semibold text-gray-700">{{ $log->action }}</div>
         </td>
         <td class="px-4 py-3">
-          <div class="text-xs text-gray-500 truncate max-w-[250px]">{{ $log->detail ?? '—' }}</div>
+          <div class="text-xs text-gray-500 truncate max-w-62.5">{{ $log->detail ?? '—' }}</div>
         </td>
         <td class="px-4 py-3 font-mono text-xs text-gray-500">{{ $log->ip_address ?? '—' }}</td>
         <td class="px-4 py-3 text-center">
