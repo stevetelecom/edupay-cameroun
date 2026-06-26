@@ -73,6 +73,12 @@
     <div class="ep-modal-head">
       <h3>↑ Importer des apprenants (CSV)</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-import-csv')">×</button>
+        <div id="categorie-details" style="background:#f5f5f5;border-radius:8px;padding:12px;margin-bottom:12px;display:none;">
+          <div style="font-size:12px;font-weight:600;color:#333;margin-bottom:8px;">📋 Détail de la catégorie sélectionnée</div>
+          <div id="categorie-info" style="font-size:12px;color:#666;">
+            <!-- Rempli par JavaScript -->
+          </div>
+        </div>
     </div>
     <form method="POST" action="{{ route('etablissement.apprenants.import') }}" enctype="multipart/form-data">
       @csrf
@@ -117,6 +123,80 @@
         <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">Supprimer définitivement</button>
       </form>
     </div>
+  </div>
+</div>
+
+
+{{-- ══ MODAL : Voir apprenant (lecture seule) ══ --}}
+<div id="modal-voir-apprenant" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-md">
+    <div class="ep-modal-head">
+      <h3 id="voir-titre">Fiche apprenant</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-voir-apprenant')">×</button>
+    </div>
+    <div class="ep-modal-body" id="voir-body">
+      <div style="text-align:center;color:#aaa;padding:20px;">Chargement…</div>
+    </div>
+    <div class="ep-modal-foot">
+      <button class="btn-p" style="width:auto;padding:8px 20px;" onclick="epModal.close('modal-voir-apprenant')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+{{-- ══ MODAL : Modifier apprenant ══ --}}
+<div id="modal-modifier-apprenant" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-md">
+    <div class="ep-modal-head">
+      <h3>✏ Modifier l'apprenant</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-modifier-apprenant')">×</button>
+    </div>
+    <form id="modifier-apprenant-form" method="POST">
+      @csrf @method('PUT')
+      <div class="ep-modal-body">
+        <div class="g2">
+          <div>
+            <div class="lbl">Nom *</div>
+            <input class="inp" name="nom" id="edit-nom" required />
+          </div>
+          <div>
+            <div class="lbl">Prénom *</div>
+            <input class="inp" name="prenom" id="edit-prenom" required />
+          </div>
+        </div>
+        <div class="g2">
+          <div>
+            <div class="lbl">Classe *</div>
+            <input class="inp" name="classe" id="edit-classe" required />
+          </div>
+          <div>
+            <div class="lbl">Matricule</div>
+            <input class="inp" name="matricule" id="edit-matricule" />
+          </div>
+        </div>
+        <div class="g2">
+          <div>
+            <div class="lbl">Date de naissance</div>
+            <input class="inp" type="date" name="date_naissance" id="edit-ddn" />
+          </div>
+          <div>
+            <div class="lbl">Sexe</div>
+            <select class="select" name="sexe" id="edit-sexe">
+              <option value="">— Non précisé —</option>
+              <option value="M">Masculin</option>
+              <option value="F">Féminin</option>
+            </select>
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" name="actif" value="1" id="edit-actif" />
+          Apprenant actif
+        </label>
+      </div>
+      <div class="ep-modal-foot">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-modifier-apprenant')">Annuler</button>
+        <button type="submit" class="btn-p" style="width:auto;padding:8px 20px;">Enregistrer les modifications</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -237,95 +317,28 @@
 @if(method_exists($apprenants ?? null, 'links'))
   <div style="margin-top:16px;">{{ $apprenants->links() }}</div>
 @endif
-
-{{-- ══ MODAL : Voir apprenant (lecture seule) ══ --}}
-<div id="modal-voir-apprenant" class="ep-modal-overlay">
-  <div class="ep-modal ep-modal-md">
-    <div class="ep-modal-head">
-      <h3 id="voir-titre">Fiche apprenant</h3>
-      <button class="ep-modal-close" onclick="epModal.close('modal-voir-apprenant')">×</button>
-    </div>
-    <div class="ep-modal-body" id="voir-body">
-      <div style="text-align:center;color:#aaa;padding:20px;">Chargement…</div>
-    </div>
-    <div class="ep-modal-foot">
-      <button class="btn-p" style="width:auto;padding:8px 20px;" onclick="epModal.close('modal-voir-apprenant')">Fermer</button>
-    </div>
-  </div>
-</div>
-
-{{-- ══ MODAL : Modifier apprenant ══ --}}
-<div id="modal-modifier-apprenant" class="ep-modal-overlay">
-  <div class="ep-modal ep-modal-md">
-    <div class="ep-modal-head">
-      <h3>✏ Modifier l'apprenant</h3>
-      <button class="ep-modal-close" onclick="epModal.close('modal-modifier-apprenant')">×</button>
-    </div>
-    <form id="modifier-apprenant-form" method="POST">
-      @csrf @method('PUT')
-      <div class="ep-modal-body">
-        <div class="g2">
-          <div>
-            <div class="lbl">Nom *</div>
-            <input class="inp" name="nom" id="edit-nom" required />
-          </div>
-          <div>
-            <div class="lbl">Prénom *</div>
-            <input class="inp" name="prenom" id="edit-prenom" required />
-          </div>
-        </div>
-        <div class="g2">
-          <div>
-            <div class="lbl">Classe *</div>
-            <input class="inp" name="classe" id="edit-classe" required />
-          </div>
-          <div>
-            <div class="lbl">Matricule</div>
-            <input class="inp" name="matricule" id="edit-matricule" />
-          </div>
-        </div>
-        <div class="g2">
-          <div>
-            <div class="lbl">Date de naissance</div>
-            <input class="inp" type="date" name="date_naissance" id="edit-ddn" />
-          </div>
-          <div>
-            <div class="lbl">Sexe</div>
-            <select class="select" name="sexe" id="edit-sexe">
-              <option value="">— Non précisé —</option>
-              <option value="M">Masculin</option>
-              <option value="F">Féminin</option>
-            </select>
-          </div>
-        </div>
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-          <input type="checkbox" name="actif" value="1" id="edit-actif" />
-          Apprenant actif
-        </label>
-      </div>
-      <div class="ep-modal-foot">
-        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-modifier-apprenant')">Annuler</button>
-        <button type="submit" class="btn-p" style="width:auto;padding:8px 20px;">Enregistrer les modifications</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 @endsection
 
 @push('scripts')
 <script>
 // ── Voir apprenant ──
 function voirApprenant(id) {
-    var row = document.querySelector('button[onclick*="voirApprenant('+id+')"]').closest('tr');
+    var btns = document.querySelectorAll('button');
+    var row = null;
+    btns.forEach(function(b) {
+        if (b.getAttribute('onclick') && b.getAttribute('onclick').includes('voirApprenant(' + id + ')')) {
+            row = b.closest('tr');
+        }
+    });
+    if (!row) return;
     var cells = row.querySelectorAll('td');
     document.getElementById('voir-titre').textContent = cells[1].textContent.trim();
     document.getElementById('voir-body').innerHTML =
         '<div class="g2" style="gap:16px;">' +
-        '<div><div class="lbl">Matricule</div><div style="font-weight:600;">'+cells[0].textContent.trim()+'</div></div>' +
-        '<div><div class="lbl">Nom complet</div><div style="font-weight:600;">'+cells[1].textContent.trim()+'</div></div>' +
-        '<div><div class="lbl">Classe</div><div>'+cells[2].textContent.trim()+'</div></div>' +
-        '<div><div class="lbl">Sexe</div><div>'+cells[3].textContent.trim()+'</div></div>' +
+        '<div><div class="lbl">Matricule</div><div style="font-weight:600;">' + cells[0].textContent.trim() + '</div></div>' +
+        '<div><div class="lbl">Nom complet</div><div style="font-weight:600;">' + cells[1].textContent.trim() + '</div></div>' +
+        '<div><div class="lbl">Classe</div><div>' + cells[2].textContent.trim() + '</div></div>' +
+        '<div><div class="lbl">Sexe</div><div>' + cells[3].textContent.trim() + '</div></div>' +
         '</div>';
     epModal.open('modal-voir-apprenant');
 }
@@ -334,13 +347,13 @@ function voirApprenant(id) {
 function modifierApprenant(id, nom, prenom, classe, matricule, ddn, sexe, actif) {
     var baseUrl = "{{ url('etablissement/apprenants') }}/";
     document.getElementById('modifier-apprenant-form').action = baseUrl + id;
-    document.getElementById('edit-nom').value      = nom;
-    document.getElementById('edit-prenom').value   = prenom;
-    document.getElementById('edit-classe').value   = classe;
+    document.getElementById('edit-nom').value       = nom;
+    document.getElementById('edit-prenom').value    = prenom;
+    document.getElementById('edit-classe').value    = classe;
     document.getElementById('edit-matricule').value = matricule || '';
-    document.getElementById('edit-ddn').value      = ddn || '';
-    document.getElementById('edit-sexe').value     = sexe || '';
-    document.getElementById('edit-actif').checked  = actif;
+    document.getElementById('edit-ddn').value       = ddn || '';
+    document.getElementById('edit-sexe').value      = sexe || '';
+    document.getElementById('edit-actif').checked   = actif;
     epModal.open('modal-modifier-apprenant');
 }
 
@@ -352,11 +365,48 @@ function supprimerApprenant(id, nom) {
     epModal.open('modal-delete-apprenant');
 }
 
-// ── Ouvrir create si erreurs de validation ──
-@if($errors->any() && old('nom'))
-document.addEventListener('DOMContentLoaded', function(){
+// ── Catégorie de frais dans le modal create ──
+document.addEventListener('DOMContentLoaded', function() {
+    var categoriesData = @json($categories ?? []);
+
+    var selectCat = document.querySelector('select[name="categorie_frais_id"]');
+    if (selectCat) {
+        selectCat.addEventListener('change', function() {
+            var categId = this.value;
+            var detailsDiv = document.getElementById('categorie-details');
+            var infoDiv    = document.getElementById('categorie-info');
+            if (!categId || !detailsDiv) { if (detailsDiv) detailsDiv.style.display = 'none'; return; }
+
+            var categorie = categoriesData.find(function(c) { return c.id == categId; });
+            if (categorie) {
+                var html = '<div style="margin-bottom:8px;">'
+                    + '<strong>' + categorie.nom + '</strong><br>'
+                    + '<span style="color:#888;">' + (categorie.annee_scolaire || '2025-2026') + '</span>'
+                    + '</div>';
+
+                if (categorie.echeanciers && categorie.echeanciers.length > 0) {
+                    html += '<div style="font-size:11px;color:#666;"><strong>Échéanciers :</strong><br>';
+                    categorie.echeanciers.forEach(function(ech) {
+                        var date = new Date(ech.date_echeance).toLocaleDateString('fr-FR');
+                        var montant = Number(ech.montant).toLocaleString('fr-FR');
+                        html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+                            + ' Tranche ' + ech.numero_tranche + ' : ' + date + ' — ' + montant + ' FCFA<br>';
+                    });
+                    html += '</div>';
+                } else {
+                    html += '<div style="font-size:11px;color:#999;">Aucun échéancier défini.</div>';
+                }
+
+                if (infoDiv) infoDiv.innerHTML = html;
+                if (detailsDiv) detailsDiv.style.display = 'block';
+            }
+        });
+    }
+
+    // ── Ouvrir modal create si erreurs de validation ──
+    @if($errors->any() && old('nom'))
     epModal.open('modal-apprenant-create');
+    @endif
 });
-@endif
 </script>
 @endpush

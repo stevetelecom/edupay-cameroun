@@ -33,6 +33,29 @@
         </div>
     </div>
 
+    {{-- ── Taux de recouvrement ── --}}
+    <div class="epcard" style="margin-bottom:18px;padding:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div>
+                <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:2px;">
+                    Taux de recouvrement — {{ $anneeScolaire ?? '2025-2026' }}
+                </div>
+                <div style="font-size:12px;color:#888;">
+                    {{ number_format($totalPaye ?? 0, 0, ',', ' ') }} FCFA payés sur {{ number_format($totalAttendu ?? 0, 0, ',', ' ') }} FCFA attendus
+                </div>
+            </div>
+            <div style="text-align:right;">
+                <div style="font-size:28px;font-weight:700;color:{{ ($tauxRecouvrementDecimal ?? 0) >= 80 ? '#0D9E75' : (($tauxRecouvrementDecimal ?? 0) >= 50 ? '#E8A020' : '#D94040') }};">
+                    {{ number_format($tauxRecouvrementDecimal ?? 0, 2, ',', '') }}%
+                </div>
+            </div>
+        </div>
+        <div style="background:#f0f0f0;border-radius:6px;height:8px;overflow:hidden;">
+            <div style="background:{{ ($tauxRecouvrementDecimal ?? 0) >= 80 ? '#0D9E75' : (($tauxRecouvrementDecimal ?? 0) >= 50 ? '#E8A020' : '#D94040') }};height:100%;width:{{ min($tauxRecouvrementDecimal ?? 0, 100) }}%;transition:width 0.5s ease;">
+            </div>
+        </div>
+    </div>
+
     {{-- ── Derniers paiements reçus ── --}}
     <div class="seclbl" style="margin-top:0;">Derniers paiements reçus</div>
     <div class="epcard" style="margin-bottom:14px;">
@@ -93,6 +116,11 @@
         <a href="{{ route('etablissement.rapports.index') }}" class="btn-o" style="flex:1;font-size:12px;">
             Exporter rapport Excel
         </a>
+    </div>
+
+    {{-- ── Info recouvrement pour établissement ── --}}
+    <div style="font-size:12px;color:#999;margin-top:16px;text-align:center;">
+        💡 Taux de votre établissement : <strong>{{ number_format($tauxRecouvrementDecimal ?? 0, 2, ',', '') }}%</strong>
     </div>
 
 @endsection

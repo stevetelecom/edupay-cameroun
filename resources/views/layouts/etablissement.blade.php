@@ -272,8 +272,8 @@
             </a>
             <div style="margin-top:16px;background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;">
                 <div style="font-size:11px;font-weight:600;color:#0F6E56;margin-bottom:4px;">Recouvrement</div>
-                <div style="font-size:24px;font-weight:700;color:#085041;">{{ $tauxRecouvrement ?? 0 }}%</div>
-                <div class="prog"><div class="pfill" style="width:{{ $tauxRecouvrement ?? 0 }}%"></div></div>
+                <div style="font-size:24px;font-weight:700;color:#085041;">{{ number_format($tauxRecouvrementDecimal ?? 0, 2, ',', '') }}%</div>
+                <div class="prog"><div class="pfill" style="width:{{ min($tauxRecouvrementDecimal ?? 0, 100) }}%"></div></div>
                 <div style="font-size:10px;color:#1B9E75;margin-top:3px;">Objectif : 80%</div>
             </div>
         </div>

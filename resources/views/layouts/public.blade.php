@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>@yield('title', 'EduPay Cameroun')</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
 <style>
 :root{--ep-navy:#0B2545;--ep-teal:#0D9E75;--ep-teal2:#0A8562;--ep-teal-lt:#E0F5EE;--ep-teal-mid:#9FE1CB;--ep-gold:#E8A020;--ep-gold-lt:#FEF3DC;--ep-red:#D94040;--ep-red-lt:#FBEAEA;--ep-blue-lt:#E6F0FB;--ep-purple-lt:#EDE9FE;--border:rgba(0,0,0,0.09);--radius-md:8px;--radius-lg:12px;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -34,9 +35,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .hero-top{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.08);}
 .logo-t{font-size:20px;font-weight:700;letter-spacing:-.3px;}
 .logo-t span{color:#5DCAA5;}
-.hero-main{padding:48px 28px 36px;}
+.hero-main{padding:48px 28px 36px;text-align:center;display:flex;flex-direction:column;align-items:center;}
 .hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 14px;font-size:11px;color:rgba(255,255,255,.75);margin-bottom:18px;}
-.hero-h1{font-size:36px;font-weight:700;line-height:1.2;max-width:520px;margin-bottom:14px;}
+.hero-h1{font-size:36px;font-weight:700;line-height:1.2;max-width:620px;margin:0 auto 14px;}
 .hero-h1 em{font-style:normal;color:#5DCAA5;}
 .hero-sub{font-size:14px;color:rgba(255,255,255,.6);max-width:440px;margin-bottom:28px;line-height:1.65;}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
@@ -45,6 +46,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .hbtn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);padding:13px 26px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;text-decoration:none;}
 .hero-stats{display:flex;border-top:1px solid rgba(255,255,255,.08);}
 .hstat{flex:1;padding:18px 28px;border-right:1px solid rgba(255,255,255,.08);text-align:center;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:18px;display:inline-flex;align-items:center;justify-content:center;}
 .hstat:last-child{border-right:none;}
 .hstat-v{font-size:22px;font-weight:700;color:#5DCAA5;}
 .hstat-l{font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;}
@@ -53,6 +55,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .feat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;position:relative;overflow:hidden;}
 .feat-icon{width:42px;height:42px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
 .feat-icon svg{width:22px;height:22px;}
+.icon-round{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
+.icon-round svg{width:18px;height:18px;}
+.icon-sm{width:30px;height:30px;border-radius:10px;}
 .feat-title{font-size:14px;font-weight:600;margin-bottom:7px;}
 .feat-desc{font-size:12px;color:#777;line-height:1.65;}
 .feat-line{position:absolute;top:0;left:0;width:3px;height:100%;}

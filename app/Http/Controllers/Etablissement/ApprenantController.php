@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Etablissement;
 
 use App\Http\Controllers\Controller;
 use App\Models\Apprenant;
+use App\Models\CategoriesFrais;
+use App\Models\Echeancier;
+use App\Models\FraisApprenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -34,7 +37,19 @@ class ApprenantController extends Controller
             ->orderBy('classe')
             ->pluck('classe');
 
-        return view('etablissement.apprenants.index', compact('apprenants', 'classes'));
+        // Charger les catégories et échéanciers pour le modal
+        $categories = CategoriesFrais::where('etablissement_id', $etablissementId)
+            ->where('actif', true)
+            ->with(['echeanciers' => fn($q) => $q->orderBy('numero_tranche')])
+            ->orderBy('nom')
+            ->get();
+
+        $echeanciers = Echeancier::whereHas('categorieFrais', fn($q) => $q->where('etablissement_id', $etablissementId))
+            ->with('categorieFrais')
+            ->orderBy('date_echeance')
+            ->get();
+
+        return view('etablissement.apprenants.index', compact('apprenants', 'classes', 'categories', 'echeanciers'));
     }
 
     public function create()
@@ -54,13 +69,55 @@ class ApprenantController extends Controller
             'date_naissance' => ['nullable', 'date'],
             'sexe'           => ['nullable', Rule::in(['M', 'F'])],
             'actif'          => ['nullable', 'boolean'],
+            'categorie_frais_id' => ['nullable', 'exists:categories_frais,id'],
         ]);
 
         $validated['etablissement_id'] = $etablissementId;
         $validated['actif']            = $request->boolean('actif', true);
         $validated['statut_paiement']  = 'impaye';
 
+        // Génération automatique du matricule si non fourni
+        if (empty($validated['matricule'])) {
+            $etablissement = Auth::user()->etablissement;
+            // Préfixe basé sur le code établissement ou les initiales
+            $prefix = $etablissement->code_etablissement
+                ? strtoupper(explode('-', $etablissement->code_etablissement)[0])
+                : strtoupper(substr(preg_replace('/[^A-Z]/i', '', $etablissement->nom), 0, 3));
+
+            // Numéro séquentiel : dernier matricule de cet établissement + 1
+            $dernierMatricule = \App\Models\Apprenant::where('etablissement_id', $etablissementId)
+                ->whereNotNull('matricule')
+                ->orderByDesc('id')
+                ->value('matricule');
+
+            $numero = 1;
+            if ($dernierMatricule) {
+                // Extraire le numéro à la fin du matricule
+                preg_match('/(\d+)$/', $dernierMatricule, $matches);
+                $numero = isset($matches[1]) ? (int)$matches[1] + 1 : 1;
+            }
+
+            $validated['matricule'] = $prefix . '-' . date('Y') . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+        }
+
+    // Récupérer categorie_frais_id sans la passer à create()
+    $categorieFraisId = $validated['categorie_frais_id'] ?? null;
+    unset($validated['categorie_frais_id']);
+
         $apprenant = Apprenant::create($validated);
+        // Si une catégorie de frais est sélectionnée, créer FraisApprenant
+        if ($categorieFraisId) {
+            $categorieFrais = CategoriesFrais::findOrFail($categorieFraisId);
+            FraisApprenant::create([
+                'apprenant_id'        => $apprenant->id,
+                'categorie_frais_id'  => $categorieFraisId,
+                'montant_total'       => $categorieFrais->montant_total,
+                'montant_paye'        => 0,
+                'statut'              => 'impaye',
+                'annee_scolaire'      => $categorieFrais->annee_scolaire ?? '2025-2026',
+            ]);
+        }
+
 
         return redirect()
             ->route('etablissement.apprenants.show', $apprenant)

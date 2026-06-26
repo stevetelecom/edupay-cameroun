@@ -95,7 +95,8 @@
 
 {{-- Table --}}
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-  <table class="w-full text-sm">
+  <div class="overflow-x-auto">
+    <table class="min-w-[900px] w-full text-sm">
     <thead class="bg-gray-50 border-b border-gray-200">
       <tr>
         <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
@@ -145,7 +146,8 @@
       </tr>
       @endforelse
     </tbody>
-  </table>
+    </table>
+  </div>
   @if($logs->hasPages())
   <div class="px-4 py-3 border-t border-gray-100">{{ $logs->links() }}</div>
   @endif

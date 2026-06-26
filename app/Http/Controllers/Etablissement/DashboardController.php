@@ -48,9 +48,11 @@ class DashboardController extends Controller
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
             ->sum('montant_paye');
 
-        $tauxRecouvrement = $totalAttendu > 0
-            ? round(($totalPaye / $totalAttendu) * 100)
+        $tauxRecouvrementDecimal = $totalAttendu > 0
+            ? round(($totalPaye / $totalAttendu) * 100, 2)
             : 0;
+
+        $tauxRecouvrement = (int) $tauxRecouvrementDecimal;
 
         // 5 derniers paiements reçus
         $derniersPaiements = Paiement::with(['apprenant', 'fraisApprenant.categorieFrais'])
@@ -68,6 +70,9 @@ class DashboardController extends Controller
             'nbDossiersImpayes',
             'derniersPaiements',
             'tauxRecouvrement',
+            'tauxRecouvrementDecimal',
+            'totalAttendu',
+            'totalPaye',
             'countImpayes',
             'anneeScolaire',
         ));

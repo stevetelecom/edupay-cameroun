@@ -19,7 +19,7 @@
     </div>
 
     {{-- ── KPIs principaux ── --}}
-    <div class="grid grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
 
         {{-- Volume de transactions --}}
         <div class="bg-white border border-gray-200 rounded-xl p-4">
@@ -83,6 +83,22 @@
             </div>
             <div class="text-2xl font-bold text-gray-900">{{ number_format($transactionsMois, 0, ',', ' ') }}</div>
             <div class="text-xs text-gray-500 mt-1">validées ce mois</div>
+        </div>
+
+        {{-- Réclamations --}}
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Réclamations</span>
+                <div class="w-8 h-8 bg-[#FCEAEA] rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-[#C53030]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 9v4"/>
+                        <path d="M12 17h.01"/>
+                        <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-2xl font-bold text-[#D32F2F]">{{ number_format($reclamationsMois, 0, ',', ' ') }}</div>
+            <div class="text-xs text-gray-500 mt-1">créées ce mois</div>
         </div>
     </div>
 
@@ -160,7 +176,109 @@
         </div>
     </div>
 
-    {{-- ── Taux de commission — configurable ── --}}
+    {{-- ── Taux de recouvrement GLOBAL ── --}}
+    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-sm font-bold text-gray-900">Taux de recouvrement — Plateforme globale</h2>
+                <p class="text-xs text-gray-500 mt-1">Calcul : montant payé / montant total</p>
+            </div>
+            <div class="text-right">
+                <div class="text-4xl font-bold text-[#0D9E75]">{{ number_format($tauxRecouvrementGlobal, 2, ',', '') }}%</div>
+                <p class="text-xs text-gray-500 mt-1">Taux global</p>
+            </div>
+        </div>
+        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-500 bg-[#0D9E75]"
+                 style="width:{{ min($tauxRecouvrementGlobal, 100) }}%">
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Grille taux par région + par établissement ── --}}
+    <div class="grid grid-cols-2 gap-5 mb-5">
+
+        {{-- Taux par région --}}
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+            <h2 class="text-sm font-bold text-gray-900 mb-4">Taux par région</h2>
+            <div class="space-y-2.5 max-h-72 overflow-y-auto">
+                @forelse ($tauxParRegion as $region)
+                    <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <div class="text-sm font-semibold text-gray-800">{{ $region->region ?: 'Non spécifiée' }}</div>
+                            <div class="text-xs text-gray-400">{{ $region->nb_etablissements }} établissement(s)</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-[#0D9E75]">{{ number_format($region->taux_recouvrement ?? 0, 2, ',', '') }}%</div>
+                            <div class="text-xs text-gray-400">{{ number_format($region->montant_paye ?? 0, 0, ',', ' ') }} FCFA</div>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-400 text-center py-4">Aucune donnée disponible</p>
+                @endforelse
+            </div>
+        </div>
+
+        {{-- Top 10 établissements par taux de recouvrement --}}
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+            <h2 class="text-sm font-bold text-gray-900 mb-4">Top établissements (taux recouvrement)</h2>
+            <div class="space-y-2.5 max-h-72 overflow-y-auto">
+                @forelse ($tauxParEtablissement as $index => $etab)
+                    <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-gray-400 w-5">{{ $index + 1 }}.</span>
+                                <div>
+                                    <div class="text-sm font-semibold text-gray-800">{{ $etab->nom }}</div>
+                                    <div class="text-xs text-gray-400">{{ $etab->ville ?? 'N/A' }} · {{ $etab->region ?? 'N/A' }}</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold" style="color:{{ $etab->taux_recouvrement >= 80 ? '#0D9E75' : ($etab->taux_recouvrement >= 50 ? '#E8A020' : '#D94040') }}">
+                                    {{ number_format($etab->taux_recouvrement ?? 0, 2, ',', '') }}%
+                                </div>
+                                <div class="text-xs text-gray-400">{{ number_format($etab->montant_paye ?? 0, 0, ',', ' ') }} FCFA</div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-sm text-gray-400 text-center py-4">Aucune donnée disponible</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Évolution mensuelle du taux de recouvrement ── --}}
+    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
+        <h2 class="text-sm font-bold text-gray-900 mb-4">Évolution mensuelle du taux de recouvrement (12 mois)</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-200">
+                        <th class="text-left py-2 px-3 text-xs font-bold text-gray-600">Mois</th>
+                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">Montant payé</th>
+                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">Montant total</th>
+                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">Taux</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($evolutionMensuelle as $mois)
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-2.5 px-3 font-semibold text-gray-800">{{ $mois['mois'] }}</td>
+                            <td class="py-2.5 px-3 text-right text-gray-600">{{ number_format($mois['montant_paye'], 0, ',', ' ') }} FCFA</td>
+                            <td class="py-2.5 px-3 text-right text-gray-600">{{ number_format($mois['montant_total'], 0, ',', ' ') }} FCFA</td>
+                            <td class="py-2.5 px-3 text-right">
+                                <span class="font-bold" style="color:{{ $mois['taux'] >= 80 ? '#0D9E75' : ($mois['taux'] >= 50 ? '#E8A020' : '#D94040') }}">
+                                    {{ number_format($mois['taux'], 2, ',', '') }}%
+                                </span>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="bg-[#FEF3DC] rounded-xl border-l-4 border-[#E8A020] px-5 py-4 flex items-center justify-between">
         <div>
             <div class="text-sm font-bold text-[#854F0B]">Taux de commission — configurable</div>

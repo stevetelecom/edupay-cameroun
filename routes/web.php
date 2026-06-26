@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/a-propos', [LandingController::class, 'about'])->name('about');
 Route::get('/temoignages', [LandingController::class, 'temoignages'])->name('temoignages');
+Route::get('/contact', [LandingController::class, 'contact'])->name('contact');
+Route::post('/contact', [LandingController::class, 'submitContact'])->name('contact.submit');
 
 // Authentification
 Route::middleware('guest')->group(function () {

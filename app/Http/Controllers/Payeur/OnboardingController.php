@@ -71,12 +71,30 @@ class OnboardingController extends Controller
 
         // Cas 3 : créer (pré-rattachement)
         if (!$apprenant) {
+            // Génération auto du matricule si non fourni
+            $matriculeAuto = $validated['matricule'] ?? null;
+            if (empty($matriculeAuto)) {
+                $prefix = $etablissement->code_etablissement
+                    ? strtoupper(explode('-', $etablissement->code_etablissement)[0])
+                    : strtoupper(substr(preg_replace('/[^A-Z]/i', '', $etablissement->nom), 0, 3));
+                $dernierMatricule = Apprenant::where('etablissement_id', $etablissement->id)
+                    ->whereNotNull('matricule')
+                    ->orderByDesc('id')
+                    ->value('matricule');
+                $numero = 1;
+                if ($dernierMatricule) {
+                    preg_match('/(\d+)$/', $dernierMatricule, $matches);
+                    $numero = isset($matches[1]) ? (int)$matches[1] + 1 : 1;
+                }
+                $matriculeAuto = $prefix . '-' . date('Y') . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+            }
+
             $apprenant = Apprenant::create([
                 'etablissement_id' => $etablissement->id,
                 'prenom'           => $prenomApprenant,
                 'nom'              => $nomApprenant,
                 'classe'           => $validated['classe'],
-                'matricule'        => $validated['matricule'] ?? null,
+                'matricule'        => $matriculeAuto,
                 'statut_paiement'  => 'impaye',
                 'actif'            => true,
             ]);
