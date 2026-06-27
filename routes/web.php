@@ -146,6 +146,9 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier'])->prefix('etabli
     Route::get('/rapports/export/pdf', [\App\Http\Controllers\Etablissement\RapportController::class, 'exportPdf'])->name('rapports.export.pdf');
     Route::get('/rapports/export/excel', [\App\Http\Controllers\Etablissement\RapportController::class, 'exportExcel'])->name('rapports.export.excel');
     Route::get('/parametres', [\App\Http\Controllers\Etablissement\ParametreController::class, 'index'])->name('parametres.index');
+    Route::get('/profil',           [\App\Http\Controllers\Etablissement\ProfilController::class, 'index'])->name('profil.index');
+    Route::put('/profil/infos',     [\App\Http\Controllers\Etablissement\ProfilController::class, 'updateInfos'])->name('profil.infos');
+    Route::put('/profil/password',  [\App\Http\Controllers\Etablissement\ProfilController::class, 'updatePassword'])->name('profil.password');
     Route::put('/parametres', [\App\Http\Controllers\Etablissement\ParametreController::class, 'update'])->name('parametres.update');
     Route::get('/utilisateurs', [\App\Http\Controllers\Etablissement\UtilisateurController::class, 'index'])->name('utilisateurs.index');
     Route::post('/utilisateurs', [\App\Http\Controllers\Etablissement\UtilisateurController::class, 'store'])->name('utilisateurs.store');
