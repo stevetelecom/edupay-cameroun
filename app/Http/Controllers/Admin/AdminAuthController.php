@@ -216,4 +216,73 @@ class AdminAuthController extends Controller
         return redirect()->route('admin.login')
             ->with('info', 'Vous avez été déconnecté avec succès.');
     }
+
+    /**
+     * Affiche le formulaire d'inscription Super Admin.
+     * Protégé par un token secret défini dans .env (ADMIN_REGISTER_TOKEN).
+     */
+    public function showRegisterForm(\Illuminate\Http\Request $request)
+    {
+        // Vérifier le token secret dans l'URL : ?token=xxxx
+        $token = $request->query('token');
+        if (! $token || $token !== config('app.admin_register_token')) {
+            abort(404);
+        }
+
+        return view('admin.register', [
+            'pageTitle' => 'Créer le Super Admin — EduPay Cameroun',
+            'token'     => $token,
+        ]);
+    }
+
+    /**
+     * Créer le compte Super Admin.
+     */
+    public function register(\Illuminate\Http\Request $request)
+    {
+        // Revérifier le token
+        $token = $request->input('token');
+        if (! $token || $token !== config('app.admin_register_token')) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'prenom'     => ['required', 'string', 'max:80'],
+            'nom'        => ['required', 'string', 'max:80'],
+            'email'      => ['required', 'email', 'unique:admins,email'],
+            'telephone'  => ['required', 'string', 'max:20'],
+            'password'   => ['required', 'string', 'min:10', 'confirmed'],
+        ], [
+            'prenom.required'    => 'Le prénom est obligatoire.',
+            'nom.required'       => 'Le nom est obligatoire.',
+            'email.required'     => 'L\'email est obligatoire.',
+            'email.unique'       => 'Cet email est déjà utilisé.',
+            'telephone.required' => 'Le téléphone est obligatoire.',
+            'password.required'  => 'Le mot de passe est obligatoire.',
+            'password.min'       => 'Le mot de passe doit contenir au moins 10 caractères.',
+            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
+        ]);
+
+        $admin = Admin::create([
+            'prenom'    => $validated['prenom'],
+            'nom'       => strtoupper($validated['nom']),
+            'email'     => $validated['email'],
+            'telephone' => $validated['telephone'],
+            'password'  => $validated['password'],
+            'est_actif' => true,
+        ]);
+
+        AuditLog::enregistrerSansUser(
+            'ADMIN_CREE',
+            'Super Admin créé : ' . $admin->email . ' depuis ' . $request->ip(),
+            $request,
+            'CRITICAL'
+        );
+
+        Log::channel('admin')->info('Super Admin créé : ' . $admin->email);
+
+        return redirect()->route('admin.login')
+            ->with('success', 'Compte Super Admin créé avec succès. Connectez-vous.');
+    }
+
 }

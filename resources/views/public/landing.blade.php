@@ -29,15 +29,120 @@
     </div>
   </div>
   <div class="hero-stats">
-    <div class="hstat"><div class="hstat-v">30 000+</div><div class="hstat-l">Établissements ciblés</div></div>
-    <div class="hstat"><div class="hstat-v">6 000 000</div><div class="hstat-l">Apprenants au Cameroun</div></div>
-    <div class="hstat"><div class="hstat-v">12M</div><div class="hstat-l">Abonnés Mobile Money</div></div>
-    <div class="hstat"><div class="hstat-v">99,5%</div><div class="hstat-l">Uptime garanti</div></div>
+    <div class="hstat">
+      <div class="hstat-v">{{ $stats['nb_etablissements'] > 0 ? $stats['nb_etablissements'] : '0' }}</div>
+      <div class="hstat-l">Établissements partenaires</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-v">{{ $stats['nb_apprenants'] > 0 ? number_format($stats['nb_apprenants'],0,',',' ') : '0' }}</div>
+      <div class="hstat-l">Apprenants inscrits</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-v">{{ $stats['nb_paiements'] > 0 ? $stats['nb_paiements'] : '0' }}</div>
+      <div class="hstat-l">Paiements validés</div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-v">99,5%</div>
+      <div class="hstat-l">Uptime garanti</div>
+    </div>
   </div>
 </div>
 
 {{-- ══ BODY ══ --}}
 <div class="ep-body2">
+
+
+  {{-- ══ SECTION : Établissements partenaires ══ --}}
+  <div style="margin-bottom:32px;">
+    <div class="seclbl">Nos établissements partenaires</div>
+    <div style="font-size:13px;color:#888;margin-bottom:20px;text-align:center;">
+      {{ $stats['nb_etablissements'] }} établissement{{ $stats['nb_etablissements'] > 1 ? 's' : '' }}
+      nous font confiance pour la collecte de leurs frais scolaires.
+    </div>
+
+    {{-- Filtre rapide --}}
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <input type="text" id="etab-filter"
+             placeholder="Rechercher un établissement..."
+             oninput="filtrerEtabsPublic()"
+             style="flex:1;min-width:200px;padding:10px 14px;border:1px solid #ddd;
+                    border-radius:8px;font-size:13px;outline:none;" />
+      <select id="type-filter" onchange="filtrerEtabsPublic()"
+              style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;
+                     font-size:13px;background:#fff;outline:none;">
+        <option value="">Tous les types</option>
+        <option value="maternelle">Maternelle</option>
+        <option value="primaire">Primaire</option>
+        <option value="college">Collège</option>
+        <option value="lycee_general">Lycée général</option>
+        <option value="lycee_technique">Lycée technique</option>
+        <option value="universite">Université</option>
+        <option value="institut">Institut</option>
+      </select>
+    </div>
+
+    {{-- Grille établissements --}}
+    <div id="etabs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
+      @forelse($etablissements as $etab)
+      <div class="etab-card-pub"
+           data-nom="{{ strtolower($etab->nom) }}"
+           data-ville="{{ strtolower($etab->ville ?? '') }}"
+           data-type="{{ strtolower($etab->type ?? '') }}"
+           style="background:#fff;border:1px solid #eee;border-radius:12px;
+                  padding:16px;text-align:center;transition:box-shadow .15s;
+                  cursor:default;">
+        {{-- Logo ou avatar --}}
+        @if($etab->logo)
+          <img src="{{ asset('storage/'.$etab->logo) }}"
+               alt="{{ $etab->nom }}"
+               style="width:56px;height:56px;border-radius:10px;object-fit:cover;
+                      margin:0 auto 10px;display:block;border:1px solid #eee;" />
+        @else
+          <div style="width:56px;height:56px;border-radius:10px;
+                      background:var(--ep-teal-lt);display:flex;align-items:center;
+                      justify-content:center;margin:0 auto 10px;
+                      font-size:22px;font-weight:700;color:var(--ep-teal);">
+            {{ strtoupper(substr($etab->nom, 0, 1)) }}
+          </div>
+        @endif
+
+        <div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px;
+                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+             title="{{ $etab->nom }}">
+          {{ $etab->nom }}
+        </div>
+        <div style="font-size:11px;color:#888;margin-bottom:8px;">
+          📍 {{ $etab->ville ?? '—' }}
+        </div>
+        <span style="font-size:10px;padding:3px 8px;border-radius:20px;
+                     background:var(--ep-teal-lt);color:#085041;font-weight:500;">
+          {{ ucfirst(str_replace('_', ' ', $etab->type ?? 'Établissement')) }}
+        </span>
+      </div>
+      @empty
+      <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:40px 0;font-size:13px;">
+        Aucun établissement partenaire pour le moment. Soyez le premier !
+        <div style="margin-top:12px;">
+          <a href="{{ route('register.ecole.step1') }}" class="hbtn-main"
+             style="font-size:13px;padding:10px 20px;">
+            Inscrire mon établissement →
+          </a>
+        </div>
+      </div>
+      @endforelse
+    </div>
+
+    {{-- Voir plus si beaucoup d'établissements --}}
+    @if($etablissements->count() > 12)
+    <div style="text-align:center;margin-top:16px;">
+      <button onclick="toggleTousEtabs(this)"
+              style="background:transparent;color:var(--ep-teal);border:2px solid var(--ep-teal);
+                     padding:10px 24px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;">
+        Voir tous les {{ $etablissements->count() }} établissements
+      </button>
+    </div>
+    @endif
+  </div>
 
   <div class="seclbl" style="margin-top:4px;">Pourquoi choisir EduPay ?</div>
   <div class="feat-grid" style="margin-bottom:24px;">
@@ -188,3 +293,58 @@
 </div>
 
 @endsection
+
+@push('styles')
+<style>
+.etab-card-pub:hover {
+    box-shadow: 0 4px 20px rgba(13,158,117,.12);
+    border-color: var(--ep-teal-mid) !important;
+    transform: translateY(-2px);
+}
+</style>
+@endpush
+
+@push('scripts')
+<script>
+// ── Filtre établissements publics ──
+var allCards = null;
+
+function filtrerEtabsPublic() {
+    if (!allCards) allCards = document.querySelectorAll('.etab-card-pub');
+    var q    = (document.getElementById('etab-filter').value || '').toLowerCase().trim();
+    var type = (document.getElementById('type-filter').value || '').toLowerCase().trim();
+    allCards.forEach(function(card) {
+        var nom   = card.dataset.nom   || '';
+        var ville = card.dataset.ville || '';
+        var t     = card.dataset.type  || '';
+        var matchQ    = !q    || nom.includes(q) || ville.includes(q);
+        var matchType = !type || t === type;
+        card.style.display = (matchQ && matchType) ? '' : 'none';
+    });
+}
+
+// ── Afficher / masquer tous les établissements ──
+var etabsLimites = false;
+function toggleTousEtabs(btn) {
+    if (!allCards) allCards = document.querySelectorAll('.etab-card-pub');
+    etabsLimites = !etabsLimites;
+    allCards.forEach(function(card, idx) {
+        if (idx >= 12) card.style.display = etabsLimites ? '' : 'none';
+    });
+    btn.textContent = etabsLimites
+        ? 'Réduire la liste'
+        : 'Voir tous les établissements';
+}
+
+// ── Limiter à 12 au chargement si > 12 ──
+document.addEventListener('DOMContentLoaded', function() {
+    allCards = document.querySelectorAll('.etab-card-pub');
+    if (allCards.length > 12) {
+        allCards.forEach(function(card, idx) {
+            if (idx >= 12) card.style.display = 'none';
+        });
+    }
+});
+</script>
+@endpush
+

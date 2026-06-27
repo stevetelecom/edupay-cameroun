@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest:admin')->group(function () {
+    // Register Super Admin — URL cachée, protégée par token secret
+    Route::get('/register',  [AdminAuthController::class, 'showRegisterForm'])->name('register');
+    Route::post('/register', [AdminAuthController::class, 'register'])->name('register.post');
+
     Route::get('/login',          [AdminAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login',         [AdminAuthController::class, 'login'])->name('login.post');
     Route::get('/login/2fa',      [AdminAuthController::class, 'show2fa'])->name('login.2fa');
@@ -32,6 +36,16 @@ Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:admin', 'super.admin'])->group(function () {
+
+
+    // Gestion de l'équipe Super Admin
+    Route::prefix('admins')->name('admins.')->group(function () {
+        Route::get('/',                    [\App\Http\Controllers\Admin\AdminGestionController::class, 'index'])->name('index');
+        Route::post('/',                   [\App\Http\Controllers\Admin\AdminGestionController::class, 'store'])->name('store');
+        Route::patch('/{admin}/activer',   [\App\Http\Controllers\Admin\AdminGestionController::class, 'activer'])->name('activer');
+        Route::patch('/{admin}/suspendre', [\App\Http\Controllers\Admin\AdminGestionController::class, 'suspendre'])->name('suspendre');
+        Route::delete('/{admin}',          [\App\Http\Controllers\Admin\AdminGestionController::class, 'destroy'])->name('destroy');
+    });
 
     // Dashboard KPIs globaux
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');

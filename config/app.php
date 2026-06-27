@@ -118,9 +118,14 @@ return [
     |
     */
 
+    'admin_register_token' => env('ADMIN_REGISTER_TOKEN', ''),
+
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+
+    'admin_register_token' => env('ADMIN_REGISTER_TOKEN', ''),
 
 ];

@@ -14,7 +14,20 @@ class LandingController extends Controller
 {
     public function index(): View
     {
-        return view('public.landing');
+        // Stats réelles pour la landing page
+        $stats = [
+            'nb_etablissements' => \App\Models\Etablissement::where('statut', 'actif')->count(),
+            'nb_apprenants'     => \App\Models\Apprenant::where('actif', true)->count(),
+            'nb_paiements'      => \App\Models\Paiement::where('statut', 'valide')->count(),
+            'montant_total'     => \App\Models\Paiement::where('statut', 'valide')->sum('montant'),
+        ];
+
+        // Liste des établissements actifs avec logo
+        $etablissements = \App\Models\Etablissement::where('statut', 'actif')
+            ->orderBy('nom')
+            ->get(['id', 'nom', 'ville', 'type', 'logo', 'code_etablissement', 'region']);
+
+        return view('public.landing', compact('stats', 'etablissements'));
     }
 
     public function about(): View
