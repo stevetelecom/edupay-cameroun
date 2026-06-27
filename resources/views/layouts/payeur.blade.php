@@ -203,10 +203,10 @@
             </a>
 
             @unless($estSoloLayout)
-            <a href="{{ route('payeur.dashboard') }}#mes-enfants" id="tab-children"
+            <a href="{{ route('payeur.mes-enfants') }}" id="tab-children"
                class="sbar-item {{ request()->routeIs('payeur.dashboard') && request()->server('QUERY_STRING') === '' ? '' : '' }}"
                onclick="
-                 const sec = document.getElementById('mes-enfants');
+                 const sec = null;
                  if(sec){ sec.scrollIntoView({behavior:'smooth', block:'start'}); }
                  document.querySelectorAll('.sbar-item').forEach(el => el.classList.remove('on'));
                  this.classList.add('on');
@@ -333,7 +333,7 @@
 // Auto-scroll vers #mes-enfants si present dans l'URL
 document.addEventListener('DOMContentLoaded', function() {
     if (window.location.hash === '#mes-enfants') {
-        const sec = document.getElementById('mes-enfants');
+        const sec = null;
         if (sec) {
             setTimeout(() => {
                 sec.scrollIntoView({behavior: 'smooth', block: 'start'});
