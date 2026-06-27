@@ -8,11 +8,11 @@
 
 {{-- ══ MODAL : Ajouter un admin ══ --}}
 <div id="modal-create-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
-     onclick="if(event.target===this)this.classList.add('hidden')">
+     onclick="if(event.target===this)fermerModal(this.id)">
   <div class="bg-white rounded-xl w-full max-w-lg mx-4 shadow-xl">
     <div class="flex items-center justify-between px-6 py-4 border-b">
       <h3 class="font-bold text-gray-900">+ Ajouter un administrateur</h3>
-      <button onclick="document.getElementById('modal-create-admin').classList.add('hidden')"
+      <button onclick="fermerModal('modal-create-admin')"
               class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
     </div>
     <form method="POST" action="{{ route('admin.admins.store') }}">
@@ -73,7 +73,7 @@
       </div>
       <div class="flex justify-end gap-3 px-6 py-4 border-t">
         <button type="button"
-                onclick="document.getElementById('modal-create-admin').classList.add('hidden')"
+                onclick="fermerModal('modal-create-admin')"
                 class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
           Annuler
         </button>
@@ -88,11 +88,11 @@
 
 {{-- ══ MODAL : Confirmer suppression ══ --}}
 <div id="modal-delete-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
-     onclick="if(event.target===this)this.classList.add('hidden')">
+     onclick="if(event.target===this)fermerModal(this.id)">
   <div class="bg-white rounded-xl w-full max-w-sm mx-4 shadow-xl">
     <div class="flex items-center justify-between px-6 py-4 border-b border-red-100">
       <h3 class="font-bold text-red-600">🗑 Supprimer l'administrateur</h3>
-      <button onclick="document.getElementById('modal-delete-admin').classList.add('hidden')"
+      <button onclick="fermerModal('modal-delete-admin')"
               class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
     </div>
     <div class="p-6">
@@ -103,7 +103,7 @@
       </p>
     </div>
     <div class="flex justify-end gap-3 px-6 py-4 border-t">
-      <button onclick="document.getElementById('modal-delete-admin').classList.add('hidden')"
+      <button onclick="fermerModal('modal-delete-admin')"
               class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
         Annuler
       </button>
@@ -127,7 +127,7 @@
         <p class="text-sm text-gray-500 mt-0.5">{{ $admins->count() }} administrateur(s) enregistré(s)</p>
       </div>
       @if(Auth::guard('admin')->user()->role === 'super_admin')
-        <button onclick="document.getElementById('modal-create-admin').classList.remove('hidden');document.getElementById('modal-create-admin').style.display='flex';"
+        <button onclick="ouvrirModal('modal-create-admin')"
                 class="px-4 py-2 text-sm bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold rounded-lg">
           + Ajouter un administrateur
         </button>
@@ -246,6 +246,16 @@
 
 @push('scripts')
 <script>
+function ouvrirModal(id) {
+    var el = document.getElementById(id);
+    el.classList.remove('hidden');
+    el.style.display = 'flex';
+}
+function fermerModal(id) {
+    var el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.style.display = 'none';
+}
 function confirmerSuppressionAdmin(id, nom) {
     document.getElementById('delete-admin-nom').textContent = nom;
     document.getElementById('delete-admin-form').action = "{{ url(config('app.admin_url_prefix', 'admin-ep2026') . '/admins') }}/" + id;

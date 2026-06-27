@@ -57,8 +57,91 @@
             <span class="text-sm text-white/70">
                 {{ Auth::guard('admin')->user()->nom_complet }}
             </span>
-            <div class="w-9 h-9 rounded-full bg-[#D94040] flex items-center justify-center text-white text-sm font-bold">
-                {{ Auth::guard('admin')->user()->initiales }}
+            <div class="relative">
+                <button onclick="toggleProfilAdmin()"
+                        class="w-9 h-9 rounded-full bg-[#D94040] flex items-center justify-center text-white text-sm font-bold hover:bg-red-700 transition-colors focus:outline-none">
+                    {{ Auth::guard('admin')->user()->initiales }}
+                </button>
+
+                {{-- Dropdown profil --}}
+                <div id="dropdown-profil-admin"
+                     style="display:none;"
+                     class="absolute right-0 top-11 w-72 bg-white rounded-xl shadow-xl border border-gray-200 z-50">
+
+                    {{-- En-tête profil --}}
+                    <div class="px-4 py-4 border-b border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-[#D94040] flex items-center justify-center text-white text-base font-bold flex-shrink-0">
+                                {{ Auth::guard('admin')->user()->initiales }}
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900 text-sm">
+                                    {{ Auth::guard('admin')->user()->nom_complet }}
+                                </div>
+                                <div class="text-xs text-gray-500">{{ Auth::guard('admin')->user()->email }}</div>
+                                <div class="mt-1">
+                                    @php
+                                        $roleStyles = [
+                                            'super_admin'          => 'bg-purple-50 text-purple-700 border-purple-200',
+                                            'superviseur'          => 'bg-blue-50 text-blue-700 border-blue-200',
+                                            'comptable_plateforme' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                        ];
+                                        $roleLabels = [
+                                            'super_admin'          => 'Super Admin',
+                                            'superviseur'          => 'Superviseur',
+                                            'comptable_plateforme' => 'Comptable plateforme',
+                                        ];
+                                        $role = Auth::guard('admin')->user()->role ?? 'superviseur';
+                                    @endphp
+                                    <span class="text-xs font-medium px-2 py-0.5 rounded-full border {{ $roleStyles[$role] ?? 'bg-gray-50 text-gray-600 border-gray-200' }}">
+                                        {{ $roleLabels[$role] ?? $role }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Infos --}}
+                    <div class="px-4 py-3 border-b border-gray-100 space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">Téléphone</span>
+                            <span class="font-medium text-gray-800">{{ Auth::guard('admin')->user()->telephone ?? '—' }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">Dernière connexion</span>
+                            <span class="font-medium text-gray-800">
+                                {{ Auth::guard('admin')->user()->derniere_connexion
+                                    ? Auth::guard('admin')->user()->derniere_connexion->diffForHumans()
+                                    : '—' }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">IP dernière connexion</span>
+                            <span class="font-medium text-gray-800">{{ Auth::guard('admin')->user()->derniere_connexion_ip ?? '—' }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-500">Statut</span>
+                            <span class="text-green-600 font-medium">● Connecté</span>
+                        </div>
+                    </div>
+
+                    {{-- Actions --}}
+                    <div class="px-4 py-3">
+                        <form method="POST" action="{{ route('admin.logout') }}">
+                            @csrf
+                            <button type="submit"
+                                    class="w-full text-left text-sm text-red-600 hover:text-red-800 font-medium flex items-center gap-2 py-1">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                                    <polyline points="16 17 21 12 16 7"/>
+                                    <line x1="21" y1="12" x2="9" y2="12"/>
+                                </svg>
+                                Déconnexion sécurisée
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
             </div>
             <form method="POST" action="{{ route('admin.logout') }}" class="inline">
                 @csrf
@@ -544,5 +627,31 @@
     });
     </script>
 
+<script>
+function toggleProfilAdmin() {
+    var el = document.getElementById('dropdown-profil-admin');
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('dropdown-profil-admin');
+    var btn = dropdown ? dropdown.previousElementSibling : null;
+    if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+</script>
+<script>
+function toggleProfilAdmin() {
+    var el = document.getElementById('dropdown-profil-admin');
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('dropdown-profil-admin');
+    var btn = dropdown ? dropdown.previousElementSibling : null;
+    if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+</script>
 </body>
 </html>
