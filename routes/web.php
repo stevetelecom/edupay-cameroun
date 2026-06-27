@@ -82,6 +82,7 @@ Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur
     Route::get('/paiement/{paiement}/attente',  [\App\Http\Controllers\Payeur\PaiementController::class, 'attente'])->name('paiement.attente');
     Route::get('/paiement/{paiement}/statut',   [\App\Http\Controllers\Payeur\PaiementController::class, 'verifierStatut'])->name('paiement.statut');
     Route::get('/historique', [\App\Http\Controllers\Payeur\PaiementController::class, 'historique'])->name('historique');
+    Route::get('/mes-enfants', [\App\Http\Controllers\Payeur\MesEnfantsController::class, 'index'])->name('mes-enfants');
     Route::get('/recus', [\App\Http\Controllers\Payeur\RecuController::class, 'index'])->name('recus.index');
     Route::get('/recus/{paiement}/telecharger', [\App\Http\Controllers\Payeur\RecuController::class, 'telechargerRecu'])->name('recus.telecharger');
     Route::get('/certificat/{apprenant}', [\App\Http\Controllers\Payeur\RecuController::class, 'genererCertificat'])->name('recus.certificat');
