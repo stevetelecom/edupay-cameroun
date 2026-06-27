@@ -235,7 +235,7 @@
 
                     {{-- Actions --}}
                     <div style="padding:12px 16px;">
-                        <a href="{{ route('payeur.profil') }}"
+                        <a href="{{ route('payeur.profil.index') }}"
                            style="display:flex;align-items:center;gap:8px;font-size:13px;
                                   color:#0D9E75;font-weight:500;text-decoration:none;padding:4px 0;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
