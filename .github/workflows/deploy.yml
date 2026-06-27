@@ -23,6 +23,16 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install NPM dependencies & Build assets
+        run: |
+          npm install
+          npm run build
+
       - name: Get runner public IP
         id: ip
         uses: haythem/public-ip@v1.3
@@ -46,7 +56,10 @@ jobs:
             --exclude='.github' \
             --exclude='node_modules' \
             --exclude='.env' \
-            --exclude='storage/logs/*.log' \
+            --exclude='storage/logs/' \
+            --exclude='storage/framework/cache/' \
+            --exclude='storage/framework/sessions/' \
+            --exclude='storage/app/public/' \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p 22" \
             ./ ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.DEPLOY_PATH }}
 
