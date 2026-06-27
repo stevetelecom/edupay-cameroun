@@ -180,8 +180,86 @@
         <div class="logo-t">Edu<span>Pay</span></div>
         <div style="display:flex;align-items:center;gap:12px;">
             <span style="font-size:12px;color:rgba(255,255,255,.65);">{{ $headerLabel }}</span>
-            <div class="av" style="background:var(--ep-teal);color:#fff;">
-                {{ Auth::user()->initiales }}
+            <div class="relative" style="position:relative;">
+                <button onclick="toggleProfilPayeur()"
+                        title="Voir mon profil"
+                        style="width:36px;height:36px;border-radius:50%;background:var(--ep-teal);color:#fff;
+                               font-size:13px;font-weight:700;border:none;cursor:pointer;
+                               display:flex;align-items:center;justify-content:center;transition:opacity .15s;"
+                        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+                    {{ Auth::user()->initiales }}
+                </button>
+
+                {{-- Dropdown profil payeur --}}
+                <div id="dropdown-profil-payeur"
+                     style="display:none;position:absolute;right:0;top:44px;width:280px;
+                            background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12);
+                            border:1px solid #e5e7eb;z-index:999;">
+
+                    {{-- En-tête --}}
+                    <div style="padding:16px;border-bottom:1px solid #f0f0f0;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:46px;height:46px;border-radius:50%;background:var(--ep-teal);
+                                        color:#fff;font-size:16px;font-weight:700;flex-shrink:0;
+                                        display:flex;align-items:center;justify-content:center;">
+                                {{ Auth::user()->initiales }}
+                            </div>
+                            <div>
+                                <div style="font-size:14px;font-weight:700;color:#111;">
+                                    {{ Auth::user()->name }}
+                                </div>
+                                <div style="font-size:11px;color:#888;">{{ Auth::user()->email ?? Auth::user()->telephone }}</div>
+                                <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;
+                                             background:#E1F5EE;color:#085041;border:1px solid #5DCAA5;margin-top:4px;display:inline-block;">
+                                    {{ ucfirst(Auth::user()->getRoleNames()->first() ?? 'Parent') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Infos --}}
+                    <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
+                        <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;">
+                            <span style="color:#888;">Téléphone</span>
+                            <span style="font-weight:600;color:#333;">{{ Auth::user()->telephone ?? '—' }}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;">
+                            <span style="color:#888;">Ville</span>
+                            <span style="font-weight:600;color:#333;">{{ Auth::user()->ville ?? '—' }}</span>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;">
+                            <span style="color:#888;">Statut</span>
+                            <span style="color:#0D9E75;font-weight:600;">● Connecté</span>
+                        </div>
+                    </div>
+
+                    {{-- Actions --}}
+                    <div style="padding:12px 16px;">
+                        <a href="{{ route('payeur.profil') }}"
+                           style="display:flex;align-items:center;gap:8px;font-size:13px;
+                                  color:#0D9E75;font-weight:500;text-decoration:none;padding:4px 0;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Voir mon profil
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" style="margin-top:8px;">
+                            @csrf
+                            <button type="submit"
+                                    style="background:none;border:none;cursor:pointer;padding:4px 0;
+                                           font-size:13px;color:#e53e3e;font-weight:500;
+                                           display:flex;align-items:center;gap:8px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                                    <polyline points="16 17 21 12 16 7"/>
+                                    <line x1="21" y1="12" x2="9" y2="12"/>
+                                </svg>
+                                Déconnexion
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
@@ -344,6 +422,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }, 200);
         }
+    }
+});
+
+function toggleProfilPayeur() {
+    var el = document.getElementById('dropdown-profil-payeur');
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('dropdown-profil-payeur');
+    if (!dropdown) return;
+    var btn = dropdown.previousElementSibling;
+    if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.style.display = 'none';
     }
 });
 </script>
