@@ -256,9 +256,9 @@ function toggleNav(){
     var overlay = document.getElementById('nav-overlay');
     var burger  = document.getElementById('nav-burger');
     if(!drawer) return;
-    var isOpen = drawer.style.right === '0px';
-    drawer.style.right  = isOpen ? '-100%' : '0px';
-    overlay.style.display = isOpen ? 'none' : 'block';
+    var isOpen = drawer.style.left === '0px';
+    drawer.style.left     = isOpen ? '-100%' : '0px';
+    overlay.style.display = isOpen ? 'none'  : 'block';
     burger.classList.toggle('open', !isOpen);
     document.body.style.overflow = isOpen ? '' : 'hidden';
 }

@@ -1,7 +1,8 @@
 @php
   $routeActuelle = request()->routeIs('landing') ? 'landing'
       : (request()->routeIs('about') ? 'about'
-      : (request()->routeIs('temoignages') ? 'temoignages' : ''));
+      : (request()->routeIs('temoignages') ? 'temoignages'
+      : (request()->routeIs('contact') ? 'contact' : '')));
 @endphp
 
 <nav class="pub-nav">
@@ -17,6 +18,7 @@
       <a href="{{ route('landing') }}" class="nav-link {{ $routeActuelle==='landing'?'nav-link-active':'' }}">Accueil</a>
       <a href="{{ route('about') }}"   class="nav-link {{ $routeActuelle==='about'?'nav-link-active':'' }}">À propos</a>
       <a href="{{ route('temoignages') }}" class="nav-link {{ $routeActuelle==='temoignages'?'nav-link-active':'' }}">Témoignages</a>
+      <a href="{{ route('contact') }}" class="nav-link {{ $routeActuelle==='contact'?'nav-link-active':'' }}">Contact</a>
       <div class="nav-sep"></div>
       <a href="{{ route('login') }}" class="nav-btn-ghost">Connexion</a>
       <a href="{{ route('register.parent.step1') }}" class="nav-btn-main">S'inscrire →</a>
@@ -29,9 +31,9 @@
      style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:9998;"></div>
 
 <div id="nav-drawer"
-     style="position:fixed;top:0;right:-100%;width:75%;max-width:260px;height:100%;
-            background:#0B2545;border-left:1px solid rgba(255,255,255,.12);
-            z-index:9999;transition:right .3s ease;overflow-y:auto;
+     style="position:fixed;top:0;left:-100%;width:75%;max-width:260px;height:100%;
+            background:#0B2545;border-right:1px solid rgba(255,255,255,.12);
+            z-index:9999;transition:left .3s ease;overflow-y:auto;
             display:flex;flex-direction:column;padding:20px 16px 30px;gap:6px;">
 
   {{-- Fermer --}}
@@ -58,6 +60,12 @@
             text-decoration:none;font-size:15px;padding:12px 14px;border-radius:10px;
             background:{{ $routeActuelle==='temoignages'?'rgba(255,255,255,.1)':'' }};">
     Témoignages
+  </a>
+  <a href="{{ route('contact') }}"
+     style="color:{{ $routeActuelle==='contact'?'#fff':'rgba(255,255,255,.7)' }};
+            text-decoration:none;font-size:15px;padding:12px 14px;border-radius:10px;
+            background:{{ $routeActuelle==='contact'?'rgba(255,255,255,.1)':'' }};">
+    Contact
   </a>
 
   <div style="height:1px;background:rgba(255,255,255,.1);margin:8px 0;"></div>

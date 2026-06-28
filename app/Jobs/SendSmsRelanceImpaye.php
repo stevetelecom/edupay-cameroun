@@ -10,6 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use App\Mail\RappelEcheanceMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
 class SendSmsRelanceImpaye implements ShouldQueue
@@ -58,6 +60,20 @@ class SendSmsRelanceImpaye implements ShouldQueue
 
                     $ok = $smsService->envoyerRelance($parent->telephone, $message);
                     $ok ? $nbEnvoyes++ : $nbEchecs++;
+
+                    // F12-B — Email rappel échéance
+                    if ($parent->email && $parent->notif_rappel_echeance) {
+                        try {
+                            Mail::to($parent->email)->send(new RappelEcheanceMail(
+                                $apprenant,
+                                $categorie->nom,
+                                $reste,
+                                $echeance->date_echeance->format('d/m/Y')
+                            ));
+                        } catch (\Exception $e) {
+                            Log::channel('admin')->error('Erreur email rappel echeance', ['error' => $e->getMessage()]);
+                        }
+                    }
                 }
             }
         }
