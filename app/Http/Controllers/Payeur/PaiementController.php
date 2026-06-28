@@ -11,6 +11,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use App\Jobs\SendConfirmationPaiement;
 
 class PaiementController extends Controller
 {
@@ -140,6 +141,9 @@ class PaiementController extends Controller
                     : ($frais->montant_paye > 0 ? 'partiel' : 'impaye');
             $frais->apprenant->update(['statut_paiement' => $statut]);
 
+            // F12-A — Envoyer email + SMS de confirmation
+            SendConfirmationPaiement::dispatch($paiement);
+
             return response()->json(['statut' => 'valide']);
         }
 
@@ -187,6 +191,9 @@ class PaiementController extends Controller
             $statutApprenant = $frais->montant_paye >= $frais->montant_total ? 'regle'
                              : ($frais->montant_paye > 0 ? 'partiel' : 'impaye');
             $frais->apprenant->update(['statut_paiement' => $statutApprenant]);
+
+            // F12-A — Envoyer email + SMS de confirmation
+            SendConfirmationPaiement::dispatch($paiement);
         }
 
         if ($statut === 'FAILED' && $paiement->statut === 'en_attente') {

@@ -67,7 +67,7 @@
                 </div>
                 <div class="row">
                     <span class="label">Date de validation</span>
-                    <span class="value">{{ $paiement->date_validation ? $paiement->date_validation->format('d/m/Y à H:i') : 'Aujourd\'hui' }}</span>
+                    <span class="value">{{ $paiement->date_validation ? \Carbon\Carbon::parse($paiement->date_validation)->format('d/m/Y à H:i') : 'Aujourd\'hui' }}</span>
                 </div>
             </div>
 
