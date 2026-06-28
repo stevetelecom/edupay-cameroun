@@ -4,17 +4,8 @@
 
 @section('content')
 
+@include('layouts._navbar_public')
 <div class="hero-band">
-  <div class="hero-top">
-    <div class="logo-t">Edu<span>Pay</span> Cameroun</div>
-    <div style="display:flex;gap:8px;">
-      <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;text-decoration:none;">← Accueil</a>
-       <a href="{{ route('temoignages') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;text-decoration:none;">Témoignages</a>
-      <a href="{{ route('login') }}" style="background:var(--ep-teal);color:#fff;border:none;padding:7px 16px;border-radius:20px;font-size:12px;cursor:pointer;text-decoration:none;">Connexion</a>
-      <a href="{{ route('register.parent.step1') }}" style="background:var(--ep-teal);color:#fff;border:none;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">S'inscrire gratuitement →</a>
-</div>
-    </div>
-  </div>
   <div style="padding:36px 28px 28px;text-align:center;background:#0B2545">
     <div class="hero-tag" style="justify-content:center;">Notre histoire &amp; notre mission</div>
     <div style="font-size:28px;font-weight:700;color:#fff;margin:10px 0;line-height:1.3;">À propos d'<em style="font-style:normal;color:#5DCAA5;">EduPay Cameroun</em></div>

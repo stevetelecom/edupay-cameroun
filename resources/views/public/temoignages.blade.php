@@ -4,24 +4,28 @@
 
 @section('content')
 
+@include('layouts._navbar_public')
 <div class="hero-band">
-  <div class="hero-top">
-    <div class="logo-t">Edu<span>Pay</span> Cameroun</div>
-    <div style="display:flex;gap:8px;">
-      <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;text-decoration:none;">← Accueil</a>
-        <a href="{{ route('about') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;text-decoration:none;">À propos</a>
-      <a href="{{ route('login') }}" style="background:var(--ep-teal);color:#fff;border:none;padding:7px 16px;border-radius:20px;font-size:12px;text-decoration:none;">Connexion</a>
-      <a href="{{ route('register.parent.step1') }}" style="background:var(--ep-teal);color:#fff;border:none;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">S'inscrire gratuitement →</a>
-</div>
-    </div>
-  </div>
   <div style="padding:32px 28px 24px;text-align:center;background:#0B2545">
     <div class="hero-tag" style="justify-content:center;">Ce qu'ils disent de nous</div>
     <div style="font-size:26px;font-weight:700;color:#fff;margin:10px 0 8px;">Des utilisateurs satisfaits<br>à travers tout le <em style="font-style:normal;color:#5DCAA5;">Cameroun</em></div>
-    <div style="display:flex;justify-content:center;gap:32px;margin-top:18px;flex-wrap:wrap;">
-      <div><div style="font-size:22px;font-weight:700;color:#5DCAA5;">4,8/5</div><div style="font-size:11px;color:rgba(255,255,255,.5);">Note moyenne</div></div>
-      <div><div style="font-size:22px;font-weight:700;color:#5DCAA5;">127</div><div style="font-size:11px;color:rgba(255,255,255,.5);">Établissements actifs</div></div>
-      <div><div style="font-size:22px;font-weight:700;color:#5DCAA5;">3 847</div><div style="font-size:11px;color:rgba(255,255,255,.5);">Transactions ce mois</div></div>
+    <div style="display:flex;justify-content:center;gap:24px;margin-top:18px;flex-wrap:wrap;">
+      <div style="text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:#5DCAA5;">{{ $stats['nb_etablissements'] }}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);">Établissements actifs</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:#5DCAA5;">{{ $stats['nb_apprenants'] }}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);">Apprenants inscrits</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:#5DCAA5;">{{ $stats['nb_paiements'] }}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);">Paiements validés</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:#5DCAA5;">{{ number_format($stats['montant_total'], 0, ',', ' ') }} FCFA</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);">Collectés</div>
+      </div>
     </div>
   </div>
 </div>

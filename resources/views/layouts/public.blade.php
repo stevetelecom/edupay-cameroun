@@ -31,7 +31,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .divider{height:1px;background:#f0f0f0;margin:14px 0;}
 .ep-body2{padding:24px 28px;background:#f1f3f5;}
 /* HERO */
-.hero-band{background:var(--ep-navy);color:#fff;overflow:hidden;}
+.hero-band{background:var(--ep-navy);color:#fff;}
 .hero-top{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.08);}
 .logo-t{font-size:20px;font-weight:700;letter-spacing:-.3px;}
 .logo-t span{color:#5DCAA5;}
@@ -190,6 +190,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .toast.closing{animation:toast-out .2s ease-in forwards;}
 @keyframes toast-in{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
 @keyframes toast-out{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(30px);}}
+
+    /* ══ NAVBAR PUBLIQUE RESPONSIVE ══ */
+    .pub-nav{background:var(--ep-navy);border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:1000;}
+    .pub-nav-inner{display:flex;align-items:center;justify-content:space-between;padding:13px 28px;position:relative;}
+    .nav-links{display:flex;align-items:center;gap:4px;}
+    .nav-link{color:rgba(255,255,255,.65);text-decoration:none;font-size:13px;padding:7px 13px;border-radius:20px;transition:all .15s;white-space:nowrap;}
+    .nav-link:hover{color:#fff;background:rgba(255,255,255,.08);}
+    .nav-link-active{color:#fff!important;background:rgba(255,255,255,.12)!important;font-weight:600;}
+    .nav-sep{width:1px;height:20px;background:rgba(255,255,255,.15);margin:0 6px;}
+    .nav-btn-ghost{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.25);white-space:nowrap;transition:all .15s;}
+    .nav-btn-ghost:hover{background:rgba(255,255,255,.08);color:#fff;}
+    .nav-btn-main{color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:8px 18px;border-radius:20px;background:var(--ep-teal);transition:background .15s;white-space:nowrap;}
+    .nav-btn-main:hover{background:var(--ep-teal2);}
+    .nav-burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;}
+    .nav-burger span{display:block;width:22px;height:2px;background:rgba(255,255,255,.85);border-radius:2px;transition:all .25s;}
+    .nav-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+    .nav-burger.open span:nth-child(2){opacity:0;}
+    .nav-burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+    .nav-overlay{display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;background:rgba(0,0,0,.6);z-index:9998;}
+    .nav-overlay.show{display:block;}
+    .nav-close-btn{display:none;}
+    @media(max-width:768px){
+      .pub-nav-inner{padding:12px 16px;}
+      .nav-burger{display:flex;}
+      .nav-links{position:fixed;top:0;right:-110vw;width:75vw;max-width:260px;height:100vh;height:100dvh;background:var(--ep-navy);border-left:1px solid rgba(255,255,255,.1);flex-direction:column;align-items:stretch;padding:16px 16px 30px;gap:2px;z-index:9999;transition:right .3s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(0,0,0,.6);overflow-y:auto;overflow-x:hidden;}
+      .nav-links.open{right:0 !important;}
+      .nav-close-btn{display:flex;align-self:flex-end;background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.7);width:34px;height:34px;border-radius:8px;align-items:center;justify-content:center;font-size:18px;cursor:pointer;margin-bottom:12px;}
+      .nav-link{font-size:15px;padding:13px 16px;border-radius:10px;}
+      .nav-sep{width:100%;height:1px;margin:8px 0;}
+      .nav-btn-ghost{font-size:15px;padding:13px 16px;border-radius:10px;text-align:center;display:block;}
+      .nav-btn-main{font-size:15px;padding:14px 16px;border-radius:10px;text-align:center;display:block;margin-top:4px;}
+    }
+    /* ══ FIN NAVBAR ══ */
+
 </style>
 </head>
 <body>
@@ -219,6 +253,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 @yield('content')
 
 <script>
+
+// ── Navbar mobile ──
+function toggleNav(){
+    var l=document.getElementById('nav-links');
+    var b=document.getElementById('nav-burger');
+    var o=document.getElementById('nav-overlay');
+    if(!l)return;
+    var open=l.classList.contains('open');
+    l.classList.toggle('open',!open);
+    b.classList.toggle('open',!open);
+    o.classList.toggle('show',!open);
+    document.body.style.overflow=open?'':'hidden';
+}
+window.addEventListener('resize',function(){
+    if(window.innerWidth>768){
+        var l=document.getElementById('nav-links');
+        var b=document.getElementById('nav-burger');
+        var o=document.getElementById('nav-overlay');
+        if(l){l.classList.remove('open');b.classList.remove('open');o.classList.remove('show');document.body.style.overflow='';}
+    }
+});
+
 // ── Toasts auto-dismiss (4 secondes) ──
 document.querySelectorAll('[data-toast]').forEach(function(t){
     setTimeout(function(){ t.classList.add('closing'); setTimeout(function(){ t.remove(); },200); },4000);

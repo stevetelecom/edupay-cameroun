@@ -5,17 +5,8 @@
 @section('content')
 
 {{-- ══ HERO BAND ══ --}}
+@include('layouts._navbar_public')
 <div class="hero-band">
-  <div class="hero-top">
-    <div class="logo-t">Edu<span>Pay</span> Cameroun</div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <a href="{{ route('about') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;text-decoration:none;">À propos</a>
-      <a href="{{ route('temoignages') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;text-decoration:none;">Témoignages</a>
-      <a href="{{ route('contact') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;text-decoration:none;">Contact</a>
-      <a href="{{ route('login') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;text-decoration:none;">Connexion</a>
-      <a href="{{ route('register.parent.step1') }}" style="background:var(--ep-teal);color:#fff;border:none;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;">S'inscrire gratuitement →</a>
-    </div>
-  </div>
   <div class="hero-main">
     <div class="hero-tag">
       <span style="width:7px;height:7px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span>
