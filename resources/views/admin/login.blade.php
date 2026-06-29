@@ -78,18 +78,52 @@
                 <label for="password" class="block text-xs font-medium text-gray-600 mb-1.5">
                     Mot de passe
                 </label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    required
-                    autocomplete="current-password"
-                    class="w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none transition-colors {{ $errors->has('password') ? 'border-red-400 focus:border-red-600' : 'border-gray-300 focus:border-[#0D9E75]' }}"
-                />
+                <div style="position:relative;">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        class="w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none transition-colors {{ $errors->has('password') ? 'border-red-400 focus:border-red-600' : 'border-gray-300 focus:border-[#0D9E75]' }}"
+                        style="padding-right:44px;"
+                    />
+                    <button type="button" onclick="togglePwd()" tabindex="-1"
+                            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);
+                                   background:none;border:none;cursor:pointer;padding:0;color:#888;">
+                        <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg id="eye-off-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" style="display:none;">
+                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
+                            <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
                 @error('password')
                     <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                 @enderror
             </div>
+            <script>
+            function togglePwd() {
+                var inp = document.getElementById('password');
+                var eye = document.getElementById('eye-icon');
+                var eyeOff = document.getElementById('eye-off-icon');
+                if (inp.type === 'password') {
+                    inp.type = 'text';
+                    eye.style.display = 'none';
+                    eyeOff.style.display = 'block';
+                } else {
+                    inp.type = 'password';
+                    eye.style.display = 'block';
+                    eyeOff.style.display = 'none';
+                }
+            }
+            </script>
 
             <button
                 type="submit"

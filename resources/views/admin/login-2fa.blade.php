@@ -51,27 +51,81 @@
         <form method="POST" action="{{ route('admin.login.2fa.verify') }}">
             @csrf
 
-            {{-- Champ code OTP --}}
+            {{-- Champ code OTP — 6 cases séparées --}}
             <div class="mb-5">
-                <label for="code" class="block text-xs font-medium text-gray-600 mb-2 text-center">
+                <label class="block text-xs font-medium text-gray-600 mb-3 text-center">
                     Code à 6 chiffres
                 </label>
-                <input
-                    type="text"
-                    id="code"
-                    name="code"
-                    maxlength="6"
-                    inputmode="numeric"
-                    pattern="[0-9]{6}"
-                    autofocus
-                    required
-                    class="w-full text-center text-2xl font-mono font-bold tracking-[0.5em] py-4 border-2 rounded-xl focus:outline-none transition-colors {{ $errors->has('code') ? 'border-red-400 focus:border-red-600' : 'border-gray-300 focus:border-[#0D9E75]' }}"
-                    placeholder="000000"
-                />
+                <input type="hidden" name="code" id="code-hidden" />
+                <div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px;">
+                    @for($i = 1; $i <= 6; $i++)
+                    <input type="text"
+                           id="otp-{{ $i }}"
+                           maxlength="1"
+                           inputmode="numeric"
+                           pattern="[0-9]"
+                           autocomplete="off"
+                           style="width:44px;height:52px;text-align:center;font-size:22px;
+                                  font-weight:700;border:2px solid #ddd;border-radius:10px;
+                                  font-family:monospace;outline:none;transition:border .15s;
+                                  -webkit-appearance:none;"
+                           onfocus="this.style.borderColor='#0D9E75'"
+                           onblur="this.style.borderColor='#ddd'"
+                    />
+                    @endfor
+                </div>
                 @error('code')
                     <p class="text-xs text-red-500 mt-1 text-center">{{ $message }}</p>
                 @enderror
             </div>
+            <script>
+            (function() {
+                var inputs = [1,2,3,4,5,6].map(function(i){ return document.getElementById('otp-'+i); });
+                inputs[0].focus();
+
+                inputs.forEach(function(inp, idx) {
+                    inp.addEventListener('input', function() {
+                        // Accepter seulement chiffres
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                        if (this.value && idx < 5) inputs[idx+1].focus();
+                        updateHidden();
+                    });
+                    inp.addEventListener('keydown', function(e) {
+                        if (e.key === 'Backspace' && !this.value && idx > 0) {
+                            inputs[idx-1].focus();
+                            inputs[idx-1].value = '';
+                            updateHidden();
+                        }
+                    });
+                    // Coller le code d'un coup
+                    inp.addEventListener('paste', function(e) {
+                        e.preventDefault();
+                        var text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g,'');
+                        text.split('').slice(0,6).forEach(function(ch, i) {
+                            if (inputs[i]) inputs[i].value = ch;
+                        });
+                        inputs[Math.min(text.length, 5)].focus();
+                        updateHidden();
+                    });
+                });
+
+                function updateHidden() {
+                    document.getElementById('code-hidden').value = inputs.map(function(i){ return i.value; }).join('');
+                }
+
+                // Soumettre auto quand les 6 cases sont remplies
+                function checkAutoSubmit() {
+                    var val = inputs.map(function(i){ return i.value; }).join('');
+                    if (val.length === 6) {
+                        updateHidden();
+                        document.querySelector('form').submit();
+                    }
+                }
+                inputs.forEach(function(inp) {
+                    inp.addEventListener('input', checkAutoSubmit);
+                });
+            })();
+            </script>
 
             <button
                 type="submit"
