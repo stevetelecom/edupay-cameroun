@@ -72,7 +72,7 @@ class LandingController extends Controller
         ]);
 
         try {
-            $recipientEmail = config('mail.from.address', 'support@edupay.cm');
+            $recipientEmail = config('mail.contact_address', config('mail.from.address'));
             
             // 📝 Logging: Tentative d'envoi
             Log::info("📨 Envoi de l'email à: {$recipientEmail}", [
