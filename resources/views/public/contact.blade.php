@@ -52,16 +52,7 @@
               </span>
               <div>
                 <div style="font-size:13px;font-weight:700;color:#0B2545;">Email</div>
-                <div style="font-size:13px;color:#555;line-height:1.6;">contact@edupay.cm<br>support@edupay.cm</div>
-              </div>
-            </div>
-            <div style="background:#FCEFEF;border-radius:16px;padding:18px;display:flex;gap:14px;align-items:flex-start;">
-              <span class="icon-round" style="background:var(--ep-red);">
-                <span class="material-symbols-outlined">schedule</span>
-              </span>
-              <div>
-                <div style="font-size:13px;font-weight:700;color:#0B2545;">Horaires</div>
-                <div style="font-size:13px;color:#555;line-height:1.6;">Lundi - Vendredi : 8h - 18h<br>Support en ligne 24/7</div>
+                <div style="font-size:13px;color:#555;line-height:1.6;">contact@mekontso.gsi2026.com</div>
               </div>
             </div>
           </div>
