@@ -4,8 +4,16 @@ use Illuminate\Support\Facades\Schedule;
 use App\Jobs\SendSmsRelanceImpaye;
 use App\Jobs\SendAlerteImpayeJournaliere;
 
-// E07 — Relances automatiques impayés J-5 avant chaque echeance
-Schedule::job(new SendSmsRelanceImpaye)->dailyAt('07:00');
+// E07 — Relances SMS impayés J-5 avant chaque échéance
+Schedule::job(new SendSmsRelanceImpaye)
+    ->dailyAt('07:00')
+    ->timezone('Africa/Douala')
+    ->withoutOverlapping()
+    ->name('sms-relance-impaye');
 
-// F12 — Alertes impayés automatiques (frais dépassant la date d'échéance)
-Schedule::job(new SendAlerteImpayeJournaliere)->dailyAt('18:00');
+// F12-C — Alertes impayés email + SMS chaque soir à 18h00
+Schedule::job(new SendAlerteImpayeJournaliere)
+    ->dailyAt('18:00')
+    ->timezone('Africa/Douala')
+    ->withoutOverlapping()
+    ->name('alerte-impaye-journaliere');
