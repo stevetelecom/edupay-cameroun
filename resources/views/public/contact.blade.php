@@ -106,15 +106,99 @@
               </span>
               Sujet
             </div>
-            <select class="select" name="subject">
-              <option value="">Sélectionnez un sujet</option>
-              <option value="Intégration établissement" {{ old('subject') == 'Intégration établissement' ? 'selected' : '' }}>Intégration établissement</option>
-              <option value="Problème de paiement" {{ old('subject') == 'Problème de paiement' ? 'selected' : '' }}>Problème de paiement</option>
-              <option value="Partenariat" {{ old('subject') == 'Partenariat' ? 'selected' : '' }}>Partenariat</option>
-              <option value="Autre question" {{ old('subject') == 'Autre question' ? 'selected' : '' }}>Autre question</option>
-            </select>
+            {{-- Custom select responsive --}}
+            <input type="hidden" name="subject" id="subject-input" value="{{ old('subject') }}" />
+            <div id="custom-select" style="position:relative;user-select:none;">
+              <div id="select-trigger"
+                   style="display:flex;justify-content:space-between;align-items:center;
+                          padding:11px 14px;border:1px solid #ddd;border-radius:8px;
+                          font-size:13px;color:#555;background:#fff;cursor:pointer;
+                          transition:border .15s;"
+                   onclick="toggleSelect()">
+                <span id="select-label">
+                  {{ old('subject') ?: 'Sélectionnez un sujet' }}
+                </span>
+                <svg id="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="#888" stroke-width="2" style="transition:transform .2s;flex-shrink:0;">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+              <div id="select-dropdown"
+                   style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
+                          background:#fff;border:1px solid #ddd;border-radius:10px;
+                          box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;overflow:hidden;">
+                @foreach([
+                  'Intégration établissement',
+                  'Problème de paiement',
+                  'Partenariat',
+                  'Autre question'
+                ] as $opt)
+                <div class="select-opt"
+                     data-value="{{ $opt }}"
+                     onclick="selectOption(this)"
+                     style="padding:13px 16px;font-size:13px;color:#333;cursor:pointer;
+                            border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;
+                            {{ old('subject') === $opt ? 'background:#E0F5EE;color:#085041;font-weight:600;' : '' }}
+                            transition:background .15s;">
+                  <span class="opt-check" style="width:16px;height:16px;border-radius:50%;
+                        border:2px solid {{ old('subject') === $opt ? '#0D9E75' : '#ddd' }};
+                        background:{{ old('subject') === $opt ? '#0D9E75' : '#fff' }};
+                        display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    @if(old('subject') === $opt)
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    @endif
+                  </span>
+                  {{ $opt }}
+                </div>
+                @endforeach
+              </div>
+            </div>
             @error('subject')<div style="font-size:12px;color:#d94040;">{{ $message }}</div>@enderror
           </div>
+
+          <script>
+          function toggleSelect() {
+            var dd = document.getElementById('select-dropdown');
+            var arrow = document.getElementById('select-arrow');
+            var trigger = document.getElementById('select-trigger');
+            var open = dd.style.display === 'block';
+            dd.style.display = open ? 'none' : 'block';
+            arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+            trigger.style.borderColor = open ? '#ddd' : '#0D9E75';
+          }
+          function selectOption(el) {
+            var val = el.getAttribute('data-value');
+            document.getElementById('subject-input').value = val;
+            document.getElementById('select-label').textContent = val;
+            document.getElementById('select-dropdown').style.display = 'none';
+            document.getElementById('select-arrow').style.transform = 'rotate(0deg)';
+            document.getElementById('select-trigger').style.borderColor = '#0D9E75';
+            // Reset all options
+            document.querySelectorAll('.select-opt').forEach(function(opt) {
+              opt.style.background = '';
+              opt.style.color = '#333';
+              opt.style.fontWeight = '';
+              opt.querySelector('.opt-check').style.borderColor = '#ddd';
+              opt.querySelector('.opt-check').style.background = '#fff';
+              opt.querySelector('.opt-check').innerHTML = '';
+            });
+            // Highlight selected
+            el.style.background = '#E0F5EE';
+            el.style.color = '#085041';
+            el.style.fontWeight = '600';
+            el.querySelector('.opt-check').style.borderColor = '#0D9E75';
+            el.querySelector('.opt-check').style.background = '#0D9E75';
+            el.querySelector('.opt-check').innerHTML = '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+          }
+          // Fermer si clic ailleurs
+          document.addEventListener('click', function(e) {
+            var cs = document.getElementById('custom-select');
+            if (cs && !cs.contains(e.target)) {
+              document.getElementById('select-dropdown').style.display = 'none';
+              document.getElementById('select-arrow').style.transform = 'rotate(0deg)';
+            }
+          });
+          </script>
           <div style="display:grid;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#0B2545;">
               <span class="icon-round icon-sm" style="background:#7C3AED;">
