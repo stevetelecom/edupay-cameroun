@@ -16,18 +16,24 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        // Créer le rôle super-admin (guard admin)
+        // Créer les rôles admin plateforme (guard admin)
         $roleSuperAdmin = Role::firstOrCreate(
             ['name' => 'super-admin', 'guard_name' => 'admin']
+        );
+        Role::firstOrCreate(
+            ['name' => 'superviseur', 'guard_name' => 'admin']
+        );
+        Role::firstOrCreate(
+            ['name' => 'comptable_plateforme', 'guard_name' => 'admin']
         );
 
         // Créer le compte Super Admin
         $admin = Admin::firstOrCreate(
-            ['email' => 'admin@edupay.cm'],
+            ['email' => 'moffosteve2@gmail.com'],
             [
                 'prenom'    => 'Olivier',
                 'nom'       => 'MEKONTSO',
-                'email'     => 'admin@edupay.cm',
+                'email'     => 'moffosteve2@gmail.com',
                 'telephone' => '+237690000000',   // À remplacer par le vrai numéro
                 'password'  => Hash::make('Admin@EduPay2026!'),  // À changer en production
                 'est_actif' => true,
@@ -36,7 +42,7 @@ class AdminSeeder extends Seeder
 
         $admin->assignRole($roleSuperAdmin);
 
-        $this->command->info('Super Admin créé : admin@edupay.cm');
+        $this->command->info('Super Admin créé : moffosteve2@gmail.com');
         $this->command->warn('IMPORTANT : Changez le mot de passe en production !');
     }
 }

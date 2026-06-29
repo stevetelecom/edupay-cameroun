@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\Admin2FAMail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -95,16 +97,14 @@ class AdminAuthController extends Controller
         // Stocker l'admin_id en session pour l'étape 2FA
         $request->session()->put('admin_2fa_id', $admin->id);
 
-        // Envoi du code par SMS Africa's Talking (commenté en dev)
-        // app(\App\Services\SmsService::class)->envoyerOtp($admin->telephone, $otpCode);
-
-        // En développement : log le code dans le fichier de log Laravel
-        Log::channel('admin')->info('Code 2FA Super Admin pour ' . $admin->email . ' : ' . $otpCode);
-// // Après
-// $smsSent = app(\App\Services\SmsService::class)->envoyerOtp($admin->telephone, $otpCode);
-
-// // Garder le log en parallèle (utile pour debug même en prod)
-// Log::channel('admin')->info('Code 2FA Super Admin pour ' . $admin->email . ' : ' . $otpCode . ($smsSent ? ' [SMS envoyé]' : ' [SMS ECHEC]'));
+        // Envoi du code 2FA par email
+        try {
+            Mail::to($admin->email)->send(new Admin2FAMail($admin, $otpCode));
+            Log::channel('admin')->info('Code 2FA envoyé par email à ' . $admin->email);
+        } catch (\Throwable $e) {
+            Log::channel('admin')->error('Échec envoi email 2FA : ' . $e->getMessage());
+            Log::channel('admin')->info('Code 2FA (fallback log) pour ' . $admin->email . ' : ' . $otpCode);
+        }
         AuditLog::enregistrer(
             $admin,
             'LOGIN_2FA_ENVOYE',

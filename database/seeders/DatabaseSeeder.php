@@ -29,7 +29,7 @@ class DatabaseSeeder extends Seeder
         // requis par SuperAdminMiddleware::hasRole('super-admin').
         // ────────────────────────────────────────────
         $admin = \App\Models\Admin::firstOrCreate(
-            ['email' => 'admin@edupay.cm'],
+            ['email' => 'moffosteve2@gmail.com'],
             [
                 'prenom'    => 'Olivier Steve',
                 'nom'       => 'MEKONTSO',
@@ -108,12 +108,12 @@ class DatabaseSeeder extends Seeder
         $this->command->table(
             ['Module', 'Identifiant', 'Mot de passe', 'Note'],
             [
-                ['Super Admin (/admin-ep2026/login)', 'admin@edupay.cm', 'Admin2026!', 'Code 2FA généré à chaque login, voir storage/logs/admin.log'],
+                ['Super Admin (/admin-ep2026/login)', 'moffosteve2@gmail.com', 'Admin2026!', 'Code 2FA généré à chaque login, voir storage/logs/admin.log'],
                 ['Login classique (/connexion)', 'parent@test.cm ou 699123456', 'password', 'Rôle parent'],
                 ['Login classique (/connexion)', 'directeur@test.cm ou 677000001', 'password', 'Rôle directeur'],
             ]
         );
         $this->command->info('Code établissement de test (inscription parent étape 2) : LYC-MEL-2026');
-        $this->command->warn('Pour le 2FA admin : après "Continuer vers la vérification 2FA", lance "tail -f storage/logs/admin.log" pour voir le code à 6 chiffres.');
+        $this->command->warn('Pour le 2FA admin : le code à 6 chiffres est envoyé par email à moffosteve2@gmail.com.');
     }
 }

@@ -30,7 +30,7 @@
 
         <h1 class="text-lg font-bold text-center text-gray-900 mb-1">Code de vérification</h1>
         <p class="text-sm text-gray-500 text-center mb-6">
-            Entrez le code à 6 chiffres envoyé par SMS sur votre téléphone enregistré.
+            Entrez le code à 6 chiffres envoyé à votre adresse email administrateur.
             Ce code expire dans <strong class="text-gray-700">5 minutes</strong>.
         </p>
 

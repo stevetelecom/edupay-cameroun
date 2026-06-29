@@ -50,6 +50,14 @@ class Admin extends Authenticatable
     /**
      * Nom complet formaté.
      */
+    /**
+     * Rôle principal via Spatie (compatible avec l'ancienne syntaxe $admin->role).
+     */
+    public function getRoleAttribute(): string
+    {
+        return $this->getRoleNames()->first() ?? 'super-admin';
+    }
+
     public function getNomCompletAttribute(): string
     {
         return strtoupper($this->nom) . ' ' . ucfirst(strtolower($this->prenom));

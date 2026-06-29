@@ -65,8 +65,8 @@
 
                 {{-- Dropdown profil --}}
                 <div id="dropdown-profil-admin"
-                     style="display:none;"
-                     class="absolute right-0 top-11 w-72 bg-white rounded-xl shadow-xl border border-gray-200 z-50">
+                     style="display:none;position:fixed;top:58px;right:8px;width:min(288px,calc(100vw - 16px));z-index:9998;"
+                     class="bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden">
 
                     {{-- En-tête profil --}}
                     <div class="px-4 py-4 border-b border-gray-100">
@@ -81,20 +81,20 @@
                                 <div class="text-xs text-gray-500">{{ Auth::guard('admin')->user()->email }}</div>
                                 <div class="mt-1">
                                     @php
-                                        $roleStyles = [
-                                            'super_admin'          => 'bg-purple-50 text-purple-700 border-purple-200',
+                                        $roleStylesD = [
+                                            'super-admin'          => 'bg-purple-50 text-purple-700 border-purple-200',
                                             'superviseur'          => 'bg-blue-50 text-blue-700 border-blue-200',
                                             'comptable_plateforme' => 'bg-amber-50 text-amber-700 border-amber-200',
                                         ];
-                                        $roleLabels = [
-                                            'super_admin'          => 'Super Admin',
+                                        $roleLabelsD = [
+                                            'super-admin'          => 'Super Admin',
                                             'superviseur'          => 'Superviseur',
                                             'comptable_plateforme' => 'Comptable plateforme',
                                         ];
-                                        $role = Auth::guard('admin')->user()->role ?? 'superviseur';
+                                        $roleD = Auth::guard('admin')->user()->getRoleNames()->first() ?? 'super-admin';
                                     @endphp
-                                    <span class="text-xs font-medium px-2 py-0.5 rounded-full border {{ $roleStyles[$role] ?? 'bg-gray-50 text-gray-600 border-gray-200' }}">
-                                        {{ $roleLabels[$role] ?? $role }}
+                                    <span class="text-xs font-medium px-2 py-0.5 rounded-full border {{ $roleStylesD[$roleD] ?? 'bg-gray-50 text-gray-600 border-gray-200' }}">
+                                        {{ $roleLabelsD[$roleD] ?? $roleD }}
                                     </span>
                                 </div>
                             </div>
@@ -126,7 +126,15 @@
                     </div>
 
                     {{-- Actions --}}
-                    <div class="px-4 py-3">
+                    <div class="px-4 py-3 space-y-2">
+                        <button onclick="document.getElementById('dropdown-profil-admin').style.display='none'; ouvrirModalProfil()"
+                                class="w-full text-left text-sm text-[#0D9E75] hover:text-[#085041] font-medium flex items-center gap-2 py-1">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                            Modifier mon profil
+                        </button>
                         <form method="POST" action="{{ route('admin.logout') }}">
                             @csrf
                             <button type="submit"
@@ -634,24 +642,103 @@ function toggleProfilAdmin() {
 }
 document.addEventListener('click', function(e) {
     var dropdown = document.getElementById('dropdown-profil-admin');
-    var btn = dropdown ? dropdown.previousElementSibling : null;
+    var btn = document.querySelector('[onclick="toggleProfilAdmin()"]');
     if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
         dropdown.style.display = 'none';
     }
 });
-</script>
-<script>
-function toggleProfilAdmin() {
-    var el = document.getElementById('dropdown-profil-admin');
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+
+function ouvrirModalProfil() {
+    var admin = {
+        prenom: '{{ Auth::guard("admin")->user()->prenom }}',
+        nom: '{{ Auth::guard("admin")->user()->nom }}',
+        email: '{{ Auth::guard("admin")->user()->email }}',
+        telephone: '{{ Auth::guard("admin")->user()->telephone ?? "" }}'
+    };
+    document.getElementById('mp-prenom').value = admin.prenom;
+    document.getElementById('mp-nom').value = admin.nom;
+    document.getElementById('mp-email').value = admin.email;
+    document.getElementById('mp-telephone').value = admin.telephone;
+    var modal = document.getElementById('modal-mon-profil');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
 }
-document.addEventListener('click', function(e) {
-    var dropdown = document.getElementById('dropdown-profil-admin');
-    var btn = dropdown ? dropdown.previousElementSibling : null;
-    if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
-        dropdown.style.display = 'none';
-    }
-});
+function fermerModalProfil() {
+    var modal = document.getElementById('modal-mon-profil');
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+}
 </script>
+{{-- ══ MODAL : Modifier mon profil admin ══ --}}
+<div id="modal-mon-profil"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f0f0f0;">
+      <div style="font-size:15px;font-weight:700;color:#0B2545;">✏️ Modifier mon profil</div>
+      <button onclick="fermerModalProfil()"
+              style="background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;line-height:1;padding:2px 8px;border-radius:4px;"
+              onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='none'">×</button>
+    </div>
+    <form method="POST" action="{{ route('admin.profil.update') }}">
+      @csrf @method('PATCH')
+      <div style="padding:20px;display:grid;gap:14px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Prénom *</div>
+            <input type="text" name="prenom" id="mp-prenom" required
+                   style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
+                   onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Nom *</div>
+            <input type="text" name="nom" id="mp-nom" required
+                   style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
+                   onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Email *</div>
+          <input type="email" name="email" id="mp-email" required
+                 style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
+                 onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Téléphone</div>
+          <input type="text" name="telephone" id="mp-telephone"
+                 style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
+                 onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
+        </div>
+        <div style="border-top:1px solid #f0f0f0;padding-top:14px;">
+          <div style="font-size:11px;font-weight:600;color:#999;margin-bottom:10px;">CHANGER LE MOT DE PASSE (laisser vide = inchangé)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Nouveau mot de passe</div>
+              <input type="password" name="password" autocomplete="new-password"
+                     style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
+                     onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Confirmer</div>
+              <input type="password" name="password_confirmation"
+                     style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
+                     onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid #f0f0f0;">
+        <button type="button" onclick="fermerModalProfil()"
+                style="padding:8px 16px;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;background:#fff;color:#666;">
+          Annuler
+        </button>
+        <button type="submit"
+                style="padding:8px 20px;background:#0D9E75;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+          Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 </body>
 </html>

@@ -42,6 +42,7 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
     Route::prefix('admins')->name('admins.')->group(function () {
         Route::get('/',                    [\App\Http\Controllers\Admin\AdminGestionController::class, 'index'])->name('index');
         Route::post('/',                   [\App\Http\Controllers\Admin\AdminGestionController::class, 'store'])->name('store');
+        Route::patch('/{admin}',           [\App\Http\Controllers\Admin\AdminGestionController::class, 'update'])->name('update');
         Route::patch('/{admin}/activer',   [\App\Http\Controllers\Admin\AdminGestionController::class, 'activer'])->name('activer');
         Route::patch('/{admin}/suspendre', [\App\Http\Controllers\Admin\AdminGestionController::class, 'suspendre'])->name('suspendre');
         Route::delete('/{admin}',          [\App\Http\Controllers\Admin\AdminGestionController::class, 'destroy'])->name('destroy');
@@ -49,6 +50,7 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
 
     // Dashboard KPIs globaux
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::patch('/profil', [\App\Http\Controllers\Admin\AdminGestionController::class, 'updateProfil'])->name('profil.update');
 
     // Gestion des établissements
     Route::prefix('etablissements')->name('etablissements.')->group(function () {
