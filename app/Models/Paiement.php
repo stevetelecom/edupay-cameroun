@@ -14,6 +14,16 @@ class Paiement extends Model
         'date_paiement', 'date_validation',
     ];
 
+    protected $casts = [
+        'user_id' => 'integer',
+        'apprenant_id' => 'integer',
+        'frais_apprenant_id' => 'integer',
+        'echeancier_id' => 'integer',
+        'numero_tranche' => 'integer',
+        'date_paiement' => 'datetime',
+        'date_validation' => 'datetime',
+    ];
+
     protected static function booted(): void
     {
         static::creating(function ($paiement) {
