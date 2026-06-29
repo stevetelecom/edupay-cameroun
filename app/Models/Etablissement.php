@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Etablissement extends Model
 {
+    protected $casts = [
+        'parent_etablissement_id' => 'integer',
+    ];
+
     use SoftDeletes;
 
     protected $fillable = [

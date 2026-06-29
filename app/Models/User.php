@@ -12,6 +12,10 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
+    protected $casts = [
+        'etablissement_id' => 'integer',
+    ];
+
     use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [

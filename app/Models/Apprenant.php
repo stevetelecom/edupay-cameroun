@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Apprenant extends Model
 {
+    protected $casts = [
+        'etablissement_id' => 'integer',
+        'user_id' => 'integer',
+    ];
+
     use SoftDeletes;
 
     protected $fillable = [
