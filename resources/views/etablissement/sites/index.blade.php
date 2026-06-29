@@ -78,6 +78,51 @@
   </div>
 </div>
 
+{{-- ══ MODAL : Modifier un site ══ --}}
+<div id="modal-edit-site" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-lg">
+    <div class="ep-modal-head">
+      <h3>Modifier le site</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-edit-site')">×</button>
+    </div>
+    <form method="POST" id="form-edit-site" action="">
+      @csrf
+      @method('PUT')
+      <div class="ep-modal-body">
+        <div class="g2">
+          <div>
+            <div class="lbl">Nom du site *</div>
+            <input class="inp" name="nom" id="edit-nom" required />
+          </div>
+          <div>
+            <div class="lbl">Ville *</div>
+            <input class="inp" name="ville" id="edit-ville" required />
+          </div>
+        </div>
+        <div class="g2">
+          <div>
+            <div class="lbl">Quartier (optionnel)</div>
+            <input class="inp" name="quartier" id="edit-quartier" />
+          </div>
+          <div>
+            <div class="lbl">Téléphone du site *</div>
+            <input class="inp" name="telephone" id="edit-telephone" required />
+          </div>
+        </div>
+        <div class="lbl">Email du site *</div>
+        <input class="inp" type="email" name="email" id="edit-email" required />
+      </div>
+      <div class="ep-modal-foot">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
+                onclick="epModal.close('modal-edit-site')">Annuler</button>
+        <button type="submit" class="btn-p" style="width:auto;padding:8px 20px;">
+          Enregistrer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {{-- ══ MODAL : Détail d'un site ══ --}}
 <div id="modal-detail-site" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-md">
@@ -179,6 +224,7 @@
       </div>
     </div>
 
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
     <button onclick="voirSite(
         '{{ addslashes($site->nom) }}',
         '{{ $site->id === $sitePrincipal->id ? 'Site principal' : 'Site secondaire' }}',
@@ -193,6 +239,30 @@
     style="color:#185FA5;background:none;border:none;font-size:12px;cursor:pointer;white-space:nowrap;">
       Voir le détail
     </button>
+    @if($estSitePrincipal && Auth::user()->hasRole('directeur') && $site->id !== $sitePrincipal->id)
+    <button onclick="modifierSite(
+        {{ $site->id }},
+        '{{ addslashes($site->nom) }}',
+        '{{ addslashes($site->ville) }}',
+        '{{ addslashes($site->quartier ?? '') }}',
+        '{{ addslashes($site->telephone) }}',
+        '{{ addslashes($site->email) }}'
+    )"
+    style="color:#1A4F8A;background:none;border:none;font-size:12px;cursor:pointer;white-space:nowrap;">
+      Modifier
+    </button>
+    <form method="POST" action="{{ route('etablissement.sites.destroy', $site) }}"
+          onsubmit="return confirm('Supprimer définitivement le site « {{ addslashes($site->nom) }} » ?');"
+          style="display:inline;">
+      @csrf
+      @method('DELETE')
+      <button type="submit"
+              style="color:#9B2C2C;background:none;border:none;font-size:12px;cursor:pointer;white-space:nowrap;">
+        Supprimer
+      </button>
+    </form>
+    @endif
+    </div>
   </div>
   @endforeach
 </div>
@@ -207,6 +277,16 @@
 
 @push('scripts')
 <script>
+function modifierSite(id, nom, ville, quartier, telephone, email) {
+    document.getElementById('edit-nom').value = nom;
+    document.getElementById('edit-ville').value = ville;
+    document.getElementById('edit-quartier').value = quartier;
+    document.getElementById('edit-telephone').value = telephone;
+    document.getElementById('edit-email').value = email;
+    document.getElementById('form-edit-site').action = '/etablissement/sites/' + id;
+    epModal.open('modal-edit-site');
+}
+
 function voirSite(nom, type, statut, ville, quartier, tel, email, nbApp, encaisse) {
     document.getElementById('detail-site-titre').textContent = nom;
 

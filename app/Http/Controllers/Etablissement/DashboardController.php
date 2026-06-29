@@ -13,6 +13,7 @@ class DashboardController extends Controller
     {
         $etablissementId = Auth::user()->etablissement_id;
         $anneeScolaire   = '2025-2026';
+        $etablissement   = Auth::user()->etablissement;
 
         // Total encaissé ce mois (paiements validés, apprenants de l'établissement)
         $totalEncaisseMois = Paiement::where('statut', 'valide')
@@ -64,6 +65,7 @@ class DashboardController extends Controller
         $countImpayes = $nbDossiersImpayes;
 
         return view('etablissement.dashboard', compact(
+            'etablissement',
             'totalEncaisseMois',
             'totalImpaye',
             'nbApprenants',

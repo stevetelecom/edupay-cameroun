@@ -220,9 +220,9 @@
 
                 {{-- Dropdown profil établissement --}}
                 <div id="dropdown-profil-etab"
-                     style="display:none;position:absolute;right:0;top:44px;width:288px;
+                     style="display:none;position:fixed;top:58px;right:8px;width:min(288px,calc(100vw - 16px));
                             background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.14);
-                            border:1px solid #e5e7eb;z-index:999;">
+                            border:1px solid #e5e7eb;z-index:9998;overflow:hidden;">
 
                     {{-- En-tête --}}
                     <div style="padding:16px;border-bottom:1px solid #f0f0f0;">
@@ -339,17 +339,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
                 Remboursements
             </a>
-            @php
-                $etCourant = Auth::user()->etablissement;
-                $siteGroupe = $etCourant?->parent_etablissement_id ? $etCourant->siteParent : $etCourant;
-                $faitPartieDunGroupe = $siteGroupe && $siteGroupe->sites()->exists();
-            @endphp
-            @if($faitPartieDunGroupe)
             <a href="{{ route('etablissement.sites.index') }}" class="sbar-item {{ request()->routeIs('etablissement.sites.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 Multi-sites
             </a>
-            @endif
             <a href="{{ route('etablissement.profil.index') }}" class="sbar-item {{ request()->routeIs('etablissement.parametres.*') ? 'on' : '' }}" style="margin-top:4px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
                 Paramètres

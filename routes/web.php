@@ -160,6 +160,8 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier'])->prefix('etabli
     Route::post('/remboursements/{remboursement}/refuser', [\App\Http\Controllers\Etablissement\RemboursementController::class, 'refuser'])->name('remboursements.refuser');
     Route::get('/sites', [\App\Http\Controllers\Etablissement\SiteController::class, 'index'])->name('sites.index');
     Route::post('/sites', [\App\Http\Controllers\Etablissement\SiteController::class, 'store'])->name('sites.store');
+    Route::put('/sites/{site}', [\App\Http\Controllers\Etablissement\SiteController::class, 'update'])->name('sites.update');
+    Route::delete('/sites/{site}', [\App\Http\Controllers\Etablissement\SiteController::class, 'destroy'])->name('sites.destroy');
 });
 
 

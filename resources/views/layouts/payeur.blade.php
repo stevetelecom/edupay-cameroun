@@ -192,9 +192,9 @@
 
                 {{-- Dropdown profil payeur --}}
                 <div id="dropdown-profil-payeur"
-                     style="display:none;position:absolute;right:0;top:44px;width:280px;
+                     style="display:none;position:fixed;top:58px;right:8px;width:min(280px,calc(100vw - 16px));
                             background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12);
-                            border:1px solid #e5e7eb;z-index:999;">
+                            border:1px solid #e5e7eb;z-index:9998;overflow:hidden;">
 
                     {{-- En-tête --}}
                     <div style="padding:16px;border-bottom:1px solid #f0f0f0;">

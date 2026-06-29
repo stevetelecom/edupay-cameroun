@@ -96,18 +96,54 @@ class SiteController extends Controller
             ->with('success', 'Site « ' . $nouveauSite->nom . ' » créé avec succès. Un compte directeur a été généré pour ' . $directeur->email . '.');
     }
 
-    private function resoudreSitePrincipal(Etablissement $etablissement): Etablissement
+    public function update(Request $request, Etablissement $site): RedirectResponse
     {
-        $sitePrincipal = $etablissement->parent_etablissement_id
-            ? $etablissement->siteParent
-            : $etablissement;
+        $etablissementCourant = Auth::user()->etablissement;
 
         abort_unless(
-            $sitePrincipal && $sitePrincipal->sites()->exists(),
+            Auth::user()->hasRole('directeur') && $site->parent_etablissement_id === $etablissementCourant->id,
             403,
-            'Votre établissement ne fait pas partie d\'un groupe scolaire.'
+            'Vous ne pouvez modifier que les sites secondaires de votre groupe.'
         );
 
-        return $sitePrincipal;
+        $validated = $request->validate([
+            'nom'       => 'required|string|max:255',
+            'ville'     => 'required|string|max:255',
+            'quartier'  => 'nullable|string|max:255',
+            'telephone' => 'required|string|max:30',
+            'email'     => 'required|email|max:255',
+        ]);
+
+        $site->update($validated);
+
+        return redirect()->route('etablissement.sites.index')
+            ->with('success', 'Site « ' . $site->nom . ' » modifié avec succès.');
+    }
+
+    public function destroy(Etablissement $site): RedirectResponse
+    {
+        $etablissementCourant = Auth::user()->etablissement;
+
+        abort_unless(
+            Auth::user()->hasRole('directeur') && $site->parent_etablissement_id === $etablissementCourant->id,
+            403,
+            'Vous ne pouvez supprimer que les sites secondaires de votre groupe.'
+        );
+
+        $nom = $site->nom;
+        $site->delete();
+
+        return redirect()->route('etablissement.sites.index')
+            ->with('success', 'Site « ' . $nom . ' » supprimé avec succès.');
+    }
+
+    private function resoudreSitePrincipal(Etablissement $etablissement): Etablissement
+    {
+        // Un établissement sans groupe est traité comme son propre "site principal"
+        // potentiel : ça permet d'afficher la page Multi-sites avec le bouton
+        // "+ Ajouter un site" même quand aucun site n'existe encore.
+        return $etablissement->parent_etablissement_id
+            ? $etablissement->siteParent
+            : $etablissement;
     }
 }

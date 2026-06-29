@@ -4,6 +4,54 @@
 
 @section('content')
 
+    {{-- ── Bannière statut établissement ── --}}
+    @if(isset($etablissement))
+    @php
+        $statut = $etablissement->statut ?? 'inconnu';
+        $config = match($statut) {
+            'actif'        => ['bg'=>'#ECFDF5','border'=>'#0D9E75','text'=>'#065F46','icon'=>'✅','label'=>'Établissement actif',      'msg'=>'Votre établissement est validé et actif sur EduPay.'],
+            'en_attente'   => ['bg'=>'#FFFBEB','border'=>'#E8A020','text'=>'#92400E','icon'=>'⏳','label'=>'En attente de validation', 'msg'=>"Votre dossier est en cours d'examen par l'équipe EduPay. Vous serez notifié par email dès activation."],
+            'suspendu'     => ['bg'=>'#FEF2F2','border'=>'#D94040','text'=>'#7F1D1D','icon'=>'🚫','label'=>'Établissement suspendu',   'msg'=>"Votre compte est suspendu. Contactez le support EduPay pour plus d'informations."],
+            default        => ['bg'=>'#F9FAFB','border'=>'#9CA3AF','text'=>'#374151','icon'=>'ℹ️','label'=>'Statut inconnu',           'msg'=>'Statut non défini. Contactez le support.'],
+        };
+    @endphp
+    <div style="
+        background:{{ $config['bg'] }};
+        border:1.5px solid {{ $config['border'] }};
+        border-radius:10px;
+        padding:12px 16px;
+        margin-bottom:18px;
+        display:flex;
+        align-items:flex-start;
+        gap:12px;
+        flex-wrap:wrap;
+    ">
+        <div style="font-size:20px;flex-shrink:0;">{{ $config['icon'] }}</div>
+        <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;color:{{ $config['text'] }};margin-bottom:2px;">
+                {{ $config['label'] }}
+                <span style="font-weight:400;font-size:11px;margin-left:8px;background:{{ $config['border'] }};color:#fff;padding:1px 8px;border-radius:99px;">
+                    {{ strtoupper($statut) }}
+                </span>
+            </div>
+            <div style="font-size:12px;color:{{ $config['text'] }};opacity:0.85;line-height:1.5;">
+                {{ $config['msg'] }}
+            </div>
+            @if($statut === 'en_attente')
+            <div style="font-size:11px;color:#92400E;margin-top:4px;opacity:0.7;">
+                📧 Un email vous sera envoyé à <strong>{{ Auth::user()->email }}</strong> dès validation.
+            </div>
+            @endif
+        </div>
+        <div style="flex-shrink:0;text-align:right;min-width:120px;">
+            <div style="font-size:11px;color:{{ $config['text'] }};opacity:0.7;">Nom de l'établissement</div>
+            <div style="font-size:12px;font-weight:600;color:{{ $config['text'] }};word-break:break-word;">
+                {{ $etablissement->nom }}
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div style="font-size:17px;font-weight:700;margin-bottom:4px;">Tableau de bord financier</div>
     <div style="font-size:12px;color:#888;margin-bottom:16px;">
         Année {{ $anneeScolaire ?? '2025-2026' }} · {{ \Carbon\Carbon::now()->locale('fr')->isoFormat('MMMM YYYY') }}
