@@ -35,7 +35,25 @@ jobs:
 
       - name: Get runner public IP
         id: ip
-        uses: haythem/public-ip@v1.3
+        run: |
+          IP=""
+          for url in "https://api.ipify.org" "https://ifconfig.me/ip" "https://checkip.amazonaws.com"; do
+            for attempt in 1 2 3; do
+              IP=$(curl -s -m 10 "$url" || true)
+              IP=$(echo "$IP" | tr -d '[:space:]')
+              if [[ "$IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                break 2
+              fi
+              echo "Tentative $attempt sur $url a échoué, nouvel essai..."
+              sleep 3
+            done
+          done
+          if [[ -z "$IP" ]]; then
+            echo "Impossible de récupérer l'IP publique du runner après plusieurs tentatives" >&2
+            exit 1
+          fi
+          echo "ipv4=$IP" >> "$GITHUB_OUTPUT"
+          echo "IP publique du runner : $IP"
 
       - name: Whitelist GitHub Actions IP on o2switch
         run: |
