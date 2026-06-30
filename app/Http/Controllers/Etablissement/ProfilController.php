@@ -28,7 +28,8 @@ class ProfilController extends Controller
         ]);
 
         $user->update([
-            'name'      => $validated['prenom'] . ' ' . $validated['nom'],
+            'prenom'    => $validated['prenom'],
+            'nom'       => $validated['nom'],
             'telephone' => $validated['telephone'],
             'email'     => $validated['email'] ?? null,
             'ville'     => $validated['ville'] ?? null,
