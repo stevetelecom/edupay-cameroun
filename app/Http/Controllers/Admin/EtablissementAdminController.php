@@ -7,6 +7,8 @@ use App\Models\Etablissement;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use App\Mail\EtablissementActiveMail;
+use App\Mail\EtablissementSuspenduMail;
+use App\Mail\EtablissementSupprimeMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -104,12 +106,28 @@ class EtablissementAdminController extends Controller
             ['statut' => 'suspendu']
         );
 
-        return back()->with('success', "L'etablissement « {$etablissement->nom} » a ete suspendu.");
+        // Notifier le responsable par email
+        $responsable = \App\Models\User::where('etablissement_id', $etablissement->id)
+            ->whereHas('roles', fn($q) => $q->where('name', 'directeur'))
+            ->first();
+        if ($responsable) {
+            try {
+                Mail::to($responsable->email)
+                    ->send(new EtablissementSuspenduMail($etablissement, $responsable, $request->raison));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Échec email suspension : ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', "L'etablissement « {$etablissement->nom} » a ete suspendu. Le responsable a ete notifie.");
     }
 
     public function destroy(Request $request, Etablissement $etablissement)
     {
         $nom = $etablissement->nom;
+        $responsable = \App\Models\User::where('etablissement_id', $etablissement->id)
+            ->whereHas('roles', fn($q) => $q->where('name', 'directeur'))
+            ->first();
         $etablissement->delete();
 
         AuditLog::enregistrer(
@@ -119,6 +137,16 @@ class EtablissementAdminController extends Controller
             $request, 'CRITICAL'
         );
 
-        return back()->with('success', "L'etablissement « {$nom} » a ete supprime.");
+        // Notifier le responsable par email (avant suppression du compte)
+        if ($responsable) {
+            try {
+                Mail::to($responsable->email)
+                    ->send(new EtablissementSupprimeMail($nom, $responsable));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Échec email suppression : ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', "L'etablissement « {$nom} » a ete supprime. Le responsable a ete notifie.");
     }
 }
