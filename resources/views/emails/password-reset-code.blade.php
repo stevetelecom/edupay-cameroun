@@ -42,7 +42,7 @@
             </div>
 
             <p style="color: #666; font-size: 13px; margin-top: 25px;">
-                <strong>Questions?</strong> Contactez notre équipe support à <a href="mailto:support@edupay.cm" style="color: #0D9E75;">support@edupay.cm</a>
+                <strong>Questions?</strong> Contactez notre équipe support à <a href="mailto:edupay@mekontso.gsi2026.com" style="color: #0D9E75;">edupay@mekontso.gsi2026.com</a>
             </p>
         </div>
 

@@ -34,22 +34,28 @@
         <form method="POST" action="{{ route('password.verify.code') }}">
           @csrf
           <input type="hidden" name="email" value="{{ $email }}">
-          
-          <div class="lbl">Code de vérification</div>
-          <input 
-            class="inp" 
-            type="text" 
-            name="code" 
-            value="{{ old('code') }}" 
-            placeholder="000000"
-            maxlength="6"
-            pattern="[0-9]{6}"
-            required 
-            autofocus
-            style="font-size:24px;letter-spacing:12px;text-align:center;font-weight:bold;font-family:'Courier New',monospace;"
-          />
+
+          <div class="lbl" style="text-align:center;margin-bottom:10px;">Code de vérification</div>
+          <input type="hidden" name="code" id="code-hidden" />
+          <div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px;">
+            @for($i = 1; $i <= 6; $i++)
+            <input type="text"
+                   id="otp-{{ $i }}"
+                   maxlength="1"
+                   inputmode="numeric"
+                   pattern="[0-9]"
+                   autocomplete="off"
+                   style="width:42px;height:50px;text-align:center;font-size:20px;
+                          font-weight:700;border:2px solid #ddd;border-radius:10px;
+                          font-family:monospace;outline:none;transition:border .15s;
+                          -webkit-appearance:none;"
+                   onfocus="this.style.borderColor='#0D9E75'"
+                   onblur="this.style.borderColor='#ddd'"
+            />
+            @endfor
+          </div>
           <p style="font-size:11px;color:#888;margin:8px 0 16px;text-align:center;">Entrez le code à 6 chiffres</p>
-          
+
           <button type="submit" class="btn-p" style="margin-bottom:10px;">Vérifier le code</button>
 
           <form method="POST" action="{{ route('password.resend.code') }}" style="display:inline-width:100%;">
@@ -62,6 +68,41 @@
         <p style="text-align:center;font-size:11px;color:#888;margin-top:16px;">
           <a href="{{ route('password.forgot') }}" style="color:var(--ep-teal);text-decoration:none;">← Utiliser un autre email</a>
         </p>
+
+        <script>
+        (function() {
+            var inputs = [1,2,3,4,5,6].map(function(i){ return document.getElementById('otp-'+i); });
+            inputs[0].focus();
+
+            inputs.forEach(function(inp, idx) {
+                inp.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                    if (this.value && idx < 5) inputs[idx+1].focus();
+                    updateHidden();
+                });
+                inp.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && !this.value && idx > 0) {
+                        inputs[idx-1].focus();
+                        inputs[idx-1].value = '';
+                        updateHidden();
+                    }
+                });
+                inp.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    var text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g,'');
+                    text.split('').slice(0,6).forEach(function(ch, i) {
+                        if (inputs[i]) inputs[i].value = ch;
+                    });
+                    inputs[Math.min(text.length, 5)].focus();
+                    updateHidden();
+                });
+            });
+
+            function updateHidden() {
+                document.getElementById('code-hidden').value = inputs.map(function(i){ return i.value; }).join('');
+            }
+        })();
+        </script>
       </div>
     </div>
   </div>

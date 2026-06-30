@@ -105,7 +105,7 @@
 
     <div class="tip">
       <strong>📞 Besoin d'aide ?</strong><br>
-      Contactez le support : <a href="mailto:support@mekontso.gsi2026.com" style="color:#D94040;">support@mekontso.gsi2026.com</a>
+      Contactez le support : <a href="mailto:edupay@mekontso.gsi2026.com" style="color:#D94040;">edupay@mekontso.gsi2026.com</a>
     </div>
 
     <div class="text" style="color:#999; font-size:12px; margin-top:20px;">

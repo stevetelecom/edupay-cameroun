@@ -191,6 +191,134 @@ class AdminAuthController extends Controller
             ->with('success', 'Bienvenue, ' . $admin->prenom . '. Connexion sécurisée.');
     }
 
+
+    // ─────────────────────────────────────────────
+    // Reset mot de passe admin
+    // ─────────────────────────────────────────────
+
+    public function showForgotForm()
+    {
+        return view('admin.forgot-password', [
+            'pageTitle' => 'Réinitialisation — Super Admin EduPay',
+        ]);
+    }
+
+    public function sendResetCode(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ], [
+            'email.required' => "L'email est obligatoire.",
+            'email.email'    => "Format d'email invalide.",
+        ]);
+
+        $admin = Admin::where('email', $request->email)->first();
+
+        // Sécurité : ne pas révéler si l'email existe ou non
+        if ($admin) {
+            $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            Cache::put('admin_reset_' . $admin->id, Hash::make($code), now()->addMinutes(10));
+            $request->session()->put('admin_reset_id', $admin->id);
+
+            try {
+                Mail::to($admin->email)->send(new \App\Mail\AdminResetPasswordMail($admin, $code));
+                Log::channel('admin')->info('Code reset envoyé à ' . $admin->email);
+            } catch (\Throwable $e) {
+                Log::channel('admin')->error('Échec envoi reset : ' . $e->getMessage());
+            }
+        }
+
+        return redirect()->route('admin.password.reset.form')
+            ->with('info', 'Si cet email existe, un code a été envoyé.');
+    }
+
+    public function showResetForm(Request $request)
+    {
+        if (! $request->session()->has('admin_reset_id')) {
+            return redirect()->route('admin.password.forgot')
+                ->with('error', 'Session expirée. Recommencez.');
+        }
+
+        return view('admin.reset-password', [
+            'pageTitle' => 'Nouveau mot de passe — Super Admin EduPay',
+        ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'code'                  => ['required', 'digits:6'],
+            'password'              => ['required', 'string', 'min:10', 'confirmed'],
+        ], [
+            'code.required'         => 'Le code est obligatoire.',
+            'code.digits'           => 'Le code doit contenir 6 chiffres.',
+            'password.required'     => 'Le mot de passe est obligatoire.',
+            'password.min'          => 'Minimum 10 caractères.',
+            'password.confirmed'    => 'Les mots de passe ne correspondent pas.',
+        ]);
+
+        // Vérifier que le nouveau mot de passe est différent de l'ancien
+        $adminId = $request->session()->get('admin_reset_id');
+        $adminCheck = Admin::findOrFail($adminId);
+        if (Hash::check($request->password, $adminCheck->password)) {
+            return back()->withErrors(['password' => 'Le nouveau mot de passe doit être différent de l\'ancien.']);
+        }
+
+        $adminId = $request->session()->get('admin_reset_id');
+        if (! $adminId) {
+            return redirect()->route('admin.password.forgot')
+                ->with('error', 'Session expirée. Recommencez.');
+        }
+
+        $admin     = Admin::findOrFail($adminId);
+        $hashedCode = Cache::get('admin_reset_' . $admin->id);
+
+        if (! $hashedCode || ! Hash::check($request->code, $hashedCode)) {
+            return back()->withErrors(['code' => 'Code incorrect ou expiré.']);
+        }
+
+        $admin->update(['password' => bcrypt($request->password)]);
+        Cache::forget('admin_reset_' . $admin->id);
+        $request->session()->forget('admin_reset_id');
+
+        AuditLog::enregistrerSansUser(
+            'PASSWORD_RESET',
+            'Mot de passe Super Admin réinitialisé : ' . $admin->email,
+            $request,
+            'WARNING'
+        );
+
+        return redirect()->route('admin.login')
+            ->with('success', 'Mot de passe réinitialisé. Connectez-vous.');
+    }
+
+    // ─────────────────────────────────────────────
+    // Renvoyer le code 2FA
+    // ─────────────────────────────────────────────
+
+    public function resend2fa(Request $request)
+    {
+        $adminId = $request->session()->get('admin_2fa_id');
+        if (! $adminId) {
+            return redirect()->route('admin.login')
+                ->with('error', 'Session expirée. Veuillez recommencer.');
+        }
+
+        $admin   = Admin::findOrFail($adminId);
+        $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        Cache::put('2fa_admin_' . $admin->id, Hash::make($otpCode), now()->addMinutes(5));
+
+        try {
+            Mail::to($admin->email)->send(new Admin2FAMail($admin, $otpCode));
+            Log::channel('admin')->info('Code 2FA renvoyé à ' . $admin->email);
+        } catch (\Throwable $e) {
+            Log::channel('admin')->error('Échec renvoi 2FA : ' . $e->getMessage());
+        }
+
+        return redirect()->route('admin.login.2fa')
+            ->with('info', 'Un nouveau code a été envoyé à votre adresse email.');
+    }
+
     /**
      * Déconnexion sécurisée Super Admin.
      */

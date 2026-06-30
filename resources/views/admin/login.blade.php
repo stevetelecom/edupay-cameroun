@@ -131,6 +131,11 @@
                 Continuer vers la vérification 2FA
             </button>
         </form>
+        <div class="mt-4 text-center">
+            <a href="{{ route('admin.password.forgot') }}" class="text-xs text-gray-400 hover:text-[#0D9E75] transition-colors">
+                Mot de passe oublié ?
+            </a>
+        </div>
     </div>
 
     <div class="mt-6 text-xs text-gray-400 text-center">

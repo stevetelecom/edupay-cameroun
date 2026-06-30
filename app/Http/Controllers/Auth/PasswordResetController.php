@@ -9,7 +9,8 @@ use App\Models\Admin;
 use App\Models\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Suppor\Facades\DB;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
@@ -189,6 +190,13 @@ class PasswordResetController extends Controller
             $user = User::where('email', $email)->firstOrFail();
         } else {
             $user = Admin::where('email', $email)->firstOrFail();
+        }
+
+        // Vérifier que le nouveau mot de passe est différent de l'ancien
+        if (Hash::check($request->password, $user->password)) {
+            return back()->withErrors([
+                'password' => 'Le nouveau mot de passe doit être différent de l\'ancien.',
+            ]);
         }
 
         // Mettre à jour le mot de passe

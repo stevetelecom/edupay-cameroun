@@ -134,7 +134,13 @@
             </button>
         </form>
 
-        <div class="mt-4 text-center">
+        <div class="mt-4 text-center" style="display:flex;flex-direction:column;gap:8px;">
+            <form method="POST" action="{{ route('admin.login.2fa.resend') }}" style="display:inline;">
+                @csrf
+                <button type="submit" class="text-xs text-[#0D9E75] hover:underline bg-transparent border-none cursor-pointer">
+                    Pas reçu ? Renvoyer le code
+                </button>
+            </form>
             <a href="{{ route('admin.login') }}" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">
                 Annuler et revenir à la connexion
             </a>

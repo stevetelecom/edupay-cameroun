@@ -26,6 +26,11 @@ Route::middleware('guest:admin')->group(function () {
     Route::post('/login',         [AdminAuthController::class, 'login'])->name('login.post');
     Route::get('/login/2fa',      [AdminAuthController::class, 'show2fa'])->name('login.2fa');
     Route::post('/login/2fa',     [AdminAuthController::class, 'verify2fa'])->name('login.2fa.verify');
+    Route::post('/login/2fa/resend', [AdminAuthController::class, 'resend2fa'])->name('login.2fa.resend');
+    Route::get('/password/forgot',   [AdminAuthController::class, 'showForgotForm'])->name('password.forgot');
+    Route::post('/password/forgot',  [AdminAuthController::class, 'sendResetCode'])->name('password.forgot.send');
+    Route::get('/password/reset',    [AdminAuthController::class, 'showResetForm'])->name('password.reset.form');
+    Route::post('/password/reset',   [AdminAuthController::class, 'resetPassword'])->name('password.reset');
 });
 
 Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
