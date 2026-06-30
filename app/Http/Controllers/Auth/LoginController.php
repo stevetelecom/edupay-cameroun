@@ -37,21 +37,39 @@ class LoginController extends Controller
         }
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $user = $request->user();
+
+            // Vérification systématique pour tout utilisateur lié à un établissement,
+            // quel que soit le chemin de connexion emprunté (avec ou sans login_type).
+            if ($user->hasAnyRole(['directeur', 'comptable', 'caissier'])) {
+                $etablissement = $user->etablissement;
+                if ($etablissement && $etablissement->statut !== 'actif') {
+                    Auth::logout();
+                    $message = match($etablissement->statut) {
+                        'en_attente' => 'Votre dossier est en cours d\'examen par l\'équipe EduPay. Vous serez notifié(e) par email dès activation à l\'adresse ' . $user->email . '.',
+                        'suspendu'   => 'Votre établissement a été suspendu. Contactez le support EduPay pour plus d\'informations.',
+                        default      => 'Votre compte établissement n\'est pas encore actif.',
+                    };
+                    return back()
+                        ->with('error', $message)
+                        ->withInput();
+                }
+            }
+
             if ($request->input('login_type') === 'etablissement') {
-                $user = $request->user();
                 if (! $user->hasAnyRole(['directeur', 'comptable', 'caissier'])) {
                     Auth::logout();
                     return back()
                         ->with('error', 'Ce compte n\'a pas accès au back-office établissement.')
                         ->withInput();
                 }
+
                 $request->session()->regenerate();
                 return redirect()->intended(route('etablissement.dashboard'))
                     ->with('success', 'Connexion établissement réussie !');
             }
 
             $request->session()->regenerate();
-            $user = $request->user();
             $redirect = $this->redirectionParRole($user);
             return redirect()->intended($redirect)
                 ->with('success', 'Connexion réussie !');

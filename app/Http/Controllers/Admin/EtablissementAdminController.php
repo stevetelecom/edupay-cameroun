@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Etablissement;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
+use App\Mail\EtablissementActiveMail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class EtablissementAdminController extends Controller
 {
@@ -49,7 +51,10 @@ class EtablissementAdminController extends Controller
     public function show(Etablissement $etablissement)
     {
         $etablissement->loadCount(['apprenants', 'commissions']);
-        return view('admin.etablissements.show', compact('etablissement'));
+        $responsable = \App\Models\User::where('etablissement_id', $etablissement->id)
+            ->whereHas('roles', fn($q) => $q->where('name', 'directeur'))
+            ->first();
+        return view('admin.etablissements.show', compact('etablissement', 'responsable'));
     }
 
     public function activer(Request $request, Etablissement $etablissement)
@@ -66,7 +71,21 @@ class EtablissementAdminController extends Controller
             ['statut' => 'actif']
         );
 
-        return back()->with('success', "L'etablissement « {$etablissement->nom} » a ete active.");
+        // Notifier le responsable (directeur) par email
+        $responsable = \App\Models\User::where('etablissement_id', $etablissement->id)
+            ->whereHas('roles', fn($q) => $q->where('name', 'directeur'))
+            ->first();
+
+        if ($responsable) {
+            try {
+                Mail::to($responsable->email)
+                    ->send(new EtablissementActiveMail($etablissement, $responsable));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Échec email activation établissement : ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', "L'etablissement « {$etablissement->nom} » a ete active. Un email de notification a ete envoye au responsable.");
     }
 
     public function suspendre(Request $request, Etablissement $etablissement)
