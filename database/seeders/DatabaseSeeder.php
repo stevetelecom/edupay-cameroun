@@ -14,33 +14,14 @@ class DatabaseSeeder extends Seeder
         // ────────────────────────────────────────────
 
         // Rôles pour le guard 'web' (table users)
-        $rolesWeb = ['directeur', 'comptable', 'caissier', 'parent', 'eleve'];
+        $rolesWeb = ['directeur', 'comptable', 'caissier', 'parent', 'eleve', 'etudiant'];
         foreach ($rolesWeb as $role) {
             \Spatie\Permission\Models\Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
         }
 
-        // Rôle pour le guard 'admin' (table admins) — requis par SuperAdminMiddleware
-        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'admin']);
 
-        // ────────────────────────────────────────────
-        // 2. SUPER ADMIN — table `admins` dédiée (guard:admin)
-        // Conforme à AdminAuthController : prenom, nom, email,
-        // telephone, password. Rôle Spatie 'super-admin' (guard admin)
-        // requis par SuperAdminMiddleware::hasRole('super-admin').
-        // ────────────────────────────────────────────
-        $admin = \App\Models\Admin::firstOrCreate(
-            ['email' => 'moffosteve2@gmail.com'],
-            [
-                'prenom'    => 'Olivier Steve',
-                'nom'       => 'MEKONTSO',
-                'telephone' => '699000001',
-                'password'  => Hash::make('Admin2026!'),
-                'est_actif' => true,
-            ]
-        );
-        if (!$admin->hasRole('super-admin')) {
-            $admin->assignRole('super-admin');
-        }
+
+
 
         // ────────────────────────────────────────────
         // 3. ÉTABLISSEMENT DE TEST (table `users` classique)
