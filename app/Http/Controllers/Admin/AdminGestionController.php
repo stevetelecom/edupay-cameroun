@@ -85,7 +85,7 @@ class AdminGestionController extends Controller
             'nom'       => strtoupper($validated['nom']),
             'email'     => $validated['email'],
             'telephone' => $validated['telephone'],
-            'password'  => $validated['password'],
+            'password'  => Hash::make($validated['password']),
             'est_actif' => true,
         ]);
         $admin->assignRole($validated['role']);
@@ -93,7 +93,7 @@ class AdminGestionController extends Controller
         AuditLog::enregistrer(
             $adminConnecte,
             'ADMIN_CREE',
-            'Nouvel admin créé : ' . $admin->email . ' — rôle : ' . $admin->role,
+            'Nouvel admin créé : ' . $admin->email . ' — rôle : ' . $validated['role'],
             $request,
             'INFO'
         );
