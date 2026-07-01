@@ -61,7 +61,7 @@ class DashboardController extends Controller
         
         $etablissements = \App\Models\Etablissement::where('statut', 'actif')
             ->orderBy('nom')
-            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement']);
+            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement', 'logo']);
 
         return view('payeur.dashboard', [
             'apprenants'          => $apprenants,
