@@ -70,11 +70,13 @@ class ProfilController extends Controller
                 'min:8',
                 'confirmed',
                 'regex:/^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).+$/',
+                'different:current_password',
             ],
         ], [
             'password.min'       => 'Le mot de passe doit contenir au moins 8 caractères.',
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
             'password.regex'     => 'Le mot de passe doit contenir 1 majuscule, 1 chiffre et 1 caractère spécial.',
+            'password.different' => 'Le nouveau mot de passe doit être différent de l\'ancien.',
         ]);
 
         if (!Hash::check($validated['current_password'], $user->password)) {

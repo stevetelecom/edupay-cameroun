@@ -89,7 +89,7 @@ class DatabaseSeeder extends Seeder
         $this->command->table(
             ['Module', 'Identifiant', 'Mot de passe', 'Note'],
             [
-                ['Super Admin (/admin-ep2026/login)', 'moffosteve2@gmail.com', 'Admin2026!', 'Code 2FA généré à chaque login, voir storage/logs/admin.log'],
+                
                 ['Login classique (/connexion)', 'parent@test.cm ou 699123456', 'password', 'Rôle parent'],
                 ['Login classique (/connexion)', 'directeur@test.cm ou 677000001', 'password', 'Rôle directeur'],
             ]

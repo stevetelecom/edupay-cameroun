@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Payeur;
 
 use App\Http\Controllers\Controller;
+use App\Models\Etablissement;
 use Illuminate\Support\Facades\Auth;
 
 class MesEnfantsController extends Controller
@@ -23,9 +24,21 @@ class MesEnfantsController extends Controller
             }
         }
 
-        return view('payeur.mes-enfants', [
-            'apprenants'         => $apprenants,
-            'premierFraisImpaye' => $premierFraisImpaye,
-        ]);
+        $etablissements = Etablissement::where('statut', 'actif')
+            ->select(['id', 'nom', 'ville', 'type', 'code_etablissement', 'logo'])
+            ->orderBy('nom')
+            ->get();
+
+        $monDossier = null;
+        if (in_array(Auth::user()->profil ?? '', ['eleve', 'etudiant'])) {
+            $monDossier = $user->apprenants()->first();
+        }
+
+        return view('payeur.mes-enfants', compact(
+            'apprenants',
+            'premierFraisImpaye',
+            'etablissements',
+            'monDossier',
+        ));
     }
 }

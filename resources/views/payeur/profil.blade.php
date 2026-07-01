@@ -99,18 +99,43 @@
         @method('PUT')
 
         <div class="lbl">Mot de passe actuel</div>
-        <input class="inp" type="password" name="current_password" required />
+        <div style="position:relative;">
+            <input class="inp" type="password" name="current_password" id="pwd_current" required autocomplete="current-password" style="padding-right:40px;" />
+            <span onclick="togglePwd('pwd_current',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#888;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+        </div>
 
         <div class="lbl">Nouveau mot de passe</div>
-        <input class="inp" type="password" name="password" placeholder="Min. 8 caractères" required />
+        <div style="position:relative;">
+            <input class="inp" type="password" name="password" id="pwd_new" placeholder="Min. 8 caractères, 1 majuscule, 1 chiffre, 1 symbole" required autocomplete="new-password" style="padding-right:40px;" />
+            <span onclick="togglePwd('pwd_new',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#888;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+        </div>
 
         <div class="lbl">Confirmer le nouveau mot de passe</div>
-        <input class="inp" type="password" name="password_confirmation" required />
+        <div style="position:relative;">
+            <input class="inp" type="password" name="password_confirmation" id="pwd_confirm" required autocomplete="new-password" style="padding-right:40px;" />
+            <span onclick="togglePwd('pwd_confirm',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#888;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+        </div>
 
         <button type="submit" class="btn-o" style="margin-top:4px;width:auto;padding:9px 18px;font-size:12px;">
             Changer le mot de passe
         </button>
     </form>
 </div>
+
+
+<script>
+function togglePwd(id, el) {
+    var inp = document.getElementById(id);
+    var isHidden = inp.type === 'password';
+    inp.type = isHidden ? 'text' : 'password';
+    el.style.color = isHidden ? '#0D9E75' : '#888';
+}
+</script>
 
 @endsection
