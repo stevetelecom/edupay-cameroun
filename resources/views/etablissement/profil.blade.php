@@ -56,7 +56,9 @@
   <div class="epcard">
     <div class="seclbl" style="margin-top:0;">Changer le mot de passe</div>
 
-    <form method="POST" action="{{ route('etablissement.profil.password') }}">
+    <form method="POST" action="{{ route('etablissement.profil.password') }}" autocomplete="off">
+        <input type="text" style="display:none;" tabindex="-1" autocomplete="username" />
+        <input type="password" style="display:none;" tabindex="-1" autocomplete="new-password" />
       @csrf @method('PUT')
 
       <div style="margin-bottom:12px;">

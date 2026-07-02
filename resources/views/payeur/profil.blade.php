@@ -94,9 +94,12 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('payeur.profil.password') }}">
+    <form method="POST" action="{{ route('payeur.profil.password') }}" autocomplete="off">
         @csrf
         @method('PUT')
+        {{-- Champ piège anti-autofill navigateur --}}
+        <input type="text" name="fake_user" style="display:none;" tabindex="-1" autocomplete="username" />
+        <input type="password" name="fake_pass" style="display:none;" tabindex="-1" autocomplete="new-password" />
 
         <div class="lbl">Mot de passe actuel</div>
         <div style="position:relative;">
