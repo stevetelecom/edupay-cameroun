@@ -199,6 +199,7 @@
       </div>
 
     </div>
+    </div>
     <div class="ep-modal-foot">
       <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
               onclick="epModal.close('modal-rattacher')">Annuler</button>
