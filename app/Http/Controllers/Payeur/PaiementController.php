@@ -46,12 +46,19 @@ class PaiementController extends Controller
             ? (int) round($resteAPayer / ($fraisApprenant->categorieFrais->nb_tranches_max ?? 2))
             : (int) $resteAPayer;
 
+        // Calculer les frais de service (visibles payeur = EduPay + AangaraaPay fusionnés)
+        $frais = $this->aangaraa->calculerFrais($montant);
+
         // Créer le paiement en base avec statut en_attente
         $paiement = Paiement::create([
             'user_id'            => Auth::id(),
             'apprenant_id'       => $fraisApprenant->apprenant_id,
             'frais_apprenant_id' => $fraisApprenant->id,
             'montant'            => $montant,
+            'frais_service'      => $frais['frais_service'],
+            'montant_total_paye' => $frais['montant_total_paye'],
+            'frais_aangaraa'     => $frais['frais_aangaraa'],
+            'marge_edupay'       => $frais['marge_edupay'],
             'mode_paiement'      => $validated['mode_paiement'],
             'type_paiement'      => $validated['type_paiement'],
             'statut'             => 'en_attente',
@@ -66,7 +73,7 @@ class PaiementController extends Controller
 
         $resultat = $this->aangaraa->initierPaiement(
             telephone:     $telephone,
-            montant:       $montant,
+            montant:       $paiement->montant_total_paye, // montant + frais service
             description:   $description,
             transactionId: $paiement->reference,
             notifyUrl:     $notifyUrl
@@ -194,6 +201,40 @@ class PaiementController extends Controller
 
             // F12-A — Envoyer email + SMS de confirmation
             SendConfirmationPaiement::dispatch($paiement);
+
+            // Enregistrer la commission EduPay en base
+            $fraisApprenant = $paiement->fraisApprenant;
+            $etablissement  = $fraisApprenant->apprenant->etablissement;
+
+            \App\Models\Commission::create([
+                'paiement_id'             => $paiement->id,
+                'etablissement_id'        => $etablissement->id,
+                'montant_transaction'     => $paiement->montant,
+                'taux'                    => $etablissement->taux_commission,
+                'montant_commission'      => $paiement->marge_edupay,
+                'montant_net_etablissement' => $paiement->montant,
+                'frais_aangaraa'          => $paiement->frais_aangaraa,
+                'statut'                  => 'calculee',
+            ]);
+
+            // Reversement automatique vers l'établissement
+            if ($etablissement->numero_momo_reversement) {
+                $resultatReversement = $this->aangaraa->reverserEtablissement(
+                    telephone:   $etablissement->numero_momo_reversement,
+                    operateur:   $etablissement->operateur_momo_reversement ?? 'mtn',
+                    montant:     $paiement->montant,
+                    description: 'Reversement EduPay — ' . $paiement->reference
+                );
+
+                if ($resultatReversement['succes']) {
+                    \App\Models\Commission::where('paiement_id', $paiement->id)
+                        ->update([
+                            'statut'               => 'prelevee',
+                            'reference_reversement' => $resultatReversement['reference'],
+                            'reversed_at'          => now(),
+                        ]);
+                }
+            }
         }
 
         if ($statut === 'FAILED' && $paiement->statut === 'en_attente') {

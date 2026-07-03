@@ -10,6 +10,10 @@
     {{-- Tailwind CSS + config EduPay --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- DataTables CSS --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css"/>
+
     {{-- Styles spécifiques admin --}}
     <style>
         :root {
@@ -289,11 +293,106 @@
         </main>
     </div>
 
-    {{-- Modals injectés par les pages --}}
-    @stack('modals')
+    {{-- ══ TOASTS ══ --}}
+    <div class="toast-wrap" id="toast-wrap">
+        @if(session('success'))
+        <div class="toast t-success" data-toast>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>{{ session('success') }}</span>
+        </div>
+        @endif
+        @if(session('error'))
+        <div class="toast t-error" data-toast>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{ session('error') }}</span>
+        </div>
+        @endif
+        @if(session('info'))
+        <div class="toast t-info" data-toast>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span>{{ session('info') }}</span>
+        </div>
+        @endif
+    </div>
+
+    {{-- Modal : Modifier mon profil (Super Admin) --}}
+    <div id="modal-profil-admin" class="ep-modal-overlay">
+      <div class="ep-modal ep-modal-md">
+        <div class="ep-modal-head">
+          <h3>Modifier mon profil</h3>
+          <button class="ep-modal-close" onclick="epModal.close('modal-profil-admin')">x</button>
+        </div>
+        <form method="POST" action="{{ route('admin.profil.update') }}">
+          @csrf
+          @method('PATCH')
+          <div class="ep-modal-body">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Prénom</label>
+                <input type="text" name="prenom" required
+                       value="{{ old('prenom', Auth::guard('admin')->user()->prenom) }}"
+                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Nom</label>
+                <input type="text" name="nom" required
+                       value="{{ old('nom', Auth::guard('admin')->user()->nom) }}"
+                       class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
+              <input type="email" name="email" required
+                     value="{{ old('email', Auth::guard('admin')->user()->email) }}"
+                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+            </div>
+            <div class="mb-4">
+              <label class="block text-xs font-medium text-gray-600 mb-1">Téléphone</label>
+              <input type="text" name="telephone"
+                     value="{{ old('telephone', Auth::guard('admin')->user()->telephone) }}"
+                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+            </div>
+            <div class="border-t border-gray-100 pt-3">
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Changer le mot de passe (optionnel)</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">Nouveau mot de passe</label>
+                  <input type="password" name="password" minlength="10"
+                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">Confirmer</label>
+                  <input type="password" name="password_confirmation" minlength="10"
+                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                </div>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">Laisser vide pour ne pas changer le mot de passe. Minimum 10 caractères.</p>
+            </div>
+            @if($errors->any())
+            <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-3">
+              @foreach($errors->all() as $error)
+                <div class="text-xs text-red-700">{{ $error }}</div>
+              @endforeach
+            </div>
+            @endif
+          </div>
+          <div class="ep-modal-foot">
+            <button type="button" onclick="epModal.close('modal-profil-admin')"
+                    style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
+              Annuler
+            </button>
+            <button type="submit"
+                    style="padding:8px 20px;font-size:13px;font-weight:600;background:#0D9E75;color:#fff;border:none;border-radius:8px;cursor:pointer;">
+              Enregistrer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     {{-- Modals injectés par les pages --}}
     @stack('modals')
+
 
     {{-- CSS sidebar-link utilitaire --}}
     <style>
@@ -358,7 +457,7 @@
             .admin-body main .overflow-hidden {
                 overflow-x: auto;
             }
-            .admin-body main .overflow-hidden table {
+            .admin-body main .overflow-hidden table:not(.ep-dt) {
                 min-width: 900px;
                 table-layout: auto;
             }
@@ -367,6 +466,9 @@
                 white-space: nowrap;
                 word-break: normal;
             }
+            /* table.ep-dt (DataTables Responsive) : aucune règle de largeur/wrap forcée ici.
+               Le plugin a besoin de mesurer le contenu en white-space:nowrap natif
+               pour calculer correctement quelles colonnes replier. */
         }
         .admin-body main img {
             max-width: 100%;
@@ -407,6 +509,163 @@
     </style>
 
 
+    {{-- jQuery + DataTables JS --}}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
+    {{-- DataTables config globale EduPay --}}
+    <style>
+    /* ══ DataTables EduPay Theme ══ */
+    .dt-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table.ep-dt { width: 100% !important; border-collapse: collapse; font-size: 13px; }
+    table.ep-dt thead th {
+        background: #f8fafc;
+        color: #6b7280;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        padding: 10px 14px;
+        border-bottom: 2px solid #e5e7eb;
+        white-space: nowrap;
+        cursor: pointer;
+        user-select: none;
+    }
+    table.ep-dt thead th:hover { background: #f0fdf4; color: #0D9E75; }
+    table.ep-dt thead th.sorting_asc  { color: #0D9E75; background: #f0fdf4; }
+    table.ep-dt thead th.sorting_desc { color: #0D9E75; background: #f0fdf4; }
+    table.ep-dt thead th::after,
+    table.ep-dt thead th::before { color: #0D9E75 !important; }
+    table.ep-dt tbody tr { border-bottom: 1px solid #f3f4f6; transition: background .1s; }
+    table.ep-dt tbody tr:hover { background: #f9fafb; }
+    table.ep-dt tbody td { padding: 10px 14px; color: #374151; vertical-align: middle; }
+    /* Toolbar (search + length) */
+    .ep-dt-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .ep-dt-toolbar .dt-length select {
+        padding: 6px 10px;
+        font-size: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        outline: none;
+        color: #555;
+    }
+    .ep-dt-toolbar .dt-search input {
+        padding: 7px 12px;
+        font-size: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        outline: none;
+        width: 220px;
+        transition: border .15s;
+    }
+    .ep-dt-toolbar .dt-search input:focus { border-color: #0D9E75; }
+    /* Pagination */
+    .ep-dt-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        border-top: 1px solid #f0f0f0;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .ep-dt-foot .dt-info { font-size: 12px; color: #9ca3af; }
+    .ep-dt-foot .dt-paging .paginate_button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        font-size: 12px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: #555;
+        margin: 0 1px;
+        transition: all .15s;
+    }
+    .ep-dt-foot .dt-paging .paginate_button:hover { background: #E0F5EE; color: #085041; }
+    .ep-dt-foot .dt-paging .paginate_button.current { background: #0D9E75; color: #fff !important; font-weight: 600; }
+    .ep-dt-foot .dt-paging .paginate_button.disabled { color: #d1d5db; cursor: not-allowed; }
+    /* Responsive — colonnes cachées */
+    /* Badges et boutons actions DataTables */
+    .ep-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-block; }
+    .ep-badge-green  { background:#dcfce7; color:#166534; }
+    .ep-badge-yellow { background:#fef9c3; color:#854d0e; }
+    .ep-badge-red    { background:#fee2e2; color:#991b1b; }
+    .ep-badge-gray   { background:#f3f4f6; color:#4b5563; }
+    .ep-actions { display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap; }
+    .ep-btn-icon { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center;
+                   border:none; border-radius:7px; cursor:pointer; transition:opacity .15s; }
+    .ep-btn-icon:hover { opacity:.8; }
+    .ep-btn-teal   { background:#E0F5EE; color:#0D9E75; }
+    .ep-btn-green  { background:#dcfce7; color:#16a34a; }
+    .ep-btn-yellow { background:#fef9c3; color:#ca8a04; }
+    .ep-btn-red    { background:#fee2e2; color:#dc2626; }
+    .ep-dt-name { font-weight:600; color:#111; font-size:13px; }
+    .ep-dt-sub  { font-size:11px; color:#9ca3af; margin-top:1px; }
+    .ep-dt-center { text-align:center; font-weight:600; color:#374151; }
+    .ep-link    { color:#0D9E75 !important; }
+    .ep-pwd-wrap { position: relative; }
+    .ep-pwd-wrap input[type="password"],
+    .ep-pwd-wrap input[type="text"] { padding-right: 38px !important; }
+    .ep-pwd-toggle {
+        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; cursor: pointer; padding: 4px;
+        color: #9ca3af; display: flex; align-items: center; justify-content: center;
+    }
+    .ep-pwd-toggle:hover { color: #0D9E75; }
+
+
+    table.ep-dt td.dtr-details { padding: 0; }
+    table.ep-dt td.dtr-control { cursor: pointer; }
+    table.ep-dt td.dtr-control::before {
+        background: #0D9E75 !important;
+        border-color: #0D9E75 !important;
+    }
+    @media (max-width: 640px) {
+        .ep-dt-toolbar .dt-search input { width: 160px; }
+    }
+    </style>
+
+    <script>
+    window.epDT = function(selector, opts) {
+        var defaults = {
+            responsive: true,
+            language: {
+                search:           '',
+                searchPlaceholder: 'Rechercher...',
+                lengthMenu:        'Afficher _MENU_ lignes',
+                info:              '_START_–_END_ sur _TOTAL_',
+                infoEmpty:         '0 résultat',
+                infoFiltered:      '(filtré sur _MAX_)',
+                zeroRecords:       'Aucun résultat',
+                emptyTable:        'Tableau vide',
+                paginate: {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                }
+            },
+            dom: '<"ep-dt-toolbar"l<"dt-search"f>>rt<"ep-dt-foot"i<"dt-paging"p>>',
+            pageLength: 15,
+            lengthMenu: [[10, 15, 25, 50, -1], [10, 15, 25, 50, 'Tous']],
+        };
+        return $(selector).DataTable($.extend(true, defaults, opts || {}));
+    };
+    </script>
+
     {{-- Scripts injectés par les pages --}}
     @stack('scripts')
 
@@ -470,6 +729,70 @@
     </style>
 
     <script>
+    // ── Toasts auto-dismiss (flash session) ──
+    document.querySelectorAll('[data-toast]').forEach(function(t){
+        setTimeout(function(){ t.classList.add('closing'); setTimeout(function(){ t.remove(); },200); },4000);
+    });
+
+    // ── API Toast globale (pour AJAX) ──
+    // epToast('Message', 'success' | 'error' | 'info')
+    window.epToast = function(message, type) {
+        type = type || 'info';
+        var wrap = document.getElementById('toast-wrap');
+        if (!wrap) return;
+
+        var icons = {
+            success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+            error:   '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+            info:    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>'
+        };
+
+        var el = document.createElement('div');
+        el.className = 'toast t-' + type;
+        el.setAttribute('data-toast', '');
+        el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">'
+            + (icons[type] || icons.info) + '</svg><span></span>';
+        el.querySelector('span').textContent = message;
+
+        wrap.appendChild(el);
+
+        setTimeout(function(){
+            el.classList.add('closing');
+            setTimeout(function(){ el.remove(); }, 200);
+        }, 4000);
+    };
+
+    // ── Toggle visibilité mot de passe (bouton oeil) ──
+    function togglePasswordVisibility(btn) {
+        const input = btn.previousElementSibling;
+        if (!input) return;
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        btn.innerHTML = isHidden
+            ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.8 21.8 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.77 21.77 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+            : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    }
+
+    // ── Dropdown profil admin (header) ──
+    function toggleProfilAdmin() {
+        const el = document.getElementById('dropdown-profil-admin');
+        if (!el) return;
+        el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
+    }
+    // Fermer le dropdown si on clique en dehors
+    document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById('dropdown-profil-admin');
+        const btn = e.target.closest('button[onclick*="toggleProfilAdmin"]');
+        if (dropdown && dropdown.style.display === 'block' && !dropdown.contains(e.target) && !btn) {
+            dropdown.style.display = 'none';
+        }
+    });
+
+    // ── Modal modification profil admin ──
+    function ouvrirModalProfil() {
+        epModal.open('modal-profil-admin');
+    }
+
     const epModal = {
         open(id) {
             const el = document.getElementById(id);
@@ -499,246 +822,4 @@
     </script>
 
     {{-- Scripts injectés par les pages --}}
-    @stack('scripts')
-
-    {{-- Système epModal admin --}}
-    <style>
-        .ep-modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            background: rgba(0,0,0,0.45);
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-        }
-        .ep-modal-overlay.open { display: flex; }
-        .ep-modal {
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: epSlideUp .2s ease;
-        }
-        .ep-modal-sm  { max-width: 420px; }
-        .ep-modal-md  { max-width: 560px; }
-        .ep-modal-lg  { max-width: 720px; }
-        .ep-modal-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 15px;
-            font-weight: 700;
-            color: #111;
-        }
-        .ep-modal-close {
-            background: none;
-            border: none;
-            font-size: 20px;
-            color: #999;
-            cursor: pointer;
-            line-height: 1;
-            padding: 0 4px;
-        }
-        .ep-modal-close:hover { color: #333; }
-        .ep-modal-body  { padding: 20px; }
-        .ep-modal-foot  {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            padding: 14px 20px;
-            border-top: 1px solid #f0f0f0;
-        }
-        @keyframes epSlideUp {
-            from { transform: translateY(16px); opacity: 0; }
-            to   { transform: translateY(0);    opacity: 1; }
-        }
-    </style>
-
-    <script>
-    const epModal = {
-        open(id) {
-            const el = document.getElementById(id);
-            if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
-        },
-        close(id) {
-            const el = document.getElementById(id);
-            if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
-        }
-    };
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('ep-modal-overlay')) {
-            e.target.classList.remove('open');
-            document.body.style.overflow = '';
-        }
-    });
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.ep-modal-overlay.open').forEach(m => {
-                m.classList.remove('open');
-                document.body.style.overflow = '';
-            });
-        }
-    });
-    </script>
-    {{-- ══ TOASTS ══ --}}
-    <div class="toast-wrap" id="toast-wrap">
-        @if (session('success'))
-        <div class="toast t-success" data-toast>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            <span>{{ session('success') }}</span>
-        </div>
-        @endif
-        @if (session('error'))
-        <div class="toast t-error" data-toast>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <span>{{ session('error') }}</span>
-        </div>
-        @endif
-        @if (session('info'))
-        <div class="toast t-info" data-toast>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <span>{{ session('info') }}</span>
-        </div>
-        @endif
-    </div>
-
-    <script>
-    document.querySelectorAll('[data-toast]').forEach(function (t) {
-        setTimeout(function () {
-            t.classList.add('closing');
-            setTimeout(function () { t.remove(); }, 200);
-        }, 4000);
-    });
-    </script>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('main .overflow-hidden table').forEach(function (table) {
-            var headers = Array.from(table.querySelectorAll('thead th')).map(function (th) {
-                return th.textContent.trim();
-            });
-            if (!headers.length) { return; }
-            table.querySelectorAll('tbody tr').forEach(function (row) {
-                Array.from(row.querySelectorAll('td')).forEach(function (td, index) {
-                    if (!td.dataset.label) {
-                        td.dataset.label = headers[index] || '';
-                    }
-                });
-            });
-        });
-    });
-    </script>
-
-<script>
-function toggleProfilAdmin() {
-    var el = document.getElementById('dropdown-profil-admin');
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-document.addEventListener('click', function(e) {
-    var dropdown = document.getElementById('dropdown-profil-admin');
-    var btn = document.querySelector('[onclick="toggleProfilAdmin()"]');
-    if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
-        dropdown.style.display = 'none';
-    }
-});
-
-function ouvrirModalProfil() {
-    var admin = {
-        prenom: '{{ Auth::guard("admin")->user()->prenom }}',
-        nom: '{{ Auth::guard("admin")->user()->nom }}',
-        email: '{{ Auth::guard("admin")->user()->email }}',
-        telephone: '{{ Auth::guard("admin")->user()->telephone ?? "" }}'
-    };
-    document.getElementById('mp-prenom').value = admin.prenom;
-    document.getElementById('mp-nom').value = admin.nom;
-    document.getElementById('mp-email').value = admin.email;
-    document.getElementById('mp-telephone').value = admin.telephone;
-    var modal = document.getElementById('modal-mon-profil');
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
-}
-function fermerModalProfil() {
-    var modal = document.getElementById('modal-mon-profil');
-    modal.classList.add('hidden');
-    modal.style.display = 'none';
-}
-</script>
-{{-- ══ MODAL : Modifier mon profil admin ══ --}}
-<div id="modal-mon-profil"
-     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#fff;border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f0f0f0;">
-      <div style="font-size:15px;font-weight:700;color:#0B2545;">✏️ Modifier mon profil</div>
-      <button onclick="fermerModalProfil()"
-              style="background:none;border:none;font-size:22px;cursor:pointer;color:#aaa;line-height:1;padding:2px 8px;border-radius:4px;"
-              onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='none'">×</button>
-    </div>
-    <form method="POST" action="{{ route('admin.profil.update') }}">
-      @csrf @method('PATCH')
-      <div style="padding:20px;display:grid;gap:14px;">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-          <div>
-            <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Prénom *</div>
-            <input type="text" name="prenom" id="mp-prenom" required
-                   style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
-                   onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
-          </div>
-          <div>
-            <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Nom *</div>
-            <input type="text" name="nom" id="mp-nom" required
-                   style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
-                   onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
-          </div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Email *</div>
-          <input type="email" name="email" id="mp-email" required
-                 style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
-                 onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
-        </div>
-        <div>
-          <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Téléphone</div>
-          <input type="text" name="telephone" id="mp-telephone"
-                 style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
-                 onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
-        </div>
-        <div style="border-top:1px solid #f0f0f0;padding-top:14px;">
-          <div style="font-size:11px;font-weight:600;color:#999;margin-bottom:10px;">CHANGER LE MOT DE PASSE (laisser vide = inchangé)</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div>
-              <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Nouveau mot de passe</div>
-              <input type="password" name="password" autocomplete="new-password"
-                     style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
-                     onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
-            </div>
-            <div>
-              <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:5px;">Confirmer</div>
-              <input type="password" name="password_confirmation"
-                     style="width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;"
-                     onfocus="this.style.borderColor='#0D9E75'" onblur="this.style.borderColor='#ddd'" />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid #f0f0f0;">
-        <button type="button" onclick="fermerModalProfil()"
-                style="padding:8px 16px;border:1px solid #ddd;border-radius:8px;font-size:13px;cursor:pointer;background:#fff;color:#666;">
-          Annuler
-        </button>
-        <button type="submit"
-                style="padding:8px 20px;background:#0D9E75;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
-          Enregistrer
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-</body>
-</html>
+    </body></html>

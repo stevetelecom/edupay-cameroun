@@ -7,6 +7,24 @@
     $nbTranches     = $fraisApprenant->categorieFrais->nb_tranches_max ?? 2;
     $montantTranche = (int) round($resteAPayer / $nbTranches);
     $fractionnable  = $fraisApprenant->categorieFrais->fractionnable ?? false;
+
+    // Calcul frais de service selon barème dégressif
+    function calculerFraisService(int $montant): array {
+        $fraisVisibles = match(true) {
+            $montant <= 10000  => 200,
+            $montant <= 25000  => 400,
+            $montant <= 50000  => 800,
+            $montant <= 100000 => 1500,
+            default            => 2500,
+        };
+        return [
+            'frais'  => $fraisVisibles,
+            'total'  => $montant + $fraisVisibles,
+        ];
+    }
+
+    $fraisIntegral = calculerFraisService((int) $resteAPayer);
+    $fraisTranche  = calculerFraisService($montantTranche);
 @endphp
 
 @section('content')
@@ -119,13 +137,15 @@
                 <span>Tranche</span>
                 <span style="font-weight:600;color:#888;" id="pay-tranche-recap">Intégral</span>
             </div>
-            <div style="font-size:13px;color:#888;margin-bottom:12px;display:flex;justify-content:space-between;">
-                <span>Frais de transaction</span>
-                <span style="font-weight:600;color:var(--ep-teal);">Offerts</span>
+            <div style="font-size:13px;color:#888;margin-bottom:6px;display:flex;justify-content:space-between;">
+                <span>Frais de service EduPay
+                    <span style="font-size:10px;color:#aaa;display:block;">Inclut les frais de traitement Mobile Money</span>
+                </span>
+                <span style="font-weight:600;color:#555;" id="pay-frais-recap">{{ number_format($fraisIntegral['frais'], 0, ',', ' ') }} FCFA</span>
             </div>
             <div style="border-top:1px solid #eee;padding-top:12px;margin-bottom:6px;display:flex;justify-content:space-between;">
                 <span style="font-size:15px;font-weight:700;">Total à payer</span>
-                <span style="font-size:22px;font-weight:700;color:var(--ep-teal);" id="pay-total-recap">{{ number_format($resteAPayer, 0, ',', ' ') }} FCFA</span>
+                <span style="font-size:22px;font-weight:700;color:var(--ep-teal);" id="pay-total-recap">{{ number_format($fraisIntegral['total'], 0, ',', ' ') }} FCFA</span>
             </div>
 
             {{-- ── Indicateur opérateur ── --}}
@@ -148,6 +168,17 @@
 const montantIntegral = {{ (int) $resteAPayer }};
 const montantTranche  = {{ $montantTranche }};
 
+// Barème frais de service (identique au backend AangaraaPayService::calculerFrais)
+function calculerFrais(montant) {
+    let frais;
+    if      (montant <= 10000)  frais = 200;
+    else if (montant <= 25000)  frais = 400;
+    else if (montant <= 50000)  frais = 800;
+    else if (montant <= 100000) frais = 1500;
+    else                        frais = 2500;
+    return { frais, total: montant + frais };
+}
+
 function fmt(n) {
     return n.toLocaleString('fr-FR') + ' FCFA';
 }
@@ -160,8 +191,10 @@ function selOpt(n) {
         el.style.background = i===n ? 'var(--ep-teal-lt)' : '#fff';
     });
     const montant = n===1 ? montantIntegral : montantTranche;
+    const f = calculerFrais(montant);
     document.getElementById('pay-montant-recap').textContent = fmt(montant);
-    document.getElementById('pay-total-recap').textContent   = fmt(montant);
+    document.getElementById('pay-frais-recap').textContent   = fmt(f.frais);
+    document.getElementById('pay-total-recap').textContent   = fmt(f.total);
     document.getElementById('pay-tranche-recap').textContent = n===1 ? 'Intégral' : 'Tranche';
 }
 

@@ -16,6 +16,85 @@ class AangaraaPayService
         $this->appKey = config('services.aangaraa.app_key');
     }
 
+    /**
+     * Calcule les frais de service visibles par le payeur.
+     * Barème dégressif — fusionné EduPay + AangaraaPay.
+     * Le payeur ne voit qu'une seule ligne "Frais de service EduPay".
+     */
+    public function calculerFrais(int $montant): array
+    {
+        // Frais visibles (fusionné EduPay + AangaraaPay)
+        $fraisVisibles = match(true) {
+            $montant <= 10000  => 200,
+            $montant <= 25000  => 400,
+            $montant <= 50000  => 800,
+            $montant <= 100000 => 1500,
+            default            => 2500,
+        };
+
+        // Part AangaraaPay estimée à 2% (gérée en backend, invisible au payeur)
+        $fraisAangaraa = (int) round($montant * 0.02);
+
+        // Marge EduPay = frais visibles - part AangaraaPay
+        $margeEdupay = max(0, $fraisVisibles - $fraisAangaraa);
+
+        return [
+            'montant_frais'       => $montant,          // Frais scolaires nets
+            'frais_service'       => $fraisVisibles,    // Ce que voit le payeur
+            'frais_aangaraa'      => $fraisAangaraa,    // Backend uniquement
+            'marge_edupay'        => $margeEdupay,      // Gain EduPay
+            'montant_total_paye'  => $montant + $fraisVisibles, // Total débité
+        ];
+    }
+
+    /**
+     * Reverser le net à l'établissement via API withdrawal AangaraaPay.
+     * Appelé automatiquement après chaque paiement validé (webhook SUCCESSFUL).
+     */
+    public function reverserEtablissement(
+        string $telephone,
+        string $operateur,
+        int    $montant,
+        string $description
+    ): array {
+        try {
+            $numero = $this->normaliserNumero($telephone);
+
+            $response = Http::timeout(30)
+                ->post($this->apiUrl . '/withdrawal', [
+                    'phone_number' => $numero,
+                    'amount'       => (string) $montant,
+                    'description'  => $description,
+                    'app_key'      => $this->appKey,
+                    'operator'     => $operateur === 'orange' ? 'Orange_Cameroon' : 'MTN_Cameroon',
+                ]);
+
+            $data = $response->json();
+
+            Log::info('AangaraaPay withdrawal', [
+                'telephone' => $numero,
+                'montant'   => $montant,
+                'response'  => $data,
+            ]);
+
+            return [
+                'succes'    => $response->successful(),
+                'reference' => $data['data']['transaction_id'] ?? null,
+                'message'   => $data['message'] ?? 'Erreur inconnue',
+                'raw'       => $data,
+            ];
+
+        } catch (\Throwable $e) {
+            Log::error('AangaraaPay withdrawal exception', ['error' => $e->getMessage()]);
+            return [
+                'succes'    => false,
+                'reference' => null,
+                'message'   => 'Erreur : ' . $e->getMessage(),
+                'raw'       => [],
+            ];
+        }
+    }
+
     public function detecterOperateur(string $telephone): string
     {
         $numero = preg_replace('/\D/', '', $telephone);

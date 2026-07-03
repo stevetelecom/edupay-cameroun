@@ -211,96 +211,79 @@
 </div>
 
 {{-- Table --}}
-<div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-  <div class="responsive-admin-table-container">
-    <table class="responsive-admin-table text-sm">
-    <thead class="bg-gray-50 border-b border-gray-200">
+<div class="bg-white border border-gray-200 rounded-xl">
+  <div>
+    <table id="dt-etablissements" class="ep-dt text-sm">
+    <thead>
       <tr>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Etablissement</th>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Type / Region</th>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Contact</th>
-        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Apprenants</th>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Statut</th>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Inscrit le</th>
-        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
+        <th>Etablissement</th>
+        <th>Type / Région</th>
+        <th>Contact</th>
+        <th>Apprenants</th>
+        <th>Statut</th>
+        <th>Inscrit le</th>
+        <th data-orderable="false">Actions</th>
       </tr>
     </thead>
-    <tbody class="divide-y divide-gray-100">
-      @forelse ($etablissements as $etab)
-      <tr class="hover:bg-gray-50 transition-colors">
-        <td class="px-4 py-3">
-          <div class="font-semibold text-gray-900">{{ $etab->nom }}</div>
-          <div class="text-xs text-gray-400">{{ $etab->code_etablissement }}</div>
-        </td>
-        <td class="px-4 py-3">
-          <div class="text-gray-700">{{ ucfirst($etab->type ?? '—') }}</div>
-          <div class="text-xs text-gray-400">{{ $etab->ville }}, {{ $etab->region }}</div>
-        </td>
-        <td class="px-4 py-3">
-          <div class="text-gray-700">{{ $etab->telephone }}</div>
-          <div class="text-xs text-gray-400">{{ $etab->email }}</div>
-        </td>
-        <td class="px-4 py-3 text-center font-semibold text-gray-800">{{ $etab->apprenants_count }}</td>
-        <td class="px-4 py-3">
-          @php
-            $sc = match($etab->statut) {
-              'actif'      => 'bg-green-100 text-green-800',
-              'en_attente' => 'bg-yellow-100 text-yellow-800',
-              'suspendu'   => 'bg-red-100 text-red-800',
-              default      => 'bg-gray-100 text-gray-600',
-            };
-          @endphp
-          <span class="text-xs px-2.5 py-1 rounded-full font-medium {{ $sc }}">
-            {{ ucfirst(str_replace('_', ' ', $etab->statut)) }}
-          </span>
-        </td>
-        <td class="px-4 py-3 text-xs text-gray-500">{{ $etab->created_at->format('d/m/Y') }}</td>
-        <td class="px-4 py-3">
-          <div class="flex items-center justify-center gap-1.5">
-            {{-- Detail --}}
-            <button onclick="ouvrirDetail({{ $etab->id }})"
-                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-[#E0F5EE] hover:bg-[#c4eadb] text-[#0D9E75] transition-colors" title="Detail">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-            {{-- Activer --}}
-            @if($etab->statut !== 'actif')
-            <button onclick="ouvrirActivation({{ $etab->id }}, {{ json_encode($etab->nom) }})"
-                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-green-50 hover:bg-green-100 text-green-600 transition-colors" title="Activer">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>
-            @endif
-            {{-- Suspendre --}}
-            @if($etab->statut !== 'suspendu')
-            <button onclick="ouvrirSuspension({{ $etab->id }}, {{ json_encode($etab->nom) }})"
-                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-yellow-50 hover:bg-yellow-100 text-yellow-600 transition-colors" title="Suspendre">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-            </button>
-            @endif
-            {{-- Supprimer --}}
-            <button onclick="ouvrirSuppression({{ $etab->id }}, {{ json_encode($etab->nom) }})"
-                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 text-red-500 transition-colors" title="Supprimer">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
-          </div>
-        </td>
-      </tr>
-      @empty
-      <tr>
-        <td colspan="7" class="px-4 py-10 text-center text-sm text-gray-400">Aucun etablissement trouve.</td>
-      </tr>
-      @endforelse
-    </tbody>
+    <tbody></tbody>
     </table>
   </div>
-  @if($etablissements->hasPages())
-  <div class="px-4 py-3 border-t border-gray-100">{{ $etablissements->links() }}</div>
-  @endif
 </div>
 
 @endsection
 
 @push('scripts')
 <script>
+var dtEtab;
+
+$(document).ready(function() {
+    if ($.fn.DataTable.isDataTable('#dt-etablissements')) {
+        $('#dt-etablissements').DataTable().destroy();
+    }
+
+    dtEtab = epDT('#dt-etablissements', {
+        serverSide: true,
+        processing: true,
+        ajax: {
+            url: '{{ route("admin.etablissements.datatable") }}',
+            type: 'GET',
+            data: function(d) {
+                d.statut = $('select[name="statut"]').val();
+                d.type   = $('select[name="type"]').val();
+            }
+        },
+        columns: [
+            { data: 0, orderable: true,  responsivePriority: 1 }, // Etablissement
+            { data: 1, orderable: true,  responsivePriority: 5 }, // Type / Région
+            { data: 2, orderable: false, responsivePriority: 6 }, // Contact
+            { data: 3, orderable: true,  responsivePriority: 4 }, // Apprenants
+            { data: 4, orderable: true,  responsivePriority: 3 }, // Statut
+            { data: 5, orderable: true,  responsivePriority: 7 }, // Inscrit le
+            { data: 6, orderable: false, responsivePriority: 2 }, // Actions
+        ],
+        order: [[0, 'asc']],
+    });
+
+    // Le formulaire de filtres déclenche un reload AJAX au lieu d'un GET classique
+    $('form[action="{{ route('admin.etablissements.index') }}"]').on('submit', function(e) {
+        e.preventDefault();
+        dtEtab.ajax.reload();
+    });
+
+    // Recherche en direct dans le champ texte (debounce léger)
+    var searchTimer;
+    $('input[name="search"]').on('keyup', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() {
+            dtEtab.search($('input[name="search"]').val()).draw();
+        }, 300);
+    });
+
+    // Filtres select déclenchent directement le reload
+    $('select[name="statut"], select[name="type"]').on('change', function() {
+        dtEtab.ajax.reload();
+    });
+});
 function ouvrirDetail(id) {
     const content = document.getElementById('modal-detail-etab-content');
     content.innerHTML = '<div style="text-align:center;padding:30px 0;"><div style="width:24px;height:24px;border:2px solid #0D9E75;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin:auto;"></div></div>';
@@ -325,5 +308,51 @@ function ouvrirSuppression(id, nom) {
     document.getElementById('form-supprimer-etab').action = '/admin-ep2026/etablissements/' + id;
     epModal.open('modal-supprimer-etab');
 }
+
+// ── Soumission AJAX des 3 formulaires (activer / suspendre / supprimer) ──
+function epSubmitAjax(form, modalId, btnSelector) {
+    const btn = form.querySelector(btnSelector);
+    const btnTexteOriginal = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = '...'; }
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: new FormData(form),
+    })
+    .then(r => r.json().then(data => ({ status: r.status, body: data })))
+    .then(({ status, body }) => {
+        if (status >= 200 && status < 300 && body.success) {
+            epToast(body.message || 'Action effectuée.', 'success');
+            epModal.close(modalId);
+            dtEtab.ajax.reload(null, false);
+        } else {
+            epToast(body.message || 'Une erreur est survenue.', 'error');
+        }
+    })
+    .catch(() => {
+        epToast('Erreur réseau — veuillez réessayer.', 'error');
+    })
+    .finally(() => {
+        if (btn) { btn.disabled = false; btn.textContent = btnTexteOriginal; }
+    });
+}
+
+document.getElementById('form-activer-etab').addEventListener('submit', function(e) {
+    e.preventDefault();
+    epSubmitAjax(this, 'modal-activer-etab', 'button[type="submit"]');
+});
+document.getElementById('form-suspendre-etab').addEventListener('submit', function(e) {
+    e.preventDefault();
+    epSubmitAjax(this, 'modal-suspendre-etab', 'button[type="submit"]');
+});
+document.getElementById('form-supprimer-etab').addEventListener('submit', function(e) {
+    e.preventDefault();
+    epSubmitAjax(this, 'modal-supprimer-etab', 'button[type="submit"]');
+});
 </script>
 @endpush
