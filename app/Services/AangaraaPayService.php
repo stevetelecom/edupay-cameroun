@@ -61,7 +61,7 @@ class AangaraaPayService
             $numero = $this->normaliserNumero($telephone);
 
             $response = Http::timeout(30)
-                ->post($this->apiUrl . '/withdrawal', [
+                ->post($this->apiUrl . '/aangaraa-pay/withdrawal', [
                     'phone_number' => $numero,
                     'amount'       => (string) $montant,
                     'description'  => $description,
