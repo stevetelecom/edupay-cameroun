@@ -32,7 +32,13 @@ class LandingController extends Controller
 
     public function about(): View
     {
-        return view('public.about');
+        $stats = [
+            'nb_etablissements' => \App\Models\Etablissement::where('statut', 'actif')->count(),
+            'nb_apprenants'     => \App\Models\Apprenant::where('actif', true)->count(),
+            'nb_paiements'      => \App\Models\Paiement::where('statut', 'valide')->count(),
+            'montant_total'     => \App\Models\Paiement::where('statut', 'valide')->sum('montant'),
+        ];
+        return view('public.about', compact('stats'));
     }
 
     public function temoignages(): View

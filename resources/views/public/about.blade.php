@@ -37,6 +37,32 @@
     <div class="kpi"><div class="kval">45%</div><div class="klbl">Taux pénétration smartphone</div></div>
   </div>
 
+  <div class="seclbl">EduPay en chiffres</div>
+  <div class="g4" style="margin-bottom:20px;">
+    <div class="kpi" style="background:var(--ep-teal-lt);border:1px solid rgba(13,158,117,.15);">
+      <div class="kval" style="color:var(--ep-teal);">{{ $stats['nb_etablissements'] }}</div>
+      <div class="klbl">Établissements actifs</div>
+    </div>
+    <div class="kpi" style="background:var(--ep-blue-lt);border:1px solid rgba(24,95,165,.15);">
+      <div class="kval" style="color:#185FA5;">{{ number_format($stats['nb_apprenants'], 0, ',', ' ') }}</div>
+      <div class="klbl">Apprenants inscrits</div>
+    </div>
+    <div class="kpi" style="background:var(--ep-gold-lt);border:1px solid rgba(232,160,32,.15);">
+      <div class="kval" style="color:#854F0B;">{{ number_format($stats['nb_paiements'], 0, ',', ' ') }}</div>
+      <div class="klbl">Paiements validés</div>
+    </div>
+    <div class="kpi" style="background:#F3F4F6;border:1px solid #E5E7EB;">
+      <div class="kval" style="color:#374151;">
+        @if($stats['montant_total'] >= 1000000)
+          {{ number_format($stats['montant_total'] / 1000000, 1, ',', ' ') }}M
+        @else
+          {{ number_format($stats['montant_total'], 0, ',', ' ') }}
+        @endif
+      </div>
+      <div class="klbl">FCFA collectés</div>
+    </div>
+  </div>
+
   <div class="seclbl">L'équipe projet — Groupes 14 &amp; 15 · GSI · ESTLC Ambam</div>
   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;">
     <div class="team-card"><div class="team-av" style="background:var(--ep-teal-lt);color:#085041;">MO</div><div style="font-size:12px;font-weight:700;">MEKONTSO OLIVIER</div><div style="font-size:10px;color:#888;margin-top:3px;">Chef de projet</div><span class="pill pg" style="margin-top:6px;font-size:10px;">Lead</span></div>
