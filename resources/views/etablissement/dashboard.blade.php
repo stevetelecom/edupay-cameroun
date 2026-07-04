@@ -9,24 +9,42 @@
     @php
         $statut = $etablissement->statut ?? 'inconnu';
         $config = match($statut) {
-            'actif'        => ['bg'=>'#ECFDF5','border'=>'#0D9E75','text'=>'#065F46','icon'=>'✅','label'=>'Établissement actif',      'msg'=>'Votre établissement est validé et actif sur EduPay.'],
-            'en_attente'   => ['bg'=>'#FFFBEB','border'=>'#E8A020','text'=>'#92400E','icon'=>'⏳','label'=>'En attente de validation', 'msg'=>"Votre dossier est en cours d'examen par l'équipe EduPay. Vous serez notifié par email dès activation."],
-            'suspendu'     => ['bg'=>'#FEF2F2','border'=>'#D94040','text'=>'#7F1D1D','icon'=>'🚫','label'=>'Établissement suspendu',   'msg'=>"Votre compte est suspendu. Contactez le support EduPay pour plus d'informations."],
-            default        => ['bg'=>'#F9FAFB','border'=>'#9CA3AF','text'=>'#374151','icon'=>'ℹ️','label'=>'Statut inconnu',           'msg'=>'Statut non défini. Contactez le support.'],
+            'actif'      => ['bg'=>'#ECFDF5','border'=>'#0D9E75','text'=>'#065F46','icon'=>'verified','label'=>'Établissement actif',      'msg'=>'Votre établissement est validé et actif sur EduPay.'],
+            'en_attente' => ['bg'=>'#FFFBEB','border'=>'#E8A020','text'=>'#92400E','icon'=>'hourglass_top','label'=>'En attente de validation','msg'=>"Votre dossier est en cours d'examen par l'équipe EduPay. Vous serez notifié par email dès activation."],
+            'suspendu'   => ['bg'=>'#FEF2F2','border'=>'#D94040','text'=>'#7F1D1D','icon'=>'block','label'=>'Établissement suspendu',   'msg'=>"Votre compte est suspendu. Contactez le support EduPay pour plus d'informations."],
+            default      => ['bg'=>'#F9FAFB','border'=>'#9CA3AF','text'=>'#374151','icon'=>'info','label'=>'Statut inconnu',            'msg'=>'Statut non défini. Contactez le support.'],
         };
+
+        // Config plan abonnement
+        $planConfig = null;
+        $planLabel  = null;
+        $planColor  = null;
+        $planIcon   = null;
+        $planMsg    = null;
+        if (isset($abonnement) && $abonnement) {
+            $planData = \App\Models\Abonnement::PLANS[$abonnement->plan] ?? null;
+            $planLabel = $planData ? ucfirst($abonnement->plan) : ucfirst($abonnement->plan);
+            $planColor = match($abonnement->plan) {
+                'basique'  => ['bg'=>'#E0F5EE','border'=>'#0D9E75','text'=>'#065F46','icon'=>'workspace_premium'],
+                'standard' => ['bg'=>'#E6F0FB','border'=>'#185FA5','text'=>'#1A4F8A','icon'=>'star'],
+                'premium'  => ['bg'=>'#FEF3DC','border'=>'#E8A020','text'=>'#92400E','icon'=>'diamond'],
+                default    => ['bg'=>'#F9FAFB','border'=>'#9CA3AF','text'=>'#374151','icon'=>'help'],
+            };
+            $maxApp = $planData['max_apprenants'] ?? -1;
+            $planMsg = match($abonnement->plan) {
+                'basique'  => 'Plan Basique · Max ' . $maxApp . ' apprenants · Pas de multi-sites · Passez au Standard pour plus de fonctionnalités.',
+                'standard' => 'Plan Standard · Max ' . $maxApp . ' apprenants · Multi-sites activé · SMS illimités.',
+                'premium'  => 'Plan Premium · Apprenants illimités · Toutes les fonctionnalités activées.',
+                default    => 'Plan actif.',
+            };
+            $joursRestants = $abonnement->joursRestants();
+            $abonnementExpire = $abonnement->date_fin ? $abonnement->date_fin->format('d/m/Y') : '—';
+        }
     @endphp
-    <div style="
-        background:{{ $config['bg'] }};
-        border:1.5px solid {{ $config['border'] }};
-        border-radius:10px;
-        padding:12px 16px;
-        margin-bottom:18px;
-        display:flex;
-        align-items:flex-start;
-        gap:12px;
-        flex-wrap:wrap;
-    ">
-        <div style="font-size:20px;flex-shrink:0;">{{ $config['icon'] }}</div>
+
+    {{-- Bannière statut établissement --}}
+    <div style="background:{{ $config['bg'] }};border:1.5px solid {{ $config['border'] }};border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <span class="material-symbols-outlined" style="font-size:22px;color:{{ $config['border'] }};flex-shrink:0;margin-top:1px;">{{ $config['icon'] }}</span>
         <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:700;color:{{ $config['text'] }};margin-bottom:2px;">
                 {{ $config['label'] }}
@@ -34,12 +52,11 @@
                     {{ strtoupper($statut) }}
                 </span>
             </div>
-            <div style="font-size:12px;color:{{ $config['text'] }};opacity:0.85;line-height:1.5;">
-                {{ $config['msg'] }}
-            </div>
+            <div style="font-size:12px;color:{{ $config['text'] }};opacity:0.85;line-height:1.5;">{{ $config['msg'] }}</div>
             @if($statut === 'en_attente')
-            <div style="font-size:11px;color:#92400E;margin-top:4px;opacity:0.7;">
-                📧 Un email vous sera envoyé à <strong>{{ Auth::user()->email }}</strong> dès validation.
+            <div style="font-size:11px;color:#92400E;margin-top:4px;opacity:0.7;display:flex;align-items:center;gap:4px;">
+                <span class="material-symbols-outlined" style="font-size:13px;">mail</span>
+                Un email vous sera envoyé à <strong>{{ Auth::user()->email }}</strong> dès validation.
             </div>
             @endif
         </div>
@@ -48,6 +65,44 @@
             <div style="font-size:12px;font-weight:600;color:{{ $config['text'] }};word-break:break-word;">
                 {{ $etablissement->nom }}
             </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- Bannière plan abonnement --}}
+    @if(isset($abonnement) && $abonnement && isset($planColor))
+    <div style="background:{{ $planColor['bg'] }};border:1.5px solid {{ $planColor['border'] }};border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+        <span class="material-symbols-outlined" style="font-size:22px;color:{{ $planColor['border'] }};flex-shrink:0;margin-top:1px;">{{ $planColor['icon'] }}</span>
+        <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;color:{{ $planColor['text'] }};margin-bottom:2px;">
+                Plan {{ $planLabel }}
+                <span style="font-weight:400;font-size:11px;margin-left:8px;background:{{ $planColor['border'] }};color:#fff;padding:1px 8px;border-radius:99px;">
+                    ABONNEMENT {{ strtoupper($abonnement->statut) }}
+                </span>
+            </div>
+            <div style="font-size:12px;color:{{ $planColor['text'] }};opacity:0.85;line-height:1.5;">{{ $planMsg }}</div>
+            @if(isset($joursRestants) && $joursRestants <= 7)
+            <div style="font-size:11px;color:#D94040;margin-top:4px;font-weight:600;display:flex;align-items:center;gap:4px;">
+                <span class="material-symbols-outlined" style="font-size:13px;">warning</span>
+                Votre abonnement expire dans {{ $joursRestants }} jour(s) ({{ $abonnementExpire }}). Contactez EduPay pour renouveler.
+            </div>
+            @endif
+        </div>
+        <div style="flex-shrink:0;text-align:right;min-width:130px;">
+            <div style="font-size:11px;color:{{ $planColor['text'] }};opacity:0.7;">Expire le</div>
+            <div style="font-size:12px;font-weight:600;color:{{ $planColor['text'] }};">{{ $abonnementExpire ?? '—' }}</div>
+            @if(isset($joursRestants))
+            <div style="font-size:11px;color:{{ $joursRestants <= 7 ? '#D94040' : $planColor['text'] }};margin-top:2px;">
+                {{ $joursRestants }} jour(s) restant(s)
+            </div>
+            @endif
+        </div>
+    </div>
+    @elseif($statut === 'actif')
+    <div style="background:#F9FAFB;border:1.5px solid #E5E7EB;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span class="material-symbols-outlined" style="font-size:20px;color:#9CA3AF;">credit_card_off</span>
+        <div style="font-size:12px;color:#6B7280;flex:1;">
+            Aucun abonnement actif. Contactez EduPay pour activer votre plan et accéder à toutes les fonctionnalités.
         </div>
     </div>
     @endif

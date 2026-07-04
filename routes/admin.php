@@ -41,6 +41,13 @@ Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:admin', 'super.admin'])->group(function () {
+    // Abonnements
+    Route::get('/abonnements', [\App\Http\Controllers\Admin\AbonnementController::class, 'index'])->name('abonnements.index');
+    Route::post('/abonnements', [\App\Http\Controllers\Admin\AbonnementController::class, 'store'])->name('abonnements.store');
+    Route::patch('/abonnements/{abonnement}/renouveler', [\App\Http\Controllers\Admin\AbonnementController::class, 'renouveler'])->name('abonnements.renouveler');
+    Route::patch('/abonnements/{abonnement}', [\App\Http\Controllers\Admin\AbonnementController::class, 'update'])->name('abonnements.update');
+    Route::delete('/abonnements/{abonnement}', [\App\Http\Controllers\Admin\AbonnementController::class, 'destroy'])->name('abonnements.destroy');
+
 
 
     // Gestion de l'équipe Super Admin

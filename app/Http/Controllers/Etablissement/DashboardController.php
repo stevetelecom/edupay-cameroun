@@ -64,8 +64,15 @@ class DashboardController extends Controller
 
         $countImpayes = $nbDossiersImpayes;
 
+
+        // Abonnement actif
+        $abonnement = \App\Models\Abonnement::where('etablissement_id', $etablissementId)
+            ->whereIn('statut', ['actif', 'grace_period'])
+            ->latest()->first();
+
         return view('etablissement.dashboard', compact(
             'etablissement',
+            'abonnement',
             'totalEncaisseMois',
             'totalImpaye',
             'nbApprenants',

@@ -118,7 +118,7 @@ Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur
 | Routes Établissement
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:directeur|comptable|caissier'])->prefix('etablissement')->name('etablissement.')->group(function () {
+Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnement'])->prefix('etablissement')->name('etablissement.')->group(function () {
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Etablissement\DashboardController::class, 'index'])->name('dashboard');
     Route::resource('apprenants', \App\Http\Controllers\Etablissement\ApprenantController::class);
 

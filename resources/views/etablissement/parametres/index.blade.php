@@ -35,8 +35,39 @@
                     </div>
                 </div>
 
-                <div class="lbl">Nom de l'établissement</div>
+                <div class="lbl">Nom de l'établissement *</div>
                 <input type="text" name="nom" value="{{ old('nom', $etab->nom ?? '') }}" class="inp" required>
+                @error('nom')<div style="color:var(--ep-red);font-size:11px;margin-top:-8px;margin-bottom:8px;">{{ $message }}</div>@enderror
+
+                <div class="inp-row">
+                    <div>
+                        <div class="lbl">Type d'établissement *</div>
+                        <select name="type" class="select">
+                            <option value="maternelle"    @selected(old('type', $etab->type ?? '') === 'maternelle')>Maternelle</option>
+                            <option value="primaire"      @selected(old('type', $etab->type ?? '') === 'primaire')>Primaire</option>
+                            <option value="secondaire"    @selected(old('type', $etab->type ?? '') === 'secondaire')>Secondaire</option>
+                            <option value="universitaire" @selected(old('type', $etab->type ?? '') === 'universitaire')>Universitaire</option>
+                            <option value="formation"     @selected(old('type', $etab->type ?? '') === 'formation')>Formation pro.</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="lbl">Statut juridique</div>
+                        <input type="text" name="statut_juridique" value="{{ old('statut_juridique', $etab->statut_juridique ?? '') }}" class="inp" placeholder="Ex: SARL, Public...">
+                    </div>
+                </div>
+
+                <div class="inp-row">
+                    <div>
+                        <div class="lbl">Numéro d'agrément</div>
+                        <input type="text" name="numero_agrement" value="{{ old('numero_agrement', $etab->numero_agrement ?? '') }}" class="inp" placeholder="Ex: AGR-2026-001">
+                    </div>
+                    <div>
+                        <div class="lbl">Nombre d'élèves</div>
+                        <input type="number" name="nb_eleves" value="{{ old('nb_eleves', $etab->nb_eleves ?? '') }}" class="inp" min="0" placeholder="Ex: 500">
+                    </div>
+                </div>
+
+                <div style="font-size:13px;font-weight:700;color:#0B2545;margin:16px 0 10px;padding-top:12px;border-top:1px solid #f0f0f0;">Contact & Localisation</div>
 
                 <div class="inp-row">
                     <div>
@@ -60,14 +91,55 @@
                     </div>
                 </div>
 
-                <div class="lbl">Moyen Mobile Money principal</div>
+                <div class="inp-row">
+                    <div>
+                        <div class="lbl">Région</div>
+                        <select name="region" class="select">
+                            @foreach(['Centre','Littoral','Ouest','Nord-Ouest','Sud-Ouest','Est','Adamaoua','Nord','Extrême-Nord','Sud'] as $reg)
+                            <option value="{{ $reg }}" @selected(old('region', $etab->region ?? '') === $reg)>{{ $reg }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <div class="lbl">Boîte postale</div>
+                        <input type="text" name="boite_postale" value="{{ old('boite_postale', $etab->boite_postale ?? '') }}" class="inp" placeholder="BP 1234">
+                    </div>
+                </div>
+
+                <div class="lbl">Site web</div>
+                <input type="url" name="site_web" value="{{ old('site_web', $etab->site_web ?? '') }}" class="inp" placeholder="https://www.monecole.cm">
+                @error('site_web')<div style="color:var(--ep-red);font-size:11px;margin-top:-8px;margin-bottom:8px;">{{ $message }}</div>@enderror
+
+                <div class="lbl">Description</div>
+                <textarea name="description" class="inp" rows="3" style="resize:vertical;" placeholder="Présentation de l'établissement...">{{ old('description', $etab->description ?? '') }}</textarea>
+
+                <div style="font-size:13px;font-weight:700;color:#0B2545;margin:16px 0 10px;padding-top:12px;border-top:1px solid #f0f0f0;">Configuration paiement</div>
+
+                <div class="lbl">Moyen Mobile Money principal *</div>
                 <select name="mobile_money_principal" class="select">
-                    <option value="mtn" @selected(($etab->mobile_money_principal ?? '') === 'mtn')>MTN Mobile Money</option>
-                    <option value="orange" @selected(($etab->mobile_money_principal ?? '') === 'orange')>Orange Money</option>
-                    <option value="les_deux" @selected(($etab->mobile_money_principal ?? '') === 'les_deux')>Les deux</option>
+                    <option value="mtn"      @selected(($etab->mobile_money_principal ?? '') === 'mtn')>MTN Mobile Money</option>
+                    <option value="orange"   @selected(($etab->mobile_money_principal ?? '') === 'orange')>Orange Money</option>
+                    <option value="les_deux" @selected(($etab->mobile_money_principal ?? '') === 'les_deux')>MTN + Orange (les deux)</option>
                 </select>
 
-                <button type="submit" class="btn-p" style="margin-top:8px;">Enregistrer les modifications</button>
+                <div style="font-size:13px;font-weight:700;color:#0B2545;margin:16px 0 10px;padding-top:12px;border-top:1px solid #f0f0f0;">Document d'agrément</div>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                    @if($etab->document_agrement)
+                    <a href="{{ Storage::url($etab->document_agrement) }}" target="_blank"
+                       style="font-size:12px;color:var(--ep-teal);text-decoration:none;border:1px solid var(--ep-teal);padding:6px 14px;border-radius:20px;">
+                        Voir le document actuel
+                    </a>
+                    @endif
+                    <div>
+                        <label for="doc-agrement-input" style="display:inline-block;background:#fff;border:1px solid #ddd;padding:7px 14px;border-radius:var(--radius-md);font-size:12px;font-weight:600;cursor:pointer;color:#333;">
+                            {{ $etab->document_agrement ? 'Remplacer le document' : 'Téléverser le document' }}
+                        </label>
+                        <input type="file" name="document_agrement" id="doc-agrement-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;">
+                        <div style="font-size:11px;color:#888;margin-top:4px;">PDF, JPG ou PNG · 5 Mo max</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-p" style="margin-top:8px;width:auto;padding:10px 24px;">Enregistrer les modifications</button>
             </form>
         </div>
 

@@ -240,6 +240,16 @@
                 </a>
                 @endif
 
+                {{-- Abonnements --}}
+                @if (Route::has('admin.abonnements.index'))
+                <a href="{{ route('admin.abonnements.index') }}"
+                   class="sidebar-link {{ request()->routeIs('admin.abonnements.*') ? 'active' : '' }}">
+                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
+                    </svg>
+                    Abonnements
+                </a>
+                @endif
                 {{-- Exports réglementaires --}}
                 @if (Route::has('admin.exports.index'))
                 <a href="{{ route('admin.exports.index') }}"

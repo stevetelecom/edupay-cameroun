@@ -40,23 +40,32 @@ class ProfilController extends Controller
 
     public function updatePassword(Request $request)
     {
+        $user = Auth::user();
+
+        if (!Hash::check($request->current_password ?? '', $user->password)) {
+            return back()->withErrors(['current_password' => 'Mot de passe actuel incorrect.'])->withInput();
+        }
+
         $request->validate([
             'current_password' => 'required|string',
-            'password'         => 'required|string|min:8|confirmed',
+            'password'         => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+                'regex:/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).+$/',
+                'different:current_password',
+            ],
         ], [
             'current_password.required' => 'Le mot de passe actuel est obligatoire.',
             'password.min'              => 'Le nouveau mot de passe doit contenir au moins 8 caractères.',
             'password.confirmed'        => 'Les mots de passe ne correspondent pas.',
+            'password.regex'            => 'Le mot de passe doit contenir 1 majuscule, 1 minuscule, 1 chiffre et 1 caractère spécial.',
+            'password.different'        => 'Le nouveau mot de passe doit être différent de l\'ancien.',
         ]);
-
-        $user = Auth::user();
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Mot de passe actuel incorrect.']);
-        }
 
         $user->update(['password' => Hash::make($request->password)]);
 
-        return back()->with('success_password', 'Mot de passe modifié avec succès.');
+        return back()->with('success_password', 'Mot de passe modifié avec succès. Authentification renforcée.');
     }
 }

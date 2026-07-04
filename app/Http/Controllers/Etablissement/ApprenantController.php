@@ -72,6 +72,26 @@ class ApprenantController extends Controller
             'categorie_frais_id' => ['nullable', 'exists:categories_frais,id'],
         ]);
 
+        // Vérification limite apprenants selon plan abonnement
+        $abonnement = \App\Models\Abonnement::where('etablissement_id', $etablissementId)
+            ->whereIn('statut', ['actif', 'grace_period'])
+            ->latest()->first();
+
+        if ($abonnement) {
+            $plan     = \App\Models\Abonnement::PLANS[$abonnement->plan] ?? null;
+            $maxApp   = $plan['max_apprenants'] ?? -1;
+            if ($maxApp > 0) {
+                $nbActuels = \App\Models\Apprenant::where('etablissement_id', $etablissementId)
+                    ->where('actif', true)->count();
+                if ($nbActuels >= $maxApp) {
+                    return back()->with('error',
+                        'Limite atteinte : votre plan ' . ucfirst($abonnement->plan) .
+                        ' autorise ' . $maxApp . ' apprenants actifs maximum. ' .
+                        'Passez au plan supérieur pour en ajouter davantage.');
+                }
+            }
+        }
+
         $validated['etablissement_id'] = $etablissementId;
         $validated['actif']            = $request->boolean('actif', true);
         $validated['statut_paiement']  = 'impaye';

@@ -14,9 +14,23 @@ use Illuminate\View\View;
 
 class SiteController extends Controller
 {
-    public function index(): View
+    public function index()
     {
         $etablissement = Auth::user()->etablissement;
+
+        // Vérifier plan abonnement pour multi-sites
+        $abonnement = \App\Models\Abonnement::where('etablissement_id', $etablissement->id)
+            ->whereIn('statut', ['actif', 'grace_period'])
+            ->latest()->first();
+
+        if ($abonnement) {
+            $planConfig = \App\Models\Abonnement::PLANS[$abonnement->plan] ?? null;
+            if ($planConfig && !$planConfig['multi_sites']) {
+                return redirect()->route('etablissement.dashboard')
+                    ->with('error', "La gestion multi-sites n'est pas disponible avec votre plan " . ucfirst($abonnement->plan) . ". Passez au plan Standard ou Premium pour accéder à cette fonctionnalité.");
+            }
+        }
+
         $sitePrincipal = $this->resoudreSitePrincipal($etablissement);
 
         $sites = $sitePrincipal->sites()->get();
@@ -52,6 +66,19 @@ class SiteController extends Controller
             403,
             'Seul le directeur du site principal peut ajouter un nouveau site.'
         );
+
+        // Vérification plan abonnement — multi-sites requiert Standard ou Premium
+        $abonnement = \App\Models\Abonnement::where('etablissement_id', $etablissement->id)
+            ->whereIn('statut', ['actif', 'grace_period'])
+            ->latest()->first();
+        if ($abonnement) {
+            $planConfig = \App\Models\Abonnement::PLANS[$abonnement->plan] ?? null;
+            if ($planConfig && !$planConfig['multi_sites']) {
+                return back()->with('error',
+                    "La gestion multi-sites n'est pas disponible avec votre plan " .
+                    ucfirst($abonnement->plan) . ". Passez au plan Standard ou Premium pour créer des sites secondaires.");
+            }
+        }
 
         $validated = $request->validate([
             'nom'              => 'required|string|max:255',

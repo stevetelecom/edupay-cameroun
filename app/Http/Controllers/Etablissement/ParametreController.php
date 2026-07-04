@@ -14,11 +14,8 @@ class ParametreController extends Controller
     public function index()
     {
         $etablissement = Auth::user()->etablissement;
-
         $categoriesFrais = CategoriesFrais::where('etablissement_id', $etablissement->id)
-            ->orderBy('nom')
-            ->get();
-
+            ->orderBy('nom')->get();
         return view('etablissement.parametres.index', compact('etablissement', 'categoriesFrais'));
     }
 
@@ -28,12 +25,21 @@ class ParametreController extends Controller
 
         $validated = $request->validate([
             'nom'                    => ['required', 'string', 'max:150'],
-            'telephone'              => ['required', 'string', 'max:20'],
-            'email'                  => ['required', 'email', 'max:150'],
+            'type'                   => ['required', Rule::in(['maternelle','primaire','secondaire','universitaire','formation'])],
+            'statut_juridique'       => ['nullable', 'string', 'max:100'],
+            'numero_agrement'        => ['nullable', 'string', 'max:100'],
+            'nb_eleves'              => ['nullable', 'integer', 'min:0'],
+            'region'                 => ['nullable', 'string', 'max:100'],
             'ville'                  => ['required', 'string', 'max:100'],
             'quartier'               => ['nullable', 'string', 'max:100'],
+            'boite_postale'          => ['nullable', 'string', 'max:50'],
+            'telephone'              => ['required', 'string', 'max:20'],
+            'email'                  => ['required', 'email', 'max:150'],
+            'site_web'               => ['nullable', 'url', 'max:200'],
+            'description'            => ['nullable', 'string', 'max:1000'],
             'mobile_money_principal' => ['required', Rule::in(['mtn', 'orange', 'les_deux'])],
             'logo'                   => ['nullable', 'file', 'mimes:png,jpg,jpeg,svg', 'max:2048'],
+            'document_agrement'      => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
         if ($request->hasFile('logo')) {
@@ -45,8 +51,17 @@ class ParametreController extends Controller
             unset($validated['logo']);
         }
 
+        if ($request->hasFile('document_agrement')) {
+            if ($etablissement->document_agrement) {
+                Storage::disk('public')->delete($etablissement->document_agrement);
+            }
+            $validated['document_agrement'] = $request->file('document_agrement')->store('agrements', 'public');
+        } else {
+            unset($validated['document_agrement']);
+        }
+
         $etablissement->update($validated);
 
-        return back()->with('success', 'Paramètres de l\'établissement mis à jour avec succès.');
+        return back()->with('success', 'Paramètres mis à jour avec succès.');
     }
 }

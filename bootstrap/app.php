@@ -19,9 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Middleware alias
         $middleware->alias([
-            'super.admin' => \App\Http\Middleware\SuperAdminMiddleware::class,
-            'role'        => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission'  => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'super.admin'       => \App\Http\Middleware\SuperAdminMiddleware::class,
+            'check.abonnement'  => \App\Http\Middleware\CheckAbonnement::class,
+            'role'              => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission'        => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         ]);
 
         // Middleware groupes

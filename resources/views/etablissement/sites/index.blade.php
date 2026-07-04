@@ -142,6 +142,22 @@
 
 @section('content')
 
+@if(!($multiSitesAutorise ?? true))
+<div style="background:#FEF3DC;border:1.5px solid #E8A020;border-radius:10px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+    <div style="font-size:20px;flex-shrink:0;">🔒</div>
+    <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:2px;">
+            Fonctionnalité non disponible — Plan {{ ucfirst($planActuel ?? 'Basique') }}
+        </div>
+        <div style="font-size:12px;color:#92400E;opacity:.85;line-height:1.5;">
+            La gestion multi-sites est disponible à partir du plan <strong>Standard</strong>.
+            Vous pouvez consulter vos sites existants mais pas en créer de nouveaux.
+            Contactez EduPay pour upgrader votre plan.
+        </div>
+    </div>
+</div>
+@endif
+
 @if(session('success'))
 <div class="epcard" style="background:#d1fae5;border-left:4px solid #059669;color:#065f46;margin-bottom:16px;padding:12px 16px;">
   ✓ {{ session('success') }}
