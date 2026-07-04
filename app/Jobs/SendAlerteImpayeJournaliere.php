@@ -4,16 +4,12 @@ namespace App\Jobs;
 
 use App\Models\Echeancier;
 use App\Models\FraisApprenant;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class SendAlerteImpayeJournaliere implements ShouldQueue
+class SendAlerteImpayeJournaliere
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
 
     public function handle(): void
     {

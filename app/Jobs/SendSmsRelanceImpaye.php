@@ -5,18 +5,14 @@ namespace App\Jobs;
 use App\Models\Echeancier;
 use App\Models\FraisApprenant;
 use App\Services\SmsService;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use App\Mail\RappelEcheanceMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
-class SendSmsRelanceImpaye implements ShouldQueue
+class SendSmsRelanceImpaye
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
 
     public function handle(SmsService $smsService): void
     {
