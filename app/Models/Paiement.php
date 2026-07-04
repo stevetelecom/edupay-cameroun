@@ -38,13 +38,7 @@ class Paiement extends Model
             }
         });
 
-        // Dispatcher l'événement quand le statut devient 'valide'
-        static::updated(function ($paiement) {
-            if ($paiement->isDirty('statut') && $paiement->statut === 'valide') {
-                // Envoyer confirmation de paiement (Email + SMS)
-                dispatch(new SendConfirmationPaiement($paiement));
-            }
-        });
+        // Confirmation envoyée uniquement dans PaiementController (webhook + verifierStatut)
     }
 
     public function user() { return $this->belongsTo(User::class); }
