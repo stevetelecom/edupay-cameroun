@@ -18,6 +18,7 @@ class Etablissement extends Model
         'boite_postale', 'telephone', 'email', 'site_web',
         'mobile_money_principal', 'document_agrement', 'description',
         'statut', 'taux_commission', 'parent_etablissement_id',
+        'numero_momo_reversement', 'operateur_momo_reversement',
     ];
 
     public function apprenants() { return $this->hasMany(Apprenant::class); }
