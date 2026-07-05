@@ -63,7 +63,12 @@
                     </div>
                     <div>
                         <div class="lbl">Nombre d'élèves</div>
-                        <input type="number" name="nb_eleves" value="{{ old('nb_eleves', $etab->nb_eleves ?? '') }}" class="inp" min="0" placeholder="Ex: 500">
+                        <select name="nb_eleves" class="inp" style="padding:10px 12px;">
+                            <option value="">-- Sélectionner --</option>
+                            @foreach(['moins_100'=>'Moins de 100','100_300'=>'100 à 300','300_500'=>'300 à 500','500_1000'=>'500 à 1000','plus_1000'=>'Plus de 1000'] as $val => $label)
+                            <option value="{{ $val }}" {{ old('nb_eleves', $etab->nb_eleves ?? '') === $val ? 'selected' : '' }}>{{ $label }}</option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 

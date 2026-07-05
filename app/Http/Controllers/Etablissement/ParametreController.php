@@ -28,7 +28,7 @@ class ParametreController extends Controller
             'type'                   => ['required', Rule::in(['maternelle','primaire','secondaire','universitaire','formation'])],
             'statut_juridique'       => ['nullable', 'string', 'max:100'],
             'numero_agrement'        => ['nullable', 'string', 'max:100'],
-            'nb_eleves'              => ['nullable', 'integer', 'min:0'],
+            'nb_eleves'              => ['nullable', 'in:moins_100,100_300,300_500,500_1000,plus_1000'],
             'region'                 => ['nullable', 'string', 'max:100'],
             'ville'                  => ['required', 'string', 'max:100'],
             'quartier'               => ['nullable', 'string', 'max:100'],
