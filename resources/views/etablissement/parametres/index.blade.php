@@ -128,20 +128,27 @@
                 </select>
 
                 <div style="font-size:13px;font-weight:700;color:#0B2545;margin:16px 0 10px;padding-top:12px;border-top:1px solid #f0f0f0;">Document d'agrément</div>
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-                    @if($etab->document_agrement)
+
+                @if($etab->document_agrement)
+                <div style="background:#FEF3DC;border:1.5px solid #E8A020;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+                    <div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:8px;">Document d'agrément actuel</div>
                     <a href="{{ Storage::url($etab->document_agrement) }}" target="_blank"
-                       style="font-size:12px;color:var(--ep-teal);text-decoration:none;border:1px solid var(--ep-teal);padding:6px 14px;border-radius:20px;">
-                        Voir le document actuel
+                       style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#92400E;text-decoration:none;border:1px solid #E8A020;padding:5px 12px;border-radius:20px;background:#fff;">
+                        Ouvrir le document actuel
                     </a>
-                    @endif
-                    <div>
-                        <label for="doc-agrement-input" style="display:inline-block;background:#fff;border:1px solid #ddd;padding:7px 14px;border-radius:var(--radius-md);font-size:12px;font-weight:600;cursor:pointer;color:#333;">
-                            {{ $etab->document_agrement ? 'Remplacer le document' : 'Téléverser le document' }}
-                        </label>
-                        <input type="file" name="document_agrement" id="doc-agrement-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;">
-                        <div style="font-size:11px;color:#888;margin-top:4px;">PDF, JPG ou PNG · 5 Mo max</div>
-                    </div>
+                </div>
+                @endif
+
+                <div>
+                    <label for="doc-agrement-input"
+                           style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #ddd;padding:8px 16px;border-radius:var(--radius-md);font-size:12px;font-weight:600;cursor:pointer;color:#333;">
+                        <span class="material-symbols-outlined" style="font-size:16px;">upload_file</span>
+                        {{ $etab->document_agrement ? 'Remplacer le document' : 'Téléverser le document' }}
+                    </label>
+                    <input type="file" name="document_agrement" id="doc-agrement-input" accept=".pdf,.jpg,.jpeg,.png" style="display:none;"
+                           onchange="afficherNomFichier(this, 'nom-doc-agrement')">
+                    <span id="nom-doc-agrement" style="font-size:11px;color:#0D9E75;margin-left:8px;"></span>
+                    <div style="font-size:11px;color:#888;margin-top:4px;">PDF, JPG ou PNG · 5 Mo max</div>
                 </div>
 
                 <button type="submit" class="btn-p" style="margin-top:8px;width:auto;padding:10px 24px;">Enregistrer les modifications</button>
@@ -198,9 +205,17 @@
         </div>
     </div>
 
+@endsection
 
 @push('scripts')
 <script>
+function afficherNomFichier(input, spanId) {
+    const span = document.getElementById(spanId);
+    if (input.files && input.files[0]) {
+        span.textContent = input.files[0].name;
+    }
+}
+
 function previewLogo(input) {
     const preview = document.getElementById('logo-preview');
     if (!preview || !input.files || !input.files[0]) return;
@@ -210,4 +225,3 @@ function previewLogo(input) {
 }
 </script>
 @endpush
-@endsection
