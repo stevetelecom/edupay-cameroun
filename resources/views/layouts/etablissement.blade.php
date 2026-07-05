@@ -31,6 +31,9 @@
         .kval{font-size:22px;font-weight:700;color:#1a1a2e;}
         .klbl{font-size:11px;color:#888;margin-top:4px;}
         .seclbl{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;}
+        .icon-round{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
+        .icon-round svg{width:18px;height:18px;}
+        .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:18px;display:inline-flex;align-items:center;justify-content:center;color:#fff;}
         .btn-p{background:var(--ep-teal);color:#fff;border:none;padding:11px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;transition:background .15s;text-decoration:none;display:inline-block;text-align:center;}
         .btn-p:hover{background:var(--ep-teal2);color:#fff;}
         .btn-o{background:transparent;color:var(--ep-teal);border:2px solid var(--ep-teal);padding:9px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-block;text-align:center;}
@@ -352,6 +355,10 @@
             <a href="{{ route('etablissement.utilisateurs.index') }}" class="sbar-item {{ request()->routeIs('etablissement.utilisateurs.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
                 Utilisateurs internes
+            </a>
+            <a href="{{ route('etablissement.aide.index') }}" class="sbar-item {{ request()->routeIs('etablissement.aide.*') ? 'on' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Guide &amp; Support
             </a>
             <div style="margin-top:16px;background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;">
                 <div style="font-size:11px;font-weight:600;color:#0F6E56;margin-bottom:4px;">Recouvrement</div>

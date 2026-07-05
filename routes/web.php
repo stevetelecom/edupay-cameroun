@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/a-propos', [LandingController::class, 'about'])->name('about');
 Route::get('/temoignages', [LandingController::class, 'temoignages'])->name('temoignages');
+Route::get('/guide', [LandingController::class, 'guide'])->name('guide');
+Route::get('/support', [LandingController::class, 'support'])->name('support');
 Route::get('/contact', [LandingController::class, 'contact'])->name('contact');
 Route::post('/contact', [LandingController::class, 'submitContact'])->name('contact.submit');
 
@@ -150,6 +152,7 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnemen
     Route::put('/profil/infos',     [\App\Http\Controllers\Etablissement\ProfilController::class, 'updateInfos'])->name('profil.infos');
     Route::put('/profil/password',  [\App\Http\Controllers\Etablissement\ProfilController::class, 'updatePassword'])->name('profil.password');
     Route::put('/parametres', [\App\Http\Controllers\Etablissement\ParametreController::class, 'update'])->name('parametres.update');
+    Route::get('/aide', [\App\Http\Controllers\Etablissement\AideController::class, 'index'])->name('aide.index');
     Route::get('/utilisateurs', [\App\Http\Controllers\Etablissement\UtilisateurController::class, 'index'])->name('utilisateurs.index');
     Route::post('/utilisateurs', [\App\Http\Controllers\Etablissement\UtilisateurController::class, 'store'])->name('utilisateurs.store');
     Route::put('/utilisateurs/{utilisateur}/role', [\App\Http\Controllers\Etablissement\UtilisateurController::class, 'updateRole'])->name('utilisateurs.role');

@@ -52,6 +52,16 @@ class LandingController extends Controller
         return view('public.temoignages', compact('stats'));
     }
 
+    public function guide(): View
+    {
+        return view('public.guide');
+    }
+
+    public function support(): View
+    {
+        return view('public.support');
+    }
+
     public function contact(): View
     {
         return view('public.contact');

@@ -232,8 +232,8 @@
     <div>
       <div class="footer-col-title">Établissements</div>
       <a class="footer-link" href="{{ route('register.ecole.step1') }}">Inscription</a>
-      <a class="footer-link" href="#">Guide</a>
-      <a class="footer-link" href="#">Support</a>
+      <a class="footer-link" href="{{ route('guide') }}">Guide</a>
+      <a class="footer-link" href="{{ route('support') }}">Support</a>
     </div>
     <div>
       <div class="footer-col-title">Informations</div>
