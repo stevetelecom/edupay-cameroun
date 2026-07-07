@@ -18,6 +18,8 @@ Route::get('/a-propos', [LandingController::class, 'about'])->name('about');
 Route::get('/temoignages', [LandingController::class, 'temoignages'])->name('temoignages');
 Route::get('/guide', [LandingController::class, 'guide'])->name('guide');
 Route::get('/support', [LandingController::class, 'support'])->name('support');
+Route::get('/politique-confidentialite', [LandingController::class, 'confidentialite'])->name('confidentialite');
+Route::get('/conditions-utilisation', [LandingController::class, 'cgu'])->name('cgu');
 Route::get('/contact', [LandingController::class, 'contact'])->name('contact');
 Route::post('/contact', [LandingController::class, 'submitContact'])->name('contact.submit');
 

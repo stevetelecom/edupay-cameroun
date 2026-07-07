@@ -254,16 +254,16 @@
     <div>
       <div class="footer-col-title">Établissements</div>
       <a class="footer-link" href="{{ route('register.ecole.step1') }}">Inscrire mon école</a>
-      <a class="footer-link" href="#">Back-office</a>
+      <a class="footer-link" href="{{ route('login', ['role' => 'etablissement']) }}">Back-office</a>
       <a class="footer-link" href="{{ route('guide') }}">Guide d'utilisation</a>
       <a class="footer-link" href="{{ route('support') }}">Support dédié</a>
     </div>
     <div>
       <div class="footer-col-title">Informations</div>
       <a class="footer-link" href="{{ route('about') }}">À propos</a>
-      <a class="footer-link" href="#">Contact</a>
-      <a class="footer-link" href="#">Politique de confidentialité</a>
-      <a class="footer-link" href="#">Conditions d'utilisation</a>
+      <a class="footer-link" href="{{ route('contact') }}">Contact</a>
+      <a class="footer-link" href="{{ route('confidentialite') }}">Politique de confidentialité</a>
+      <a class="footer-link" href="{{ route('cgu') }}">Conditions d'utilisation</a>
     </div>
   </div>
   <div class="footer-bottom">

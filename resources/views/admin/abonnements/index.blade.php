@@ -250,7 +250,7 @@
 {{-- Tableau responsive --}}
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
   <div class="overflow-x-auto">
-    <table class="w-full text-sm min-w-[700px]">
+    <table class="w-full text-sm min-w-175">
       <thead>
         <tr class="border-b border-gray-100 bg-gray-50">
           <th class="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Établissement</th>

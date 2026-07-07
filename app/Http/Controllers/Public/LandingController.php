@@ -57,6 +57,16 @@ class LandingController extends Controller
         return view('public.guide');
     }
 
+    public function confidentialite(): View
+    {
+        return view('public.confidentialite');
+    }
+
+    public function cgu(): View
+    {
+        return view('public.cgu');
+    }
+
     public function support(): View
     {
         return view('public.support');

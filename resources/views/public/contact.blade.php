@@ -238,8 +238,8 @@
     <div>
       <div class="footer-col-title">Informations</div>
       <a class="footer-link" href="{{ route('contact') }}">Contact</a>
-      <a class="footer-link" href="#">Politique de confidentialité</a>
-      <a class="footer-link" href="#">Conditions d'utilisation</a>
+      <a class="footer-link" href="{{ route('confidentialite') }}">Politique de confidentialité</a>
+      <a class="footer-link" href="{{ route('cgu') }}">Conditions d'utilisation</a>
     </div>
   </div>
   <div class="footer-bottom">
