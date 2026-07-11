@@ -39,6 +39,14 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = $request->user();
 
+            // Vérifier que le compte n'est pas suspendu avant toute autre chose
+            if ($user->suspendu) {
+                Auth::logout();
+                return back()
+                    ->with('error', 'Votre compte a été suspendu. Contactez le support EduPay pour plus d\'informations.')
+                    ->withInput();
+            }
+
             // Vérification systématique pour tout utilisateur lié à un établissement,
             // quel que soit le chemin de connexion emprunté (avec ou sans login_type).
             if ($user->hasAnyRole(['directeur', 'comptable', 'caissier'])) {
@@ -144,6 +152,14 @@ class LoginController extends Controller
             $request->session()->put('otp_attempts', $attempts + 1);
             return back()
                 ->with('error', 'Code OTP invalide.')
+                ->withInput();
+        }
+
+        // Vérifier que le compte n'est pas suspendu avant d'authentifier
+        if ($user->suspendu) {
+            $request->session()->forget(['otp_code', 'otp_login', 'otp_user_id', 'otp_attempts']);
+            return back()
+                ->with('error', 'Votre compte a été suspendu. Contactez le support EduPay pour plus d\'informations.')
                 ->withInput();
         }
 

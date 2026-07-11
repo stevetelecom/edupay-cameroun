@@ -50,43 +50,55 @@
       </div>
       <div style="font-size:13px;color:#888;margin-bottom:20px;">
         {{ $estSolo
-            ? 'Recherchez votre établissement partenaire EduPay ci-dessous.'
-            : 'Recherchez l\'établissement de votre enfant. Vous pourrez en ajouter d\'autres depuis votre tableau de bord.' }}
+            ? 'Recherchez votre établissement partenaire EduPay, puis retrouvez votre profil dans l\'annuaire.'
+            : 'Recherchez l\'établissement de votre enfant, puis retrouvez-le dans l\'annuaire. Vous pourrez en ajouter d\'autres depuis votre tableau de bord.' }}
       </div>
 
-      {{-- ══ BLOC RECHERCHE ÉTABLISSEMENT ══ --}}
-      <div style="margin-bottom:20px;">
-        <div class="lbl">Rechercher un établissement *</div>
+      {{-- ══ ÉTAPE A : Recherche établissement ══ --}}
+      <div id="o-step1">
+        <div style="font-size:11px;font-weight:700;color:#0D9E75;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">
+          Étape 1 — Choisir l'établissement
+        </div>
+
         <div style="position:relative;margin-bottom:10px;">
-          <input type="text" id="etab-search"
+          <input type="text" id="o-etab-search"
                  placeholder="Tapez le nom ou la ville…"
-                 style="width:100%;padding:11px 12px 11px 36px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"
-                 oninput="filtrerEtabs(this.value)"
-                 onfocus="document.getElementById('etab-liste').style.display='block'" />
+                 style="width:100%;padding:11px 12px 11px 36px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
+                 oninput="oFiltrerEtabs(this.value)"
+                 onfocus="document.getElementById('o-etab-liste').style.display='block'" />
           <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#aaa;"
                width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
         </div>
 
-        {{-- Liste établissements — visible dès l'ouverture, filtrée en temps réel --}}
-        <div id="etab-liste"
+        <div id="o-etab-liste"
              style="border:1px solid #e0e0e0;border-radius:8px;background:#fff;
-                    max-height:220px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1);">
+                    max-height:260px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1);">
           @foreach($etablissements as $etab)
-          <div class="etab-item"
+          <div class="o-etab-item"
                data-id="{{ $etab->id }}"
                data-nom="{{ $etab->nom }}"
                data-ville="{{ $etab->ville }}"
                data-type="{{ $etab->type }}"
-               onclick="selectionnerEtab(this)"
-               style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;justify-content:space-between;">
-            <div>
+               onclick="oSelectionnerEtab(this)"
+               style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;">
+            @if($etab->logo)
+              <img src="{{ asset('storage/'.$etab->logo) }}" alt="{{ $etab->nom }}"
+                   style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid #eee;" />
+            @else
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--ep-teal-lt);
+                          display:flex;align-items:center;justify-content:center;
+                          font-size:14px;font-weight:700;color:var(--ep-teal);flex-shrink:0;">
+                {{ strtoupper(substr($etab->nom, 0, 1)) }}
+              </div>
+            @endif
+            <div style="flex:1;min-width:0;">
               <div style="font-size:13px;font-weight:600;">{{ $etab->nom }}</div>
-              <div style="font-size:11px;color:#888;">{{ $etab->ville }} · {{ $etab->type }}</div>
+              <div style="font-size:11px;color:#888;">{{ $etab->ville }} · {{ ucfirst($etab->type) }}</div>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"
-                 style="flex-shrink:0;opacity:0;" class="etab-check">
+                 style="flex-shrink:0;opacity:0;" class="o-etab-check">
               <polyline points="20 6 9 17 4 12"/>
             </svg>
           </div>
@@ -97,91 +109,107 @@
           </div>
           @endif
         </div>
-
-        {{-- Établissement sélectionné (badge) --}}
-        <div id="etab-selectionne" style="display:none;margin-top:10px;background:var(--ep-teal-lt);border-radius:8px;padding:10px 14px;display:none;align-items:center;justify-content:space-between;">
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#085041;" id="etab-sel-nom"></div>
-            <div style="font-size:11px;color:#1B9E75;" id="etab-sel-ville"></div>
-          </div>
-          <button type="button" onclick="reinitialiserEtab()"
-                  style="background:none;border:none;color:#888;cursor:pointer;font-size:18px;line-height:1;">×</button>
-        </div>
       </div>
 
-      {{-- Champs cachés pour la soumission --}}
-      <form method="POST" action="{{ route('payeur.onboarding.store') }}" id="onb-form">
-        @csrf
-        <input type="hidden" name="lien" value="{{ $estSolo ? 'soi-meme' : 'parent' }}" />
-        <input type="hidden" name="etablissement_id"  id="h-etab-id"  value="{{ old('etablissement_id') }}" />
-        <input type="hidden" name="etablissement_nom" id="h-etab-nom" value="{{ old('etablissement_nom') }}" />
-
-        @if(!$estSolo)
-        {{-- Parent : infos de l'enfant --}}
-        <div style="border:1px solid #e8e8e8;border-radius:8px;padding:16px;margin-bottom:16px;">
-          <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">
-            Informations de l'enfant
+      {{-- ══ ÉTAPE B : Annuaire apprenants (après sélection établissement) ══ --}}
+      <div id="o-step2" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:11px;font-weight:700;color:#0D9E75;text-transform:uppercase;letter-spacing:.05em;">
+            Étape 2 — Trouver dans l'annuaire
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-            <div>
-              <div class="lbl">Prénom *</div>
-              <input class="inp" name="prenom_apprenant" value="{{ old('prenom_apprenant') }}"
-                     placeholder="Brice" required />
-            </div>
-            <div>
-              <div class="lbl">Nom *</div>
-              <input class="inp" name="nom_apprenant" value="{{ old('nom_apprenant') }}"
-                     placeholder="FONO" required />
-            </div>
-            <div>
-              <div class="lbl">Classe *</div>
-              <input class="inp" name="classe" value="{{ old('classe') }}"
-                     placeholder="Ex : 3ème A" required />
-            </div>
-            <div>
-              <div class="lbl">Matricule (si connu)</div>
-              <input class="inp" name="matricule" value="{{ old('matricule') }}"
-                     placeholder="Ex : EP-1184" />
-            </div>
-          </div>
-        </div>
-        @else
-        {{-- Élève/Étudiant : juste la classe --}}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-          <div>
-            <div class="lbl">{{ Auth::user()->profil === 'etudiant' ? 'Filière / Niveau *' : 'Classe *' }}</div>
-            <input class="inp" name="classe" value="{{ old('classe') }}"
-                   placeholder="{{ Auth::user()->profil === 'etudiant' ? 'Ex : Licence 2 GSI' : 'Ex : Tle A' }}"
-                   required />
-          </div>
-          <div>
-            <div class="lbl">Matricule (si connu)</div>
-            <input class="inp" name="matricule" value="{{ old('matricule') }}"
-                   placeholder="Ex : EP-1184" />
-          </div>
-        </div>
-        @endif
-
-        <div style="background:var(--ep-teal-lt);border-radius:8px;padding:12px;margin-bottom:18px;font-size:12px;color:#085041;display:flex;gap:10px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" style="flex-shrink:0;">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>
-            {{ $estSolo
-                ? 'Apprenant introuvable dans l\'annuaire ? Votre demande sera en pré-rattachement, validée par l\'établissement.'
-                : 'Vous pourrez rattacher d\'autres enfants depuis votre tableau de bord.' }}
-          </span>
-        </div>
-
-        <div style="display:flex;gap:10px;">
-          <a href="{{ route('payeur.dashboard') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">
-            Plus tard
-          </a>
-          <button type="submit" class="btn-p" id="btn-submit" style="flex:1;">
-            Terminer et accéder à mon tableau de bord →
+          <button type="button" onclick="oReinitEtab()"
+                  style="font-size:11px;color:#888;background:none;border:none;cursor:pointer;text-decoration:underline;">
+            Changer d'établissement
           </button>
         </div>
-      </form>
+
+        <div style="background:var(--ep-teal-lt);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><rect x="2" y="7" width="20" height="15"/><polyline points="16 2 12 7 8 2"/></svg>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#085041;" id="o-etab-badge-nom"></div>
+            <div style="font-size:11px;color:#1B9E75;" id="o-etab-badge-ville"></div>
+          </div>
+        </div>
+
+        <div style="position:relative;margin-bottom:10px;">
+          <input type="text" id="o-apprenant-search"
+                 placeholder="Chercher par nom, prénom ou classe…"
+                 style="width:100%;padding:11px 12px 11px 36px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
+                 oninput="oRechercherApprenant(this.value)" />
+          <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#aaa;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+
+        <div id="o-apprenant-liste"
+             style="border:1px solid #e0e0e0;border-radius:8px;background:#fff;max-height:200px;overflow-y:auto;margin-bottom:16px;">
+          <div style="padding:16px;text-align:center;color:#aaa;font-size:13px;">
+            Chargement de l'annuaire…
+          </div>
+        </div>
+
+        {{-- Formulaire de soumission --}}
+        <form method="POST" action="{{ route('payeur.onboarding.store') }}" id="onb-form">
+          @csrf
+          <input type="hidden" name="lien" value="{{ $estSolo ? 'soi-meme' : 'parent' }}" />
+          <input type="hidden" name="etablissement_id"  id="h-etab-id"  value="{{ old('etablissement_id') }}" />
+          <input type="hidden" name="etablissement_nom" id="h-etab-nom" value="{{ old('etablissement_nom') }}" />
+          <input type="hidden" name="apprenant_id"      id="h-apprenant-id" value="" />
+
+          {{-- Badge apprenant sélectionné --}}
+          <div id="o-app-badge"
+               style="display:none;background:var(--ep-teal-lt);border-radius:8px;
+                      padding:10px 14px;margin-bottom:12px;
+                      align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#085041;" id="o-app-badge-nom"></div>
+              <div style="font-size:11px;color:#1B9E75;" id="o-app-badge-info"></div>
+            </div>
+            <button type="button" onclick="oReinitApprenant()"
+                    style="background:none;border:none;color:#888;cursor:pointer;font-size:18px;line-height:1;">×</button>
+          </div>
+
+          {{-- Champs manuels (si pas trouvé dans annuaire) --}}
+          <div id="o-saisie-manuelle" style="display:none;">
+            <div style="font-size:12px;color:#888;margin-bottom:12px;padding:10px 12px;background:#f9fafb;border-radius:6px;">
+              @if($estSolo)
+                Pas trouvé dans l'annuaire ? Remplissez ci-dessous — votre demande sera validée par l'établissement.
+              @else
+                Pas trouvé dans l'annuaire ? Saisissez les informations de l'enfant manuellement.
+              @endif
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              @unless($estSolo)
+              <div>
+                <div class="lbl">Prénom de l'enfant *</div>
+                <input class="inp" id="o-prenom" name="prenom_apprenant" value="{{ old('prenom_apprenant') }}" placeholder="Brice" />
+              </div>
+              <div>
+                <div class="lbl">Nom *</div>
+                <input class="inp" id="o-nom" name="nom_apprenant" value="{{ old('nom_apprenant') }}" placeholder="FONO" />
+              </div>
+              @endunless
+              <div>
+                <div class="lbl">{{ Auth::user()->profil === 'etudiant' ? 'Filière / Niveau *' : 'Classe *' }}</div>
+                <input class="inp" id="o-classe" name="classe" value="{{ old('classe') }}"
+                       placeholder="{{ Auth::user()->profil === 'etudiant' ? 'Ex : Licence 2 GSI' : 'Ex : 3ème A' }}" />
+              </div>
+              <div>
+                <div class="lbl">Matricule (si connu)</div>
+                <input class="inp" id="o-matricule" name="matricule" value="{{ old('matricule') }}" placeholder="Ex : EP-1184" />
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:8px;">
+            <a href="{{ route('payeur.dashboard') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">
+              Plus tard
+            </a>
+            <button type="submit" class="btn-p" id="btn-submit" style="flex:1;">
+              Terminer et accéder à mon tableau de bord →
+            </button>
+          </div>
+        </form>
+      </div>
 
     </div>
   </div>
@@ -196,96 +224,202 @@
 </div>
 
 <script>
-var etabSelecte = null;
+var oEtabSelecte = null;
+var oApprenantSelectionne = null;
+var oAnnuaireTimeout = null;
 
-// ── Filtre la liste en temps réel ──
-function filtrerEtabs(q) {
-    var items = document.querySelectorAll('.etab-item');
+// ── Étape 1 : filtrer les établissements ──
+function oFiltrerEtabs(q) {
+    var items = document.querySelectorAll('.o-etab-item');
     var ql = q.toLowerCase().trim();
-    var visible = 0;
     items.forEach(function(item) {
         var nom   = item.dataset.nom.toLowerCase();
         var ville = item.dataset.ville.toLowerCase();
         var show  = !ql || nom.includes(ql) || ville.includes(ql);
         item.style.display = show ? 'flex' : 'none';
-        if (show) visible++;
     });
-    document.getElementById('etab-liste').style.display = 'block';
+    document.getElementById('o-etab-liste').style.display = 'block';
 }
 
-// ── Sélectionner un établissement ──
-function selectionnerEtab(el) {
-    // Reset précédent
-    document.querySelectorAll('.etab-item').forEach(function(i) {
+// ── Étape 1 : sélectionner un établissement → passer à l'étape 2 ──
+function oSelectionnerEtab(el) {
+    document.querySelectorAll('.o-etab-item').forEach(function(i) {
         i.style.background = '';
-        i.querySelector('.etab-check').style.opacity = '0';
+        i.querySelector('.o-etab-check').style.opacity = '0';
     });
-
     el.style.background = '#f0fdf4';
-    el.querySelector('.etab-check').style.opacity = '1';
+    el.querySelector('.o-etab-check').style.opacity = '1';
 
-    etabSelecte = {id: el.dataset.id, nom: el.dataset.nom, ville: el.dataset.ville};
+    oEtabSelecte = {id: el.dataset.id, nom: el.dataset.nom, ville: el.dataset.ville};
 
     document.getElementById('h-etab-id').value  = el.dataset.id;
     document.getElementById('h-etab-nom').value = el.dataset.nom;
-    document.getElementById('etab-search').value = el.dataset.nom;
 
-    // Afficher le badge
-    document.getElementById('etab-sel-nom').textContent   = el.dataset.nom;
-    document.getElementById('etab-sel-ville').textContent = el.dataset.ville + ' · ' + el.dataset.type;
-    var badge = document.getElementById('etab-selectionne');
-    badge.style.display = 'flex';
+    document.getElementById('o-etab-badge-nom').textContent   = el.dataset.nom;
+    document.getElementById('o-etab-badge-ville').textContent = el.dataset.ville + ' · ' + el.dataset.type;
 
-    // Masquer la liste
-    document.getElementById('etab-liste').style.display = 'none';
+    document.getElementById('o-step1').style.display = 'none';
+    document.getElementById('o-step2').style.display = 'block';
+
+    oReinitApprenant();
+    oRechercherApprenant('');
+
+    setTimeout(function() {
+        var inp = document.getElementById('o-apprenant-search');
+        if (inp) inp.focus();
+    }, 150);
 }
 
-// ── Réinitialiser la sélection ──
-function reinitialiserEtab() {
-    etabSelecte = null;
+// ── Revenir à l'étape 1 ──
+function oReinitEtab() {
     document.getElementById('h-etab-id').value  = '';
     document.getElementById('h-etab-nom').value = '';
-    document.getElementById('etab-search').value = '';
-    document.getElementById('etab-selectionne').style.display = 'none';
-    document.getElementById('etab-liste').style.display = 'block';
-    document.querySelectorAll('.etab-item').forEach(function(i) {
+    document.getElementById('o-etab-search').value = '';
+    document.querySelectorAll('.o-etab-item').forEach(function(i) {
         i.style.background = '';
-        i.querySelector('.etab-check').style.opacity = '0';
+        i.querySelector('.o-etab-check').style.opacity = '0';
         i.style.display = 'flex';
     });
+    document.getElementById('o-step1').style.display = 'block';
+    document.getElementById('o-step2').style.display = 'none';
+    oReinitApprenant();
 }
 
-// ── Fermer la liste si clic extérieur ──
+// ── Étape 2 : rechercher dans l'annuaire ──
+function oRechercherApprenant(q) {
+    var etabId = document.getElementById('h-etab-id').value;
+    if (!etabId) return;
+
+    clearTimeout(oAnnuaireTimeout);
+    var liste = document.getElementById('o-apprenant-liste');
+    liste.innerHTML = '<div style="padding:14px;text-align:center;color:#888;font-size:12px;">Chargement de l\'annuaire…</div>';
+
+    oAnnuaireTimeout = setTimeout(function() {
+        var url = '{{ route("payeur.onboarding.search") }}?etablissement_id=' + etabId + '&q=' + encodeURIComponent(q);
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(apprenants) {
+            if (apprenants.length === 0) {
+                var msgVide = q.trim()
+                    ? 'Aucun résultat pour "<strong>' + q + '</strong>"'
+                    : 'Aucun apprenant enregistré dans cet établissement pour le moment.';
+                liste.innerHTML =
+                    '<div style="padding:16px;text-align:center;">' +
+                    '<div style="font-size:13px;color:#888;margin-bottom:6px;">' + msgVide + '</div>' +
+                    '<div style="font-size:11px;color:#aaa;">Remplissez les champs ci-dessous pour un pré-rattachement.</div>' +
+                    '</div>';
+                oAfficherSaisieManuelle(true);
+                return;
+            }
+
+            var html = '';
+            apprenants.forEach(function(a) {
+                html += '<div class="o-app-item" data-id="' + a.id + '" data-nom="' + a.nom + '" ' +
+                    'data-prenom="' + a.prenom + '" data-classe="' + (a.classe||'') + '" ' +
+                    'data-matricule="' + (a.matricule||'') + '" ' +
+                    'onclick="oSelectionnerApprenant(this)" ' +
+                    'style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f5f5f5;' +
+                    'display:flex;align-items:center;justify-content:space-between;">' +
+                    '<div>' +
+                    '<div style="font-size:13px;font-weight:600;">' + a.prenom + ' ' + a.nom + '</div>' +
+                    '<div style="font-size:11px;color:#888;">' + (a.classe||'—') +
+                    (a.matricule ? ' · Mat. ' + a.matricule : '') + '</div>' +
+                    '</div>' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" ' +
+                    'class="o-app-check" style="opacity:0;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>' +
+                    '</div>';
+            });
+            liste.innerHTML = html;
+            oAfficherSaisieManuelle(false);
+        })
+        .catch(function() {
+            liste.innerHTML = '<div style="padding:14px;color:var(--ep-red);font-size:12px;">Erreur de connexion — vérifiez votre réseau.</div>';
+        });
+    }, 350);
+}
+
+function oSelectionnerApprenant(el) {
+    document.querySelectorAll('.o-app-item').forEach(function(i) {
+        i.style.background = '';
+        var chk = i.querySelector('.o-app-check');
+        if (chk) chk.style.opacity = '0';
+    });
+    el.style.background = '#f0fdf4';
+    var chk = el.querySelector('.o-app-check');
+    if (chk) chk.style.opacity = '1';
+
+    oApprenantSelectionne = {
+        id: el.dataset.id, nom: el.dataset.nom, prenom: el.dataset.prenom,
+        classe: el.dataset.classe, matricule: el.dataset.matricule
+    };
+
+    document.getElementById('h-apprenant-id').value = el.dataset.id;
+
+    var inp = {
+        'prenom_apprenant': el.dataset.prenom,
+        'nom_apprenant':    el.dataset.nom,
+        'classe':           el.dataset.classe,
+        'matricule':        el.dataset.matricule
+    };
+    Object.keys(inp).forEach(function(name) {
+        var field = document.querySelector('#onb-form [name="' + name + '"]');
+        if (field) field.value = inp[name] || '';
+    });
+
+    var badge = document.getElementById('o-app-badge');
+    badge.style.display = 'flex';
+    document.getElementById('o-app-badge-nom').textContent  = el.dataset.prenom + ' ' + el.dataset.nom;
+    document.getElementById('o-app-badge-info').textContent = (el.dataset.classe||'') + (el.dataset.matricule ? ' · ' + el.dataset.matricule : '');
+
+    document.getElementById('o-apprenant-liste').style.display = 'none';
+    oAfficherSaisieManuelle(true);
+}
+
+function oAfficherSaisieManuelle(show) {
+    var bloc = document.getElementById('o-saisie-manuelle');
+    if (bloc) bloc.style.display = show ? 'block' : 'none';
+}
+
+function oReinitApprenant() {
+    oApprenantSelectionne = null;
+    document.getElementById('h-apprenant-id').value = '';
+    document.getElementById('o-app-badge').style.display = 'none';
+    var liste = document.getElementById('o-apprenant-liste');
+    liste.innerHTML = '<div style="padding:16px;text-align:center;color:#aaa;font-size:13px;">Chargement de l\'annuaire…</div>';
+    liste.style.display = 'block';
+    var searchInp = document.getElementById('o-apprenant-search');
+    if (searchInp) searchInp.value = '';
+    oAfficherSaisieManuelle(false);
+}
+
+// ── Fermer la liste établissement si clic extérieur ──
 document.addEventListener('click', function(e) {
-    var liste  = document.getElementById('etab-liste');
-    var search = document.getElementById('etab-search');
-    if (!liste.contains(e.target) && e.target !== search) {
+    var liste  = document.getElementById('o-etab-liste');
+    var search = document.getElementById('o-etab-search');
+    if (liste && search && !liste.contains(e.target) && e.target !== search) {
         liste.style.display = 'none';
     }
 });
 
 // ── Validation avant soumission ──
 document.getElementById('onb-form').addEventListener('submit', function(e) {
-    if (!document.getElementById('h-etab-id').value &&
-        !document.getElementById('h-etab-nom').value) {
+    if (!document.getElementById('h-etab-id').value && !document.getElementById('h-etab-nom').value) {
         e.preventDefault();
-        document.getElementById('etab-search').style.border = '1.5px solid var(--ep-red)';
-        document.getElementById('etab-search').focus();
-        alert('Veuillez sélectionner un établissement dans la liste.');
+        alert('Veuillez sélectionner un établissement.');
+        return;
     }
-});
-
-// ── Restaurer la sélection si old() disponible ──
-document.addEventListener('DOMContentLoaded', function() {
-    var oldId  = '{{ old("etablissement_id") }}';
-    var oldNom = '{{ old("etablissement_nom") }}';
-    if (oldId || oldNom) {
-        var items = document.querySelectorAll('.etab-item');
-        items.forEach(function(item) {
-            if (item.dataset.id === oldId || item.dataset.nom === oldNom) {
-                selectionnerEtab(item);
-            }
-        });
+    var classeInp = document.getElementById('o-classe');
+    if (classeInp && document.getElementById('o-saisie-manuelle').style.display !== 'none' && !classeInp.value.trim()) {
+        e.preventDefault();
+        classeInp.style.border = '1.5px solid var(--ep-red)';
+        classeInp.focus();
+        alert('Veuillez indiquer la classe.');
     }
 });
 </script>

@@ -78,8 +78,8 @@ Route::post('/webhook/aangaraapay',
 
 Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur.')->group(function () {
     Route::get('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'index'])->name('onboarding');
-    Route::get('/apprenants/search', [\App\Http\Controllers\Payeur\OnboardingController::class, 'searchApprenants'])->name('onboarding.search');
-    Route::post('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'store'])->name('onboarding.store');
+    Route::middleware('throttle:60,1')->get('/apprenants/search', [\App\Http\Controllers\Payeur\OnboardingController::class, 'searchApprenants'])->name('onboarding.search');
+    Route::middleware('throttle:10,1')->post('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'store'])->name('onboarding.store');
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Payeur\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/paiement/{fraisApprenant}', [\App\Http\Controllers\Payeur\PaiementController::class, 'show'])->name('paiement.show');
     Route::post('/paiement/{fraisApprenant}/initier', [\App\Http\Controllers\Payeur\PaiementController::class, 'initier'])->name('paiement.initier');
@@ -140,6 +140,7 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnemen
 
     Route::get('/apprenants/import/template', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'importTemplate'])
          ->name('apprenants.import.template');
+         
     Route::post('/apprenants/import', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'import'])
          ->name('apprenants.import');
     Route::get('/paiements',  [\App\Http\Controllers\Etablissement\PaiementController::class, 'index'])->name('paiements.index');

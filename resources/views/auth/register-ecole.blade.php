@@ -237,7 +237,7 @@
 
       {{-- ───────────────────────── ÉTAPE 4 : VALIDATION ───────────────────────── --}}
       @if ($step === 4)
-        @if (session('success'))
+        @if (session('inscription_reussie'))
           <div class="form-title">🎉 Demande envoyée avec succès</div>
           <div class="form-sub">Votre code établissement : <strong>{{ session('code_etablissement') }}</strong></div>
           <div style="background:var(--ep-teal-lt);border-radius:8px;padding:14px;margin:16px 0;font-size:13px;color:#085041;">

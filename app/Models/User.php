@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -16,7 +17,7 @@ class User extends Authenticatable
         'etablissement_id' => 'integer',
     ];
 
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
     protected $fillable = [
         'prenom',
@@ -31,6 +32,9 @@ class User extends Authenticatable
         'notif_rappel_echeance',
         'password',
         'etablissement_id',
+        'suspendu',
+        'suspendu_raison',
+        'suspendu_at',
     ];
 
     protected $hidden = [
@@ -46,6 +50,8 @@ class User extends Authenticatable
             'notif_sms'         => 'boolean',
             'notif_email'       => 'boolean',
             'notif_rappel_echeance' => 'boolean',
+            'suspendu'           => 'boolean',
+            'suspendu_at'        => 'datetime',
         ];
     }
 

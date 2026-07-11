@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EtablissementAdminController;
+use App\Http\Controllers\Admin\PayeurAdminController;
 use App\Http\Controllers\Admin\TransactionAdminController;
 use App\Http\Controllers\Admin\CommissionController;
 use App\Http\Controllers\Admin\LogSecuriteController;
@@ -72,6 +73,16 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
         Route::patch('/{etablissement}/activer',  [EtablissementAdminController::class, 'activer'])->name('activer');
         Route::patch('/{etablissement}/suspendre',[EtablissementAdminController::class, 'suspendre'])->name('suspendre');
         Route::delete('/{etablissement}',         [EtablissementAdminController::class, 'destroy'])->name('destroy');
+    });
+
+    // Comptes payeurs (parents / élèves / étudiants)
+    Route::prefix('payeurs')->name('payeurs.')->group(function () {
+        Route::get('/',                   [PayeurAdminController::class, 'index'])->name('index');
+        Route::get('/datatable',          [PayeurAdminController::class, 'datatable'])->name('datatable');
+        Route::get('/{payeur}',           [PayeurAdminController::class, 'show'])->name('show');
+        Route::patch('/{payeur}/suspendre',[PayeurAdminController::class, 'suspendre'])->name('suspendre');
+        Route::patch('/{payeur}/activer', [PayeurAdminController::class, 'activer'])->name('activer');
+        Route::delete('/{payeur}',        [PayeurAdminController::class, 'destroy'])->name('destroy');
     });
 
     // Transactions globales

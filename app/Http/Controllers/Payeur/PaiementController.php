@@ -250,7 +250,7 @@ class PaiementController extends Controller
     public function historique(Request $request)
     {
         $query = Paiement::with(['apprenant', 'fraisApprenant.categorieFrais', 'remboursements' => function ($q) {
-                $q->where('statut', 'approuve');
+                $q->where('statut', 'valide');
             }])
             ->where('user_id', Auth::id())
             ->latest('date_paiement');

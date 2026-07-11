@@ -187,7 +187,8 @@ class RegisterEcolController extends Controller
         $request->session()->forget('register_ecole');
 
         return redirect()->route('register.ecole.validation')
-            ->with('success', true)
-            ->with('code_etablissement', $codeEtablissement);
+            ->with('inscription_reussie', true)
+            ->with('code_etablissement', $codeEtablissement)
+            ->with('success', 'Votre demande d\'inscription a été envoyée avec succès. Notre équipe va étudier votre dossier.');
     }
 }
