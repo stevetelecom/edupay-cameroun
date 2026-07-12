@@ -49,6 +49,30 @@
 
 @section('content')
 
+@if(isset($notifications) && $notifications->count() > 0)
+    @foreach($notifications as $notif)
+    <div style="background:{{ $notif->type === 'error' ? '#FEF2F2' : '#FFFBEB' }};
+                border:1.5px solid {{ $notif->type === 'error' ? '#D94040' : '#E8A020' }};
+                border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px;">
+        <span class="material-symbols-outlined" style="font-size:20px;color:{{ $notif->type === 'error' ? '#D94040' : '#E8A020' }};flex-shrink:0;">
+            {{ $notif->type === 'error' ? 'error' : 'info' }}
+        </span>
+        <div style="flex:1;">
+            <div style="font-size:13px;font-weight:700;color:{{ $notif->type === 'error' ? '#7F1D1D' : '#92400E' }};margin-bottom:2px;">
+                {{ $notif->titre }}
+            </div>
+            <div style="font-size:12px;color:{{ $notif->type === 'error' ? '#7F1D1D' : '#92400E' }};opacity:.85;">
+                {{ $notif->message }}
+            </div>
+        </div>
+        <form method="POST" action="{{ route('payeur.notifications.lu', $notif) }}">
+            @csrf @method('PATCH')
+            <button type="submit" style="background:none;border:none;cursor:pointer;color:#888;font-size:18px;line-height:1;flex-shrink:0;">×</button>
+        </form>
+    </div>
+    @endforeach
+@endif
+
 @if($estSolo)
 {{-- ════════════════════════════════════════════════════════════
      VUE SOLO — Élève / Étudiant

@@ -8,6 +8,14 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Material Symbols (icones utilisees dans les notifications) --}}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+
     <style>
         :root{
             --ep-navy:#0B2545; --ep-teal:#0D9E75; --ep-teal2:#0A8562;

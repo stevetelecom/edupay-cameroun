@@ -16,6 +16,7 @@ class Apprenant extends Model
     protected $fillable = [
         'etablissement_id', 'nom', 'prenom', 'classe',
         'matricule', 'date_naissance', 'sexe', 'statut_paiement', 'actif',
+        'source', 'valide_par_etablissement',
     ];
 
     public function etablissement() { return $this->belongsTo(Etablissement::class); }

@@ -90,13 +90,15 @@ class OnboardingController extends Controller
             }
 
             $apprenant = Apprenant::create([
-                'etablissement_id' => $etablissement->id,
-                'prenom'           => $prenomApprenant,
-                'nom'              => $nomApprenant,
-                'classe'           => $validated['classe'],
-                'matricule'        => $matriculeAuto,
-                'statut_paiement'  => 'impaye',
-                'actif'            => true,
+                'etablissement_id'          => $etablissement->id,
+                'prenom'                    => $prenomApprenant,
+                'nom'                       => $nomApprenant,
+                'classe'                    => $validated['classe'],
+                'matricule'                 => $matriculeAuto,
+                'statut_paiement'           => 'impaye',
+                'actif'                     => true,
+                'source'                    => 'payeur',
+                'valide_par_etablissement'  => false,
             ]);
         }
 

@@ -127,6 +127,52 @@
 </div>
 
 
+{{-- ══ MODAL : Valider le rattachement ══ --}}
+<div id="modal-valider-apprenant" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm">
+    <div class="ep-modal-head">
+      <h3>Valider le rattachement</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-valider-apprenant')">x</button>
+    </div>
+    <div class="ep-modal-body">
+      <p style="font-size:13px;color:#555;margin-bottom:8px;">
+        Vous allez valider le rattachement de <strong id="valider-apprenant-nom"></strong>.<br>
+        Le payeur sera notifié et pourra consulter les frais de cet apprenant.
+      </p>
+    </div>
+    <div class="ep-modal-foot">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-valider-apprenant')">Annuler</button>
+      <form id="valider-apprenant-form" method="POST" style="display:inline;">
+        @csrf @method('PATCH')
+        <button type="submit" class="btn-p" style="width:auto;padding:8px 18px;">Confirmer la validation</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{{-- ══ MODAL : Rejeter le rattachement ══ --}}
+<div id="modal-rejeter-apprenant" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm ep-modal-danger">
+    <div class="ep-modal-head">
+      <h3>Rejeter le rattachement</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-rejeter-apprenant')">x</button>
+    </div>
+    <div class="ep-modal-body">
+      <p style="font-size:13px;color:#555;margin-bottom:8px;">
+        Vous allez rejeter définitivement la demande de rattachement de <strong id="rejeter-apprenant-nom"></strong>.<br>
+        Cette action est <strong style="color:var(--ep-red);">irréversible</strong> — le payeur sera notifié du refus.
+      </p>
+    </div>
+    <div class="ep-modal-foot">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-rejeter-apprenant')">Annuler</button>
+      <form id="rejeter-apprenant-form" method="POST" style="display:inline;">
+        @csrf @method('DELETE')
+        <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">Rejeter définitivement</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 {{-- ══ MODAL : Voir apprenant (lecture seule) ══ --}}
 <div id="modal-voir-apprenant" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-md">
@@ -236,100 +282,54 @@
 </div>
 
 {{-- Filtres --}}
-<form method="GET" action="{{ route('etablissement.apprenants.index') }}" class="epcard" style="margin-bottom:16px;display:flex;gap:10px;align-items:flex-end;">
-  <div style="flex:2;">
+<div class="epcard" style="margin-bottom:16px;display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+  <div style="flex:2;min-width:200px;">
     <div class="lbl">Recherche (nom, prénom, matricule)</div>
-    <input type="text" name="q" value="{{ request('q') }}" class="inp" style="margin-bottom:0;" placeholder="Ex: FONO Brice">
+    <input type="text" id="f-search" class="inp" style="margin-bottom:0;" placeholder="Ex: FONO Brice">
   </div>
-  <div style="flex:1;">
+  <div style="flex:1;min-width:140px;">
     <div class="lbl">Classe</div>
-    <select name="classe" class="select" style="margin-bottom:0;">
+    <select id="f-classe" class="select" style="margin-bottom:0;">
       <option value="">Toutes</option>
       @foreach(($classes ?? []) as $classe)
-        <option value="{{ $classe }}" @selected(request('classe')===$classe)>{{ $classe }}</option>
+        <option value="{{ $classe }}">{{ $classe }}</option>
       @endforeach
     </select>
   </div>
-  <div style="flex:1;">
+  <div style="flex:1;min-width:140px;">
     <div class="lbl">Statut paiement</div>
-    <select name="statut_paiement" class="select" style="margin-bottom:0;">
+    <select id="f-statut" class="select" style="margin-bottom:0;">
       <option value="">Tous</option>
-      <option value="regle" @selected(request('statut_paiement')==='regle')>Réglé</option>
-      <option value="partiel" @selected(request('statut_paiement')==='partiel')>Partiel</option>
-      <option value="impaye" @selected(request('statut_paiement')==='impaye')>Impayé</option>
+      <option value="regle">Réglé</option>
+      <option value="partiel">Partiel</option>
+      <option value="impaye">Impayé</option>
     </select>
   </div>
-  <button type="submit" class="btn-p" style="width:auto;padding:10px 20px;">Filtrer</button>
-  @if(request()->hasAny(['q','classe','statut_paiement']))
-    <a href="{{ route('etablissement.apprenants.index') }}" class="btn-o" style="width:auto;padding:10px 16px;">Réinitialiser</a>
-  @endif
-</form>
+  <button type="button" onclick="dtApprenants.ajax.reload()" class="btn-p" style="width:auto;padding:10px 20px;">Filtrer</button>
+  <button type="button" onclick="reinitialiserFiltresApprenants()" class="btn-o" style="width:auto;padding:10px 16px;">Réinitialiser</button>
+</div>
 
 {{-- Tableau --}}
-<div class="epcard" style="padding:0;overflow:hidden;">
-  <table class="ep-table">
+<div class="epcard" style="padding:0;">
+  <table id="dt-apprenants" class="ep-dt text-sm">
     <thead>
       <tr>
         <th>Matricule</th><th>Nom complet</th><th>Classe</th><th>Sexe</th>
-        <th>Statut paiement</th><th>Actif</th><th style="text-align:right;">Actions</th>
+        <th>Statut paiement</th><th>Actif</th><th>Origine</th><th data-orderable="false">Actions</th>
       </tr>
     </thead>
-    <tbody>
-      @forelse($apprenants as $apprenant)
-      <tr>
-        <td style="color:#888;">{{ $apprenant->matricule ?? '—' }}</td>
-        <td style="font-weight:600;">{{ $apprenant->nom }} {{ $apprenant->prenom }}</td>
-        <td>{{ $apprenant->classe }}</td>
-        <td>{{ $apprenant->sexe ?? '—' }}</td>
-        <td>
-          <span class="pill {{ match($apprenant->statut_paiement){'regle'=>'pg','partiel'=>'pa','impaye'=>'pr',default=>'pa'} }}">
-            {{ match($apprenant->statut_paiement){'regle'=>'Réglé','partiel'=>'Partiel','impaye'=>'Impayé',default=>$apprenant->statut_paiement} }}
-          </span>
-        </td>
-        <td>
-          <span class="pill {{ $apprenant->actif ? 'pg' : 'pr' }}">{{ $apprenant->actif ? 'Actif' : 'Inactif' }}</span>
-        </td>
-        <td style="text-align:right;white-space:nowrap;">
-          {{-- Voir --}}
-          <button onclick="voirApprenant({{ $apprenant->id }})"
-                  style="color:var(--ep-teal);background:none;border:none;font-size:12px;cursor:pointer;margin-right:8px;">
-            Voir
-          </button>
-          {{-- Modifier --}}
-          <button onclick="modifierApprenant({{ $apprenant->id }}, '{{ addslashes($apprenant->nom) }}', '{{ addslashes($apprenant->prenom) }}', '{{ addslashes($apprenant->classe) }}', '{{ $apprenant->matricule }}', '{{ $apprenant->date_naissance ?? '' }}', '{{ $apprenant->sexe ?? '' }}', {{ $apprenant->actif ? 'true' : 'false' }})"
-                  style="color:#185FA5;background:none;border:none;font-size:12px;cursor:pointer;margin-right:8px;">
-            Modifier
-          </button>
-          {{-- Supprimer --}}
-          <button onclick="supprimerApprenant({{ $apprenant->id }}, '{{ addslashes($apprenant->nom) }} {{ addslashes($apprenant->prenom) }}')"
-                  style="color:var(--ep-red);background:none;border:none;font-size:12px;cursor:pointer;">
-            Supprimer
-          </button>
-        </td>
-      </tr>
-      @empty
-      <tr><td colspan="7" style="text-align:center;color:#999;padding:30px 0;">Aucun apprenant trouvé.</td></tr>
-      @endforelse
-    </tbody>
+    <tbody></tbody>
   </table>
 </div>
-
-@if(method_exists($apprenants ?? null, 'links'))
-  <div style="margin-top:16px;">{{ $apprenants->links() }}</div>
-@endif
 @endsection
 
 @push('scripts')
 <script>
-// ── Voir apprenant ──
-function voirApprenant(id) {
-    var btns = document.querySelectorAll('button');
-    var row = null;
-    btns.forEach(function(b) {
-        if (b.getAttribute('onclick') && b.getAttribute('onclick').includes('voirApprenant(' + id + ')')) {
-            row = b.closest('tr');
-        }
-    });
+// ── Voir apprenant (lit la ligne DataTables via son id bouton) ──
+function voirApprenantId(id) {
+    var btn = document.querySelector('button[onclick*="voirApprenantId(' + id + ')"]');
+    if (!btn) return;
+    var row = btn.closest('tr');
     if (!row) return;
     var cells = row.querySelectorAll('td');
     document.getElementById('voir-titre').textContent = cells[1].textContent.trim();
@@ -341,6 +341,22 @@ function voirApprenant(id) {
         '<div><div class="lbl">Sexe</div><div>' + cells[3].textContent.trim() + '</div></div>' +
         '</div>';
     epModal.open('modal-voir-apprenant');
+}
+
+// ── Valider rattachement ──
+function ouvrirValidationApprenant(id, nom) {
+    var baseUrl = "{{ url('etablissement/apprenants') }}/";
+    document.getElementById('valider-apprenant-nom').textContent = nom;
+    document.getElementById('valider-apprenant-form').action = baseUrl + id + '/valider';
+    epModal.open('modal-valider-apprenant');
+}
+
+// ── Rejeter rattachement ──
+function ouvrirRejetApprenant(id, nom) {
+    var baseUrl = "{{ url('etablissement/apprenants') }}/";
+    document.getElementById('rejeter-apprenant-nom').textContent = nom;
+    document.getElementById('rejeter-apprenant-form').action = baseUrl + id + '/rejeter';
+    epModal.open('modal-rejeter-apprenant');
 }
 
 // ── Modifier apprenant ──
@@ -366,6 +382,57 @@ function supprimerApprenant(id, nom) {
 }
 
 // ── Catégorie de frais dans le modal create ──
+var dtApprenants;
+
+$(document).ready(function() {
+    if ($.fn.DataTable.isDataTable('#dt-apprenants')) {
+        $('#dt-apprenants').DataTable().destroy();
+    }
+
+    dtApprenants = epDT('#dt-apprenants', {
+        serverSide: true,
+        processing: true,
+        ajax: {
+            url: '{{ route("etablissement.apprenants.datatable") }}',
+            type: 'GET',
+            data: function(d) {
+                d.classe = $('#f-classe').val();
+                d.statut_paiement = $('#f-statut').val();
+            }
+        },
+        columns: [
+            { data: 0, orderable: true,  responsivePriority: 4 },
+            { data: 1, orderable: true,  responsivePriority: 1 },
+            { data: 2, orderable: true,  responsivePriority: 5 },
+            { data: 3, orderable: true,  responsivePriority: 6 },
+            { data: 4, orderable: true,  responsivePriority: 3 },
+            { data: 5, orderable: true,  responsivePriority: 7 },
+            { data: 6, orderable: false, responsivePriority: 8 },
+            { data: 7, orderable: false, responsivePriority: 2 },
+        ],
+        order: [[1, 'asc']],
+    });
+
+    var searchTimer;
+    $('#f-search').on('keyup', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() {
+            dtApprenants.search($('#f-search').val()).draw();
+        }, 300);
+    });
+
+    $('#f-classe, #f-statut').on('change', function() {
+        dtApprenants.ajax.reload();
+    });
+});
+
+function reinitialiserFiltresApprenants() {
+    $('#f-search').val('');
+    $('#f-classe').val('');
+    $('#f-statut').val('');
+    dtApprenants.ajax.reload();
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     var categoriesData = @json($categories ?? []);
 

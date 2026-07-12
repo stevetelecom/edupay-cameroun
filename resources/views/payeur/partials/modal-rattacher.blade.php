@@ -169,14 +169,12 @@
               <div>
                 <div class="lbl">Prénom {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? '' : "de l'enfant" }} *</div>
                 <input class="inp" id="m-prenom" name="prenom_apprenant"
-                       value="{{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? Auth::user()->prenom : '' }}"
-                       placeholder="Brice" />
+                       placeholder="{{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? Auth::user()->prenom : 'Brice' }}" />
               </div>
               <div>
                 <div class="lbl">Nom *</div>
                 <input class="inp" id="m-nom" name="nom_apprenant"
-                       value="{{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? Auth::user()->nom : '' }}"
-                       placeholder="FONO" />
+                       placeholder="{{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? Auth::user()->nom : 'FONO' }}" />
               </div>
             </div>
 

@@ -8,6 +8,13 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    public function marquerNotificationLue(\App\Models\NotificationPayeur $notification)
+    {
+        abort_unless($notification->user_id === Auth::id(), 403);
+        $notification->update(['lu_at' => now()]);
+        return back();
+    }
+
     public function index()
     {
         $user = Auth::user();
@@ -63,7 +70,13 @@ class DashboardController extends Controller
             ->orderBy('nom')
             ->get(['id', 'nom', 'ville', 'type', 'code_etablissement', 'logo']);
 
+        $notifications = \App\Models\NotificationPayeur::where('user_id', Auth::id())
+            ->whereNull('lu_at')
+            ->latest()
+            ->get();
+
         return view('payeur.dashboard', [
+            'notifications' => $notifications,
             'apprenants'          => $apprenants,
             'totalDu'             => $totalDu,
             'totalPaye'           => $totalPaye,

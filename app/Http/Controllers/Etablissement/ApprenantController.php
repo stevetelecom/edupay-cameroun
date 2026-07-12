@@ -13,6 +13,61 @@ use Illuminate\Validation\Rule;
 
 class ApprenantController extends Controller
 {
+    public function valider(Apprenant $apprenant)
+    {
+        $etablissementId = Auth::user()->etablissement_id;
+        abort_unless($apprenant->etablissement_id === $etablissementId, 403);
+
+        $apprenant->update(['valide_par_etablissement' => true]);
+
+        $nomComplet = $apprenant->prenom . ' ' . $apprenant->nom;
+
+        // Notifier chaque payeur rattaché
+        foreach ($apprenant->parents()->get() as $payeur) {
+            \App\Models\NotificationPayeur::create([
+                'user_id' => $payeur->id,
+                'titre'   => 'Rattachement validé',
+                'message' => 'Votre demande de rattachement pour ' . $nomComplet . ' a été validée par l\'établissement. Vous pouvez désormais consulter et régler ses frais de scolarité.',
+                'type'    => 'success',
+            ]);
+        }
+
+        return back()->with('success', $nomComplet . ' a été validé(e) avec succès. Le payeur a été notifié.');
+    }
+
+    public function rejeter(Apprenant $apprenant)
+    {
+        $etablissementId = Auth::user()->etablissement_id;
+        abort_unless($apprenant->etablissement_id === $etablissementId, 403);
+
+        if ($apprenant->source !== 'payeur' || $apprenant->valide_par_etablissement) {
+            abort(403, 'Cet apprenant ne peut pas être rejeté.');
+        }
+
+        $nomComplet = $apprenant->prenom . ' ' . $apprenant->nom;
+
+        // Récupérer les payeurs rattachés avant suppression pour les notifier
+        $payeurs = $apprenant->parents()->get();
+
+        // Détacher le pivot user_apprenant (le soft delete n'appelle pas le cascadeOnDelete)
+        $apprenant->parents()->detach();
+
+        $apprenant->delete();
+
+        // Notifier chaque payeur concerné
+        foreach ($payeurs as $payeur) {
+            \App\Models\NotificationPayeur::create([
+                'user_id' => $payeur->id,
+                'titre'   => 'Rattachement refusé',
+                'message' => 'Votre demande de rattachement pour ' . $nomComplet . ' a été refusée par l\'établissement. '
+                    . 'Vérifiez les informations saisies ou recherchez l\'apprenant dans l\'annuaire officiel de l\'établissement.',
+                'type'    => 'error',
+            ]);
+        }
+
+        return back()->with('success', 'La demande de rattachement de ' . $nomComplet . ' a été rejetée. Le payeur a été notifié.');
+    }
+
     public function index(Request $request)
     {
         $etablissementId = Auth::user()->etablissement_id;
@@ -50,6 +105,117 @@ class ApprenantController extends Controller
             ->get();
 
         return view('etablissement.apprenants.index', compact('apprenants', 'classes', 'categories', 'echeanciers'));
+    }
+
+    /**
+     * Endpoint AJAX pour DataTables — retourne JSON pagine cote serveur
+     */
+    public function datatable(Request $request)
+    {
+        $etablissementId = Auth::user()->etablissement_id;
+
+        $draw   = $request->integer('draw', 1);
+        $start  = $request->integer('start', 0);
+        $length = $request->integer('length', 15);
+        $search = $request->input('search.value', '');
+        $classe = $request->input('classe', '');
+        $statutPaiement = $request->input('statut_paiement', '');
+
+        $cols = ['matricule', 'nom', 'classe', 'sexe', 'statut_paiement', 'actif'];
+        $orderCol = $request->input('order.0.column', 1);
+        $orderDir = $request->input('order.0.dir', 'asc');
+
+        $query = Apprenant::where('etablissement_id', $etablissementId);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nom', 'like', "%{$search}%")
+                  ->orWhere('prenom', 'like', "%{$search}%")
+                  ->orWhere('matricule', 'like', "%{$search}%");
+            });
+        }
+
+        if ($classe)         $query->where('classe', $classe);
+        if ($statutPaiement) $query->where('statut_paiement', $statutPaiement);
+
+        $total    = Apprenant::where('etablissement_id', $etablissementId)->count();
+        $filtered = $query->count();
+
+        $col = $cols[$orderCol] ?? 'nom';
+        $apprenants = $query->orderBy($col, $orderDir)
+            ->skip($start)->take($length)->get();
+
+        $rows = $apprenants->map(function ($a) {
+            $statutBadge = match($a->statut_paiement) {
+                'regle'   => '<span class="ep-badge ep-badge-green">Regle</span>',
+                'partiel' => '<span class="ep-badge ep-badge-yellow">Partiel</span>',
+                'impaye'  => '<span class="ep-badge ep-badge-red">Impaye</span>',
+                default   => '<span class="ep-badge ep-badge-gray">'.ucfirst($a->statut_paiement).'</span>',
+            };
+
+            $actifBadge = $a->actif
+                ? '<span class="ep-badge ep-badge-green">Actif</span>'
+                : '<span class="ep-badge ep-badge-red">Inactif</span>';
+
+            $enAttente = $a->source === 'payeur' && ! $a->valide_par_etablissement;
+
+            $origineBadge = $enAttente
+                ? '<span class="ep-badge ep-badge-yellow">En attente de validation</span>'
+                : ($a->source === 'payeur'
+                    ? '<span class="ep-badge ep-badge-blue">Ajoute par famille</span>'
+                    : '<span class="ep-badge ep-badge-green">Etablissement</span>');
+
+            $nomComplet = htmlspecialchars($a->prenom.' '.$a->nom, ENT_QUOTES, 'UTF-8');
+            $nomJs      = htmlspecialchars($a->nom, ENT_QUOTES, 'UTF-8');
+            $prenomJs   = htmlspecialchars($a->prenom, ENT_QUOTES, 'UTF-8');
+            $classeJs   = htmlspecialchars($a->classe, ENT_QUOTES, 'UTF-8');
+            $matJs      = htmlspecialchars($a->matricule ?? '', ENT_QUOTES, 'UTF-8');
+            $ddnJs      = $a->date_naissance ?? '';
+            $sexeJs     = $a->sexe ?? '';
+            $actifJs    = $a->actif ? 'true' : 'false';
+
+            $actions = '<div class="ep-actions">';
+
+            if ($enAttente) {
+                $actions .= '
+                <button onclick="ouvrirValidationApprenant('.$a->id.', &quot;'.$nomComplet.'&quot;)" class="ep-btn-icon ep-btn-green" title="Valider">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button onclick="ouvrirRejetApprenant('.$a->id.', &quot;'.$nomComplet.'&quot;)" class="ep-btn-icon ep-btn-red" title="Rejeter">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>';
+            }
+
+            $actions .= '
+                <button onclick="voirApprenantId('.$a->id.')" class="ep-btn-icon ep-btn-teal" title="Voir">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button onclick="modifierApprenant('.$a->id.', &quot;'.$nomJs.'&quot;, &quot;'.$prenomJs.'&quot;, &quot;'.$classeJs.'&quot;, &quot;'.$matJs.'&quot;, &quot;'.$ddnJs.'&quot;, &quot;'.$sexeJs.'&quot;, '.$actifJs.')" class="ep-btn-icon ep-btn-blue" title="Modifier">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button onclick="supprimerApprenant('.$a->id.', &quot;'.$nomComplet.'&quot;)" class="ep-btn-icon ep-btn-red" title="Supprimer">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+            </div>';
+
+            return [
+                '<div class="ep-dt-sub">'.e($a->matricule ?? '\u2014').'</div>',
+                '<div class="ep-dt-name">'.e($a->nom).' '.e($a->prenom).'</div>',
+                '<div>'.e($a->classe).'</div>',
+                '<div>'.e($a->sexe ?? '\u2014').'</div>',
+                $statutBadge,
+                $actifBadge,
+                $origineBadge,
+                $actions,
+            ];
+        });
+
+        return response()->json([
+            'draw'            => $draw,
+            'recordsTotal'    => $total,
+            'recordsFiltered' => $filtered,
+            'data'            => $rows,
+        ]);
     }
 
     public function create()

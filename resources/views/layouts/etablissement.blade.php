@@ -9,6 +9,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
 
+    {{-- DataTables CSS --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css"/>
+
     <style>
         :root{
             --ep-navy:#0B2545; --ep-teal:#0D9E75; --ep-teal2:#0A8562;
@@ -460,6 +464,94 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
+
+    {{-- jQuery + DataTables JS --}}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
+    {{-- ══ DataTables EduPay Theme (identique admin) ══ --}}
+    <style>
+    .dt-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table.ep-dt { width: 100% !important; border-collapse: collapse; font-size: 13px; }
+    table.ep-dt thead th {
+        background: #f8fafc; color: #6b7280; font-size: 11px; font-weight: 600;
+        text-transform: uppercase; letter-spacing: .05em; padding: 10px 14px;
+        border-bottom: 2px solid #e5e7eb; white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    table.ep-dt thead th:hover { background: #f0fdf4; color: #0D9E75; }
+    table.ep-dt thead th.sorting_asc  { color: #0D9E75; background: #f0fdf4; }
+    table.ep-dt thead th.sorting_desc { color: #0D9E75; background: #f0fdf4; }
+    table.ep-dt tbody tr { border-bottom: 1px solid #f3f4f6; transition: background .1s; }
+    table.ep-dt tbody tr:hover { background: #f9fafb; }
+    table.ep-dt tbody td { padding: 10px 14px; color: #374151; vertical-align: middle; }
+    .ep-dt-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #f0f0f0; flex-wrap: wrap; gap: 10px; }
+    .ep-dt-toolbar .dt-length select { padding: 6px 10px; font-size: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; color: #555; }
+    .ep-dt-toolbar .dt-search input { padding: 7px 12px; font-size: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; width: 220px; }
+    .ep-dt-toolbar .dt-search input:focus { border-color: #0D9E75; }
+    .ep-dt-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid #f0f0f0; flex-wrap: wrap; gap: 8px; }
+    .ep-dt-foot .dt-info { font-size: 12px; color: #9ca3af; }
+    .ep-dt-foot .dt-paging .paginate_button { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 6px; font-size: 12px; cursor: pointer; border: none; background: none; color: #555; margin: 0 1px; transition: all .15s; }
+    .ep-dt-foot .dt-paging .paginate_button:hover { background: #E0F5EE; color: #085041; }
+    .ep-dt-foot .dt-paging .paginate_button.current { background: #0D9E75; color: #fff !important; font-weight: 600; }
+    .ep-dt-foot .dt-paging .paginate_button.disabled { color: #d1d5db; cursor: not-allowed; }
+    .ep-badge { font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; display:inline-block; }
+    .ep-badge-green  { background:#dcfce7; color:#166534; }
+    .ep-badge-yellow { background:#fef9c3; color:#854d0e; }
+    .ep-badge-red    { background:#fee2e2; color:#991b1b; }
+    .ep-badge-blue   { background:#dbeafe; color:#1e40af; }
+    .ep-badge-gray   { background:#f3f4f6; color:#4b5563; }
+    .ep-actions { display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap; }
+    .ep-btn-icon { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; border:none; border-radius:7px; cursor:pointer; transition:opacity .15s; }
+    .ep-btn-icon:hover { opacity:.8; }
+    .ep-btn-teal   { background:#E0F5EE; color:#0D9E75; }
+    .ep-btn-green  { background:#dcfce7; color:#16a34a; }
+    .ep-btn-yellow { background:#fef9c3; color:#ca8a04; }
+    .ep-btn-red    { background:#fee2e2; color:#dc2626; }
+    .ep-btn-blue   { background:#dbeafe; color:#1e40af; }
+    .ep-dt-name { font-weight:600; color:#111; font-size:13px; }
+    .ep-dt-sub  { font-size:11px; color:#9ca3af; margin-top:1px; }
+    .ep-dt-center { text-align:center; font-weight:600; color:#374151; }
+    table.ep-dt td.dtr-control::before { background: #0D9E75 !important; border-color: #0D9E75 !important; }
+    @media (max-width: 640px) { .ep-dt-toolbar .dt-search input { width: 160px; } }
+    </style>
+
+    <script>
+    window.epDT = function(selector, opts) {
+        var defaults = {
+            responsive: true,
+            language: {
+                search: '', searchPlaceholder: 'Rechercher...', lengthMenu: 'Afficher _MENU_ lignes',
+                info: '_START_\u2013_END_ sur _TOTAL_', infoEmpty: '0 r\u00e9sultat', infoFiltered: '(filtr\u00e9 sur _MAX_)',
+                zeroRecords: 'Aucun r\u00e9sultat', emptyTable: 'Tableau vide',
+                paginate: { first: '\u00ab', previous: '\u2039', next: '\u203a', last: '\u00bb' }
+            },
+            dom: '<"ep-dt-toolbar"l<"dt-search"f>>rt<"ep-dt-foot"i<"dt-paging"p>>',
+            pageLength: 15,
+            lengthMenu: [[10, 15, 25, 50, -1], [10, 15, 25, 50, 'Tous']],
+        };
+        return $(selector).DataTable($.extend(true, defaults, opts || {}));
+    };
+
+    // ── API Toast globale (pour AJAX) ──
+    window.epToast = function(message, type) {
+        type = type || 'info';
+        var wrap = document.getElementById('toast-wrap');
+        if (!wrap) return;
+        var icons = {
+            success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+            error:   '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+            info:    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>'
+        };
+        var el = document.createElement('div');
+        el.className = 'toast t-' + type;
+        el.setAttribute('data-toast', '');
+        el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">' + (icons[type] || icons.info) + '</svg><span></span>';
+        el.querySelector('span').textContent = message;
+        wrap.appendChild(el);
+        setTimeout(function(){ el.classList.add('closing'); setTimeout(function(){ el.remove(); }, 200); }, 4000);
+    };
+    </script>
 
     @stack('scripts')
 </body>

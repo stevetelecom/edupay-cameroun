@@ -80,6 +80,7 @@ Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur
     Route::get('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'index'])->name('onboarding');
     Route::middleware('throttle:60,1')->get('/apprenants/search', [\App\Http\Controllers\Payeur\OnboardingController::class, 'searchApprenants'])->name('onboarding.search');
     Route::middleware('throttle:10,1')->post('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'store'])->name('onboarding.store');
+    Route::patch('/notifications/{notification}/lu', [\App\Http\Controllers\Payeur\DashboardController::class, 'marquerNotificationLue'])->name('notifications.lu');
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Payeur\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/paiement/{fraisApprenant}', [\App\Http\Controllers\Payeur\PaiementController::class, 'show'])->name('paiement.show');
     Route::post('/paiement/{fraisApprenant}/initier', [\App\Http\Controllers\Payeur\PaiementController::class, 'initier'])->name('paiement.initier');
@@ -124,7 +125,10 @@ Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur
 */
 Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnement'])->prefix('etablissement')->name('etablissement.')->group(function () {
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Etablissement\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/apprenants/datatable', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'datatable'])->name('apprenants.datatable');
     Route::resource('apprenants', \App\Http\Controllers\Etablissement\ApprenantController::class);
+    Route::patch('/apprenants/{apprenant}/valider', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'valider'])->name('apprenants.valider');
+    Route::delete('/apprenants/{apprenant}/rejeter', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'rejeter'])->name('apprenants.rejeter');
 
     // Frais & Échéanciers (E02 / E03)
     Route::get('/frais',                    [\App\Http\Controllers\Etablissement\FraisController::class, 'index'])->name('frais.index');
