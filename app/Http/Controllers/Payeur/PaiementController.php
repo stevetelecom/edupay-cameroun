@@ -34,6 +34,22 @@ class PaiementController extends Controller
     {
         $this->autoriserAcces($fraisApprenant);
 
+        // Empêche un double paiement : si un paiement en_attente existe déjà
+        // pour ce frais depuis moins de 5 minutes, on redirige vers sa page d'attente
+        // au lieu d'en créer un nouveau.
+        $paiementRecent = Paiement::where('frais_apprenant_id', $fraisApprenant->id)
+            ->where('user_id', Auth::id())
+            ->where('statut', 'en_attente')
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->latest()
+            ->first();
+
+        if ($paiementRecent) {
+            return redirect()
+                ->route('payeur.paiement.attente', $paiementRecent)
+                ->with('info', 'Un paiement est déjà en cours pour ce frais. Confirmez-le ou attendez son expiration avant de recommencer.');
+        }
+
         $validated = $request->validate([
             'type_paiement'      => ['required', Rule::in(['integral', 'tranche'])],
             'mode_paiement'      => ['required', Rule::in(['mtn_momo', 'orange_money'])],
@@ -125,7 +141,7 @@ class PaiementController extends Controller
             return response()->json(['statut' => $paiement->statut]);
         }
 
-        // Si déjà validé ou échoué, retourner directement
+        // Si déjà validé ou échoué, retourner directement (avant même de verrouiller)
         if (in_array($paiement->statut, ['valide', 'echoue', 'rembourse'])) {
             return response()->json(['statut' => $paiement->statut]);
         }
@@ -133,33 +149,100 @@ class PaiementController extends Controller
         $resultat = $this->aangaraa->verifierStatut($paiement->pay_token);
 
         if ($resultat['statut'] === 'SUCCESSFUL') {
+            $traite = $this->traiterPaiementValide($paiement->id);
+            return response()->json(['statut' => $traite ? 'valide' : $paiement->fresh()->statut]);
+        }
+
+        if ($resultat['statut'] === 'FAILED') {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($paiement) {
+                $p = Paiement::whereKey($paiement->id)->lockForUpdate()->first();
+                if ($p && $p->statut === 'en_attente') {
+                    $p->update(['statut' => 'echoue']);
+                }
+            });
+            return response()->json(['statut' => 'echoue']);
+        }
+
+        return response()->json(['statut' => 'en_attente']);
+    }
+
+    /**
+     * Traite un paiement confirmé SUCCESSFUL de manière atomique.
+     * Protège contre les race conditions webhook / polling AJAX simultanés :
+     * verrou pessimiste + re-check du statut à l'intérieur de la transaction.
+     * Retourne true si ce traitement est celui qui a réellement validé le paiement
+     * (false si un autre process l'avait déjà fait entre-temps).
+     */
+    private function traiterPaiementValide(int $paiementId): bool
+    {
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($paiementId) {
+            // Verrou pessimiste : bloque toute autre transaction qui tenterait
+            // de lire/modifier cette même ligne tant qu'on n'a pas fini.
+            $paiement = Paiement::whereKey($paiementId)->lockForUpdate()->first();
+
+            if (! $paiement || $paiement->statut === 'valide') {
+                // Déjà traité par un autre process (webhook ou polling) → on ne refait rien
+                return false;
+            }
+
             $paiement->update([
                 'statut'          => 'valide',
                 'date_validation' => now(),
             ]);
 
-            // Mettre à jour montant_paye sur FraisApprenant
             $frais = $paiement->fraisApprenant;
             $frais->increment('montant_paye', $paiement->montant);
-
-            // Mettre à jour statut_paiement sur Apprenant
             $frais->refresh();
-            $statut = $frais->montant_paye >= $frais->montant_total ? 'regle'
-                    : ($frais->montant_paye > 0 ? 'partiel' : 'impaye');
-            $frais->apprenant->update(['statut_paiement' => $statut]);
 
-            // F12-A — Envoyer email + SMS de confirmation
+            $statutApprenant = $frais->montant_paye >= $frais->montant_total ? 'regle'
+                             : ($frais->montant_paye > 0 ? 'partiel' : 'impaye');
+            $frais->apprenant->update(['statut_paiement' => $statutApprenant]);
+
             SendConfirmationPaiement::dispatch($paiement);
 
-            return response()->json(['statut' => 'valide']);
-        }
+            // Commission — protégée aussi par la contrainte UNIQUE en base (paiement_id)
+            $etablissement = $frais->apprenant->etablissement;
 
-        if ($resultat['statut'] === 'FAILED') {
-            $paiement->update(['statut' => 'echoue']);
-            return response()->json(['statut' => 'echoue']);
-        }
+            try {
+                \App\Models\Commission::create([
+                    'paiement_id'               => $paiement->id,
+                    'etablissement_id'          => $etablissement->id,
+                    'montant_transaction'       => $paiement->montant,
+                    'taux'                      => $etablissement->taux_commission,
+                    'montant_commission'        => $paiement->marge_edupay,
+                    'montant_net_etablissement' => $paiement->montant,
+                    'frais_aangaraa'            => $paiement->frais_aangaraa,
+                    'statut'                    => 'calculee',
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Violation de contrainte unique = une commission existe déjà pour ce paiement.
+                // Filet de sécurité ultime : on arrête là, pas de double reversement.
+                \Illuminate\Support\Facades\Log::warning('Commission déjà existante pour ce paiement, reversement ignoré', [
+                    'paiement_id' => $paiement->id,
+                ]);
+                return true; // le paiement est bien validé, juste pas de 2e commission/reversement
+            }
 
-        return response()->json(['statut' => 'en_attente']);
+            if ($etablissement->numero_momo_reversement) {
+                $resultatReversement = $this->aangaraa->reverserEtablissement(
+                    telephone:   $etablissement->numero_momo_reversement,
+                    operateur:   $etablissement->operateur_momo_reversement ?? 'mtn',
+                    montant:     $paiement->montant,
+                    description: 'Reversement EduPay — ' . $paiement->reference
+                );
+
+                if ($resultatReversement['succes']) {
+                    \App\Models\Commission::where('paiement_id', $paiement->id)
+                        ->update([
+                            'statut'                => 'prelevee',
+                            'reference_reversement' => $resultatReversement['reference'],
+                            'reversed_at'           => now(),
+                        ]);
+                }
+            }
+
+            return true;
+        });
     }
 
     // ─────────────────────────────────────────────
@@ -199,70 +282,42 @@ class PaiementController extends Controller
         // Ainsi, un webhook forgé (POST direct sans vraie transaction) ne peut jamais valider un paiement.
         $verification = $this->aangaraa->verifierStatut($paiement->pay_token);
 
-        if (!$verification['succes'] && $verification['statut'] !== 'SUCCESSFUL') {
+        if (($payload['status'] ?? null) !== $verification['statut']) {
             Log::warning('Webhook AangaraaPay : statut annoncé non confirmé par revérification API', [
                 'reference'          => $reference,
                 'statut_webhook'     => $payload['status'] ?? null,
                 'statut_revérifié'   => $verification['statut'],
+                'ip'                 => $request->ip(),
             ]);
+
+            // Alerte email au Super Admin — discordance entre webhook et vérification API
+            try {
+                \Illuminate\Support\Facades\Mail::to('moffosteve2@gmail.com')
+                    ->send(new \App\Mail\AlerteWebhookSuspectMail(
+                        reference:      $reference,
+                        statutAnnonce:  $payload['status'] ?? null,
+                        statutReel:     $verification['statut'],
+                        ip:             $request->ip(),
+                        payloadComplet: $payload,
+                    ));
+            } catch (\Throwable $e) {
+                Log::error('Échec envoi alerte webhook suspect : ' . $e->getMessage());
+            }
         }
 
         $statut = $verification['statut'];
 
-        if ($statut === 'SUCCESSFUL' && $paiement->statut !== 'valide') {
-            $paiement->update([
-                'statut'          => 'valide',
-                'date_validation' => now(),
-            ]);
-
-            $frais = $paiement->fraisApprenant;
-            $frais->increment('montant_paye', $paiement->montant);
-            $frais->refresh();
-
-            $statutApprenant = $frais->montant_paye >= $frais->montant_total ? 'regle'
-                             : ($frais->montant_paye > 0 ? 'partiel' : 'impaye');
-            $frais->apprenant->update(['statut_paiement' => $statutApprenant]);
-
-            // F12-A — Envoyer email + SMS de confirmation
-            SendConfirmationPaiement::dispatch($paiement);
-
-            // Enregistrer la commission EduPay en base
-            $fraisApprenant = $paiement->fraisApprenant;
-            $etablissement  = $fraisApprenant->apprenant->etablissement;
-
-            \App\Models\Commission::create([
-                'paiement_id'             => $paiement->id,
-                'etablissement_id'        => $etablissement->id,
-                'montant_transaction'     => $paiement->montant,
-                'taux'                    => $etablissement->taux_commission,
-                'montant_commission'      => $paiement->marge_edupay,
-                'montant_net_etablissement' => $paiement->montant,
-                'frais_aangaraa'          => $paiement->frais_aangaraa,
-                'statut'                  => 'calculee',
-            ]);
-
-            // Reversement automatique vers l'établissement
-            if ($etablissement->numero_momo_reversement) {
-                $resultatReversement = $this->aangaraa->reverserEtablissement(
-                    telephone:   $etablissement->numero_momo_reversement,
-                    operateur:   $etablissement->operateur_momo_reversement ?? 'mtn',
-                    montant:     $paiement->montant,
-                    description: 'Reversement EduPay — ' . $paiement->reference
-                );
-
-                if ($resultatReversement['succes']) {
-                    \App\Models\Commission::where('paiement_id', $paiement->id)
-                        ->update([
-                            'statut'               => 'prelevee',
-                            'reference_reversement' => $resultatReversement['reference'],
-                            'reversed_at'          => now(),
-                        ]);
-                }
-            }
+        if ($statut === 'SUCCESSFUL') {
+            $this->traiterPaiementValide($paiement->id);
         }
 
-        if ($statut === 'FAILED' && $paiement->statut === 'en_attente') {
-            $paiement->update(['statut' => 'echoue']);
+        if ($statut === 'FAILED') {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($paiement) {
+                $p = Paiement::whereKey($paiement->id)->lockForUpdate()->first();
+                if ($p && $p->statut === 'en_attente') {
+                    $p->update(['statut' => 'echoue']);
+                }
+            });
         }
 
         return response()->json(['ok' => true]);
