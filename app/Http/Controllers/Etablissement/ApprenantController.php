@@ -235,7 +235,13 @@ class ApprenantController extends Controller
             'date_naissance' => ['nullable', 'date'],
             'sexe'           => ['nullable', Rule::in(['M', 'F'])],
             'actif'          => ['nullable', 'boolean'],
-            'categorie_frais_id' => ['nullable', 'exists:categories_frais,id'],
+            // 🔒 Sécurité (IDOR) : la catégorie de frais doit appartenir à CET établissement,
+            // sinon un comptable/caissier pourrait injecter le categorie_frais_id d'un autre
+            // établissement et créer un FraisApprenant lié à sa structure tarifaire.
+            'categorie_frais_id' => [
+                'nullable',
+                Rule::exists('categories_frais', 'id')->where('etablissement_id', $etablissementId),
+            ],
         ]);
 
         // Vérification limite apprenants selon plan abonnement

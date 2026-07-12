@@ -216,8 +216,13 @@ class OnboardingController extends Controller
     // ── Helpers privés ──
     private function resoudreEtablissement(array $validated): ?Etablissement
     {
+        // 🔒 Sécurité : dans les DEUX cas, l'établissement doit être 'actif'.
+        // Sans ce check sur etablissement_id, un payeur pouvait se rattacher
+        // à un établissement en_attente ou suspendu en connaissant/devinant son ID.
         if (!empty($validated['etablissement_id'])) {
-            $et = Etablissement::find($validated['etablissement_id']);
+            $et = Etablissement::where('id', $validated['etablissement_id'])
+                ->where('statut', 'actif')
+                ->first();
             if ($et) return $et;
         }
         if (!empty($validated['etablissement_nom'])) {
