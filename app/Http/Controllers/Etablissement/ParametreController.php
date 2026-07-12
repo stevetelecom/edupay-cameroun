@@ -37,7 +37,8 @@ class ParametreController extends Controller
             'email'                  => ['required', 'email', 'max:150'],
             'site_web'               => ['nullable', 'url', 'max:200'],
             'description'            => ['nullable', 'string', 'max:1000'],
-            'mobile_money_principal' => ['required', Rule::in(['mtn', 'orange', 'les_deux'])],
+            'mobile_money_principal'      => ['required', Rule::in(['mtn', 'orange'])],
+            'numero_momo_reversement'     => ['required', 'string', 'max:20'],
             'logo'                   => ['nullable', 'file', 'mimes:png,jpg,jpeg,svg', 'max:2048'],
             'document_agrement'      => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);

@@ -74,7 +74,7 @@ Route::post('/deconnexion', [LoginController::class, 'logout'])->name('logout')-
 */
 Route::post('/webhook/aangaraapay',
     [\App\Http\Controllers\Payeur\PaiementController::class, 'webhook']
-)->name('payeur.paiement.webhook');
+)->middleware('throttle:60,1')->name('payeur.paiement.webhook');
 
 Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur.')->group(function () {
     Route::get('/onboarding', [\App\Http\Controllers\Payeur\OnboardingController::class, 'index'])->name('onboarding');

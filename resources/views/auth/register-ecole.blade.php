@@ -148,13 +148,24 @@
           <div class="inp-row">
             <div><div class="lbl">Site web (si disponible)</div><input class="inp" name="site_web" value="{{ old('site_web', $old['site_web'] ?? '') }}" placeholder="https://www.monlycee.cm" /></div>
             <div>
-              <div class="lbl">Compte Mobile Money principal</div>
-              <select class="select" name="mobile_money_principal">
+              <div class="lbl">Compte Mobile Money principal *</div>
+              <select class="select" name="mobile_money_principal" required>
                 <option value="">-- Choisir --</option>
-                @foreach (['mtn' => 'MTN Mobile Money', 'orange' => 'Orange Money', 'les_deux' => 'Les deux'] as $value => $label)
+                @foreach (['mtn' => 'MTN Mobile Money', 'orange' => 'Orange Money'] as $value => $label)
                   <option value="{{ $value }}" @selected(old('mobile_money_principal', $old['mobile_money_principal'] ?? '') === $value)>{{ $label }}</option>
                 @endforeach
               </select>
+            </div>
+          </div>
+          <div class="inp-row">
+            <div>
+              <div class="lbl">Numéro Mobile Money de réception des paiements *</div>
+              <input class="inp phone-input-ecole" name="numero_momo_reversement"
+                     value="{{ old('numero_momo_reversement', $old['numero_momo_reversement'] ?? '') }}"
+                     placeholder="6XX XXX XXX" required />
+              <div style="font-size:11px;color:#888;margin-top:4px;">
+                C'est sur ce numéro que vous recevrez automatiquement les paiements des frais scolaires après chaque transaction validée.
+              </div>
             </div>
           </div>
 

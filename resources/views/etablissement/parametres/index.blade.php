@@ -121,11 +121,19 @@
                 <div style="font-size:13px;font-weight:700;color:#0B2545;margin:16px 0 10px;padding-top:12px;border-top:1px solid #f0f0f0;">Configuration paiement</div>
 
                 <div class="lbl">Moyen Mobile Money principal *</div>
-                <select name="mobile_money_principal" class="select">
+                <select name="mobile_money_principal" class="select" required>
                     <option value="mtn"      @selected(($etab->mobile_money_principal ?? '') === 'mtn')>MTN Mobile Money</option>
                     <option value="orange"   @selected(($etab->mobile_money_principal ?? '') === 'orange')>Orange Money</option>
-                    <option value="les_deux" @selected(($etab->mobile_money_principal ?? '') === 'les_deux')>MTN + Orange (les deux)</option>
                 </select>
+
+                <div class="lbl">Numéro Mobile Money de réception des paiements *</div>
+                <input type="text" name="numero_momo_reversement"
+                       value="{{ old('numero_momo_reversement', $etab->numero_momo_reversement ?? '') }}"
+                       class="inp" placeholder="6XX XXX XXX" required>
+                <div style="font-size:11px;color:#888;margin-top:-8px;margin-bottom:8px;">
+                    C'est sur ce numéro que vous recevrez automatiquement les paiements des frais scolaires.
+                </div>
+                @error('numero_momo_reversement')<div style="color:var(--ep-red);font-size:11px;margin-top:-8px;margin-bottom:8px;">{{ $message }}</div>@enderror
 
                 <div style="font-size:13px;font-weight:700;color:#0B2545;margin:16px 0 10px;padding-top:12px;border-top:1px solid #f0f0f0;">Document d'agrément</div>
 

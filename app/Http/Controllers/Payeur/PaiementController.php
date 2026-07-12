@@ -169,12 +169,11 @@ class PaiementController extends Controller
     {
         $payload = $request->all();
 
-        Log::info('AangaraaPay webhook reçu', $payload);
+        Log::info('AangaraaPay webhook reçu (non fiable, à revérifier)', $payload);
 
         $reference = $payload['transaction_id'] ?? null;
-        $statut    = $payload['status']         ?? null;
 
-        if (! $reference || ! $statut) {
+        if (! $reference) {
             return response()->json(['ok' => false], 400);
         }
 
@@ -184,6 +183,31 @@ class PaiementController extends Controller
             Log::warning('Webhook AangaraaPay : paiement introuvable', ['reference' => $reference]);
             return response()->json(['ok' => false], 404);
         }
+
+        // Idempotence : déjà traité, ne rien refaire
+        if (in_array($paiement->statut, ['valide', 'echoue', 'rembourse'])) {
+            return response()->json(['ok' => true, 'deja_traite' => true]);
+        }
+
+        if (! $paiement->pay_token) {
+            Log::warning('Webhook AangaraaPay : paiement sans pay_token, impossible de revérifier', ['reference' => $reference]);
+            return response()->json(['ok' => false], 422);
+        }
+
+        // 🔒 SÉCURITÉ CRITIQUE : on ne fait JAMAIS confiance au statut envoyé dans le webhook.
+        // On revérifie systématiquement via un appel serveur-à-serveur authentifié par notre app_key.
+        // Ainsi, un webhook forgé (POST direct sans vraie transaction) ne peut jamais valider un paiement.
+        $verification = $this->aangaraa->verifierStatut($paiement->pay_token);
+
+        if (!$verification['succes'] && $verification['statut'] !== 'SUCCESSFUL') {
+            Log::warning('Webhook AangaraaPay : statut annoncé non confirmé par revérification API', [
+                'reference'          => $reference,
+                'statut_webhook'     => $payload['status'] ?? null,
+                'statut_revérifié'   => $verification['statut'],
+            ]);
+        }
+
+        $statut = $verification['statut'];
 
         if ($statut === 'SUCCESSFUL' && $paiement->statut !== 'valide') {
             $paiement->update([
