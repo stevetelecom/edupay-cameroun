@@ -32,12 +32,12 @@ Route::middleware('guest')->group(function () {
 
     // Mot de passe oublié / Réinitialisation
     Route::get('/mot-de-passe-oublie',               [PasswordResetController::class, 'showForgotForm'])->name('password.forgot');
-    Route::post('/mot-de-passe-oublie',              [PasswordResetController::class, 'sendResetCode'])->name('password.send.code');
+    Route::post('/mot-de-passe-oublie',              [PasswordResetController::class, 'sendResetCode'])->middleware('throttle:5,1')->name('password.send.code');
     Route::get('/verifier-code',                     [PasswordResetController::class, 'showVerifyForm'])->name('password.verify.form');
-    Route::post('/verifier-code',                    [PasswordResetController::class, 'verifyCode'])->name('password.verify.code');
-    Route::post('/renvoyer-code',                    [PasswordResetController::class, 'resendCode'])->name('password.resend.code');
+    Route::post('/verifier-code',                    [PasswordResetController::class, 'verifyCode'])->middleware('throttle:10,1')->name('password.verify.code');
+    Route::post('/renvoyer-code',                    [PasswordResetController::class, 'resendCode'])->middleware('throttle:3,1')->name('password.resend.code');
     Route::get('/reinitialiser-mot-de-passe',       [PasswordResetController::class, 'showResetForm'])->name('password.reset.form');
-    Route::post('/reinitialiser-mot-de-passe',      [PasswordResetController::class, 'resetPassword'])->name('password.reset');
+    Route::post('/reinitialiser-mot-de-passe',      [PasswordResetController::class, 'resetPassword'])->middleware('throttle:5,1')->name('password.reset');
 
     // Inscription Parent (3 étapes)
     Route::get('/inscription/parent',            [RegisterParentController::class, 'step1'])->name('register.parent.step1');

@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Hash;
 
 class PasswordReset extends Model
 {
@@ -11,6 +11,7 @@ class PasswordReset extends Model
         'email',
         'guard',
         'code',
+        'tentatives',
         'is_verified',
         'verified_at',
     ];
@@ -18,11 +19,13 @@ class PasswordReset extends Model
     protected $casts = [
         'is_verified' => 'boolean',
         'verified_at' => 'datetime',
+        'tentatives'  => 'integer',
     ];
 
-    /**
-     * Scope : trouver les demandes non vérifiées et non expirées (15 minutes)
-     */
+    protected $hidden = ['code'];
+
+    const MAX_TENTATIVES = 5;
+
     public function scopePending(Builder $query): Builder
     {
         return $query
@@ -30,29 +33,62 @@ class PasswordReset extends Model
             ->where('created_at', '>', now()->subMinutes(15));
     }
 
-    /**
-     * Scope : trouver par email et guard
-     */
     public function scopeForEmail(Builder $query, string $email, string $guard = 'web'): Builder
     {
         return $query->where('email', $email)->where('guard', $guard);
     }
 
     /**
-     * Générer un code à 6 chiffres unique
+     * Génère un code brut à 6 chiffres (à hasher avant stockage, jamais loggé).
      */
-    public static function generateUniqueCode(): string
+    public static function genererCodeBrut(): string
     {
-        do {
-            $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        } while (self::where('code', $code)->where('is_verified', false)->where('created_at', '>', now()->subMinutes(15))->exists());
-
-        return $code;
+        return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     }
 
     /**
-     * Marquer comme vérifié
+     * Crée un enregistrement avec le code déjà hashé.
+     * Retourne le code EN CLAIR (uniquement pour l'envoyer par email, jamais stocké/loggé ainsi).
      */
+    public static function creerPour(string $email, string $guard): string
+    {
+        $codeClair = self::genererCodeBrut();
+
+        self::create([
+            'email'      => $email,
+            'guard'      => $guard,
+            'code'       => Hash::make($codeClair),
+            'tentatives' => 0,
+        ]);
+
+        return $codeClair;
+    }
+
+    /**
+     * Vérifie un code candidat contre le hash stocké, avec limite de tentatives.
+     * Retourne le record si le code est correct, sinon null.
+     * Incrémente le compteur de tentatives à chaque échec et invalide après MAX_TENTATIVES.
+     */
+    public static function verifierCode(string $email, string $codeCandidat): ?self
+    {
+        $record = self::where('email', $email)
+            ->pending()
+            ->where('tentatives', '<', self::MAX_TENTATIVES)
+            ->latest()
+            ->first();
+
+        if (! $record) {
+            return null;
+        }
+
+        if (Hash::check($codeCandidat, $record->code)) {
+            return $record;
+        }
+
+        $record->increment('tentatives');
+        return null;
+    }
+
     public function markAsVerified(): void
     {
         $this->update([

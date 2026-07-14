@@ -1,3 +1,4 @@
+<script>
 function mEscapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str)
@@ -8,7 +9,6 @@ function mEscapeHtml(str) {
         .replace(/'/g, '&#039;');
 }
 
-<script>
 // ── Modal rattachement ──
 function mFiltrerEtabs() {
     var nom   = (document.getElementById('m-etab-search').value || '').toLowerCase().trim();
