@@ -26,8 +26,12 @@
         <input class="inp" name="prenom" value="{{ old('prenom') }}" placeholder="Jean" />
         <div class="lbl">Nom</div>
         <input class="inp" name="nom" value="{{ old('nom') }}" placeholder="MVONDO" />
+        <div class="lbl">Mot de passe *</div>
+        <input class="inp" type="password" name="password" placeholder="Min. 10 caractères" autocomplete="new-password" required />
+        <div class="lbl">Confirmer le mot de passe *</div>
+        <input class="inp" type="password" name="password_confirmation" placeholder="Répétez le mot de passe" required />
         <div style="background:var(--ep-blue-lt);border-radius:var(--radius-md);padding:10px 12px;font-size:12px;color:#1A4F8A;margin-top:4px;">
-          Un email d'invitation sera envoyé avec un lien de création de mot de passe.
+          Un email de bienvenue sera envoyé à cet utilisateur avec ses identifiants de connexion.
         </div>
       </div>
       <div class="ep-modal-foot">
