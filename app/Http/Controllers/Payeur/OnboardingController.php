@@ -43,6 +43,13 @@ class OnboardingController extends Controller
             'classe.required'                    => 'La classe est obligatoire.',
         ]);
 
+        // Nettoyage défense en profondeur : retire toute balise HTML/JS des champs texte libres
+        foreach (['prenom_apprenant', 'nom_apprenant', 'classe', 'etablissement_nom', 'matricule'] as $champ) {
+            if (!empty($validated[$champ])) {
+                $validated[$champ] = strip_tags(trim($validated[$champ]));
+            }
+        }
+
         $etablissement = $this->resoudreEtablissement($validated);
 
         if (!$etablissement) {
@@ -143,6 +150,13 @@ class OnboardingController extends Controller
             'prenom'            => 'required|string|max:100',
             'nom'               => 'required|string|max:100',
         ]);
+
+        // Nettoyage défense en profondeur : retire toute balise HTML/JS des champs texte libres
+        foreach (['prenom', 'nom', 'classe', 'etablissement_nom', 'matricule'] as $champ) {
+            if (!empty($validated[$champ])) {
+                $validated[$champ] = strip_tags(trim($validated[$champ]));
+            }
+        }
 
         $etablissement = $this->resoudreEtablissement($validated);
 

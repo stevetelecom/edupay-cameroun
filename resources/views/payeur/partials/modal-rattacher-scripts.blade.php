@@ -1,3 +1,13 @@
+function mEscapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 <script>
 // ── Modal rattachement ──
 function mFiltrerEtabs() {
@@ -154,7 +164,7 @@ function mRechercherApprenant(q) {
         .then(function(apprenants) {
             if (apprenants.length === 0) {
                 var msgVide = q.trim()
-                    ? 'Aucun résultat pour "<strong>' + q + '</strong>"'
+                    ? 'Aucun résultat pour "<strong>' + mEscapeHtml(q) + '</strong>"'
                     : 'Aucun apprenant enregistré dans cet établissement pour le moment.';
                 liste.innerHTML =
                     '<div style="padding:14px;text-align:center;">' +
@@ -167,16 +177,21 @@ function mRechercherApprenant(q) {
 
             var html = '';
             apprenants.forEach(function(a) {
-                html += '<div class="m-app-item" data-id="' + a.id + '" data-nom="' + a.nom + '" ' +
-                    'data-prenom="' + a.prenom + '" data-classe="' + (a.classe||'') + '" ' +
-                    'data-matricule="' + (a.matricule||'') + '" ' +
+                var safeId        = mEscapeHtml(a.id);
+                var safeNom       = mEscapeHtml(a.nom);
+                var safePrenom    = mEscapeHtml(a.prenom);
+                var safeClasse    = mEscapeHtml(a.classe || '');
+                var safeMatricule = mEscapeHtml(a.matricule || '');
+                html += '<div class="m-app-item" data-id="' + safeId + '" data-nom="' + safeNom + '" ' +
+                    'data-prenom="' + safePrenom + '" data-classe="' + safeClasse + '" ' +
+                    'data-matricule="' + safeMatricule + '" ' +
                     'onclick="mSelectionnerApprenant(this)" ' +
                     'style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f5f5f5;' +
                     'display:flex;align-items:center;justify-content:space-between;">' +
                     '<div>' +
-                    '<div style="font-size:13px;font-weight:600;">' + a.prenom + ' ' + a.nom + '</div>' +
-                    '<div style="font-size:11px;color:#888;">' + (a.classe||'—') +
-                    (a.matricule ? ' · Mat. ' + a.matricule : '') + '</div>' +
+                    '<div style="font-size:13px;font-weight:600;">' + safePrenom + ' ' + safeNom + '</div>' +
+                    '<div style="font-size:11px;color:#888;">' + (safeClasse||'—') +
+                    (safeMatricule ? ' · Mat. ' + safeMatricule : '') + '</div>' +
                     '</div>' +
                     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" ' +
                     'class="m-app-check" style="opacity:0;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>' +
