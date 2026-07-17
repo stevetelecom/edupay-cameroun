@@ -56,7 +56,7 @@
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
                 <div class="text-xs text-gray-400 mb-1">N° agrément</div>
-                <div class="font-medium text-gray-800 text-sm break-words">{{ $etablissement->numero_agrement ?? "—" }}</div>
+                <div class="font-medium text-gray-800 text-sm wrap-break-word">{{ $etablissement->numero_agrement ?? "—" }}</div>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
                 <div class="text-xs text-gray-400 mb-1">Effectif déclaré</div>
@@ -98,16 +98,16 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
             <div class="bg-gray-50 rounded-lg p-3">
                 <div class="text-xs text-gray-400 mb-1">Téléphone</div>
-                <div class="font-medium text-gray-800 text-sm break-words">{{ $etablissement->telephone ?? "—" }}</div>
+                <div class="font-medium text-gray-800 text-sm wrap-break-word">{{ $etablissement->telephone ?? "—" }}</div>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
                 <div class="text-xs text-gray-400 mb-1">Email</div>
-                <div class="font-medium text-gray-800 text-sm break-words">{{ $etablissement->email ?? "—" }}</div>
+                <div class="font-medium text-gray-800 text-sm wrap-break-word">{{ $etablissement->email ?? "—" }}</div>
             </div>
             @if($etablissement->site_web)
             <div class="bg-gray-50 rounded-lg p-3">
                 <div class="text-xs text-gray-400 mb-1">Site web</div>
-                <a href="{{ $etablissement->site_web }}" target="_blank" class="font-medium text-[#0D9E75] text-sm break-words">{{ $etablissement->site_web }}</a>
+                <a href="{{ $etablissement->site_web }}" target="_blank" class="font-medium text-[#0D9E75] text-sm wrap-break-word">{{ $etablissement->site_web }}</a>
             </div>
             @endif
         </div>
@@ -155,7 +155,7 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
                 <div class="bg-white rounded-lg p-2.5">
                     <div class="text-xs text-gray-400 mb-0.5">Email</div>
-                    <div class="font-medium text-gray-800 text-sm break-words">{{ $responsable->email }}</div>
+                    <div class="font-medium text-gray-800 text-sm wrap-break-word">{{ $responsable->email }}</div>
                 </div>
                 <div class="bg-white rounded-lg p-2.5">
                     <div class="text-xs text-gray-400 mb-0.5">Téléphone</div>

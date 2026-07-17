@@ -61,8 +61,11 @@ class PayeurAdminController extends Controller
         $filtered = $query->count();
 
         $col = $cols[$orderCol] ?? 'created_at';
-        $users = $query->orderBy($col, $orderDir)
-            ->skip($start)->take($length)->get();
+        $query = $query->orderBy($col, $orderDir);
+        if ($length < 1) {
+            $length = $filtered > 0 ? $filtered : 1;
+        }
+        $users = $query->skip($start)->take($length)->get();
 
         $rows = $users->map(function ($u) {
             $profilBadge = match($u->profil) {

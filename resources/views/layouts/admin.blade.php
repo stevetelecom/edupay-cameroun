@@ -374,13 +374,29 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label class="block text-xs font-medium text-gray-600 mb-1">Nouveau mot de passe</label>
-                  <input type="password" name="password" minlength="10"
-                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                  <div class="ep-pwd-wrap">
+                    <input type="password" name="password" minlength="10"
+                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                    <button type="button" class="ep-pwd-toggle" onclick="togglePasswordVisibility(this)" aria-label="Voir le mot de passe">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label class="block text-xs font-medium text-gray-600 mb-1">Confirmer</label>
-                  <input type="password" name="password_confirmation" minlength="10"
-                         class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                  <div class="ep-pwd-wrap">
+                    <input type="password" name="password_confirmation" minlength="10"
+                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                    <button type="button" class="ep-pwd-toggle" onclick="togglePasswordVisibility(this)" aria-label="Voir le mot de passe">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               <p class="text-xs text-gray-400 mt-1">Laisser vide pour ne pas changer le mot de passe. Minimum 10 caractères.</p>
@@ -781,7 +797,9 @@
 
     // ── Toggle visibilité mot de passe (bouton oeil) ──
     function togglePasswordVisibility(btn) {
-        const input = btn.previousElementSibling;
+        const wrapper = btn.closest('.ep-pwd-wrap');
+        if (!wrapper) return;
+        const input = wrapper.querySelector('input[type="password"], input[type="text"]');
         if (!input) return;
         const isHidden = input.type === 'password';
         input.type = isHidden ? 'text' : 'password';

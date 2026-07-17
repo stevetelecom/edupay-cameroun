@@ -44,6 +44,7 @@ Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth:admin', 'super.admin'])->group(function () {
     // Abonnements
     Route::get('/abonnements', [\App\Http\Controllers\Admin\AbonnementController::class, 'index'])->name('abonnements.index');
+    Route::get('/abonnements/datatable', [\App\Http\Controllers\Admin\AbonnementController::class, 'datatable'])->name('abonnements.datatable');
     Route::post('/abonnements', [\App\Http\Controllers\Admin\AbonnementController::class, 'store'])->name('abonnements.store');
     Route::patch('/abonnements/{abonnement}/renouveler', [\App\Http\Controllers\Admin\AbonnementController::class, 'renouveler'])->name('abonnements.renouveler');
     Route::patch('/abonnements/{abonnement}', [\App\Http\Controllers\Admin\AbonnementController::class, 'update'])->name('abonnements.update');
@@ -54,6 +55,7 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
     // Gestion de l'équipe Super Admin
     Route::prefix('admins')->name('admins.')->group(function () {
         Route::get('/',                    [\App\Http\Controllers\Admin\AdminGestionController::class, 'index'])->name('index');
+        Route::get('/datatable',           [\App\Http\Controllers\Admin\AdminGestionController::class, 'datatable'])->name('datatable');
         Route::post('/',                   [\App\Http\Controllers\Admin\AdminGestionController::class, 'store'])->name('store');
         Route::patch('/{admin}',           [\App\Http\Controllers\Admin\AdminGestionController::class, 'update'])->name('update');
         Route::patch('/{admin}/activer',   [\App\Http\Controllers\Admin\AdminGestionController::class, 'activer'])->name('activer');

@@ -17,7 +17,24 @@ return new class extends Migration
             $table->string('email')->nullable()->change();
         });
 
-        DB::statement("UPDATE users SET prenom = SUBSTRING_INDEX(name, ' ', 1), nom = SUBSTRING(name, LOCATE(' ', name) + 1)");
+        $users = DB::table('users')->select('id', 'name')->get();
+        foreach ($users as $user) {
+            $name = trim($user->name ?? '');
+            if ($name === '') {
+                continue;
+            }
+
+            $parts = preg_split('/\s+/', $name, 2);
+            $prenom = $parts[0] ?? null;
+            $nom = $parts[1] ?? null;
+
+            DB::table('users')
+                ->where('id', $user->id)
+                ->update([
+                    'prenom' => $prenom,
+                    'nom' => $nom,
+                ]);
+        }
     }
 
     public function down(): void

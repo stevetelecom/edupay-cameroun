@@ -228,112 +228,44 @@
 </div>
 
 {{-- Filtres --}}
-<div class="flex flex-wrap gap-3 mb-4">
-  <form method="GET" class="flex flex-wrap gap-2">
-    <select name="statut" onchange="this.form.submit()"
-            class="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+<div class="flex flex-wrap items-center gap-3 mb-4">
+  <div class="flex flex-wrap gap-2">
+    <select id="filter-statut" class="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
       <option value="">Tous les statuts</option>
-      <option value="actif" {{ request('statut')==='actif' ? 'selected' : '' }}>Actif</option>
-      <option value="grace_period" {{ request('statut')==='grace_period' ? 'selected' : '' }}>Grace period</option>
-      <option value="expire" {{ request('statut')==='expire' ? 'selected' : '' }}>Expiré</option>
+      <option value="actif">Actif</option>
+      <option value="grace_period">Grace period</option>
+      <option value="expire">Expiré</option>
     </select>
-    <select name="plan" onchange="this.form.submit()"
-            class="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
+    <select id="filter-plan" class="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white">
       <option value="">Tous les plans</option>
-      <option value="basique" {{ request('plan')==='basique' ? 'selected' : '' }}>Basique</option>
-      <option value="standard" {{ request('plan')==='standard' ? 'selected' : '' }}>Standard</option>
-      <option value="premium" {{ request('plan')==='premium' ? 'selected' : '' }}>Premium</option>
+      <option value="basique">Basique</option>
+      <option value="standard">Standard</option>
+      <option value="premium">Premium</option>
     </select>
-  </form>
+  </div>
+  <div class="flex items-center gap-2 ml-auto">
+    <input id="filter-search" type="text" placeholder="Rechercher un établissement…"
+           class="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white w-64" />
+    <button type="button" onclick="resetAbonnementFilters()"
+            class="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">Réinitialiser</button>
+  </div>
 </div>
 
 {{-- Tableau responsive --}}
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm min-w-175">
-      <thead>
-        <tr class="border-b border-gray-100 bg-gray-50">
-          <th class="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Établissement</th>
-          <th class="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Plan</th>
-          <th class="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Période</th>
-          <th class="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Statut</th>
-          <th class="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Montant</th>
-          <th class="text-right text-xs font-semibold text-gray-500 uppercase px-4 py-3">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-50">
-        @forelse($abonnements as $abo)
-        @php
-          $couleurs = [
-            'actif'        => 'bg-green-50 text-green-700 border-green-200',
-            'grace_period' => 'bg-amber-50 text-amber-700 border-amber-200',
-            'expire'       => 'bg-red-50 text-red-700 border-red-200',
-            'suspendu'     => 'bg-gray-50 text-gray-600 border-gray-200',
-          ];
-          $planCouleurs = [
-            'basique'  => 'bg-teal-50 text-teal-700',
-            'standard' => 'bg-blue-50 text-blue-700',
-            'premium'  => 'bg-amber-50 text-amber-700',
-          ];
-        @endphp
-        <tr class="hover:bg-gray-50">
-          <td class="px-4 py-3">
-            <div class="font-semibold text-gray-900 text-sm">{{ $abo->etablissement->nom ?? '—' }}</div>
-            <div class="text-xs text-gray-500">{{ $abo->etablissement->ville ?? '' }}</div>
-          </td>
-          <td class="px-4 py-3">
-            <span class="text-xs font-semibold px-2 py-1 rounded-full {{ $planCouleurs[$abo->plan] ?? '' }}">
-              {{ ucfirst($abo->plan) }}
-            </span>
-          </td>
-          <td class="px-4 py-3">
-            <div class="text-xs text-gray-700">{{ $abo->date_debut->format('d/m/Y') }} → {{ $abo->date_fin->format('d/m/Y') }}</div>
-            @if($abo->enGracePeriod())
-              <div class="text-xs text-amber-600">Grace jusqu'au {{ $abo->grace_period_fin->format('d/m/Y') }}</div>
-            @else
-              <div class="text-xs text-gray-400">{{ $abo->joursRestants() }} jours restants</div>
-            @endif
-          </td>
-          <td class="px-4 py-3">
-            <span class="text-xs font-medium px-2 py-1 rounded-full border {{ $couleurs[$abo->statut] ?? '' }}">
-              {{ ucfirst(str_replace('_', ' ', $abo->statut)) }}
-            </span>
-          </td>
-          <td class="px-4 py-3 font-semibold text-gray-800">
-            {{ number_format($abo->montant_mensuel, 0, ',', ' ') }} FCFA
-          </td>
-          <td class="px-4 py-3 text-right">
-            <div class="flex items-center justify-end gap-2 flex-wrap">
-              @if(in_array($abo->statut, ['actif', 'grace_period', 'expire']))
-              <button onclick="renouveler({{ $abo->id }}, '{{ addslashes($abo->etablissement->nom ?? '') }}', '{{ ucfirst($abo->plan) }}')"
-                      class="text-xs text-blue-600 hover:text-blue-800 font-medium">
-                Renouveler
-              </button>
-              @endif
-              <button onclick="modifierAbo({{ $abo->id }}, '{{ addslashes($abo->etablissement->nom ?? '') }}', '{{ $abo->plan }}')"
-                      class="text-xs text-amber-600 hover:text-amber-800 font-medium">
-                Modifier
-              </button>
-              <button onclick="supprimerAbo({{ $abo->id }}, '{{ addslashes($abo->etablissement->nom ?? '') }}')"
-                      class="text-xs text-red-500 hover:text-red-700 font-medium">
-                Supprimer
-              </button>
-            </div>
-          </td>
-        </tr>
-        @empty
-        <tr>
-          <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500">
-            Aucun abonnement enregistré.
-          </td>
-        </tr>
-        @endforelse
-      </tbody>
-    </table>
-  </div>
-  <div class="px-4 py-3 border-t border-gray-100">
-    {{ $abonnements->links() }}
-  </div>
+  <table id="dt-abonnements" class="ep-dt text-sm" style="width:100%">
+    <thead>
+      <tr>
+        <th>Établissement</th>
+        <th>Plan</th>
+        <th>Période</th>
+        <th>Statut</th>
+        <th>Montant</th>
+        <th data-orderable="false">Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 @endsection
@@ -389,6 +321,55 @@ function renouveler(id, nom, plan) {
     document.getElementById('form-renew').action =
         "{{ url(config('app.admin_url_prefix', 'admin-ep2026') . '/abonnements') }}/" + id + '/renouveler';
     ouvrirModal('modal-renew-abo');
+}
+
+var dtAbonnements;
+
+$(document).ready(function() {
+    if ($.fn.DataTable.isDataTable('#dt-abonnements')) {
+        $('#dt-abonnements').DataTable().destroy();
+    }
+
+    dtAbonnements = epDT('#dt-abonnements', {
+        serverSide: true,
+        processing: true,
+        ajax: {
+            url: '{{ route("admin.abonnements.datatable") }}',
+            type: 'GET',
+            data: function(d) {
+                d.statut = $('#filter-statut').val();
+                d.plan   = $('#filter-plan').val();
+            }
+        },
+        columns: [
+            { data: 0, orderable: true,  responsivePriority: 1 }, // Établissement
+            { data: 1, orderable: true,  responsivePriority: 5 }, // Plan
+            { data: 2, orderable: true,  responsivePriority: 3 }, // Période
+            { data: 3, orderable: true,  responsivePriority: 4 }, // Statut
+            { data: 4, orderable: true,  responsivePriority: 6 }, // Montant
+            { data: 5, orderable: false, responsivePriority: 2 }, // Actions
+        ],
+        order: [[0, 'asc']],
+    });
+
+    $('#filter-statut, #filter-plan').on('change', function() {
+        dtAbonnements.ajax.reload();
+    });
+
+    var searchTimer;
+    $('#filter-search').on('keyup', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() {
+            dtAbonnements.search($('#filter-search').val()).draw();
+        }, 300);
+    });
+});
+
+function resetAbonnementFilters() {
+    $('#filter-statut').val('');
+    $('#filter-plan').val('');
+    $('#filter-search').val('');
+    dtAbonnements.search('').draw();
 }
 </script>
 @endpush

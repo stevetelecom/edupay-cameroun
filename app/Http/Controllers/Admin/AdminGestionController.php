@@ -51,11 +51,111 @@ class AdminGestionController extends Controller
 
     public function index()
     {
-        $admins = Admin::orderBy('created_at')->get();
+        $totalAdmins = Admin::count();
         return view('admin.admins.index', [
-            'admins'            => $admins,
+            'totalAdmins'       => $totalAdmins,
             'rolesDisponibles'  => $this->rolesDisponibles,
             'pageTitle'         => 'Équipe de supervision — EduPay',
+        ]);
+    }
+
+    public function datatable(Request $request)
+    {
+        $draw   = $request->integer('draw', 1);
+        $start  = $request->integer('start', 0);
+        $length = $request->integer('length', 15);
+        $search = $request->input('search.value', '');
+        $orderCol = $request->input('order.0.column', 0);
+        $orderDir = $request->input('order.0.dir', 'desc');
+
+        $cols = ['nom', null, 'telephone', 'derniere_connexion', 'est_actif', null];
+
+        $query = Admin::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('prenom', 'like', "%{$search}%")
+                  ->orWhere('nom', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('telephone', 'like', "%{$search}%");
+            });
+        }
+
+        $total    = Admin::count();
+        $filtered = $query->count();
+
+        $col = $cols[$orderCol] ?? 'created_at';
+        if ($col) {
+            $query->orderBy($col, $orderDir);
+        } else {
+            $query->orderBy('created_at', $orderDir);
+        }
+
+        if ($length < 1) {
+            $length = $total > 0 ? $total : 1;
+        }
+
+        $admins = $query->skip($start)->take($length)->get();
+
+        $rows = $admins->map(function (Admin $admin) {
+            $roleAdmin = $admin->getRoleNames()->first() ?? '';
+            $roleStyles = [
+                'super-admin'          => 'bg-purple-50 text-purple-700 border-purple-200',
+                'superviseur'          => 'bg-blue-50 text-blue-700 border-blue-200',
+                'comptable_plateforme' => 'bg-amber-50 text-amber-700 border-amber-200',
+            ];
+            $roleLabels = [
+                'super-admin'          => 'Super Admin',
+                'superviseur'          => 'Superviseur',
+                'comptable_plateforme' => 'Comptable plateforme',
+            ];
+            $statusBadge = $admin->est_actif
+                ? '<span class="ep-badge ep-badge-green">Actif</span>'
+                : '<span class="ep-badge ep-badge-red">Suspendu</span>';
+
+            $actions = '<div class="ep-actions">';
+            $actions .= '<button onclick="voirAdmin(\'' . addslashes($admin->initiales) . '\', \'' . addslashes($admin->nom_complet) . '\', \'' . addslashes($admin->email) . '\', \'' . addslashes($admin->telephone ?? '—') . '\', \'' . ($admin->est_actif ? 'Actif' : 'Suspendu') . '\', \'' . ($admin->derniere_connexion ? $admin->derniere_connexion->diffForHumans() : 'Jamais') . '\', \'' . addslashes($roleAdmin) . '\')" class="ep-btn-icon ep-btn-teal" title="Voir">'
+                . '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+                . '</button>';
+
+            if ($admin->id !== auth()->guard('admin')->id()) {
+                $actions .= '<button onclick="modifierAdmin(' . $admin->id . ', \'' . addslashes($admin->prenom) . '\', \'' . addslashes($admin->nom) . '\', \'' . addslashes($admin->email) . '\', \'' . addslashes($admin->telephone ?? '') . '\', \'' . addslashes($roleAdmin) . '\')" class="ep-btn-icon ep-btn-yellow" title="Modifier">'
+                    . '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>'
+                    . '</button>';
+            }
+
+            if ($admin->id !== auth()->guard('admin')->id()) {
+                if ($admin->est_actif) {
+                    $actions .= '<button onclick="confirmerSuspensionAdmin(' . $admin->id . ', \'' . addslashes($admin->prenom . ' ' . $admin->nom) . '\')" class="ep-btn-icon ep-btn-red" title="Suspendre">'
+                        . '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>'
+                        . '</button>';
+                } else {
+                    $nomCompletAdmin = addslashes($admin->prenom . ' ' . $admin->nom);
+                    $actions .= '<button onclick="confirmerActivationAdmin(' . $admin->id . ', \'' . $nomCompletAdmin . '\')" class="ep-btn-icon ep-btn-green" title="Activer">'
+                        . '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
+                        . '</button>';
+                }
+                $actions .= '<button onclick="confirmerSuppressionAdmin(' . $admin->id . ', \'' . addslashes($admin->prenom . ' ' . $admin->nom) . '\')" class="ep-btn-icon ep-btn-red" title="Supprimer">'
+                    . '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>'
+                    . '</button>';
+            }
+
+            $actions .= '</div>';
+            return [
+                '<div><div class="ep-dt-name">'.e($admin->nom_complet).'</div><div class="ep-dt-sub">'.e($roleLabels[$roleAdmin] ?? $roleAdmin).'</div></div>',
+                $roleAdmin ? '<span class="ep-badge '.($roleStyles[$roleAdmin] ?? 'ep-badge-gray').'">'.e($roleLabels[$roleAdmin] ?? $roleAdmin).'</span>' : '—',
+                '<div>'.e($admin->telephone ?? '—').'</div><div class="ep-dt-sub">'.e($admin->email ?? '—').'</div>',
+                '<div class="ep-dt-sub">'.($admin->derniere_connexion ? $admin->derniere_connexion->diffForHumans() : 'Jamais connecté').'</div>',
+                $statusBadge,
+                $actions,
+            ];
+        });
+
+        return response()->json([
+            'draw'            => $draw,
+            'recordsTotal'    => $total,
+            'recordsFiltered' => $filtered,
+            'data'            => $rows,
         ]);
     }
 

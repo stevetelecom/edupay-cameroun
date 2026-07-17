@@ -118,6 +118,70 @@
   </div>
 </div>
 
+{{-- ══ MODAL : Confirmer suspension ══ --}}
+<div id="modal-suspend-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+     onclick="if(event.target===this)fermerModal(this.id)">
+  <div class="bg-white rounded-xl w-full max-w-sm mx-4 shadow-xl">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-yellow-100">
+      <h3 class="font-bold text-yellow-700">Suspendre l'administrateur</h3>
+      <button onclick="fermerModal('modal-suspend-admin')"
+              class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+    </div>
+    <div class="p-6">
+      <p class="text-sm text-gray-600 leading-relaxed">
+        Vous allez suspendre temporairement le compte de
+        <strong id="suspend-admin-nom" class="text-yellow-700"></strong>.<br><br>
+        L'administrateur ne pourra plus se connecter tant que son compte restera suspendu.
+      </p>
+    </div>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t">
+      <button onclick="fermerModal('modal-suspend-admin')"
+              class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+        Annuler
+      </button>
+      <form id="suspend-admin-form" method="POST" style="display:inline;">
+        @csrf @method('PATCH')
+        <button type="submit"
+                class="px-5 py-2 text-sm bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg">
+          Suspendre
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{{-- ══ MODAL : Confirmer activation ══ --}}
+<div id="modal-activer-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+     onclick="if(event.target===this)fermerModal(this.id)">
+  <div class="bg-white rounded-xl w-full max-w-sm mx-4 shadow-xl">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-green-100">
+      <h3 class="font-bold text-green-700">Activer l'administrateur</h3>
+      <button onclick="fermerModal('modal-activer-admin')"
+              class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+    </div>
+    <div class="p-6">
+      <p class="text-sm text-gray-600 leading-relaxed">
+        Vous allez activer le compte de
+        <strong id="activate-admin-nom" class="text-green-700"></strong>.<br><br>
+        L'administrateur pourra alors se reconnecter immédiatement.
+      </p>
+    </div>
+    <div class="flex justify-end gap-3 px-6 py-4 border-t">
+      <button onclick="fermerModal('modal-activer-admin')"
+              class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+        Annuler
+      </button>
+      <form id="activate-admin-form" method="POST" style="display:inline;">
+        @csrf @method('PATCH')
+        <button type="submit"
+                class="px-5 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg">
+          Activer
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
 {{-- ══ MODAL : Voir un admin ══ --}}
 <div id="modal-voir-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
      onclick="if(event.target===this)fermerModal(this.id)">
@@ -217,7 +281,7 @@
     <div class="flex items-center justify-between mb-6">
       <div>
         <h1 class="text-xl font-bold text-gray-900">Équipe de supervision</h1>
-        <p class="text-sm text-gray-500 mt-0.5">{{ $admins->count() }} administrateur(s) enregistré(s)</p>
+        <p class="text-sm text-gray-500 mt-0.5">{{ $totalAdmins }} administrateur(s) enregistré(s)</p>
       </div>
       @if(Auth::guard('admin')->user()->hasRole('super-admin'))
         <button onclick="ouvrirModal('modal-create-admin')"
@@ -240,109 +304,18 @@
 
     {{-- Tableau des admins --}}
     <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <table class="w-full text-sm">
+      <table id="dt-admins" class="ep-dt text-sm" style="width:100%">
         <thead>
-          <tr class="border-b border-gray-100">
-            <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">Administrateur</th>
-            <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">Rôle</th>
-            <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">Téléphone</th>
-            <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">Dernière connexion</th>
-            <th class="text-left text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">Statut</th>
-            <th class="text-right text-xs font-semibold text-gray-500 uppercase tracking-wide px-5 py-3">Actions</th>
+          <tr>
+            <th>Administrateur</th>
+            <th>Rôle</th>
+            <th>Contact</th>
+            <th>Dernière connexion</th>
+            <th>Statut</th>
+            <th data-orderable="false">Actions</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-50">
-          @foreach($admins as $admin)
-            <tr class="hover:bg-gray-50">
-              <td class="px-5 py-3">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-[#E0F5EE] flex items-center justify-center text-xs font-bold text-[#085041]">
-                    {{ $admin->initiales }}
-                  </div>
-                  <div>
-                    <div class="font-semibold text-gray-900">{{ $admin->nom_complet }}</div>
-                    <div class="text-xs text-gray-500">{{ $admin->email }}</div>
-                  </div>
-                  @if($admin->id === Auth::guard('admin')->id())
-                    <span class="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-0.5 rounded-full">Vous</span>
-                  @endif
-                </div>
-              </td>
-              <td class="px-5 py-3">
-                @php
-                  $roleStyles = [
-                      'super-admin'          => 'bg-purple-50 text-purple-700 border-purple-200',
-                      'superviseur'          => 'bg-blue-50 text-blue-700 border-blue-200',
-                      'comptable_plateforme' => 'bg-amber-50 text-amber-700 border-amber-200',
-                  ];
-                  $roleLabels = [
-                      'super-admin'          => 'Super Admin',
-                      'superviseur'          => 'Superviseur',
-                      'comptable_plateforme' => 'Comptable plateforme',
-                  ];
-                  $roleAdmin = $admin->getRoleNames()->first() ?? '';
-                @endphp
-                <span class="text-xs font-medium px-2 py-1 rounded-full border {{ $roleStyles[$roleAdmin] ?? 'bg-gray-50 text-gray-600 border-gray-200' }}">
-                  {{ $roleLabels[$roleAdmin] ?? $roleAdmin }}
-                </span>
-              </td>
-              <td class="px-5 py-3 text-gray-600">{{ $admin->telephone ?? '—' }}</td>
-              <td class="px-5 py-3 text-gray-500 text-xs">
-                {{ $admin->derniere_connexion ? $admin->derniere_connexion->diffForHumans() : 'Jamais connecté' }}
-              </td>
-              <td class="px-5 py-3">
-                @if($admin->est_actif)
-                  <span class="text-xs font-medium bg-green-50 text-green-700 border border-green-200 px-2 py-1 rounded-full">Actif</span>
-                @else
-                  <span class="text-xs font-medium bg-red-50 text-red-700 border border-red-200 px-2 py-1 rounded-full">Suspendu</span>
-                @endif
-              </td>
-              <td class="px-5 py-3 text-right">
-                <div class="flex items-center justify-end gap-2 flex-wrap">
-                  {{-- Voir (tous) --}}
-                  <button onclick="voirAdmin(
-                      '{{ $admin->initiales }}',
-                      '{{ addslashes($admin->nom_complet) }}',
-                      '{{ addslashes($admin->email) }}',
-                      '{{ addslashes($admin->telephone ?? '—') }}',
-                      '{{ $admin->est_actif ? 'Actif' : 'Suspendu' }}',
-                      '{{ $admin->derniere_connexion ? $admin->derniere_connexion->diffForHumans() : 'Jamais' }}',
-                      '{{ $roleAdmin }}'
-                  )" class="text-xs text-blue-600 hover:text-blue-800 font-medium">Voir</button>
-
-                  @if(Auth::guard('admin')->user()->hasRole('super-admin') && $admin->id !== Auth::guard('admin')->id())
-                  {{-- Modifier --}}
-                  <button onclick="modifierAdmin(
-                      {{ $admin->id }},
-                      '{{ addslashes($admin->prenom) }}',
-                      '{{ addslashes($admin->nom) }}',
-                      '{{ addslashes($admin->email) }}',
-                      '{{ addslashes($admin->telephone ?? '') }}',
-                      '{{ $roleAdmin }}'
-                  )" class="text-xs text-amber-600 hover:text-amber-800 font-medium">Modifier</button>
-
-                  {{-- Suspendre/Activer --}}
-                  @if($admin->est_actif)
-                    <form method="POST" action="{{ route('admin.admins.suspendre', $admin) }}" style="display:inline;">
-                      @csrf @method('PATCH')
-                      <button type="submit" class="text-xs text-orange-500 hover:text-orange-700 font-medium">Suspendre</button>
-                    </form>
-                  @else
-                    <form method="POST" action="{{ route('admin.admins.activer', $admin) }}" style="display:inline;">
-                      @csrf @method('PATCH')
-                      <button type="submit" class="text-xs text-green-600 hover:text-green-800 font-medium">Activer</button>
-                    </form>
-                  @endif
-
-                  {{-- Supprimer --}}
-                  <button onclick="confirmerSuppressionAdmin({{ $admin->id }}, '{{ addslashes($admin->prenom) }} {{ addslashes($admin->nom) }}')"
-                          class="text-xs text-red-500 hover:text-red-700 font-medium">Supprimer</button>
-                  @endif
-                </div>
-              </td>
-            </tr>
-          @endforeach
-        </tbody>
+        <tbody></tbody>
       </table>
     </div>
 
@@ -397,6 +370,22 @@ function modifierAdmin(id, prenom, nom, email, telephone, role) {
     ouvrirModal('modal-edit-admin');
 }
 
+function confirmerSuspensionAdmin(id, nom) {
+    document.getElementById('suspend-admin-nom').textContent = nom;
+    document.getElementById('suspend-admin-form').action = "{{ url(config('app.admin_url_prefix', 'admin-ep2026') . '/admins') }}/" + id + '/suspendre';
+    var modal = document.getElementById('modal-suspend-admin');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+}
+
+function confirmerActivationAdmin(id, nom) {
+    document.getElementById('activate-admin-nom').textContent = nom;
+    document.getElementById('activate-admin-form').action = "{{ url(config('app.admin_url_prefix', 'admin-ep2026') . '/admins') }}/" + id + '/activer';
+    var modal = document.getElementById('modal-activer-admin');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+}
+
 function confirmerSuppressionAdmin(id, nom) {
     document.getElementById('delete-admin-nom').textContent = nom;
     document.getElementById('delete-admin-form').action = "{{ url(config('app.admin_url_prefix', 'admin-ep2026') . '/admins') }}/" + id;
@@ -404,5 +393,31 @@ function confirmerSuppressionAdmin(id, nom) {
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
 }
+
+var dtAdmins;
+
+$(document).ready(function() {
+    if ($.fn.DataTable.isDataTable('#dt-admins')) {
+        $('#dt-admins').DataTable().destroy();
+    }
+
+    dtAdmins = epDT('#dt-admins', {
+        serverSide: true,
+        processing: true,
+        ajax: {
+            url: '{{ route("admin.admins.datatable") }}',
+            type: 'GET'
+        },
+        columns: [
+            { data: 0, orderable: true,  responsivePriority: 1 }, // Administrateur
+            { data: 1, orderable: false, responsivePriority: 5 }, // Rôle
+            { data: 2, orderable: false, responsivePriority: 4 }, // Contact
+            { data: 3, orderable: true,  responsivePriority: 3 }, // Dernière connexion
+            { data: 4, orderable: true,  responsivePriority: 6 }, // Statut
+            { data: 5, orderable: false, responsivePriority: 2 }, // Actions
+        ],
+        order: [[0, 'asc']],
+    });
+});
 </script>
 @endpush

@@ -85,8 +85,11 @@ class EtablissementAdminController extends Controller
         $filtered = $query->count();
 
         $col = $cols[$orderCol] ?? 'created_at';
-        $etablissements = $query->orderBy($col, $orderDir)
-            ->skip($start)->take($length)->get();
+        $query = $query->orderBy($col, $orderDir);
+        if ($length < 1) {
+            $length = $filtered > 0 ? $filtered : 1;
+        }
+        $etablissements = $query->skip($start)->take($length)->get();
 
         $rows = $etablissements->map(function ($e) {
             $statutBadge = match($e->statut) {

@@ -142,8 +142,11 @@ class ApprenantController extends Controller
         $filtered = $query->count();
 
         $col = $cols[$orderCol] ?? 'nom';
-        $apprenants = $query->orderBy($col, $orderDir)
-            ->skip($start)->take($length)->get();
+        $query = $query->orderBy($col, $orderDir);
+        if ($length < 1) {
+            $length = $filtered > 0 ? $filtered : 1;
+        }
+        $apprenants = $query->skip($start)->take($length)->get();
 
         $rows = $apprenants->map(function ($a) {
             $statutBadge = match($a->statut_paiement) {
