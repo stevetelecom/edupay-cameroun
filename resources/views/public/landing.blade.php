@@ -52,38 +52,63 @@
     </div>
 
     {{-- Filtre rapide --}}
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-      <input type="text" id="etab-filter"
-             placeholder="Rechercher un établissement..."
-             oninput="filtrerEtabsPublic()"
-             style="flex:1;min-width:200px;padding:10px 14px;border:1px solid #ddd;
-                    border-radius:8px;font-size:13px;outline:none;
-                    transition:border-color 0.15s;" 
-             onfocus="this.style.borderColor='var(--ep-teal)'"
-             onblur="this.style.borderColor='#ddd'" />
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+      <div style="position:relative;flex:1;min-width:250px;">
+        <span class="material-symbols-outlined" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:#999;pointer-events:none;">search</span>
+        <input type="text" id="etab-filter"
+               placeholder="Rechercher un établissement, une ville..."
+               onkeyup="filtrerEtabsPublic()"
+               onkeypress="if(event.key==='Enter'){filtrerEtabsPublic();}"
+               style="width:100%;padding:11px 14px 11px 40px;border:1px solid #ddd;
+                      border-radius:8px;font-size:13px;outline:none;
+                      transition:all 0.15s;" 
+               onfocus="this.style.borderColor='var(--ep-teal)';this.style.boxShadow='0 0 0 3px rgba(13,158,117,0.1)'"
+               onblur="this.style.borderColor='#ddd';this.style.boxShadow='none'" />
+      </div>
+      
       <select id="type-filter" onchange="filtrerEtabsPublic()"
-              style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;
+              style="padding:11px 14px;border:1px solid #ddd;border-radius:8px;
                      font-size:13px;background:#fff;outline:none;cursor:pointer;
-                     transition:border-color 0.15s;"
-              onfocus="this.style.borderColor='var(--ep-teal)'"
-              onblur="this.style.borderColor='#ddd'">
+                     transition:all 0.15s;min-width:160px;"
+              onfocus="this.style.borderColor='var(--ep-teal)';this.style.boxShadow='0 0 0 3px rgba(13,158,117,0.1)'"
+              onblur="this.style.borderColor='#ddd';this.style.boxShadow='none'">
         <option value="">Tous les types</option>
         <option value="maternelle">Maternelle</option>
         <option value="primaire">Primaire</option>
         <option value="college">Collège</option>
         <option value="lycee_general">Lycée général</option>
         <option value="lycee_technique">Lycée technique</option>
-        <option value="universite">Université</option>
         <option value="institut">Institut</option>
       </select>
+      
+      <button type="button" id="filter-btn" onclick="filtrerEtabsPublic()" 
+              style="padding:11px 20px;border:none;border-radius:8px;
+                     background:var(--ep-teal);font-size:13px;font-weight:600;
+                     cursor:pointer;color:#fff;transition:all 0.15s;
+                     box-shadow:0 2px 4px rgba(13,158,117,0.2);display:inline-flex;
+                     align-items:center;gap:6px;"
+              onmouseover="this.style.background='#0B8A62';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 8px rgba(13,158,117,0.3)'"
+              onmouseout="this.style.background='var(--ep-teal)';this.style.transform='translateY(0)';this.style.boxShadow='0 2px 4px rgba(13,158,117,0.2)'">
+        <span class="material-symbols-outlined" style="font-size:18px;">search</span>
+        Rechercher
+      </button>
+      
       <button type="button" id="reset-filter-btn" onclick="resetFiltreEtabs()" 
-              style="padding:10px 16px;border:1px solid #ddd;border-radius:8px;
-                     background:#f8f8f8;font-size:13px;cursor:pointer;
-                     color:#666;display:none;transition:all 0.15s;"
-              onmouseover="this.style.background='#e8e8e8'"
-              onmouseout="this.style.background='#f8f8f8'">
+              style="padding:11px 18px;border:1px solid #ddd;border-radius:8px;
+                     background:#fff;font-size:13px;font-weight:500;cursor:pointer;
+                     color:#666;display:none;transition:all 0.15s;
+                     inline-flex;align-items:center;gap:6px;"
+              onmouseover="this.style.background='#f8f8f8';this.style.borderColor='#999'"
+              onmouseout="this.style.background='#fff';this.style.borderColor='#ddd'">
+        <span class="material-symbols-outlined" style="font-size:16px;color:#666;">close</span>
         Réinitialiser
       </button>
+    </div>
+    
+    {{-- Compteur de résultats --}}
+    <div id="results-counter" style="font-size:12px;color:#666;margin-bottom:12px;display:none;">
+      <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;color:var(--ep-teal);">filter_alt</span>
+      <span id="results-count">0</span> établissement(s) trouvé(s)
     </div>
 
     {{-- Grille établissements --}}
@@ -116,8 +141,9 @@
              title="{{ $etab->nom }}">
           {{ $etab->nom }}
         </div>
-        <div style="font-size:11px;color:#888;margin-bottom:8px;">
-          📍 {{ $etab->ville ?? '—' }}
+        <div style="font-size:11px;color:#888;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:4px;">
+          <span class="material-symbols-outlined" style="font-size:14px;color:#888;">location_on</span>
+          {{ $etab->ville ?? '—' }}
         </div>
         <span style="font-size:10px;padding:3px 8px;border-radius:20px;
                      background:var(--ep-teal-lt);color:#085041;font-weight:500;">
@@ -322,13 +348,22 @@ function filtrerEtabsPublic() {
         totalCards = allCards.length;
     }
     
-    var q    = (document.getElementById('etab-filter').value || '').toLowerCase().trim();
-    var type = (document.getElementById('type-filter').value || '').toLowerCase().trim();
-    
-    // Afficher/masquer le bouton reset
+    var searchInput = document.getElementById('etab-filter');
+    var typeSelect = document.getElementById('type-filter');
     var resetBtn = document.getElementById('reset-filter-btn');
-    if (resetBtn) {
-        resetBtn.style.display = (q || type) ? '' : 'none';
+    var resultsCounter = document.getElementById('results-counter');
+    var resultsCount = document.getElementById('results-count');
+    
+    var q    = (searchInput.value || '').toLowerCase().trim();
+    var type = (typeSelect.value || '').toLowerCase().trim();
+    
+    // Afficher/masquer le bouton reset et le compteur
+    if (q || type) {
+        resetBtn.style.display = '';
+        resultsCounter.style.display = '';
+    } else {
+        resetBtn.style.display = 'none';
+        resultsCounter.style.display = 'none';
     }
     
     var visibleCount = 0;
@@ -353,12 +388,18 @@ function filtrerEtabsPublic() {
                 card.style.display = 'none';
             } else {
                 card.style.display = '';
+                card.style.animation = 'fadeIn 0.3s ease-in';
                 visibleCount++;
             }
         } else {
             card.style.display = 'none';
         }
     });
+    
+    // Mettre à jour le compteur
+    if (resultsCount) {
+        resultsCount.textContent = visibleCount;
+    }
     
     // Afficher un message si aucun résultat
     var grid = document.getElementById('etabs-grid');
@@ -368,8 +409,10 @@ function filtrerEtabsPublic() {
         if (!noResultMsg) {
             noResultMsg = document.createElement('div');
             noResultMsg.id = 'no-result-message';
-            noResultMsg.style.cssText = 'grid-column:1/-1;text-align:center;color:#aaa;padding:40px 0;font-size:13px;';
-            noResultMsg.innerHTML = '🔍 Aucun établissement trouvé pour cette recherche.';
+            noResultMsg.style.cssText = 'grid-column:1/-1;text-align:center;color:#aaa;padding:40px 0;font-size:14px;';
+            noResultMsg.innerHTML = '<div style="margin-bottom:16px;"><span class="material-symbols-outlined" style="font-size:64px;color:#ddd;">search_off</span></div>' +
+                                   '<div style="font-weight:600;color:#666;margin-bottom:8px;">Aucun établissement trouvé</div>' +
+                                   '<div style="font-size:12px;">Essayez avec un autre nom, ville ou type d\'établissement.</div>';
             grid.appendChild(noResultMsg);
         }
         noResultMsg.style.display = '';
@@ -377,15 +420,24 @@ function filtrerEtabsPublic() {
         noResultMsg.style.display = 'none';
     }
     
-    console.log('Filtre appliqué: ' + visibleCount + ' établissement(s) affiché(s)');
+    console.log('🔍 Filtre appliqué: ' + visibleCount + '/' + totalCards + ' établissement(s)');
 }
 
 // ── Réinitialiser les filtres ──
 function resetFiltreEtabs() {
-    document.getElementById('etab-filter').value = '';
-    document.getElementById('type-filter').value = '';
-    document.getElementById('reset-filter-btn').style.display = 'none';
+    var searchInput = document.getElementById('etab-filter');
+    var typeSelect = document.getElementById('type-filter');
+    var resetBtn = document.getElementById('reset-filter-btn');
+    var resultsCounter = document.getElementById('results-counter');
+    
+    searchInput.value = '';
+    typeSelect.value = '';
+    resetBtn.style.display = 'none';
+    resultsCounter.style.display = 'none';
+    
     filtrerEtabsPublic();
+    
+    console.log('🔄 Filtres réinitialisés');
 }
 
 // ── Afficher / masquer tous les établissements ──
@@ -400,6 +452,8 @@ function toggleTousEtabs(btn) {
     btn.textContent = etabsLimites
         ? 'Réduire la liste'
         : 'Voir tous les ' + totalCards + ' établissements';
+        
+    console.log('👁️ Affichage: ' + (etabsLimites ? 'tous' : '12 premiers'));
 }
 
 // ── Limiter à 12 au chargement si > 12 ──
@@ -415,8 +469,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    console.log('Établissements chargés: ' + totalCards);
+    console.log('✅ Page chargée: ' + totalCards + ' établissement(s) disponible(s)');
+    
+    // Permettre la recherche avec Enter
+    document.getElementById('etab-filter').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            filtrerEtabsPublic();
+        }
+    });
 });
+
+// Animation fadeIn
+var style = document.createElement('style');
+style.innerHTML = '@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }';
+document.head.appendChild(style);
 </script>
 @endpush
 
