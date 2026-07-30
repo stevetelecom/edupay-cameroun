@@ -57,10 +57,16 @@
              placeholder="Rechercher un établissement..."
              oninput="filtrerEtabsPublic()"
              style="flex:1;min-width:200px;padding:10px 14px;border:1px solid #ddd;
-                    border-radius:8px;font-size:13px;outline:none;" />
+                    border-radius:8px;font-size:13px;outline:none;
+                    transition:border-color 0.15s;" 
+             onfocus="this.style.borderColor='var(--ep-teal)'"
+             onblur="this.style.borderColor='#ddd'" />
       <select id="type-filter" onchange="filtrerEtabsPublic()"
               style="padding:10px 14px;border:1px solid #ddd;border-radius:8px;
-                     font-size:13px;background:#fff;outline:none;">
+                     font-size:13px;background:#fff;outline:none;cursor:pointer;
+                     transition:border-color 0.15s;"
+              onfocus="this.style.borderColor='var(--ep-teal)'"
+              onblur="this.style.borderColor='#ddd'">
         <option value="">Tous les types</option>
         <option value="maternelle">Maternelle</option>
         <option value="primaire">Primaire</option>
@@ -70,15 +76,23 @@
         <option value="universite">Université</option>
         <option value="institut">Institut</option>
       </select>
+      <button type="button" id="reset-filter-btn" onclick="resetFiltreEtabs()" 
+              style="padding:10px 16px;border:1px solid #ddd;border-radius:8px;
+                     background:#f8f8f8;font-size:13px;cursor:pointer;
+                     color:#666;display:none;transition:all 0.15s;"
+              onmouseover="this.style.background='#e8e8e8'"
+              onmouseout="this.style.background='#f8f8f8'">
+        Réinitialiser
+      </button>
     </div>
 
     {{-- Grille établissements --}}
     <div id="etabs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
       @forelse($etablissements as $etab)
       <div class="etab-card-pub"
-           data-nom="{{ strtolower($etab->nom) }}"
-           data-ville="{{ strtolower($etab->ville ?? '') }}"
-           data-type="{{ strtolower($etab->type ?? '') }}"
+           data-nom="{{ e(strtolower($etab->nom)) }}"
+           data-ville="{{ e(strtolower($etab->ville ?? '')) }}"
+           data-type="{{ e(strtolower($etab->type ?? '')) }}"
            style="background:#fff;border:1px solid #eee;border-radius:12px;
                   padding:16px;text-align:center;transition:box-shadow .15s;
                   cursor:default;">
@@ -299,42 +313,109 @@
 <script>
 // ── Filtre établissements publics ──
 var allCards = null;
+var etabsLimites = false;
+var totalCards = 0;
 
 function filtrerEtabsPublic() {
-    if (!allCards) allCards = document.querySelectorAll('.etab-card-pub');
+    if (!allCards) {
+        allCards = document.querySelectorAll('.etab-card-pub');
+        totalCards = allCards.length;
+    }
+    
     var q    = (document.getElementById('etab-filter').value || '').toLowerCase().trim();
     var type = (document.getElementById('type-filter').value || '').toLowerCase().trim();
-    allCards.forEach(function(card) {
-        var nom   = card.dataset.nom   || '';
-        var ville = card.dataset.ville || '';
-        var t     = card.dataset.type  || '';
-        var matchQ    = !q    || nom.includes(q) || ville.includes(q);
+    
+    // Afficher/masquer le bouton reset
+    var resetBtn = document.getElementById('reset-filter-btn');
+    if (resetBtn) {
+        resetBtn.style.display = (q || type) ? '' : 'none';
+    }
+    
+    var visibleCount = 0;
+    
+    allCards.forEach(function(card, idx) {
+        var nom   = (card.getAttribute('data-nom') || '').toLowerCase();
+        var ville = (card.getAttribute('data-ville') || '').toLowerCase();
+        var t     = (card.getAttribute('data-type') || '').toLowerCase();
+        
+        // Recherche dans nom et ville
+        var matchQ = !q || nom.indexOf(q) !== -1 || ville.indexOf(q) !== -1;
+        
+        // Comparaison exacte du type
         var matchType = !type || t === type;
-        card.style.display = (matchQ && matchType) ? '' : 'none';
+        
+        // Affichage basé sur le filtre ET la limite si activée
+        var shouldShow = matchQ && matchType;
+        
+        if (shouldShow) {
+            // Si limité et que c'est au-delà de 12, ne pas afficher
+            if (!etabsLimites && totalCards > 12 && idx >= 12) {
+                card.style.display = 'none';
+            } else {
+                card.style.display = '';
+                visibleCount++;
+            }
+        } else {
+            card.style.display = 'none';
+        }
     });
+    
+    // Afficher un message si aucun résultat
+    var grid = document.getElementById('etabs-grid');
+    var noResultMsg = document.getElementById('no-result-message');
+    
+    if (visibleCount === 0 && (q || type)) {
+        if (!noResultMsg) {
+            noResultMsg = document.createElement('div');
+            noResultMsg.id = 'no-result-message';
+            noResultMsg.style.cssText = 'grid-column:1/-1;text-align:center;color:#aaa;padding:40px 0;font-size:13px;';
+            noResultMsg.innerHTML = '🔍 Aucun établissement trouvé pour cette recherche.';
+            grid.appendChild(noResultMsg);
+        }
+        noResultMsg.style.display = '';
+    } else if (noResultMsg) {
+        noResultMsg.style.display = 'none';
+    }
+    
+    console.log('Filtre appliqué: ' + visibleCount + ' établissement(s) affiché(s)');
+}
+
+// ── Réinitialiser les filtres ──
+function resetFiltreEtabs() {
+    document.getElementById('etab-filter').value = '';
+    document.getElementById('type-filter').value = '';
+    document.getElementById('reset-filter-btn').style.display = 'none';
+    filtrerEtabsPublic();
 }
 
 // ── Afficher / masquer tous les établissements ──
-var etabsLimites = false;
 function toggleTousEtabs(btn) {
     if (!allCards) allCards = document.querySelectorAll('.etab-card-pub');
+    
     etabsLimites = !etabsLimites;
-    allCards.forEach(function(card, idx) {
-        if (idx >= 12) card.style.display = etabsLimites ? '' : 'none';
-    });
+    
+    // Réappliquer le filtre avec la nouvelle limite
+    filtrerEtabsPublic();
+    
     btn.textContent = etabsLimites
         ? 'Réduire la liste'
-        : 'Voir tous les établissements';
+        : 'Voir tous les ' + totalCards + ' établissements';
 }
 
 // ── Limiter à 12 au chargement si > 12 ──
 document.addEventListener('DOMContentLoaded', function() {
     allCards = document.querySelectorAll('.etab-card-pub');
-    if (allCards.length > 12) {
+    totalCards = allCards.length;
+    
+    if (totalCards > 12) {
         allCards.forEach(function(card, idx) {
-            if (idx >= 12) card.style.display = 'none';
+            if (idx >= 12) {
+                card.style.display = 'none';
+            }
         });
     }
+    
+    console.log('Établissements chargés: ' + totalCards);
 });
 </script>
 @endpush
