@@ -90,7 +90,7 @@
 <script>
 const statutUrl = "{{ route('payeur.paiement.statut', $paiement) }}";
 let tentatives = 0;
-const maxTentatives = 24; // 2 minutes max (24 × 5s)
+const maxTentatives = 60; // 5 minutes max (60 × 5s) // 2 minutes max (24 × 5s)
 
 function afficher(etat) {
     document.getElementById('icone-attente').style.display = etat === 'attente' ? '' : 'none';
