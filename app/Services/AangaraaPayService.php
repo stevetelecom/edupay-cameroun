@@ -114,10 +114,18 @@ class AangaraaPayService
     public function normaliserNumero(string $telephone): string
     {
         $numero = preg_replace('/\D/', '', $telephone);
-        if (! str_starts_with($numero, '237')) {
-            $numero = '237' . $numero;
+
+        if (str_starts_with($numero, '237')) {
+            $numero = substr($numero, 3);
         }
-        return $numero;
+
+        $numero = ltrim($numero, '0');
+
+        if (strlen($numero) > 9) {
+            $numero = substr($numero, -9);
+        }
+
+        return '237' . $numero;
     }
 
     public function initierPaiement(
@@ -125,38 +133,56 @@ class AangaraaPayService
         int    $montant,
         string $description,
         string $transactionId,
-        string $notifyUrl
+        string $notifyUrl,
+        ?string $operateurForce = null
     ): array {
-        $operateur = $this->detecterOperateur($telephone);
         $numero    = $this->normaliserNumero($telephone);
+        $operateur = $operateurForce ?? $this->detecterOperateur($numero);
+
+        // #region agent log
+        file_put_contents('/home/adminsys/edupay-cameroun/.cursor/debug-ee0550.log', json_encode(['sessionId'=>'ee0550','hypothesisId'=>'A,B','location'=>'AangaraaPayService.php:initierPaiement:pre','message'=>'Payload AangaraaPay avant envoi','data'=>['telephone_brut_len'=>strlen(preg_replace('/\D/','',$telephone)),'telephone_normalise'=>$numero,'operateur'=>$operateur,'operateur_force'=>$operateurForce,'montant'=>$montant,'transaction_id'=>$transactionId],'timestamp'=>round(microtime(true)*1000)])."\n", FILE_APPEND);
+        // #endregion
 
         try {
+            $payload = [
+                'phone_number'   => $numero,
+                'amount'         => (string) $montant,
+                'description'    => $description,
+                'app_key'        => $this->appKey,
+                'transaction_id' => $transactionId,
+                'notify_url'     => $notifyUrl,
+                'operator'       => $operateur,
+                'devise_id'      => 'XAF',
+            ];
+
             $response = Http::timeout(30)
-                ->post($this->apiUrl . '/no_redirect/payment', [
-                    'phone_number'   => $numero,
-                    'amount'         => (string) $montant,
-                    'description'    => $description,
-                    'app_key'        => $this->appKey,
-                    'transaction_id' => $transactionId,
-                    'notify_url'     => $notifyUrl,
-                    'operator'       => $operateur,
-                    'devise_id'      => 'XAF',
-                ]);
+                ->post($this->apiUrl . '/no_redirect/payment', $payload);
 
             $data = $response->json();
+            $statutApi = $data['data']['status'] ?? 'FAILED';
+            $payToken  = $data['data']['payToken'] ?? null;
+
+            // #region agent log
+            file_put_contents('/home/adminsys/edupay-cameroun/.cursor/debug-ee0550.log', json_encode(['sessionId'=>'ee0550','hypothesisId'=>'C,D','location'=>'AangaraaPayService.php:initierPaiement:post','message'=>'Reponse AangaraaPay initier','data'=>['http_status'=>$response->status(),'statut_api'=>$statutApi,'has_pay_token'=>!empty($payToken),'message'=>$data['message']??null,'operator_sent'=>$operateur],'timestamp'=>round(microtime(true)*1000)])."\n", FILE_APPEND);
+            // #endregion
 
             Log::info('AangaraaPay initier', [
                 'transaction_id' => $transactionId,
+                'telephone'      => $numero,
                 'operateur'      => $operateur,
                 'response'       => $data,
             ]);
 
+            $succes = $response->status() === 201
+                && $statutApi === 'PENDING'
+                && ! empty($payToken);
+
             return [
-                'succes'    => $response->status() === 201,
-                'pay_token' => $data['data']['payToken'] ?? null,
-                'statut'    => $data['data']['status']   ?? 'FAILED',
+                'succes'    => $succes,
+                'pay_token' => $payToken,
+                'statut'    => $statutApi,
                 'operateur' => $operateur,
-                'message'   => $data['message']          ?? 'Erreur inconnue',
+                'message'   => $data['message'] ?? ($statutApi === 'FAILED' ? 'Le paiement a été refusé par l\'opérateur Mobile Money.' : 'Erreur inconnue'),
                 'raw'       => $data,
             ];
 

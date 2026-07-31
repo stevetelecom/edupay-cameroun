@@ -87,19 +87,34 @@ class PaiementController extends Controller
         $notifyUrl  = route('payeur.paiement.webhook');
         $description = 'EduPay — ' . $fraisApprenant->categorieFrais->nom . ' — ' . $fraisApprenant->apprenant->nom;
 
+        $operateur = match ($validated['mode_paiement']) {
+            'mtn_momo'      => 'MTN_Cameroon',
+            'orange_money'  => 'Orange_Cameroon',
+            default         => null,
+        };
+
+        // #region agent log
+        file_put_contents('/home/adminsys/edupay-cameroun/.cursor/debug-ee0550.log', json_encode(['sessionId'=>'ee0550','hypothesisId'=>'A,B,E','location'=>'PaiementController.php:initier','message'=>'Formulaire paiement recu','data'=>['telephone_saisi'=>$telephone,'mode_paiement'=>$validated['mode_paiement'],'operateur_choisi'=>$operateur,'profil_user_telephone'=>Auth::user()->telephone,'notify_url'=>$notifyUrl,'reference'=>$paiement->reference],'timestamp'=>round(microtime(true)*1000)])."\n", FILE_APPEND);
+        // #endregion
+
         $resultat = $this->aangaraa->initierPaiement(
-            telephone:     $telephone,
-            montant:       $paiement->montant_total_paye, // montant + frais service
-            description:   $description,
-            transactionId: $paiement->reference,
-            notifyUrl:     $notifyUrl
+            telephone:      $telephone,
+            montant:        $paiement->montant_total_paye,
+            description:    $description,
+            transactionId:  $paiement->reference,
+            notifyUrl:      $notifyUrl,
+            operateurForce: $operateur,
         );
 
         if (! $resultat['succes']) {
             $paiement->update(['statut' => 'echoue']);
 
+            $detail = $resultat['statut'] === 'FAILED'
+                ? 'Vérifiez que le numéro saisi (' . $telephone . ') est bien celui enregistré sur votre compte Mobile Money.'
+                : $resultat['message'];
+
             return back()->with('error',
-                'Échec de l\'initialisation du paiement : ' . $resultat['message']
+                'Échec de l\'initialisation du paiement : ' . $detail
             );
         }
 
