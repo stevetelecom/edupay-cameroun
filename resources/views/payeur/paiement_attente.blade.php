@@ -9,9 +9,26 @@
     <div class="epcard" style="padding:32px;">
 
         {{-- Icône animée --}}
-        <div id="icone-attente" style="font-size:48px;margin-bottom:16px;">⏳</div>
-        <div id="icone-valide" style="font-size:48px;margin-bottom:16px;display:none;">✅</div>
-        <div id="icone-echec"  style="font-size:48px;margin-bottom:16px;display:none;">❌</div>
+        <div id="icone-attente" style="margin-bottom:16px;display:flex;justify-content:center;">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="1.5"
+                 style="animation:spin 1.5s linear infinite;">
+                <circle cx="12" cy="12" r="10" stroke="#E0F5EE" stroke-width="2"/>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke="#0D9E75" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div id="icone-valide" style="margin-bottom:16px;display:none;justify-content:center;">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10" fill="#E0F5EE"/>
+                <polyline points="7 12 10.5 15.5 17 8.5" stroke="#0D9E75" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div id="icone-echec" style="margin-bottom:16px;display:none;justify-content:center;">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#D94040" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10" fill="#FBEAEA"/>
+                <line x1="8" y1="8" x2="16" y2="16" stroke="#D94040" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="16" y1="8" x2="8" y2="16" stroke="#D94040" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+        </div>
 
         <div id="msg-attente">
             <div style="font-size:17px;font-weight:700;margin-bottom:8px;">En attente de confirmation</div>
@@ -20,7 +37,17 @@
                 sur votre téléphone <strong>{{ $paiement->telephone_paiement }}</strong>.<br><br>
                 Réf. : <code>{{ $paiement->reference }}</code>
             </div>
-            <div style="font-size:12px;color:#aaa;">Vérification automatique toutes les 5 secondes…</div>
+            <div style="font-size:13px;color:#0D9E75;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2">
+                    <rect x="5" y="2" width="14" height="20" rx="2"/>
+                    <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                Consultez votre téléphone maintenant
+            </div>
+            <div style="font-size:12px;color:#888;margin-bottom:8px;">
+                MTN ou Orange envoie une notification USSD — entrez votre code PIN MoMo pour confirmer.
+            </div>
+            <div style="font-size:11px;color:#aaa;">Vérification automatique toutes les 5 secondes…</div>
         </div>
 
         <div id="msg-valide" style="display:none;">
@@ -51,6 +78,12 @@
 </div>
 
 @endsection
+
+@push('styles')
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+@endpush
 
 @push('scripts')
 <script>
