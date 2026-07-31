@@ -94,15 +94,33 @@
 <script>
 const statutUrl = "{{ route('payeur.paiement.statut', $paiement) }}";
 let tentatives = 0;
-const maxTentatives = 60; // 5 minutes max (60 × 5s) — laisse le temps pour *126# // 2 minutes max (24 × 5s)
+const maxTentatives = 72; // 6 minutes (72 × 5s)
+let dejaMontreEchec = false;
 
 function afficher(etat) {
-    document.getElementById('icone-attente').style.display = etat === 'attente' ? '' : 'none';
-    document.getElementById('icone-valide').style.display  = etat === 'valide'  ? '' : 'none';
-    document.getElementById('icone-echec').style.display   = etat === 'echec'   ? '' : 'none';
+    document.getElementById('icone-attente').style.display = etat === 'attente' ? 'flex' : 'none';
+    document.getElementById('icone-valide').style.display  = etat === 'valide'  ? 'flex' : 'none';
+    document.getElementById('icone-echec').style.display   = etat === 'echec'   ? 'flex' : 'none';
     document.getElementById('msg-attente').style.display   = etat === 'attente' ? '' : 'none';
     document.getElementById('msg-valide').style.display    = etat === 'valide'  ? '' : 'none';
     document.getElementById('msg-echec').style.display     = etat === 'echec'   ? '' : 'none';
+}
+
+async function verifierApresEchec() {
+    let extra = 0;
+    const maxExtra = 24; // 2 min supplémentaires
+    async function checkExtra() {
+        extra++;
+        try {
+            const res  = await fetch(statutUrl, { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+            if (data.statut === 'valide') {
+                afficher('valide'); return;
+            }
+        } catch (e) {}
+        if (extra < maxExtra) setTimeout(checkExtra, 5000);
+    }
+    checkExtra();
 }
 
 async function verifier() {
@@ -114,20 +132,23 @@ async function verifier() {
         if (data.statut === 'valide') {
             afficher('valide'); return;
         }
+
         if (data.statut === 'echoue') {
-            // Afficher le message précis de l'opérateur
             var detail = document.getElementById('msg-echec-detail');
-            if (detail && data.message) {
-                detail.textContent = data.message;
+            if (detail && data.message) detail.textContent = data.message;
+            afficher('echec');
+            // Continue à vérifier silencieusement — PIN confirmé tardivement
+            if (!dejaMontreEchec) {
+                dejaMontreEchec = true;
+                verifierApresEchec();
             }
-            afficher('echec'); return;
+            return;
         }
-    } catch (e) { /* réseau — on réessaie */ }
+    } catch (e) {}
 
     if (tentatives >= maxTentatives) {
         afficher('echec'); return;
     }
-
     setTimeout(verifier, 5000);
 }
 
