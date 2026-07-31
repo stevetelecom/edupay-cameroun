@@ -10,24 +10,25 @@
 
         {{-- Icône animée --}}
         <div id="icone-attente" style="margin-bottom:16px;display:flex;justify-content:center;">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="1.5"
-                 style="animation:spin 1.5s linear infinite;">
-                <circle cx="12" cy="12" r="10" stroke="#E0F5EE" stroke-width="2"/>
-                <path d="M12 2a10 10 0 0 1 10 10" stroke="#0D9E75" stroke-width="2" stroke-linecap="round"/>
-            </svg>
+            <span class="material-symbols-outlined"
+                  style="font-size:56px;color:#0D9E75;animation:spin 2s linear infinite;
+                         font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 48;">
+                progress_activity
+            </span>
         </div>
         <div id="icone-valide" style="margin-bottom:16px;display:none;justify-content:center;">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="1.5">
-                <circle cx="12" cy="12" r="10" fill="#E0F5EE"/>
-                <polyline points="7 12 10.5 15.5 17 8.5" stroke="#0D9E75" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <span class="material-symbols-outlined"
+                  style="font-size:56px;color:#0D9E75;
+                         font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">
+                check_circle
+            </span>
         </div>
         <div id="icone-echec" style="margin-bottom:16px;display:none;justify-content:center;">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#D94040" stroke-width="1.5">
-                <circle cx="12" cy="12" r="10" fill="#FBEAEA"/>
-                <line x1="8" y1="8" x2="16" y2="16" stroke="#D94040" stroke-width="2.5" stroke-linecap="round"/>
-                <line x1="16" y1="8" x2="8" y2="16" stroke="#D94040" stroke-width="2.5" stroke-linecap="round"/>
-            </svg>
+            <span class="material-symbols-outlined"
+                  style="font-size:56px;color:#D94040;
+                         font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">
+                cancel
+            </span>
         </div>
 
         <div id="msg-attente">
@@ -38,10 +39,10 @@
                 Réf. : <code>{{ $paiement->reference }}</code>
             </div>
             <div style="font-size:13px;color:#0D9E75;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2">
-                    <rect x="5" y="2" width="14" height="20" rx="2"/>
-                    <line x1="12" y1="18" x2="12.01" y2="18" stroke-width="2.5" stroke-linecap="round"/>
-                </svg>
+                <span class="material-symbols-outlined"
+                      style="font-size:18px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">
+                    smartphone
+                </span>
                 Consultez votre téléphone maintenant
             </div>
             <div style="font-size:12px;color:#888;margin-bottom:8px;">
