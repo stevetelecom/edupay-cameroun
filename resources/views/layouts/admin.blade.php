@@ -75,7 +75,7 @@
                     {{-- En-tête profil --}}
                     <div class="px-4 py-4 border-b border-gray-100">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 rounded-full bg-[#D94040] flex items-center justify-center text-white text-base font-bold flex-shrink-0">
+                            <div class="w-12 h-12 rounded-full bg-[#D94040] flex items-center justify-center text-white text-base font-bold shrink-0">
                                 {{ Auth::guard('admin')->user()->initiales }}
                             </div>
                             <div>
