@@ -84,11 +84,18 @@ class PaymentFlowTest extends TestCase
             ];
         });
 
+        $mock->shouldReceive('normaliserNumero')->andReturnUsing(function (string $telephone) {
+            $service = new AangaraaPayService();
+
+            return $service->normaliserNumero($telephone);
+        });
+
         $mock->shouldReceive('initierPaiement')->andReturn([
-            'succes' => true,
+            'succes'    => true,
             'pay_token' => 'MOCK_TOKEN_123',
+            'statut'    => 'PENDING',
             'operateur' => 'MTN_Cameroon',
-            'message' => 'OK',
+            'message'   => 'OK',
         ]);
 
         // verifierStatut renvoie SUCCESSFUL lors du poll

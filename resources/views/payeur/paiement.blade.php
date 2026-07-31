@@ -114,10 +114,16 @@
             <input type="text"
                    name="telephone_paiement"
                    id="pay-momo-input"
-                   value="{{ old('telephone_paiement', Auth::user()->telephone ?? '') }}"
+                   value="{{ old('telephone_paiement', $telephonePrefill ?? Auth::user()->telephone ?? '') }}"
                    class="inp"
-                   placeholder="650-654 / 670-683"
+                   placeholder="654862989 ou +237654862989"
+                   inputmode="tel"
+                   autocomplete="tel"
                    required>
+            <div style="font-size:11px;color:#888;margin-top:-6px;margin-bottom:10px;">
+                Le <strong>+237</strong> est normal — l'API reçoit <strong>237</strong> suivi de vos 9 chiffres (ex. 237654862989).
+                Vérifiez bien chaque chiffre avant de payer.
+            </div>
             @error('telephone_paiement')
                 <div style="color:var(--ep-red);font-size:11px;margin-top:-8px;margin-bottom:10px;">{{ $message }}</div>
             @enderror

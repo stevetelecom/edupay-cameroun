@@ -34,8 +34,10 @@ return [
         'sender_id' => env('AT_SENDER_ID', ''),
     ],
     'aangaraa' => [
-        'api_url' => env('AANGARAA_API_URL', 'https://api-production.aangaraa-pay.com/api/v1'),
-        'app_key' => env('AANGARAA_APP_KEY', ''),
+        'api_url'     => env('AANGARAA_API_URL', 'https://api-production.aangaraa-pay.com/api/v1'),
+        'app_key'     => env('AANGARAA_APP_KEY', ''),
+        // URL webhook explicite en prod (évite localhost si APP_URL mal configuré)
+        'notify_url'  => env('AANGARAA_NOTIFY_URL'),
     ],
 
     /*

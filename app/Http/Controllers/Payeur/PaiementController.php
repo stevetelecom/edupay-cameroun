@@ -24,13 +24,37 @@ class PaiementController extends Controller
     {
         $this->autoriserAcces($fraisApprenant);
         $fraisApprenant->load(['apprenant.etablissement', 'categorieFrais']);
-        return view('payeur.paiement', compact('fraisApprenant'));
+
+        $telephonePrefill = Auth::user()->telephone
+            ? $this->aangaraa->normaliserNumero(Auth::user()->telephone)
+            : '';
+
+        return view('payeur.paiement', compact('fraisApprenant', 'telephonePrefill'));
     }
 
     // ─────────────────────────────────────────────
     // Initier le paiement → appel AangaraaPay
     // ─────────────────────────────────────────────
     public function initier(Request $request, FraisApprenant $fraisApprenant)
+    {
+        try {
+            return $this->executerInitierPaiement($request, $fraisApprenant);
+        } catch (\Throwable $e) {
+            Log::error('[debug-ee0550] Paiement initier exception', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile() . ':' . $e->getLine(),
+                'user_id' => Auth::id(),
+                'frais'   => $fraisApprenant->id,
+            ]);
+
+            return back()->withInput()->with(
+                'error',
+                'Erreur technique lors du paiement. Vérifiez votre numéro (9 chiffres, ex. 654862989) et réessayez.'
+            );
+        }
+    }
+
+    private function executerInitierPaiement(Request $request, FraisApprenant $fraisApprenant)
     {
         $this->autoriserAcces($fraisApprenant);
 
@@ -44,10 +68,15 @@ class PaiementController extends Controller
             ->latest()
             ->first();
 
+        // Expirer ou synchroniser les paiements en_attente bloquants
         if ($paiementRecent) {
-            return redirect()
-                ->route('payeur.paiement.attente', $paiementRecent)
-                ->with('info', 'Un paiement est déjà en cours pour ce frais. Confirmez-le ou attendez son expiration avant de recommencer.');
+            $peutRelancer = $this->synchroniserPaiementEnAttente($paiementRecent);
+
+            if (! $peutRelancer) {
+                return redirect()
+                    ->route('payeur.paiement.attente', $paiementRecent)
+                    ->with('info', 'Un paiement est déjà en cours pour ce frais. Confirmez-le sur votre téléphone ou attendez 5 minutes.');
+            }
         }
 
         $validated = $request->validate([
@@ -55,6 +84,15 @@ class PaiementController extends Controller
             'mode_paiement'      => ['required', Rule::in(['mtn_momo', 'orange_money'])],
             'telephone_paiement' => ['required', 'string', 'max:20'],
         ]);
+
+        $telephoneNormalise = $this->aangaraa->normaliserNumero($validated['telephone_paiement']);
+        $numeroLocal        = substr($telephoneNormalise, 3);
+
+        if (! preg_match('/^6[0-9]{8}$/', $numeroLocal)) {
+            return back()->withInput()->withErrors([
+                'telephone_paiement' => 'Numéro invalide. Utilisez 9 chiffres (ex. 654862989) ou +237654862989.',
+            ]);
+        }
 
         $resteAPayer = $fraisApprenant->montant_total - $fraisApprenant->montant_paye;
 
@@ -78,27 +116,45 @@ class PaiementController extends Controller
             'mode_paiement'      => $validated['mode_paiement'],
             'type_paiement'      => $validated['type_paiement'],
             'statut'             => 'en_attente',
-            'telephone_paiement' => $validated['telephone_paiement'] ?? null,
+            'telephone_paiement' => $telephoneNormalise,
             'date_paiement'      => now(),
         ]);
 
         // Mobile Money → appel AangaraaPay
-        $telephone  = $validated['telephone_paiement'];
-        $notifyUrl  = route('payeur.paiement.webhook');
+        $telephone   = $telephoneNormalise;
+        $notifyUrl   = config('services.aangaraa.notify_url')
+            ?: route('payeur.paiement.webhook');
+
+        if (str_contains($notifyUrl, 'localhost') || str_contains($notifyUrl, '127.0.0.1')) {
+            Log::warning('[debug-ee0550] notify_url pointe vers localhost — AangaraaPay refusera probablement le paiement', [
+                'notify_url' => $notifyUrl,
+                'app_url'    => config('app.url'),
+            ]);
+        }
         $description = 'EduPay — ' . $fraisApprenant->categorieFrais->nom . ' — ' . $fraisApprenant->apprenant->nom;
 
         $operateur = match ($validated['mode_paiement']) {
-            'mtn_momo'      => 'MTN_Cameroon',
-            'orange_money'  => 'Orange_Cameroon',
-            default         => null,
+            'mtn_momo'     => 'MTN_Cameroon',
+            'orange_money' => 'Orange_Cameroon',
+            default        => null,
         };
 
         // #region agent log
-        file_put_contents('/home/adminsys/edupay-cameroun/.cursor/debug-ee0550.log', json_encode(['sessionId'=>'ee0550','hypothesisId'=>'A,B,E','location'=>'PaiementController.php:initier','message'=>'Formulaire paiement recu','data'=>['telephone_saisi'=>$telephone,'mode_paiement'=>$validated['mode_paiement'],'operateur_choisi'=>$operateur,'profil_user_telephone'=>Auth::user()->telephone,'notify_url'=>$notifyUrl,'reference'=>$paiement->reference],'timestamp'=>round(microtime(true)*1000)])."\n", FILE_APPEND);
+        Log::info('[debug-ee0550] Formulaire paiement recu', [
+            'hypothesisId'           => 'A,B,E,D',
+            'telephone_saisi'        => $telephone,
+            'telephone_normalise'    => $telephoneNormalise,
+            'mode_paiement'          => $validated['mode_paiement'],
+            'operateur_choisi'       => $operateur,
+            'profil_user_telephone'  => Auth::user()->telephone,
+            'notify_url'             => $notifyUrl,
+            'app_url'                => config('app.url'),
+            'reference'              => $paiement->reference,
+        ]);
         // #endregion
 
         $resultat = $this->aangaraa->initierPaiement(
-            telephone:      $telephone,
+            telephone:      $telephoneNormalise,
             montant:        $paiement->montant_total_paye,
             description:    $description,
             transactionId:  $paiement->reference,
@@ -109,12 +165,9 @@ class PaiementController extends Controller
         if (! $resultat['succes']) {
             $paiement->update(['statut' => 'echoue']);
 
-            $detail = $resultat['statut'] === 'FAILED'
-                ? 'Vérifiez que le numéro saisi (' . $telephone . ') est bien celui enregistré sur votre compte Mobile Money.'
-                : $resultat['message'];
-
-            return back()->with('error',
-                'Échec de l\'initialisation du paiement : ' . $detail
+            return back()->withInput()->with('error',
+                'Échec du paiement : ' . $resultat['message']
+                . ' (numéro envoyé à MTN : ' . $telephoneNormalise . ')'
             );
         }
 
@@ -127,7 +180,7 @@ class PaiementController extends Controller
 
         return redirect()
             ->route('payeur.paiement.attente', $paiement)
-            ->with('info', 'Confirmez le paiement sur votre téléphone ' . $telephone);
+            ->with('info', 'Confirmez le paiement sur votre téléphone ' . $telephoneNormalise);
     }
 
     // ─────────────────────────────────────────────
@@ -371,6 +424,37 @@ class PaiementController extends Controller
         if (! $estParent) {
             abort(403, 'Vous n\'êtes pas autorisé à accéder à ce dossier de paiement.');
         }
+    }
+
+    /**
+     * Synchronise un paiement en_attente avec AangaraaPay.
+     * Retourne true si un nouveau paiement peut être lancé.
+     */
+    private function synchroniserPaiementEnAttente(Paiement $paiement): bool
+    {
+        if ($paiement->created_at->lt(now()->subMinutes(5))) {
+            $paiement->update(['statut' => 'echoue']);
+
+            return true;
+        }
+
+        if (! $paiement->pay_token) {
+            return false;
+        }
+
+        $check = $this->aangaraa->verifierStatut($paiement->pay_token);
+
+        if ($check['statut'] === 'FAILED') {
+            $paiement->update(['statut' => 'echoue']);
+
+            return true;
+        }
+
+        if ($check['statut'] === 'SUCCESSFUL') {
+            $this->traiterPaiementValide($paiement->id);
+        }
+
+        return false;
     }
 
     // ─────────────────────────────────────────────

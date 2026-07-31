@@ -16,6 +16,31 @@ class AangaraaPayService
         $this->appKey = config('services.aangaraa.app_key');
     }
 
+    /** Log debug session ee0550 — safe en prod (fallback Log::info). */
+    private function debugLog(string $hypothesisId, string $location, string $message, array $data = []): void
+    {
+        Log::info('[debug-ee0550] ' . $message, array_merge(['hypothesisId' => $hypothesisId, 'location' => $location], $data));
+
+        $payload = json_encode([
+            'sessionId'    => 'ee0550',
+            'hypothesisId' => $hypothesisId,
+            'location'     => $location,
+            'message'      => $message,
+            'data'         => $data,
+            'timestamp'    => round(microtime(true) * 1000),
+        ]) . "\n";
+
+        $path = base_path('.cursor/debug-ee0550.log');
+        try {
+            if (! is_dir(dirname($path))) {
+                @mkdir(dirname($path), 0755, true);
+            }
+            @file_put_contents($path, $payload, FILE_APPEND);
+        } catch (\Throwable) {
+            // Ignorer — chemin non accessible sur O2Switch
+        }
+    }
+
     /**
      * Calcule les frais de service visibles par le payeur.
      * Barème dégressif — fusionné EduPay + AangaraaPay.
@@ -128,6 +153,22 @@ class AangaraaPayService
         return '237' . $numero;
     }
 
+    private function extraireMessageErreur(array $data, string $statutApi): string
+    {
+        $detail = $data['data']['description']
+            ?? $data['data']['message']
+            ?? $data['message']
+            ?? null;
+
+        if ($detail) {
+            return (string) $detail;
+        }
+
+        return $statutApi === 'FAILED'
+            ? 'Le paiement a été refusé par l\'opérateur Mobile Money.'
+            : 'Erreur inconnue';
+    }
+
     public function initierPaiement(
         string $telephone,
         int    $montant,
@@ -136,11 +177,31 @@ class AangaraaPayService
         string $notifyUrl,
         ?string $operateurForce = null
     ): array {
+        if ($this->appKey === '') {
+            Log::error('AangaraaPay : AANGARAA_APP_KEY manquante');
+
+            return [
+                'succes'    => false,
+                'pay_token' => null,
+                'statut'    => 'FAILED',
+                'operateur' => $operateurForce ?? 'ALL',
+                'message'   => 'Configuration paiement incomplète (clé API manquante).',
+                'raw'       => [],
+            ];
+        }
+
         $numero    = $this->normaliserNumero($telephone);
         $operateur = $operateurForce ?? $this->detecterOperateur($numero);
 
         // #region agent log
-        file_put_contents('/home/adminsys/edupay-cameroun/.cursor/debug-ee0550.log', json_encode(['sessionId'=>'ee0550','hypothesisId'=>'A,B','location'=>'AangaraaPayService.php:initierPaiement:pre','message'=>'Payload AangaraaPay avant envoi','data'=>['telephone_brut_len'=>strlen(preg_replace('/\D/','',$telephone)),'telephone_normalise'=>$numero,'operateur'=>$operateur,'operateur_force'=>$operateurForce,'montant'=>$montant,'transaction_id'=>$transactionId],'timestamp'=>round(microtime(true)*1000)])."\n", FILE_APPEND);
+        $this->debugLog('A,B', 'AangaraaPayService::initierPaiement:pre', 'Payload AangaraaPay avant envoi', [
+            'telephone_brut'      => $telephone,
+            'telephone_normalise' => $numero,
+            'operateur'           => $operateur,
+            'montant'             => $montant,
+            'transaction_id'      => $transactionId,
+            'notify_url'          => $notifyUrl,
+        ]);
         // #endregion
 
         try {
@@ -158,18 +219,26 @@ class AangaraaPayService
             $response = Http::timeout(30)
                 ->post($this->apiUrl . '/no_redirect/payment', $payload);
 
-            $data = $response->json();
+            $data      = is_array($response->json()) ? $response->json() : [];
             $statutApi = $data['data']['status'] ?? 'FAILED';
             $payToken  = $data['data']['payToken'] ?? null;
+            $message   = $this->extraireMessageErreur($data, $statutApi);
 
             // #region agent log
-            file_put_contents('/home/adminsys/edupay-cameroun/.cursor/debug-ee0550.log', json_encode(['sessionId'=>'ee0550','hypothesisId'=>'C,D','location'=>'AangaraaPayService.php:initierPaiement:post','message'=>'Reponse AangaraaPay initier','data'=>['http_status'=>$response->status(),'statut_api'=>$statutApi,'has_pay_token'=>!empty($payToken),'message'=>$data['message']??null,'operator_sent'=>$operateur],'timestamp'=>round(microtime(true)*1000)])."\n", FILE_APPEND);
+            $this->debugLog('C,D', 'AangaraaPayService::initierPaiement:post', 'Reponse AangaraaPay initier', [
+                'http_status'   => $response->status(),
+                'statut_api'    => $statutApi,
+                'has_pay_token' => ! empty($payToken),
+                'message'       => $message,
+                'operator_sent' => $operateur,
+            ]);
             // #endregion
 
             Log::info('AangaraaPay initier', [
                 'transaction_id' => $transactionId,
                 'telephone'      => $numero,
                 'operateur'      => $operateur,
+                'notify_url'     => $notifyUrl,
                 'response'       => $data,
             ]);
 
@@ -182,7 +251,7 @@ class AangaraaPayService
                 'pay_token' => $payToken,
                 'statut'    => $statutApi,
                 'operateur' => $operateur,
-                'message'   => $data['message'] ?? ($statutApi === 'FAILED' ? 'Le paiement a été refusé par l\'opérateur Mobile Money.' : 'Erreur inconnue'),
+                'message'   => $message,
                 'raw'       => $data,
             ];
 
