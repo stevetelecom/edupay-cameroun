@@ -35,11 +35,15 @@
 
         <div id="msg-echec" style="display:none;">
             <div style="font-size:17px;font-weight:700;color:var(--ep-red);margin-bottom:8px;">Paiement échoué</div>
-            <div style="font-size:13px;color:#888;margin-bottom:20px;">
+            <div id="msg-echec-detail" style="font-size:13px;color:#888;margin-bottom:20px;">
                 Le paiement n'a pas pu être confirmé. Vérifiez votre solde ou réessayez.
             </div>
+            <a href="{{ route('payeur.paiement.show', $paiement->fraisApprenant) }}"
+               class="btn-p" style="width:auto;padding:10px 24px;margin-bottom:10px;display:inline-block;">
+                Réessayer
+            </a><br>
             <a href="{{ route('payeur.dashboard') }}" class="btn-o" style="width:auto;padding:10px 24px;">
-                Retour
+                Retour au tableau de bord
             </a>
         </div>
 
@@ -73,6 +77,11 @@ async function verifier() {
             afficher('valide'); return;
         }
         if (data.statut === 'echoue') {
+            // Afficher le message précis de l'opérateur
+            var detail = document.getElementById('msg-echec-detail');
+            if (detail && data.message) {
+                detail.textContent = data.message;
+            }
             afficher('echec'); return;
         }
     } catch (e) { /* réseau — on réessaie */ }

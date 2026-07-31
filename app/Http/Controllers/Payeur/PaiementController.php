@@ -228,7 +228,11 @@ class PaiementController extends Controller
                     $p->update(['statut' => 'echoue']);
                 }
             });
-            return response()->json(['statut' => 'echoue']);
+                return response()->json([
+                    'statut'  => 'echoue',
+                    'message' => $resultat['message'] ?? 'Paiement refusé par l\'opérateur.',
+                    'reason'  => $resultat['reason']  ?? null,
+                ]);
         }
 
         return response()->json(['statut' => 'en_attente']);

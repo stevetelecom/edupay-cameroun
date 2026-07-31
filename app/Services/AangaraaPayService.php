@@ -285,10 +285,26 @@ class AangaraaPayService
             ]);
 
             return [
-                'statut'  => $data['status']  ?? 'FAILED',
-                'succes'  => ($data['status'] ?? '') === 'SUCCESSFUL',
-                'message' => $data['message'] ?? '',
-                'raw'     => $data,
+                $reason  = $data['details']['reason'] ?? null;
+                $message = match($reason) {
+                    'LOW_BALANCE_OR_PAYEE_LIMIT_REACHED_OR_NOT_ALLOWED'
+                        => 'Solde insuffisant ou limite atteinte. Rechargez votre compte Mobile Money.',
+                    'PAYER_NOT_FOUND'
+                        => 'Numéro Mobile Money introuvable. Vérifiez votre numéro.',
+                    'EXPIRED'
+                        => 'La demande a expiré. Veuillez réessayer.',
+                    'CANCELLED'
+                        => 'Paiement annulé depuis votre téléphone.',
+                    default => $data['message'] ?? 'Paiement refusé par l\'opérateur.',
+                };
+
+                return [
+                    'statut'  => $data['status']  ?? 'FAILED',
+                    'succes'  => ($data['status'] ?? '') === 'SUCCESSFUL',
+                    'message' => $message,
+                    'reason'  => $reason,
+                    'raw'     => $data,
+                ];
             ];
 
         } catch (\Throwable $e) {
