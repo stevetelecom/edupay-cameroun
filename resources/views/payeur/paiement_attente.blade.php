@@ -45,8 +45,12 @@
                 </span>
                 Consultez votre téléphone maintenant
             </div>
-            <div style="font-size:12px;color:#888;margin-bottom:8px;">
-                MTN ou Orange envoie une notification USSD — entrez votre code PIN MoMo pour confirmer.
+            <div style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;">
+                Une notification va apparaître sur votre téléphone.<br>
+                <strong>Si rien n'arrive dans 30 secondes</strong>, tapez
+                <span style="background:#f0fdf4;color:#085041;font-weight:700;
+                             padding:2px 8px;border-radius:4px;font-family:monospace;">*126#</span>
+                pour confirmer manuellement.
             </div>
             <div style="font-size:11px;color:#aaa;">Vérification automatique toutes les 5 secondes…</div>
         </div>
@@ -90,7 +94,7 @@
 <script>
 const statutUrl = "{{ route('payeur.paiement.statut', $paiement) }}";
 let tentatives = 0;
-const maxTentatives = 60; // 5 minutes max (60 × 5s) // 2 minutes max (24 × 5s)
+const maxTentatives = 60; // 5 minutes max (60 × 5s) — laisse le temps pour *126# // 2 minutes max (24 × 5s)
 
 function afficher(etat) {
     document.getElementById('icone-attente').style.display = etat === 'attente' ? '' : 'none';
