@@ -32,27 +32,35 @@
         </div>
 
         <div id="msg-attente">
-            <div style="font-size:17px;font-weight:700;margin-bottom:8px;">En attente de confirmation</div>
+            <div id="msg-attente-titre" style="font-size:17px;font-weight:700;margin-bottom:8px;">En attente de confirmation</div>
             <div style="font-size:13px;color:#888;margin-bottom:20px;">
                 Confirmez le paiement de <strong>{{ number_format($paiement->montant, 0, ',', ' ') }} FCFA</strong>
                 sur votre téléphone <strong>{{ $paiement->telephone_paiement }}</strong>.<br><br>
                 Réf. : <code>{{ $paiement->reference }}</code>
             </div>
-            <div style="font-size:13px;color:#0D9E75;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <div id="msg-attente-phase1" style="font-size:13px;color:#0D9E75;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
                 <span class="material-symbols-outlined"
                       style="font-size:18px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">
                     smartphone
                 </span>
                 Consultez votre téléphone maintenant
             </div>
-            <div style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;">
+            <div id="msg-attente-detail" style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;">
                 Une notification va apparaître sur votre téléphone.<br>
                 <strong>Si rien n'arrive dans 30 secondes</strong>, tapez
                 <span style="background:#f0fdf4;color:#085041;font-weight:700;
                              padding:2px 8px;border-radius:4px;font-family:monospace;">*126#</span>
-                pour confirmer manuellement.
+                pour ouvrir votre menu Mobile Money — une demande de paiement en attente doit y apparaître.
+                <strong>Ne rejetez rien par erreur</strong> : validez uniquement si vous reconnaissez ce montant et cette référence.
             </div>
-            <div style="font-size:11px;color:#aaa;">Vérification automatique toutes les 5 secondes…</div>
+            <div id="msg-attente-prolonge" style="display:none;background:#FEF9EC;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#854F0B;line-height:1.6;text-align:left;">
+                Cela prend plus de temps que prévu — c'est normal, certaines confirmations Mobile Money sont plus lentes. Nous continuons à vérifier automatiquement, ne fermez pas cette page. Si le prélèvement a bien eu lieu sur votre compte mais que rien ne se passe ici après plusieurs minutes, contactez le support avec la référence <code>{{ $paiement->reference }}</code>.
+            </div>
+            <div style="font-size:11px;color:#aaa;">Vérification automatique en cours…</div>
+            <button type="button" onclick="verifierMaintenant()" id="btn-verifier-maintenant"
+                    style="display:none;margin-top:12px;background:transparent;border:1px solid #ddd;color:#555;font-size:12px;padding:8px 16px;border-radius:8px;cursor:pointer;">
+                Vérifier maintenant
+            </button>
         </div>
 
         <div id="msg-valide" style="display:none;">
@@ -68,7 +76,7 @@
         <div id="msg-echec" style="display:none;">
             <div style="font-size:17px;font-weight:700;color:var(--ep-red);margin-bottom:8px;">Paiement échoué</div>
             <div id="msg-echec-detail" style="font-size:13px;color:#888;margin-bottom:20px;">
-                Le paiement n'a pas pu être confirmé. Vérifiez votre solde ou réessayez.
+                Le paiement n'a pas pu être confirmé.
             </div>
             <a href="{{ route('payeur.paiement.show', $paiement->fraisApprenant) }}"
                class="btn-p" style="width:auto;padding:10px 24px;margin-bottom:10px;display:inline-block;">
@@ -93,9 +101,19 @@
 @push('scripts')
 <script>
 const statutUrl = "{{ route('payeur.paiement.statut', $paiement) }}";
+
+// Phase 1 : vérification rapide, toutes les 5s, pendant 6 minutes (72 tentatives)
+// Phase 2 : si rien de définitif après la phase 1, on NE déclare JAMAIS d'échec
+//           côté client — on continue à vérifier, plus espacé, jusqu'à 20 minutes
+//           au total. Seule une vraie réponse de l'opérateur (SUCCESSFUL / FAILED)
+//           peut faire passer l'écran en "valide" ou "échec".
+const PHASE1_TENTATIVES = 72;   // 72 × 5s  = 6 min
+const PHASE2_INTERVALLE = 10000; // 10s
+const PHASE2_TENTATIVES = 84;   // 84 × 10s = 14 min supplémentaires (total ≈ 20 min)
+
 let tentatives = 0;
-const maxTentatives = 72; // 6 minutes (72 × 5s)
-let dejaMontreEchec = false;
+let enPhase2 = false;
+let verificationManuelleEnCours = false;
 
 function afficher(etat) {
     document.getElementById('icone-attente').style.display = etat === 'attente' ? 'flex' : 'none';
@@ -106,50 +124,86 @@ function afficher(etat) {
     document.getElementById('msg-echec').style.display     = etat === 'echec'   ? '' : 'none';
 }
 
-async function verifierApresEchec() {
-    let extra = 0;
-    const maxExtra = 24; // 2 min supplémentaires
-    async function checkExtra() {
-        extra++;
-        try {
-            const res  = await fetch(statutUrl, { headers: { 'Accept': 'application/json' } });
-            const data = await res.json();
-            if (data.statut === 'valide') {
-                afficher('valide'); return;
-            }
-        } catch (e) {}
-        if (extra < maxExtra) setTimeout(checkExtra, 5000);
+function passerEnPhase2() {
+    if (enPhase2) return;
+    enPhase2 = true;
+    document.getElementById('msg-attente-prolonge').style.display = 'block';
+    document.getElementById('btn-verifier-maintenant').style.display = 'inline-block';
+}
+
+async function appelStatut() {
+    try {
+        const res  = await fetch(statutUrl, { headers: { 'Accept': 'application/json' } });
+        return await res.json();
+    } catch (e) {
+        return null;
     }
-    checkExtra();
 }
 
 async function verifier() {
     tentatives++;
-    try {
-        const res  = await fetch(statutUrl, { headers: { 'Accept': 'application/json' } });
-        const data = await res.json();
+    const data = await appelStatut();
 
-        if (data.statut === 'valide') {
-            afficher('valide'); return;
-        }
-
-        if (data.statut === 'echoue') {
-            var detail = document.getElementById('msg-echec-detail');
-            if (detail && data.message) detail.textContent = data.message;
-            afficher('echec');
-            // Continue à vérifier silencieusement — PIN confirmé tardivement
-            if (!dejaMontreEchec) {
-                dejaMontreEchec = true;
-                verifierApresEchec();
-            }
-            return;
-        }
-    } catch (e) {}
-
-    if (tentatives >= maxTentatives) {
-        afficher('echec'); return;
+    if (data && data.statut === 'valide') {
+        afficher('valide');
+        return;
     }
-    setTimeout(verifier, 5000);
+
+    // Seule une réponse EXPLICITE 'echoue' de l'API (donc un vrai FAILED/CANCELLED
+    // confirmé par AangaraaPay/MTN) fait passer l'écran en échec — jamais un timeout.
+    if (data && data.statut === 'echoue') {
+        const detail = document.getElementById('msg-echec-detail');
+        if (detail && data.message) detail.textContent = data.message;
+        afficher('echec');
+        return;
+    }
+
+    // Toujours en attente : on continue, en passant en phase 2 (espacée) après
+    // la phase 1 rapide — sans jamais déclarer d'échec depuis le client.
+    if (tentatives === PHASE1_TENTATIVES) {
+        passerEnPhase2();
+    }
+
+    if (!enPhase2 && tentatives < PHASE1_TENTATIVES) {
+        setTimeout(verifier, 5000);
+        return;
+    }
+
+    if (enPhase2 && (tentatives - PHASE1_TENTATIVES) < PHASE2_TENTATIVES) {
+        setTimeout(verifier, PHASE2_INTERVALLE);
+        return;
+    }
+
+    // Fin de la phase 2 (~20 min) sans réponse définitive : on arrête le polling
+    // automatique mais on NE déclare PAS d'échec — l'utilisateur peut vérifier
+    // manuellement ou contacter le support avec la référence.
+    passerEnPhase2();
+    document.getElementById('msg-attente-detail').innerHTML =
+        "Nous n'avons toujours pas reçu de confirmation définitive de l'opérateur. " +
+        "Si le prélèvement a bien eu lieu sur votre compte, contactez le support avec la référence ci-dessus. " +
+        "Sinon, cliquez sur « Vérifier maintenant » ou revenez plus tard.";
+}
+
+async function verifierMaintenant() {
+    if (verificationManuelleEnCours) return;
+    verificationManuelleEnCours = true;
+    const btn = document.getElementById('btn-verifier-maintenant');
+    btn.textContent = 'Vérification…';
+    btn.disabled = true;
+
+    const data = await appelStatut();
+
+    if (data && data.statut === 'valide') {
+        afficher('valide');
+    } else if (data && data.statut === 'echoue') {
+        const detail = document.getElementById('msg-echec-detail');
+        if (detail && data.message) detail.textContent = data.message;
+        afficher('echec');
+    } else {
+        btn.textContent = 'Vérifier maintenant';
+        btn.disabled = false;
+        verificationManuelleEnCours = false;
+    }
 }
 
 setTimeout(verifier, 5000);
