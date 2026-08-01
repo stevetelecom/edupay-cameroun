@@ -326,16 +326,29 @@ class PaiementController extends Controller
 
         Log::info('AangaraaPay webhook reçu (non fiable, à revérifier)', $payload);
 
+        // AangaraaPay envoie deux types de webhooks avec des champs différents :
+        // - webhook synchrone immédiat : transaction_id = NOTRE référence (EP2026-XXXXX)
+        // - webhook différé post-confirmation opérateur : transaction_id = ID INTERNE AangaraaPay (ex: "2808")
+        //   mais le champ "paytoken" contient toujours NOTRE pay_token, stable des deux côtés.
+        // On priorise donc systématiquement le pay_token pour retrouver le paiement.
+        $payToken  = $payload['paytoken'] ?? $payload['pay_token'] ?? $payload['payToken'] ?? null;
         $reference = $payload['transaction_id'] ?? null;
 
-        if (! $reference) {
-            return response()->json(['ok' => false], 400);
+        $paiement = null;
+
+        if ($payToken) {
+            $paiement = Paiement::where('pay_token', $payToken)->first();
         }
 
-        $paiement = Paiement::where('reference', $reference)->first();
+        if (! $paiement && $reference) {
+            $paiement = Paiement::where('reference', $reference)->first();
+        }
 
         if (! $paiement) {
-            Log::warning('Webhook AangaraaPay : paiement introuvable', ['reference' => $reference]);
+            Log::warning('Webhook AangaraaPay : paiement introuvable', [
+                'reference' => $reference,
+                'pay_token' => $payToken,
+            ]);
             return response()->json(['ok' => false], 404);
         }
 
@@ -416,6 +429,35 @@ class PaiementController extends Controller
 
         $paiements = $query->paginate(15);
         return view('payeur.historique', compact('paiements'));
+    }
+
+    /**
+     * Réconciliation de sécurité — appelée par la commande planifiée aangaraa:reconcilie.
+     * Filet de sécurité totalement indépendant du webhook (qui peut échouer) et du
+     * polling client (qui s'arrête après ~20 min) : revérifie directement auprès
+     * d'AangaraaPay les paiements restés en_attente, et finalise leur statut.
+     */
+    public function reconcilierPaiement(Paiement $paiement): void
+    {
+        if (! $paiement->pay_token || in_array($paiement->statut, ['valide', 'echoue', 'rembourse'])) {
+            return;
+        }
+
+        $resultat = $this->aangaraa->verifierStatut($paiement->pay_token);
+
+        if ($resultat['statut'] === 'SUCCESSFUL') {
+            $this->traiterPaiementValide($paiement->id);
+            return;
+        }
+
+        if ($resultat['statut'] === 'FAILED') {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($paiement) {
+                $p = Paiement::whereKey($paiement->id)->lockForUpdate()->first();
+                if ($p && $p->statut === 'en_attente') {
+                    $p->update(['statut' => 'echoue']);
+                }
+            });
+        }
     }
 
     private function autoriserAcces(FraisApprenant $fraisApprenant): void

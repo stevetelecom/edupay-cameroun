@@ -17,3 +17,7 @@ Schedule::job(new SendAlerteImpayeJournaliere)
     ->timezone('Africa/Douala')
     ->withoutOverlapping()
     ->name('alerte-impaye-journaliere');
+
+// Filet de securite AangaraaPay — reverifie les paiements en_attente
+// independamment du webhook (peu fiable) et du polling client (limite a ~20 min)
+Schedule::command('aangaraa:reconcilie')->everyTwoMinutes();
