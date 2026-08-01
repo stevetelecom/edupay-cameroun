@@ -127,7 +127,8 @@ class AangaraaPayService
             $numero = substr($numero, 3);
         }
         $prefixe = (int) substr($numero, 0, 3);
-        if (($prefixe >= 650 && $prefixe <= 654) || ($prefixe >= 670 && $prefixe <= 683)) {
+        // 680-683 appartiennent a Nexttel/Viettel, pas a MTN — ne pas les inclure.
+        if (($prefixe >= 650 && $prefixe <= 654) || ($prefixe >= 670 && $prefixe <= 679)) {
             return 'MTN_Cameroon';
         }
         if (($prefixe >= 655 && $prefixe <= 659) || ($prefixe >= 690 && $prefixe <= 699)) {

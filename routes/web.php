@@ -86,6 +86,7 @@ Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur
     Route::post('/paiement/{fraisApprenant}/initier', [\App\Http\Controllers\Payeur\PaiementController::class, 'initier'])->name('paiement.initier');
     Route::get('/paiement/{paiement}/attente',  [\App\Http\Controllers\Payeur\PaiementController::class, 'attente'])->name('paiement.attente');
     Route::get('/paiement/{paiement}/statut',   [\App\Http\Controllers\Payeur\PaiementController::class, 'verifierStatut'])->name('paiement.statut');
+    Route::post('/paiement/{paiement}/annuler',  [\App\Http\Controllers\Payeur\PaiementController::class, 'annuler'])->name('paiement.annuler');
     Route::get('/historique', [\App\Http\Controllers\Payeur\PaiementController::class, 'historique'])->name('historique');
     Route::get('/mes-enfants', [\App\Http\Controllers\Payeur\MesEnfantsController::class, 'index'])->name('mes-enfants');
     Route::get('/recus', [\App\Http\Controllers\Payeur\RecuController::class, 'index'])->name('recus.index');

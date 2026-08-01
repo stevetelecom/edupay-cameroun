@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Jobs\SendConfirmationPaiement;
+use App\Jobs\SendNotificationEchecPaiement;
 
 class PaiementController extends Controller
 {
@@ -64,6 +65,7 @@ class PaiementController extends Controller
         $paiementRecent = Paiement::where('frais_apprenant_id', $fraisApprenant->id)
             ->where('user_id', Auth::id())
             ->where('statut', 'en_attente')
+            ->where('annule_manuellement', false)
             ->where('created_at', '>=', now()->subMinutes(5))
             ->latest()
             ->first();
@@ -164,6 +166,7 @@ class PaiementController extends Controller
 
         if (! $resultat['succes']) {
             $paiement->update(['statut' => 'echoue']);
+            SendNotificationEchecPaiement::dispatch($paiement->fresh(), $resultat['message'] ?? null);
 
             return back()->withInput()->with('error',
                 'Échec du paiement : ' . $resultat['message']
@@ -222,17 +225,13 @@ class PaiementController extends Controller
         }
 
         if ($resultat['statut'] === 'FAILED') {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($paiement) {
-                $p = Paiement::whereKey($paiement->id)->lockForUpdate()->first();
-                if ($p && $p->statut === 'en_attente') {
-                    $p->update(['statut' => 'echoue']);
-                }
-            });
-                return response()->json([
-                    'statut'  => 'echoue',
-                    'message' => $resultat['message'] ?? 'Paiement refusé par l\'opérateur.',
-                    'reason'  => $resultat['reason']  ?? null,
-                ]);
+            $this->marquerEchoue($paiement, $resultat['message'] ?? null);
+
+            return response()->json([
+                'statut'  => 'echoue',
+                'message' => $resultat['message'] ?? 'Paiement refusé par l\'opérateur.',
+                'reason'  => $resultat['reason']  ?? null,
+            ]);
         }
 
         return response()->json(['statut' => 'en_attente']);
@@ -397,12 +396,7 @@ class PaiementController extends Controller
         }
 
         if ($statut === 'FAILED') {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($paiement) {
-                $p = Paiement::whereKey($paiement->id)->lockForUpdate()->first();
-                if ($p && $p->statut === 'en_attente') {
-                    $p->update(['statut' => 'echoue']);
-                }
-            });
+            $this->marquerEchoue($paiement, $verification['message'] ?? null);
         }
 
         return response()->json(['ok' => true]);
@@ -451,13 +445,58 @@ class PaiementController extends Controller
         }
 
         if ($resultat['statut'] === 'FAILED') {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($paiement) {
-                $p = Paiement::whereKey($paiement->id)->lockForUpdate()->first();
-                if ($p && $p->statut === 'en_attente') {
-                    $p->update(['statut' => 'echoue']);
-                }
-            });
+            $this->marquerEchoue($paiement, $resultat['message'] ?? null);
         }
+    }
+
+    /**
+     * Marque un paiement comme echoue de maniere atomique et idempotente,
+     * puis notifie le payeur (email + SMS). Point d'entree UNIQUE pour tout
+     * passage a l'etat 'echoue' — evite les envois en double et garantit
+     * que le payeur est toujours informe, peu importe le chemin (polling
+     * client, webhook, reconciliation planifiee).
+     */
+    private function marquerEchoue(Paiement $paiement, ?string $raison = null): bool
+    {
+        $vientDetreMarque = \Illuminate\Support\Facades\DB::transaction(function () use ($paiement) {
+            $p = Paiement::whereKey($paiement->id)->lockForUpdate()->first();
+            if ($p && $p->statut === 'en_attente') {
+                $p->update(['statut' => 'echoue']);
+                return true;
+            }
+            return false;
+        });
+
+        if ($vientDetreMarque) {
+            SendNotificationEchecPaiement::dispatch($paiement->fresh(), $raison);
+        }
+
+        return $vientDetreMarque;
+    }
+
+    /**
+     * Annulation manuelle par le payeur d'un paiement en_attente.
+     * Ne modifie JAMAIS le statut reel (reste en_attente) afin qu'une
+     * confirmation tardive et legitime de l'operateur (webhook ou
+     * reconciliation) puisse toujours regulariser le paiement plus tard
+     * si l'argent a en realite ete debite. Sert uniquement a debloquer
+     * un nouvel essai immediat sans attendre les 5 minutes.
+     */
+    public function annuler(Paiement $paiement)
+    {
+        if ($paiement->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if ($paiement->statut !== 'en_attente') {
+            return back()->with('error', 'Ce paiement ne peut plus être annulé.');
+        }
+
+        $paiement->update(['annule_manuellement' => true]);
+
+        return back()->with('info',
+            'Paiement marqué comme annulé. S\'il a tout de même été débité sur votre compte, il sera automatiquement régularisé dès confirmation de l\'opérateur.'
+        );
     }
 
     private function autoriserAcces(FraisApprenant $fraisApprenant): void
@@ -479,7 +518,7 @@ class PaiementController extends Controller
     private function synchroniserPaiementEnAttente(Paiement $paiement): bool
     {
         if ($paiement->created_at->lt(now()->subMinutes(5))) {
-            $paiement->update(['statut' => 'echoue']);
+            $this->marquerEchoue($paiement, 'Délai d\'attente dépassé (5 minutes).');
 
             return true;
         }
@@ -491,7 +530,7 @@ class PaiementController extends Controller
         $check = $this->aangaraa->verifierStatut($paiement->pay_token);
 
         if ($check['statut'] === 'FAILED') {
-            $paiement->update(['statut' => 'echoue']);
+            $this->marquerEchoue($paiement, $check['message'] ?? null);
 
             return true;
         }

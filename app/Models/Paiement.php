@@ -12,7 +12,7 @@ class Paiement extends Model
         'echeancier_id', 'montant', 'frais_service', 'montant_total_paye',
         'frais_aangaraa', 'marge_edupay', 'mode_paiement', 'type_paiement',
         'numero_tranche', 'statut', 'telephone_paiement', 'pay_token',
-        'aangaraa_transaction_id', 'operateur', 'date_paiement', 'date_validation',
+        'aangaraa_transaction_id', 'operateur', 'annule_manuellement', 'date_paiement', 'date_validation',
     ];
 
     protected $casts = [
@@ -26,6 +26,7 @@ class Paiement extends Model
         'montant_total_paye' => 'integer',
         'frais_aangaraa' => 'integer',
         'marge_edupay' => 'integer',
+        'annule_manuellement' => 'boolean',
         'date_paiement' => 'datetime',
         'date_validation' => 'datetime',
     ];

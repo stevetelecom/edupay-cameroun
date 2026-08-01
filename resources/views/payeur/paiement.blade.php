@@ -119,10 +119,14 @@
                    placeholder="654862989 ou +237654862989"
                    inputmode="tel"
                    autocomplete="tel"
+                   oninput="surSaisieTelephone(this.value)"
                    required>
             <div style="font-size:11px;color:#888;margin-top:-6px;margin-bottom:10px;">
                 Le <strong>+237</strong> est normal — l'API reçoit <strong>237</strong> suivi de vos 9 chiffres (ex. 237654862989).
                 Vérifiez bien chaque chiffre avant de payer.
+            </div>
+            <div id="pay-op-avertissement" style="display:none;background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:9px 12px;margin-top:-6px;margin-bottom:12px;font-size:11px;color:#854F0B;">
+                Opérateur non reconnu automatiquement pour ce préfixe — vérifiez que vous avez bien sélectionné <strong>MTN</strong> ou <strong>Orange</strong> ci-dessus avant de continuer.
             </div>
             @error('telephone_paiement')
                 <div style="color:var(--ep-red);font-size:11px;margin-top:-8px;margin-bottom:10px;">{{ $message }}</div>
@@ -206,7 +210,7 @@ function selOpt(n) {
 
 function selPay(n) {
     const cfg = {
-        1: { border:'#FFCC00', bg:'#FFFBE6', dot:'#FFCC00', lbl:'Numéro MTN Mobile Money',    ph:'650-654 / 670-683', op:'MTN Mobile Money sélectionné — prompt USSD envoyé par AangaraaPay' },
+        1: { border:'#FFCC00', bg:'#FFFBE6', dot:'#FFCC00', lbl:'Numéro MTN Mobile Money',    ph:'650-654 / 670-679', op:'MTN Mobile Money sélectionné — prompt USSD envoyé par AangaraaPay' },
         2: { border:'#FF6600', bg:'#FFF5EE', dot:'#FF6600', lbl:'Numéro Orange Money',          ph:'655-659 / 690-699', op:'Orange Money sélectionné — prompt USSD envoyé par AangaraaPay' },
     };
     [1,2].forEach(i => {
@@ -220,5 +224,41 @@ function selPay(n) {
     document.getElementById('pay-op-dot').style.background      = cfg[n].dot;
     document.getElementById('pay-op-label').textContent         = cfg[n].op;
 }
+
+// ── Détection automatique MTN / Orange à la saisie du numéro ──
+// Règles confirmées 2026 : MTN = 650-654 / 670-679 · Orange = 655-659 / 690-699
+// Tout préfixe hors de ces plages (ex. Nexttel/Camtel/68x) reste volontairement
+// "inconnu" plutôt que de deviner au hasard — le payeur choisit alors manuellement.
+function detecterOperateurLocal(valeur) {
+    let numero = (valeur || '').replace(/\D/g, '');
+    if (numero.startsWith('237')) numero = numero.slice(3);
+    numero = numero.replace(/^0+/, '');
+    if (numero.length < 3) return null;
+    const prefixe = parseInt(numero.slice(0, 3), 10);
+    if ((prefixe >= 650 && prefixe <= 654) || (prefixe >= 670 && prefixe <= 679)) return 'mtn';
+    if ((prefixe >= 655 && prefixe <= 659) || (prefixe >= 690 && prefixe <= 699)) return 'orange';
+    return 'inconnu';
+}
+
+function surSaisieTelephone(valeur) {
+    const resultat = detecterOperateurLocal(valeur);
+    const avertissement = document.getElementById('pay-op-avertissement');
+    if (resultat === 'mtn') {
+        selPay(1);
+        if (avertissement) avertissement.style.display = 'none';
+    } else if (resultat === 'orange') {
+        selPay(2);
+        if (avertissement) avertissement.style.display = 'none';
+    } else if (resultat === 'inconnu') {
+        if (avertissement) avertissement.style.display = 'block';
+    } else if (avertissement) {
+        avertissement.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const champ = document.getElementById('pay-momo-input');
+    if (champ && champ.value) surSaisieTelephone(champ.value);
+});
 </script>
 @endpush
