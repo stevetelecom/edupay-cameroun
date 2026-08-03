@@ -168,28 +168,60 @@ class PaiementController extends Controller
             $paiement->update(['statut' => 'echoue']);
             SendNotificationEchecPaiement::dispatch($paiement->fresh(), $resultat['message'] ?? null);
 
-            $operateurLabel = match ($resultat['operateur'] ?? $operateur) {
-                'MTN_Cameroon'    => 'MTN',
-                'Orange_Cameroon' => 'Orange',
-                default           => $resultat['operateur'] ?? $operateur ?? 'l\'opérateur',
-            };
-
             return back()->withInput()->with('error',
                 'Échec du paiement : ' . $resultat['message']
-                . ' (numéro envoyé à ' . $operateurLabel . ' : ' . $telephoneNormalise . ')'
+                . ' (numéro envoyé à ' . $this->libelleOperateur($resultat['operateur'] ?? $operateur) . ' : ' . $telephoneNormalise . ')'
             );
         }
 
         // Sauvegarder le payToken pour vérifier le statut plus tard
         $paiement->update([
-            'pay_token'             => $resultat['pay_token'],
+            'pay_token'               => $resultat['pay_token'],
             'aangaraa_transaction_id' => $paiement->reference,
-            'operateur'             => $resultat['operateur'],
+            'operateur'               => $resultat['operateur'],
         ]);
+
+        // Anti-flapping : AangaraaPay renvoie parfois PENDING a l'initiation puis
+        // FAILED une seconde plus tard (observe systematiquement en logs de
+        // production, ex. solde insuffisant). Une courte verification synchrone
+        // avant redirection evite d'envoyer le payeur sur la page d'attente pour
+        // un paiement en realite deja voue a l'echec.
+        usleep(1500000);
+        $verifImmediate = $this->aangaraa->verifierStatut($resultat['pay_token']);
+
+        if ($verifImmediate['statut'] === 'FAILED') {
+            $this->marquerEchoue($paiement, $verifImmediate['message'] ?? null);
+
+            return back()->withInput()->with('error',
+                'Échec du paiement : ' . ($verifImmediate['message'] ?? 'Paiement refusé par l\'opérateur.')
+                . ' (numéro envoyé à ' . $this->libelleOperateur($resultat['operateur']) . ' : ' . $telephoneNormalise . ')'
+            );
+        }
+
+        if ($verifImmediate['statut'] === 'SUCCESSFUL') {
+            $this->traiterPaiementValide($paiement->id);
+
+            return redirect()
+                ->route('payeur.dashboard')
+                ->with('success', 'Paiement confirmé instantanément !');
+        }
 
         return redirect()
             ->route('payeur.paiement.attente', $paiement)
             ->with('info', 'Confirmez le paiement sur votre téléphone ' . $telephoneNormalise);
+    }
+
+    /**
+     * Libelle court et lisible d'un code operateur AangaraaPay, utilise dans
+     * les messages affiches au payeur (toasts, emails).
+     */
+    private function libelleOperateur(?string $operateur): string
+    {
+        return match ($operateur) {
+            'MTN_Cameroon'    => 'MTN',
+            'Orange_Cameroon' => 'Orange',
+            default           => $operateur ?? 'l\'opérateur',
+        };
     }
 
     // ─────────────────────────────────────────────

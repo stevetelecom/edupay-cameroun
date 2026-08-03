@@ -41,7 +41,7 @@
         <div id="msg-attente">
             <div id="msg-attente-titre" style="font-size:17px;font-weight:700;margin-bottom:8px;">En attente de confirmation</div>
             <div style="font-size:13px;color:#888;margin-bottom:14px;">
-                Confirmez le paiement de <strong>{{ number_format($paiement->montant, 0, ',', ' ') }} FCFA</strong>
+                Confirmez le paiement de <strong>{{ number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' ') }} FCFA</strong>
                 sur votre téléphone <strong>{{ $paiement->telephone_paiement }}</strong>.<br><br>
                 Réf. : <code>{{ $paiement->reference }}</code>
             </div>
@@ -77,7 +77,7 @@
         <div id="msg-valide" style="display:none;">
             <div style="font-size:17px;font-weight:700;color:#085041;margin-bottom:8px;">Paiement confirmé !</div>
             <div style="font-size:13px;color:#888;margin-bottom:20px;">
-                Votre paiement de <strong>{{ number_format($paiement->montant, 0, ',', ' ') }} FCFA</strong> a bien été reçu.
+                Votre paiement de <strong>{{ number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' ') }} FCFA</strong> a bien été reçu.
             </div>
             <a href="{{ route('payeur.dashboard') }}" class="btn-p" style="width:auto;padding:10px 24px;">
                 Retour au tableau de bord
