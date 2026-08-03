@@ -168,9 +168,15 @@ class PaiementController extends Controller
             $paiement->update(['statut' => 'echoue']);
             SendNotificationEchecPaiement::dispatch($paiement->fresh(), $resultat['message'] ?? null);
 
+            $operateurLabel = match ($resultat['operateur'] ?? $operateur) {
+                'MTN_Cameroon'    => 'MTN',
+                'Orange_Cameroon' => 'Orange',
+                default           => $resultat['operateur'] ?? $operateur ?? 'l\'opérateur',
+            };
+
             return back()->withInput()->with('error',
                 'Échec du paiement : ' . $resultat['message']
-                . ' (numéro envoyé à MTN : ' . $telephoneNormalise . ')'
+                . ' (numéro envoyé à ' . $operateurLabel . ' : ' . $telephoneNormalise . ')'
             );
         }
 

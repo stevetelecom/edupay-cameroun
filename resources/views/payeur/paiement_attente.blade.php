@@ -31,19 +31,30 @@
             </span>
         </div>
 
+        @php
+            $operateurAffiche = match($paiement->operateur ?? null) {
+                'MTN_Cameroon'    => ['nom' => 'MTN Mobile Money', 'court' => 'MTN',    'bg' => '#FFFBE6', 'border' => '#FFCC00', 'texte' => '#996600', 'chip_texte' => '#553300'],
+                'Orange_Cameroon' => ['nom' => 'Orange Money',      'court' => 'Orange', 'bg' => '#FFF5EE', 'border' => '#FF6600', 'texte' => '#CC4400', 'chip_texte' => '#ffffff'],
+                default           => ['nom' => 'Mobile Money',      'court' => 'votre opérateur', 'bg' => '#f5f5f5', 'border' => '#ddd', 'texte' => '#555', 'chip_texte' => '#555'],
+            };
+        @endphp
         <div id="msg-attente">
             <div id="msg-attente-titre" style="font-size:17px;font-weight:700;margin-bottom:8px;">En attente de confirmation</div>
-            <div style="font-size:13px;color:#888;margin-bottom:20px;">
+            <div style="font-size:13px;color:#888;margin-bottom:14px;">
                 Confirmez le paiement de <strong>{{ number_format($paiement->montant, 0, ',', ' ') }} FCFA</strong>
                 sur votre téléphone <strong>{{ $paiement->telephone_paiement }}</strong>.<br><br>
                 Réf. : <code>{{ $paiement->reference }}</code>
             </div>
-            <div id="msg-attente-phase1" style="font-size:13px;color:#0D9E75;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
+            <div style="display:inline-flex;align-items:center;gap:8px;background:{{ $operateurAffiche['bg'] }};border:1px solid {{ $operateurAffiche['border'] }};border-radius:20px;padding:5px 14px;margin-bottom:16px;font-size:12px;font-weight:700;color:{{ $operateurAffiche['texte'] }};">
+                <span style="background:{{ $operateurAffiche['border'] }};padding:1px 6px;border-radius:3px;font-size:10px;color:{{ $operateurAffiche['chip_texte'] }};">{{ $operateurAffiche['court'] }}</span>
+                {{ $operateurAffiche['nom'] }}
+            </div>
+            <div id="msg-attente-phase1" style="font-size:13px;color:{{ $operateurAffiche['texte'] }};font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
                 <span class="material-symbols-outlined"
                       style="font-size:18px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">
                     smartphone
                 </span>
-                Consultez votre téléphone maintenant
+                Consultez votre téléphone {{ $operateurAffiche['court'] }} maintenant
             </div>
             <div id="msg-attente-detail" style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;">
                 Une notification va apparaître sur votre téléphone.<br>
