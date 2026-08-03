@@ -22,6 +22,14 @@ class CheckAbonnement
             return $next($request);
         }
 
+        // L'établissement doit d'abord être validé (actif) par le Super Admin —
+        // les statuts 'en_attente' et 'suspendu' sont déjà gérés dans le dashboard
+        // lui-même (bannière dédiée). La question de l'abonnement ne se pose
+        // qu'une fois l'établissement actif.
+        if ($etablissement->statut !== 'actif') {
+            return $next($request);
+        }
+
         // Récupérer l'abonnement actif
         $abonnement = Abonnement::where('etablissement_id', $etablissement->id)
             ->whereIn('statut', ['actif', 'grace_period'])
@@ -31,11 +39,10 @@ class CheckAbonnement
         // Pas d'abonnement du tout
         if (!$abonnement) {
             // Routes autorisées sans abonnement (profil, déconnexion)
-            if ($request->routeIs('etablissement.profil.*', 'logout')) {
+            if ($request->routeIs('etablissement.profil.*', 'etablissement.abonnement.*', 'logout')) {
                 return $next($request);
             }
-            return redirect()->route('etablissement.profil.index')
-                ->with('warning', 'Votre établissement n\'a pas d\'abonnement actif. Contactez EduPay pour activer votre accès.');
+            return redirect()->route('etablissement.abonnement.requis');
         }
 
         // Mettre à jour statut si en grace period
@@ -53,11 +60,10 @@ class CheckAbonnement
             $abonnement->update(['statut' => 'expire']);
             $etablissement->update(['plan_abonnement' => 'aucun']);
 
-            if ($request->routeIs('etablissement.profil.*', 'logout')) {
+            if ($request->routeIs('etablissement.profil.*', 'etablissement.abonnement.*', 'logout')) {
                 return $next($request);
             }
-            return redirect()->route('etablissement.profil.index')
-                ->with('error', 'Votre abonnement EduPay a expiré. Contactez-nous pour renouveler.');
+            return redirect()->route('etablissement.abonnement.requis');
         }
 
         return $next($request);

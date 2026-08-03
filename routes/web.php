@@ -125,6 +125,7 @@ Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnement'])->prefix('etablissement')->name('etablissement.')->group(function () {
+    Route::get('/abonnement/requis', [\App\Http\Controllers\Etablissement\AbonnementController::class, 'requis'])->name('abonnement.requis');
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Etablissement\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/apprenants/datatable', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'datatable'])->name('apprenants.datatable');
     Route::resource('apprenants', \App\Http\Controllers\Etablissement\ApprenantController::class);
