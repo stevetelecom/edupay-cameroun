@@ -7,7 +7,9 @@
 
   <div class="form-header">
     <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> Cameroun</div>
-    <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:6px 13px;border-radius:20px;font-size:12px;text-decoration:none;">← Accueil</a>
+    <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:6px 13px;border-radius:20px;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+      <span class="material-symbols-outlined" style="font-size:14px;">arrow_back</span> Accueil
+    </a>
   </div>
 
   <div class="form-body" style="padding:32px 16px;">
@@ -16,7 +18,7 @@
 
         <div style="text-align:center;margin-bottom:26px;">
           <div style="width:52px;height:52px;background:var(--ep-gold-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span class="material-symbols-outlined" style="font-size:26px;color:#E8A020;">credit_card</span>
           </div>
           <div class="form-title">Abonnement requis</div>
 
@@ -47,11 +49,23 @@
               <div style="font-size:20px;font-weight:700;color:{{ $plan['couleur'] }};margin-bottom:10px;">
                 {{ number_format($plan['montant'], 0, ',', ' ') }} <span style="font-size:11px;font-weight:500;color:#999;">FCFA / mois</span>
               </div>
-              <div style="font-size:12px;color:#666;line-height:1.9;">
-                <div>👥 {{ $plan['max_apprenants'] === -1 ? 'Apprenants illimités' : $plan['max_apprenants'].' apprenants max' }}</div>
-                <div>💬 {{ $plan['sms_mensuel'] === -1 ? 'SMS illimités' : $plan['sms_mensuel'].' SMS / mois' }}</div>
-                <div>🏫 Multi-sites {{ $plan['multi_sites'] ? 'inclus' : 'non inclus' }}</div>
-                <div>📊 Exports COBAC {{ $plan['exports_cobac'] ? 'inclus' : 'non inclus' }}</div>
+              <div style="font-size:12px;color:#666;line-height:2;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="material-symbols-outlined" style="font-size:15px;color:#9CA3AF;">group</span>
+                  {{ $plan['max_apprenants'] === -1 ? 'Apprenants illimités' : $plan['max_apprenants'].' apprenants max' }}
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="material-symbols-outlined" style="font-size:15px;color:#9CA3AF;">sms</span>
+                  {{ $plan['sms_mensuel'] === -1 ? 'SMS illimités' : $plan['sms_mensuel'].' SMS / mois' }}
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="material-symbols-outlined" style="font-size:15px;color:#9CA3AF;">apartment</span>
+                  Multi-sites {{ $plan['multi_sites'] ? 'inclus' : 'non inclus' }}
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="material-symbols-outlined" style="font-size:15px;color:#9CA3AF;">bar_chart</span>
+                  Exports COBAC {{ $plan['exports_cobac'] ? 'inclus' : 'non inclus' }}
+                </div>
               </div>
             </div>
           @endforeach
@@ -76,10 +90,12 @@
 
         {{-- ── Actions principales ── --}}
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <a href="{{ route('contact') }}" class="btn-p" style="flex:1;min-width:200px;text-align:center;padding:12px;text-decoration:none;">
-            Contacter le support →
+          <a href="{{ route('contact') }}" class="btn-p" style="flex:1;min-width:200px;text-align:center;padding:12px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:16px;">support_agent</span>
+            Contacter le support
           </a>
-          <a href="{{ route('etablissement.dashboard') }}" class="btn-o" style="flex:1;min-width:200px;text-align:center;padding:12px;text-decoration:none;">
+          <a href="{{ route('etablissement.dashboard') }}" class="btn-o" style="flex:1;min-width:200px;text-align:center;padding:12px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:16px;">dashboard</span>
             Accéder à mon tableau de bord
           </a>
         </div>
@@ -90,11 +106,16 @@
       <div style="display:flex;justify-content:center;gap:20px;margin-top:18px;">
         <form method="POST" action="{{ route('logout') }}">
           @csrf
-          <button type="submit" style="background:none;border:none;cursor:pointer;font-size:12px;color:#888;font-weight:500;">
-            ← Retour à la connexion
+          <input type="hidden" name="redirect" value="login" />
+          <button type="submit" style="background:none;border:none;cursor:pointer;font-size:12px;color:#888;font-weight:500;display:inline-flex;align-items:center;gap:4px;">
+            <span class="material-symbols-outlined" style="font-size:14px;">login</span>
+            Retour à la connexion
           </button>
         </form>
-        <a href="{{ route('landing') }}" style="font-size:12px;color:#888;font-weight:500;text-decoration:none;">Accueil</a>
+        <a href="{{ route('landing') }}" style="font-size:12px;color:#888;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+          <span class="material-symbols-outlined" style="font-size:14px;">home</span>
+          Accueil
+        </a>
       </div>
 
     </div>

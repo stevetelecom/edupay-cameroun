@@ -39,7 +39,7 @@ class CheckAbonnement
         // Pas d'abonnement du tout
         if (!$abonnement) {
             // Routes autorisées sans abonnement (profil, déconnexion)
-            if ($request->routeIs('etablissement.profil.*', 'etablissement.abonnement.*', 'logout')) {
+            if ($request->routeIs('etablissement.profil.*', 'etablissement.abonnement.*', 'etablissement.dashboard', 'logout')) {
                 return $next($request);
             }
             return redirect()->route('etablissement.abonnement.requis');
@@ -60,7 +60,7 @@ class CheckAbonnement
             $abonnement->update(['statut' => 'expire']);
             $etablissement->update(['plan_abonnement' => 'aucun']);
 
-            if ($request->routeIs('etablissement.profil.*', 'etablissement.abonnement.*', 'logout')) {
+            if ($request->routeIs('etablissement.profil.*', 'etablissement.abonnement.*', 'etablissement.dashboard', 'logout')) {
                 return $next($request);
             }
             return redirect()->route('etablissement.abonnement.requis');

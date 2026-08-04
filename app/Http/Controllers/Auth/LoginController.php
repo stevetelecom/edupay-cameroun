@@ -172,10 +172,11 @@ class LoginController extends Controller
     }
     public function logout(Request $request)
     {
+        $redirectVersLogin = $request->input('redirect') === 'login';
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('landing');
+        return redirect()->route($redirectVersLogin ? 'login' : 'landing');
     }
 
     /**
