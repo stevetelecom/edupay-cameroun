@@ -1,0 +1,72 @@
+/* ══ Boutons EduPay — hover, transitions, ombres améliorées ══ */
+/* Chargé après les styles inline des layouts pour override propre (même spécificité, ordre CSS) */
+
+.btn-p {
+  transition: background .2s ease, box-shadow .25s ease, transform .15s ease !important;
+  box-shadow: 0 2px 8px rgba(13,158,117,.18);
+}
+.btn-p:hover {
+  background: #0a8562 !important;
+  box-shadow: 0 6px 18px rgba(13,158,117,.32);
+  transform: translateY(-2px);
+}
+.btn-p:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(13,158,117,.22);
+}
+
+.btn-o {
+  transition: all .2s ease, box-shadow .25s ease, transform .15s ease !important;
+}
+.btn-o:hover {
+  background: var(--ep-teal-lt) !important;
+  box-shadow: 0 4px 14px rgba(13,158,117,.14);
+  transform: translateY(-2px);
+}
+.btn-o:active {
+  transform: translateY(0);
+}
+
+.hbtn-main {
+  transition: background .2s ease, box-shadow .25s ease, transform .15s ease !important;
+  box-shadow: 0 4px 14px rgba(13,158,117,.25);
+}
+.hbtn-main:hover {
+  background: #0a8562 !important;
+  box-shadow: 0 8px 24px rgba(13,158,117,.4);
+  transform: translateY(-2px);
+}
+.hbtn-main:active {
+  transform: translateY(0);
+}
+
+.hbtn-ghost {
+  transition: all .2s ease, transform .15s ease !important;
+}
+.hbtn-ghost:hover {
+  background: rgba(255,255,255,.16) !important;
+  border-color: rgba(255,255,255,.4) !important;
+  transform: translateY(-2px);
+}
+.hbtn-ghost:active {
+  transform: translateY(0);
+}
+
+/* Boutons désactivés — pas d'effet hover */
+.btn-p:disabled, .btn-o:disabled,
+.btn-p.disabled, .btn-o.disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Respect accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  .btn-p, .btn-o, .hbtn-main, .hbtn-ghost {
+    transition: none !important;
+  }
+  .btn-p:hover, .btn-o:hover, .hbtn-main:hover, .hbtn-ghost:hover {
+    transform: none !important;
+  }
+}

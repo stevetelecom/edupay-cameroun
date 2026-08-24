@@ -189,6 +189,8 @@
         /* ───────────────────────── FIN MEDIA QUERIES ───────────────────────── */
     </style>
     @stack('styles')
+  <link rel="stylesheet" href="{{ asset('css/buttons-enhanced.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/forms-enhanced.css') }}">
 </head>
 <body class="h-full">
 
@@ -554,5 +556,6 @@ document.addEventListener('click', function(e) {
     </script>
 
     @stack('scripts')
+<script src="{{ asset('js/forms-enhanced.js') }}"></script>
 </body>
 </html>

@@ -1,0 +1,89 @@
+/* ══ Micro-interactions formulaires EduPay ══ */
+
+.inp, .select, textarea.inp {
+  transition: border-color .2s ease, box-shadow .2s ease, background .2s ease !important;
+}
+
+.inp:focus, .select:focus, textarea.inp:focus {
+  border-color: var(--ep-teal) !important;
+  box-shadow: 0 0 0 3px rgba(13,158,117,.12) !important;
+  outline: none !important;
+}
+
+.inp:hover:not(:focus), .select:hover:not(:focus) {
+  border-color: #bbb;
+}
+
+/* État validé (succès) — ajouter classe "is-valid" via JS */
+.inp.is-valid {
+  border-color: #0D9E75 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%230D9E75' stroke-width='3' viewBox='0 0 24 24'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 38px !important;
+}
+
+/* État erreur — ajouter classe "is-invalid" via JS */
+.inp.is-invalid {
+  border-color: #D94040 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23D94040' stroke-width='3' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='8' x2='12' y2='12'/%3E%3Cline x1='12' y1='16' x2='12.01' y2='16'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 38px !important;
+  animation: shake .3s ease;
+}
+
+.field-error-msg {
+  font-size: 11px;
+  color: #D94040;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity .2s ease, max-height .2s ease;
+}
+.field-error-msg.show {
+  opacity: 1;
+  max-height: 30px;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* Checkbox / radio — léger effet au clic */
+input[type="checkbox"], input[type="radio"] {
+  transition: transform .1s ease;
+}
+input[type="checkbox"]:active, input[type="radio"]:active {
+  transform: scale(0.92);
+}
+
+/* Boutons submit — état "chargement" (ajouter classe "is-loading" via JS au submit) */
+button[type="submit"].is-loading {
+  pointer-events: none;
+  opacity: .7;
+  position: relative;
+  color: transparent !important;
+}
+button[type="submit"].is-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin: -8px 0 0 -8px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spin .6s linear infinite;
+}
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}

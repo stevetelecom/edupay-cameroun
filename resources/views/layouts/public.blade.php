@@ -220,6 +220,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     /* ══ FIN NAVBAR ══ */
 </style>
   <link rel="stylesheet" href="{{ asset('css/scroll-reveal.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/buttons-enhanced.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/forms-enhanced.css') }}">
 </head>
 <body>
 
@@ -273,5 +275,6 @@ document.querySelectorAll('[data-toast]').forEach(function(t){
 <script src="{{ asset('js/counter-animation.js') }}"></script>
 <script src="{{ asset('js/scroll-reveal.js') }}"></script>
 @stack('scripts')
+<script src="{{ asset('js/forms-enhanced.js') }}"></script>
 </body>
 </html>
