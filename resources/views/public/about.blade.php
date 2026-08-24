@@ -30,35 +30,29 @@
   </div>
 
   <div class="seclbl">Contexte au Cameroun</div>
-  <div class="g4" style="margin-bottom:20px;">
+  <div class="g4" style="margin-bottom:20px;" data-stats-container>
     <div class="kpi"><div class="kval">30 000+</div><div class="klbl">Établissements d'enseignement</div></div>
-    <div class="kpi"><div class="kval">6 000 000</div><div class="klbl">Apprenants du maternel au sup.</div></div>
-    <div class="kpi"><div class="kval">12 000 000</div><div class="klbl">Abonnés Mobile Money (2024)</div></div>
-    <div class="kpi"><div class="kval">45%</div><div class="klbl">Taux pénétration smartphone</div></div>
+    <div class="kpi"><div class="kval stat-counter" data-count="6000000">0</div><div class="klbl">Apprenants du maternel au sup.</div></div>
+    <div class="kpi"><div class="kval stat-counter" data-count="12000000">0</div><div class="klbl">Abonnés Mobile Money (2024)</div></div>
+    <div class="kpi"><div class="kval stat-counter" data-count="45" data-suffix="%">0%</div><div class="klbl">Taux pénétration smartphone</div></div>
   </div>
 
   <div class="seclbl">EduPay en chiffres</div>
-  <div class="g4" style="margin-bottom:20px;">
+  <div class="g4" style="margin-bottom:20px;" data-stats-container>
     <div class="kpi" style="background:var(--ep-teal-lt);border:1px solid rgba(13,158,117,.15);">
-      <div class="kval" style="color:var(--ep-teal);">{{ $stats['nb_etablissements'] }}</div>
+      <div class="kval stat-counter" style="color:var(--ep-teal);" data-count="{{ $stats['nb_etablissements'] }}">0</div>
       <div class="klbl">Établissements actifs</div>
     </div>
     <div class="kpi" style="background:var(--ep-blue-lt);border:1px solid rgba(24,95,165,.15);">
-      <div class="kval" style="color:#185FA5;">{{ number_format($stats['nb_apprenants'], 0, ',', ' ') }}</div>
+      <div class="kval stat-counter" style="color:#185FA5;" data-count="{{ $stats['nb_apprenants'] }}">0</div>
       <div class="klbl">Apprenants inscrits</div>
     </div>
     <div class="kpi" style="background:var(--ep-gold-lt);border:1px solid rgba(232,160,32,.15);">
-      <div class="kval" style="color:#854F0B;">{{ number_format($stats['nb_paiements'], 0, ',', ' ') }}</div>
+      <div class="kval stat-counter" style="color:#854F0B;" data-count="{{ $stats['nb_paiements'] }}">0</div>
       <div class="klbl">Paiements validés</div>
     </div>
     <div class="kpi" style="background:#F3F4F6;border:1px solid #E5E7EB;">
-      <div class="kval" style="color:#374151;">
-        @if($stats['montant_total'] >= 1000000)
-          {{ number_format($stats['montant_total'] / 1000000, 1, ',', ' ') }}M
-        @else
-          {{ number_format($stats['montant_total'], 0, ',', ' ') }}
-        @endif
-      </div>
+      <div class="kval stat-counter" style="color:#374151;" data-count="{{ $stats['montant_total'] }}" data-suffix=" FCFA">0 FCFA</div>
       <div class="klbl">FCFA collectés</div>
     </div>
   </div>

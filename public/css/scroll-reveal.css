@@ -1,0 +1,37 @@
+/* ── Animations d'entrée au scroll (fade-in-up) ── */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform .6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Variante : glissement latéral (optionnel, classe additionnelle) */
+.reveal-on-scroll.reveal-left {
+  transform: translateX(-24px);
+}
+.reveal-on-scroll.reveal-left.revealed {
+  transform: translateX(0);
+}
+
+.reveal-on-scroll.reveal-right {
+  transform: translateX(24px);
+}
+.reveal-on-scroll.reveal-right.revealed {
+  transform: translateX(0);
+}
+
+/* Respect des préférences d'accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

@@ -219,6 +219,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     }
     /* ══ FIN NAVBAR ══ */
 </style>
+  <link rel="stylesheet" href="{{ asset('css/scroll-reveal.css') }}">
 </head>
 <body>
 
@@ -269,6 +270,8 @@ document.querySelectorAll('[data-toast]').forEach(function(t){
     setTimeout(function(){ t.classList.add('closing'); setTimeout(function(){ t.remove(); },200); },4000);
 });
 </script>
+<script src="{{ asset('js/counter-animation.js') }}"></script>
+<script src="{{ asset('js/scroll-reveal.js') }}"></script>
 @stack('scripts')
 </body>
 </html>

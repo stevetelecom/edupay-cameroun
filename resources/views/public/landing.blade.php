@@ -19,25 +19,48 @@
       <a href="{{ route('register.ecole.step1') }}" class="hbtn-ghost">Inscrire mon établissement</a>
     </div>
   </div>
-  <div class="hero-stats">
+  <div class="hero-stats" data-stats-container>
     <div class="hstat">
-      <div class="hstat-v">{{ $stats['nb_etablissements'] > 0 ? $stats['nb_etablissements'] : '0' }}</div>
+      <div class="hstat-v stat-counter" data-count="{{ $stats['nb_etablissements'] }}">0</div>
       <div class="hstat-l">Établissements partenaires</div>
     </div>
     <div class="hstat">
-      <div class="hstat-v">{{ $stats['nb_apprenants'] > 0 ? number_format($stats['nb_apprenants'],0,',',' ') : '0' }}</div>
+      <div class="hstat-v stat-counter" data-count="{{ $stats['nb_apprenants'] }}">0</div>
       <div class="hstat-l">Apprenants inscrits</div>
     </div>
     <div class="hstat">
-      <div class="hstat-v">{{ $stats['nb_paiements'] > 0 ? $stats['nb_paiements'] : '0' }}</div>
+      <div class="hstat-v stat-counter" data-count="{{ $stats['nb_paiements'] }}">0</div>
       <div class="hstat-l">Paiements validés</div>
     </div>
     <div class="hstat">
-      <div class="hstat-v">99,5%</div>
+      <div class="hstat-v stat-counter" data-count="99.5" data-decimals="1" data-suffix="%">0%</div>
       <div class="hstat-l">Uptime garanti</div>
     </div>
   </div>
 </div>
+
+<style>
+.hstat {
+  transition: transform .25s ease, box-shadow .25s ease;
+  border-radius: 12px;
+  padding: 8px;
+  cursor: default;
+}
+.hstat:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 28px rgba(93,202,165,.18);
+}
+.etab-card-pub {
+  transition: box-shadow .25s ease, transform .25s ease !important;
+}
+.testi-card {
+  transition: box-shadow .25s ease, transform .25s ease;
+}
+.testi-card:hover {
+  box-shadow: 0 10px 28px rgba(13,158,117,.12);
+  transform: translateY(-4px);
+}
+</style>
 
 {{-- ══ BODY ══ --}}
 <div class="ep-body2">

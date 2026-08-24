@@ -9,21 +9,21 @@
   <div style="padding:32px 28px 24px;text-align:center;background:#0B2545">
     <div class="hero-tag" style="justify-content:center;">Ce qu'ils disent de nous</div>
     <div style="font-size:26px;font-weight:700;color:#fff;margin:10px 0 8px;">Des utilisateurs satisfaits<br>à travers tout le <em style="font-style:normal;color:#5DCAA5;">Cameroun</em></div>
-    <div style="display:flex;justify-content:center;gap:24px;margin-top:18px;flex-wrap:wrap;">
+    <div style="display:flex;justify-content:center;gap:24px;margin-top:18px;flex-wrap:wrap;" data-stats-container>
       <div style="text-align:center;">
-        <div style="font-size:22px;font-weight:700;color:#5DCAA5;">{{ $stats['nb_etablissements'] }}</div>
+        <div style="font-size:22px;font-weight:700;color:#5DCAA5;" class="stat-counter" data-count="{{ $stats['nb_etablissements'] }}">0</div>
         <div style="font-size:11px;color:rgba(255,255,255,.5);">Établissements actifs</div>
       </div>
       <div style="text-align:center;">
-        <div style="font-size:22px;font-weight:700;color:#5DCAA5;">{{ $stats['nb_apprenants'] }}</div>
+        <div style="font-size:22px;font-weight:700;color:#5DCAA5;" class="stat-counter" data-count="{{ $stats['nb_apprenants'] }}">0</div>
         <div style="font-size:11px;color:rgba(255,255,255,.5);">Apprenants inscrits</div>
       </div>
       <div style="text-align:center;">
-        <div style="font-size:22px;font-weight:700;color:#5DCAA5;">{{ $stats['nb_paiements'] }}</div>
+        <div style="font-size:22px;font-weight:700;color:#5DCAA5;" class="stat-counter" data-count="{{ $stats['nb_paiements'] }}">0</div>
         <div style="font-size:11px;color:rgba(255,255,255,.5);">Paiements validés</div>
       </div>
       <div style="text-align:center;">
-        <div style="font-size:22px;font-weight:700;color:#5DCAA5;">{{ number_format($stats['montant_total'], 0, ',', ' ') }} FCFA</div>
+        <div style="font-size:22px;font-weight:700;color:#5DCAA5;" class="stat-counter" data-count="{{ $stats['montant_total'] }}" data-suffix=" FCFA">0 FCFA</div>
         <div style="font-size:11px;color:rgba(255,255,255,.5);">Collectés</div>
       </div>
     </div>
