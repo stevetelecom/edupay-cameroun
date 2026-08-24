@@ -269,5 +269,6 @@ document.querySelectorAll('[data-toast]').forEach(function(t){
     setTimeout(function(){ t.classList.add('closing'); setTimeout(function(){ t.remove(); },200); },4000);
 });
 </script>
+@stack('scripts')
 </body>
 </html>
