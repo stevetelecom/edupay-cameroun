@@ -52,6 +52,19 @@ class LandingController extends Controller
         return view('public.temoignages', compact('stats'));
     }
 
+    public function etablissement(\App\Models\Etablissement $etablissement): View
+    {
+        $etablissement->load(['categoriesFrais' => function ($q) {
+            $q->where('actif', true)->orderBy('nom');
+        }]);
+
+        $nbApprenants = \App\Models\Apprenant::where('etablissement_id', $etablissement->id)
+            ->where('actif', true)
+            ->count();
+
+        return view('public.etablissement', compact('etablissement', 'nbApprenants'));
+    }
+
     public function guide(): View
     {
         return view('public.guide');

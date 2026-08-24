@@ -114,13 +114,16 @@
     {{-- Grille établissements --}}
     <div id="etabs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
       @forelse($etablissements as $etab)
-      <div class="etab-card-pub"
+      <a href="{{ route('etablissement.show', $etab->code_etablissement) }}"
+           class="etab-card-pub"
            data-nom="{{ e(strtolower($etab->nom)) }}"
            data-ville="{{ e(strtolower($etab->ville ?? '')) }}"
            data-type="{{ e(strtolower($etab->type ?? '')) }}"
            style="background:#fff;border:1px solid #eee;border-radius:12px;
-                  padding:16px;text-align:center;transition:box-shadow .15s;
-                  cursor:default;">
+                  padding:16px;text-align:center;transition:box-shadow .2s,transform .2s;
+                  cursor:pointer;text-decoration:none;color:inherit;display:block;"
+           onmouseover="this.style.boxShadow='0 8px 20px rgba(13,158,117,.15)';this.style.transform='translateY(-3px)'"
+           onmouseout="this.style.boxShadow='none';this.style.transform='translateY(0)'">
         {{-- Logo ou avatar --}}
         @if($etab->logo)
           <img src="{{ asset('storage/'.$etab->logo) }}"
@@ -149,7 +152,7 @@
                      background:var(--ep-teal-lt);color:#085041;font-weight:500;">
           {{ ucfirst(str_replace('_', ' ', $etab->type ?? 'Établissement')) }}
         </span>
-      </div>
+      </a>
       @empty
       <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:40px 0;font-size:13px;">
         Aucun établissement partenaire pour le moment. Soyez le premier !

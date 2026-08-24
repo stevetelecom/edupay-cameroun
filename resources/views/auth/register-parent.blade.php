@@ -55,13 +55,29 @@
 
       <form method="POST" action="{{ route('register.parent.step1.post') }}">
         @csrf
+        <input type="hidden" name="code_etablissement" value="{{ old('code_etablissement', request('code_etablissement')) }}" />
+
+        @if(request('code_etablissement'))
+          @php
+            $etabPreselec = \App\Models\Etablissement::where('code_etablissement', request('code_etablissement'))->first();
+          @endphp
+          @if($etabPreselec)
+          <div style="background:var(--ep-teal-lt);border:1px solid #5DCAA5;border-radius:8px;
+                      padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+            <span class="material-symbols-outlined" style="font-size:18px;color:#0D9E75;">check_circle</span>
+            <div style="font-size:12px;color:#085041;">
+              Inscription pour <strong>{{ $etabPreselec->nom }}</strong> — {{ $etabPreselec->ville }}
+            </div>
+          </div>
+          @endif
+        @endif
 
         {{-- PROFIL --}}
         <div class="form-section">Vous êtes :</div>
         <div style="display:flex;gap:10px;margin-bottom:16px;">
 
           <label style="flex:1;padding:14px 10px;border:2px solid var(--ep-teal);border-radius:8px;cursor:pointer;text-align:center;background:var(--ep-teal-lt);" id="lbl-parent">
-            <input type="radio" name="profil" value="parent" style="display:none;" checked onchange="switchProfil('parent')">
+            <input type="radio" name="profil" value="parent" style="display:none;" {{ (old('profil', request('profil')) && old('profil', request('profil')) !== 'parent') ? '' : 'checked' }} onchange="switchProfil('parent')">
             {{-- Icône famille --}}
             <div class="prof-label"  style="display:flex;justify-content:center;margin-bottom:6px;">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="1.5">
@@ -76,7 +92,7 @@
           </label>
 
           <label style="flex:1;padding:14px 10px;border:2px solid #ddd;border-radius:8px;cursor:pointer;text-align:center;background:#fff;" id="lbl-eleve">
-            <input type="radio" name="profil" value="eleve" style="display:none;" {{ old('profil')==='eleve'?'checked':'' }} onchange="switchProfil('eleve')">
+            <input type="radio" name="profil" value="eleve" style="display:none;" {{ old('profil', request('profil'))==='eleve'?'checked':'' }} onchange="switchProfil('eleve')">
             {{-- Icône élève --}}
             <div class="prof-label" style="display:flex;justify-content:center;margin-bottom:6px;">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5">
@@ -89,7 +105,7 @@
           </label>
 
           <label  style="flex:1;padding:14px 10px;border:2px solid #ddd;border-radius:8px;cursor:pointer;text-align:center;background:#fff;" id="lbl-etudiant">
-            <input type="radio" name="profil" value="etudiant" style="display:none;" {{ old('profil')==='etudiant'?'checked':'' }} onchange="switchProfil('etudiant')">
+            <input type="radio" name="profil" value="etudiant" style="display:none;" {{ old('profil', request('profil'))==='etudiant'?'checked':'' }} onchange="switchProfil('etudiant')">
             {{-- Icône étudiant --}}
             <div class="prof-label"  style="display:flex;justify-content:center;margin-bottom:6px;">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5">
