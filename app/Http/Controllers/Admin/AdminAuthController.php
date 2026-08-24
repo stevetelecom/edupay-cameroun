@@ -353,7 +353,8 @@ class AdminAuthController extends Controller
     {
         // Vérifier le token secret dans l'URL : ?token=xxxx
         $token = $request->query('token');
-        if (! $token || $token !== config('app.admin_register_token')) {
+        $expected = config('app.admin_register_token');
+        if (! $token || ! $expected || ! hash_equals((string) $expected, (string) $token)) {
             abort(404);
         }
 
@@ -370,7 +371,8 @@ class AdminAuthController extends Controller
     {
         // Revérifier le token
         $token = $request->input('token');
-        if (! $token || $token !== config('app.admin_register_token')) {
+        $expected = config('app.admin_register_token');
+        if (! $token || ! $expected || ! hash_equals((string) $expected, (string) $token)) {
             abort(404);
         }
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 class LoginController extends Controller
 {
@@ -138,22 +139,29 @@ class LoginController extends Controller
             'otp_code' => 'required|numeric|digits:6',
         ]);
 
-        $storedOtp = $request->session()->get('otp_code');
-        $attempts = $request->session()->get('otp_attempts', 0);
+        // Compteur de tentatives basé sur IP + user, en Cache (survit à une suppression de cookies,
+        // contrairement à un compteur en session).
+        $otpAttemptsKey = 'otp_attempts_' . $request->ip() . '_' . $user->id;
+        $attempts = Cache::get($otpAttemptsKey, 0);
 
         if ($attempts >= 3) {
-            $request->session()->forget(['otp_code', 'otp_login', 'otp_user_id', 'otp_attempts']);
+            $request->session()->forget(['otp_code', 'otp_login', 'otp_user_id']);
+            Cache::forget($otpAttemptsKey);
             return back()
                 ->with('error', 'Trop de tentatives. Veuillez recommencer.')
                 ->withInput();
         }
 
+        $storedOtp = $request->session()->get('otp_code');
+
         if ((int) $request->otp_code !== (int) $storedOtp) {
-            $request->session()->put('otp_attempts', $attempts + 1);
+            Cache::put($otpAttemptsKey, $attempts + 1, now()->addMinutes(10));
             return back()
                 ->with('error', 'Code OTP invalide.')
                 ->withInput();
         }
+
+        Cache::forget($otpAttemptsKey);
 
         // Vérifier que le compte n'est pas suspendu avant d'authentifier
         if ($user->suspendu) {
@@ -166,7 +174,7 @@ class LoginController extends Controller
         // Code correct : authentifier l'utilisateur
         Auth::login($user, true);
         $request->session()->regenerate();
-        $request->session()->forget(['otp_code', 'otp_login', 'otp_user_id', 'otp_attempts']);
+        $request->session()->forget(['otp_code', 'otp_login', 'otp_user_id']);
 
         return redirect()->intended($this->redirectionParRole($user));
     }

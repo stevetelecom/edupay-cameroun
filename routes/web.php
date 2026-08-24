@@ -27,9 +27,9 @@ Route::post('/contact', [LandingController::class, 'submitContact'])->name('cont
 // Authentification
 Route::middleware('guest')->group(function () {
     Route::get('/connexion',          [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/connexion',         [LoginController::class, 'login'])->name('login.post');
+    Route::post('/connexion',         [LoginController::class, 'login'])->middleware('throttle:5,1')->name('login.post');
     Route::get('/connexion/otp',      [LoginController::class, 'showOtpForm'])->name('login.otp');
-    Route::post('/connexion/otp',     [LoginController::class, 'verifyOtp'])->name('login.otp.verify');
+    Route::post('/connexion/otp',     [LoginController::class, 'verifyOtp'])->middleware('throttle:10,1')->name('login.otp.verify');
 
     // Mot de passe oublié / Réinitialisation
     Route::get('/mot-de-passe-oublie',               [PasswordResetController::class, 'showForgotForm'])->name('password.forgot');
