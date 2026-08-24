@@ -41,6 +41,8 @@
         @keyframes toast-in{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
         @keyframes toast-out{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(30px);}}
     </style>
+  <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
+  <link rel="apple-touch-icon" href="{{ asset('images/logo.jpeg') }}">
 </head>
 <body class="h-full bg-gray-100 font-sans text-gray-900 antialiased">
 
