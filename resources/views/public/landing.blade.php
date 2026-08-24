@@ -306,7 +306,7 @@
 <div class="ep-footer">
   <div class="footer-grid">
     <div>
-      <div class="footer-logo">Edu<span>Pay</span> Cameroun</div>
+      <div class="footer-logo" style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>EduPay Cameroun</div>
       <div class="footer-desc">La première plateforme de paiement électronique des frais de scolarité pensée pour les réalités camerounaises. Mobile Money · Sécurisé · Accessible.</div>
       <div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div>
     </div>

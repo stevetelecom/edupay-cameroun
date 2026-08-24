@@ -7,8 +7,8 @@
 
 <nav class="pub-nav">
   <div class="pub-nav-inner">
-    <a href="{{ route('landing') }}" class="logo-t" style="text-decoration:none;color:#fff;">
-      Edu<span>Pay</span> Cameroun
+    <a href="{{ route('landing') }}" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
+      <span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span></span>
     </a>
     <button class="nav-burger" id="nav-burger" onclick="toggleNav()" aria-label="Menu">
       <span></span><span></span><span></span>

@@ -6,7 +6,7 @@
 
 <div class="hero-band">
   <div class="hero-top">
-    <div class="logo-t">Edu<span>Pay</span> Cameroun</div>
+    <div style="display:flex;align-items:center;gap:9px;"><span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span></div>
     <div style="display:flex;gap:8px;align-items:center;">
       <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;text-decoration:none;">Accueil</a>
       <a href="{{ route('temoignages') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;text-decoration:none;">Témoignages</a>
@@ -219,7 +219,7 @@
 <div class="ep-footer">
   <div class="footer-grid">
     <div>
-      <div class="footer-logo">Edu<span>Pay</span> Cameroun</div>
+      <div class="footer-logo" style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>EduPay Cameroun</div>
       <div class="footer-desc">La première plateforme de paiement scolaire made in Cameroon.</div>
       <div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div>
     </div>

@@ -7,7 +7,7 @@
       <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:none;cursor:pointer;padding:0;text-decoration:none;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
       </a>
-      <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> — Inscrire mon établissement</div>
+      <div style="display:flex;align-items:center;gap:9px;"><span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span></div>
     </div>
     <div style="font-size:12px;color:rgba(255,255,255,.5);">Déjà inscrit ? <a href="{{ route('login') }}" style="color:#5DCAA5;">Accéder au back-office</a></div>
   </div>

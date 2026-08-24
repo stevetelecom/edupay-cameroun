@@ -6,7 +6,7 @@
 <div style="min-height:100vh;background:#f1f3f5;display:flex;flex-direction:column;">
 
   <div class="form-header">
-    <div class="logo-t" style="font-size:17px;">Edu<span>Pay</span> Cameroun</div>
+    <div style="display:flex;align-items:center;gap:9px;"><span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span></div>
     <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:6px 13px;border-radius:20px;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
       <span class="material-symbols-outlined" style="font-size:14px;">arrow_back</span> Accueil
     </a>
