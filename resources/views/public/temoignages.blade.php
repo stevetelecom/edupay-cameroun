@@ -27,6 +27,9 @@
         <div style="font-size:11px;color:rgba(255,255,255,.5);">Collectés</div>
       </div>
     </div>
+    <div style="margin-top:14px;font-size:11px;color:rgba(255,255,255,.4);font-style:italic;">
+      Plateforme en phase pilote — chiffres en croissance quotidienne à mesure que de nouveaux établissements rejoignent EduPay.
+    </div>
   </div>
 </div>
 
