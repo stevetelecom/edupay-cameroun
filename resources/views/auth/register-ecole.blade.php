@@ -1,7 +1,7 @@
 @extends('layouts.public')
 @section('title', 'Inscription École — EduPay Cameroun')
 @section('content')
-<div style="min-height:100vh;background:#f1f3f5;display:flex;flex-direction:column;">
+<div class="video-bg-container" style="min-height:100vh;display:flex;flex-direction:column;"><video class="video-bg" autoplay muted loop playsinline><source src="{{ asset('videos/hero-payment.mp4') }}" type="video/mp4"></video><div class="video-bg-overlay"></div>
   <div class="form-header">
     <div style="display:flex;align-items:center;gap:12px;">
       <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:none;cursor:pointer;padding:0;text-decoration:none;">

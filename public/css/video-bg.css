@@ -1,0 +1,48 @@
+/* ══ Vidéo de fond avec overlay EduPay ══ */
+.video-bg-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.video-bg-container > video.video-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  z-index: 0;
+  opacity: .45;
+}
+
+.video-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(11,37,69,.55) 0%, rgba(11,37,69,.45) 50%, rgba(13,158,117,.15) 100%);
+  z-index: 1;
+}
+
+/* Le contenu doit toujours passer au-dessus */
+.video-bg-container > *:not(video):not(.video-bg-overlay) {
+  position: relative;
+  z-index: 2;
+}
+
+/* Sur mobile, désactive la vidéo (économie data + perf) et garde juste le dégradé */
+@media (max-width: 768px) {
+  .video-bg-container > video.video-bg {
+    display: none;
+  }
+  .video-bg-overlay {
+    background: linear-gradient(135deg, rgba(11,37,69,1) 0%, rgba(11,37,69,.95) 60%, rgba(13,158,117,.3) 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .video-bg-container > video.video-bg {
+    display: none;
+  }
+}

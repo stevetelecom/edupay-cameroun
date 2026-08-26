@@ -2,7 +2,7 @@
 @section('title', 'Inscription — EduPay Cameroun')
 
 @section('content')
-<div style="min-height:100vh;background:#f1f3f5;display:flex;flex-direction:column;">
+<div class="video-bg-container" style="min-height:100vh;display:flex;flex-direction:column;"><video class="video-bg" autoplay muted loop playsinline><source src="{{ asset('videos/hero-payment.mp4') }}" type="video/mp4"></video><div class="video-bg-overlay"></div>
 
   {{-- HEADER --}}
   <div class="form-header">

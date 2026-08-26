@@ -6,7 +6,11 @@
 
 {{-- ══ HERO BAND ══ --}}
 @include('layouts._navbar_public')
-<div class="hero-band">
+<div class="hero-band video-bg-container">
+  <video class="video-bg" autoplay muted loop playsinline>
+    <source src="{{ asset('videos/hero-payment.mp4') }}" type="video/mp4">
+  </video>
+  <div class="video-bg-overlay"></div>
   <div class="hero-main">
     <div class="hero-tag">
       <span style="width:7px;height:7px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span>
