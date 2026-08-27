@@ -32,7 +32,7 @@
 }
 
 /* Sur mobile, désactive la vidéo (économie data + perf) et garde juste le dégradé */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .video-bg-container > video.video-bg {
     display: none;
   }
