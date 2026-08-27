@@ -318,8 +318,7 @@
       <div class="footer-col-title">Produit</div>
       <a class="footer-link" href="{{ route('landing') }}">Fonctionnalités</a>
       <a class="footer-link" href="{{ route('temoignages') }}">Témoignages</a>
-      <a class="footer-link" href="#">Tarifs</a>
-      <a class="footer-link" href="#">API Développeurs</a>
+      <a class="footer-link" href="{{ route('tarifs') }}">Tarifs</a>
     </div>
     <div>
       <div class="footer-col-title">Établissements</div>

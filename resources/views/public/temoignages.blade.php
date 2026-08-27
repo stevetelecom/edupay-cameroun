@@ -109,7 +109,7 @@
     <div style="font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;">Rejoignez les établissements qui font confiance à EduPay</div>
     <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:22px;">Inscription gratuite · Mise en ligne en 24h · Support dédié</div>
     <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
-      <a href="{{ route('register.parent.step1') }}" class="hbtn-main">Créer mon compte parent</a>
+      <a href="{{ route('register.parent.step1') }}" class="hbtn-main">Créer mon compte payeur</a>
       <a href="{{ route('register.ecole.step1') }}" class="hbtn-ghost">Inscrire mon établissement</a>
     </div>
   </div>
@@ -119,7 +119,7 @@
 <div class="ep-footer">
   <div class="footer-grid">
     <div><div class="footer-logo" style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>EduPay Cameroun</div><div class="footer-desc">La première plateforme de paiement scolaire made in Cameroon.</div><div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div></div>
-    <div><div class="footer-col-title">Produit</div><a class="footer-link" href="{{ route('landing') }}">Accueil</a><a class="footer-link" href="{{ route('about') }}">À propos</a></div>
+    <div><div class="footer-col-title">Produit</div><a class="footer-link" href="{{ route('landing') }}">Accueil</a><a class="footer-link" href="{{ route('about') }}">À propos</a><a class="footer-link" href="{{ route('tarifs') }}">Tarifs</a></div>
     <div><div class="footer-col-title">Établissements</div><a class="footer-link" href="{{ route('register.ecole.step1') }}">Inscription</a><a class="footer-link" href="{{ route('guide') }}">Guide</a></div>
     <div><div class="footer-col-title">Légal</div><a class="footer-link" href="{{ route('confidentialite') }}">Confidentialité</a><a class="footer-link" href="{{ route('cgu') }}">CGU</a></div>
   </div>

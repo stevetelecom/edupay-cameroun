@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Auth;
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/a-propos', [LandingController::class, 'about'])->name('about');
 Route::get('/temoignages', [LandingController::class, 'temoignages'])->name('temoignages');
+Route::get('/tarifs', [LandingController::class, 'tarifs'])->name('tarifs');
 Route::get('/etablissement/{etablissement:code_etablissement}', [LandingController::class, 'etablissement'])->name('etablissement.show');
 Route::get('/guide', [LandingController::class, 'guide'])->name('guide');
 Route::get('/support', [LandingController::class, 'support'])->name('support');

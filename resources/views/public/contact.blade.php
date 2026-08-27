@@ -4,15 +4,8 @@
 
 @section('content')
 
+@include('layouts._navbar_public')
 <div class="hero-band">
-  <div class="hero-top">
-    <div style="display:flex;align-items:center;gap:9px;"><span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span></div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;text-decoration:none;">Accueil</a>
-      <a href="{{ route('temoignages') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;text-decoration:none;">Témoignages</a>
-      <a href="{{ route('about') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:7px 14px;border-radius:20px;font-size:12px;text-decoration:none;">À propos</a>
-    </div>
-  </div>
   <div class="hero-main">
     <div class="hero-tag" style="justify-content:center;display:inline-flex;"> <span style="width:7px;height:7px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span> Contactez notre équipe</div>
     <div class="hero-h1">Une question ?<br><span style="color:#5DCAA5;">Nous sommes là pour vous aider.</span></div>
@@ -228,6 +221,7 @@
       <a class="footer-link" href="{{ route('landing') }}">Accueil</a>
       <a class="footer-link" href="{{ route('about') }}">À propos</a>
       <a class="footer-link" href="{{ route('temoignages') }}">Témoignages</a>
+      <a class="footer-link" href="{{ route('tarifs') }}">Tarifs</a>
     </div>
     <div>
       <div class="footer-col-title">Établissements</div>

@@ -85,6 +85,13 @@ class LandingController extends Controller
         return view('public.support');
     }
 
+    public function tarifs(): View
+    {
+        return view('public.tarifs', [
+            'plans' => \App\Models\Abonnement::PLANS,
+        ]);
+    }
+
     public function contact(): View
     {
         return view('public.contact');
