@@ -67,6 +67,8 @@ return [
 
     'timezone' => 'UTC',
 
+    'admin_url_prefix' => env('ADMIN_URL_PREFIX', 'admin-ep2026'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

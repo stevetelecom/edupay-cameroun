@@ -21,17 +21,23 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest:admin')->group(function () {
     // Register Super Admin — URL cachée, protégée par token secret
     Route::get('/register',  [AdminAuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [AdminAuthController::class, 'register'])->name('register.post');
+    Route::post('/register', [AdminAuthController::class, 'register'])
+        ->middleware('throttle:5,1')->name('register.post');
 
     Route::get('/login',          [AdminAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login',         [AdminAuthController::class, 'login'])->name('login.post');
+    Route::post('/login',         [AdminAuthController::class, 'login'])
+        ->middleware('throttle:5,1')->name('login.post');
     Route::get('/login/2fa',      [AdminAuthController::class, 'show2fa'])->name('login.2fa');
-    Route::post('/login/2fa',     [AdminAuthController::class, 'verify2fa'])->name('login.2fa.verify');
-    Route::post('/login/2fa/resend', [AdminAuthController::class, 'resend2fa'])->name('login.2fa.resend');
+    Route::post('/login/2fa',     [AdminAuthController::class, 'verify2fa'])
+        ->middleware('throttle:10,1')->name('login.2fa.verify');
+    Route::post('/login/2fa/resend', [AdminAuthController::class, 'resend2fa'])
+        ->middleware('throttle:3,1')->name('login.2fa.resend');
     Route::get('/password/forgot',   [AdminAuthController::class, 'showForgotForm'])->name('password.forgot');
-    Route::post('/password/forgot',  [AdminAuthController::class, 'sendResetCode'])->name('password.forgot.send');
+    Route::post('/password/forgot',  [AdminAuthController::class, 'sendResetCode'])
+        ->middleware('throttle:5,1')->name('password.forgot.send');
     Route::get('/password/reset',    [AdminAuthController::class, 'showResetForm'])->name('password.reset.form');
-    Route::post('/password/reset',   [AdminAuthController::class, 'resetPassword'])->name('password.reset');
+    Route::post('/password/reset',   [AdminAuthController::class, 'resetPassword'])
+        ->middleware('throttle:10,1')->name('password.reset');
 });
 
 Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');

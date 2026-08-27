@@ -204,25 +204,49 @@ class OnboardingController extends Controller
     public function searchApprenants(Request $request): \Illuminate\Http\JsonResponse
     {
         $etablissementId = $request->input('etablissement_id');
-        $search          = $request->input('q', '');
+        $search          = trim((string) $request->input('q', ''));
 
         if (!$etablissementId) {
             return response()->json([]);
         }
 
+        // 🔒 Sécurité (E-01) : plus de recherche libre qui expose tout l'annuaire.
+        // Le parent doit connaître au moins 3 caractères ET (matricule exact
+        // OU nom+prénom précis) — sinon aucun résultat. Empêche la fouille
+        // de données personnelles de mineurs par simple frappe au clavier.
+        if (mb_strlen($search) < 3) {
+            return response()->json([]);
+        }
+
         $apprenants = \App\Models\Apprenant::where('etablissement_id', $etablissementId)
             ->where('actif', true)
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($sub) use ($search) {
-                    $sub->where('nom',       'like', "%{$search}%")
-                        ->orWhere('prenom',  'like', "%{$search}%")
-                        ->orWhere('classe',  'like', "%{$search}%")
-                        ->orWhere('matricule','like', "%{$search}%");
-                });
+            ->where(function ($query) use ($search) {
+                $query->where('matricule', $search)
+                    ->orWhere(function ($sub) use ($search) {
+                        // nom+prénom doivent être présents ensemble dans la requête
+                        $mots = preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+                        if (count($mots) >= 2) {
+                            foreach ($mots as $mot) {
+                                $sub->where(function ($s) use ($mot) {
+                                    $s->where('nom', 'like', "%{$mot}%")
+                                      ->orWhere('prenom', 'like', "%{$mot}%");
+                                });
+                            }
+                        } else {
+                            // Un seul mot : jamais de correspondance nom/prénom seul
+                            $sub->whereRaw('1 = 0');
+                        }
+                    });
             })
             ->orderBy('nom')
-            ->limit(30)
+            ->limit(10)
             ->get(['id', 'nom', 'prenom', 'classe', 'matricule']);
+
+        \Illuminate\Support\Facades\Log::info('Recherche annuaire apprenants', [
+            'user_id'          => Auth::id(),
+            'etablissement_id' => $etablissementId,
+            'resultats'        => $apprenants->count(),
+        ]);
 
         return response()->json($apprenants);
     }

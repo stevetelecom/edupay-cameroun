@@ -181,30 +181,11 @@ class PaiementController extends Controller
             'operateur'               => $resultat['operateur'],
         ]);
 
-        // Anti-flapping : AangaraaPay renvoie parfois PENDING a l'initiation puis
-        // FAILED une seconde plus tard (observe systematiquement en logs de
-        // production, ex. solde insuffisant). Une courte verification synchrone
-        // avant redirection evite d'envoyer le payeur sur la page d'attente pour
-        // un paiement en realite deja voue a l'echec.
-        usleep(1500000);
-        $verifImmediate = $this->aangaraa->verifierStatut($resultat['pay_token']);
-
-        if ($verifImmediate['statut'] === 'FAILED') {
-            $this->marquerEchoue($paiement, $verifImmediate['message'] ?? null);
-
-            return back()->withInput()->with('error',
-                'Échec du paiement : ' . ($verifImmediate['message'] ?? 'Paiement refusé par l\'opérateur.')
-                . ' (numéro envoyé à ' . $this->libelleOperateur($resultat['operateur']) . ' : ' . $telephoneNormalise . ')'
-            );
-        }
-
-        if ($verifImmediate['statut'] === 'SUCCESSFUL') {
-            $this->traiterPaiementValide($paiement->id);
-
-            return redirect()
-                ->route('payeur.dashboard')
-                ->with('success', 'Paiement confirmé instantanément !');
-        }
+        // Note sécurité (E-04 audit) : l'ancienne vérification synchrone (usleep 1.5s
+        // + appel API bloquant le worker PHP-FPM à chaque paiement) a été retirée —
+        // incompatible avec la charge visée (500 tx/min, CDC §6.4). La page d'attente
+        // fait déjà un polling à 5s qui détecte PENDING/FAILED/SUCCESSFUL de façon
+        // non bloquante, avec le même message d'erreur précis à l'utilisateur.
 
         return redirect()
             ->route('payeur.paiement.attente', $paiement)
@@ -284,7 +265,12 @@ class PaiementController extends Controller
      */
     private function traiterPaiementValide(int $paiementId): bool
     {
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($paiementId) {
+        // Sécurité (E-02 audit) : l'appel HTTP de reversement (timeout 30s)
+        // a été sorti de la transaction verrouillée — on récupère juste l'ID
+        // de la commission créée, et on dispatche le job APRÈS le commit.
+        $commissionId = null;
+
+        $resultat = \Illuminate\Support\Facades\DB::transaction(function () use ($paiementId, &$commissionId) {
             // Verrou pessimiste : bloque toute autre transaction qui tenterait
             // de lire/modifier cette même ligne tant qu'on n'a pas fini.
             $paiement = Paiement::whereKey($paiementId)->lockForUpdate()->first();
@@ -313,7 +299,7 @@ class PaiementController extends Controller
             $etablissement = $frais->apprenant->etablissement;
 
             try {
-                \App\Models\Commission::create([
+                $commission = \App\Models\Commission::create([
                     'paiement_id'               => $paiement->id,
                     'etablissement_id'          => $etablissement->id,
                     'montant_transaction'       => $paiement->montant,
@@ -323,35 +309,26 @@ class PaiementController extends Controller
                     'frais_aangaraa'            => $paiement->frais_aangaraa,
                     'statut'                    => 'calculee',
                 ]);
+                $commissionId = $commission->id;
             } catch (\Illuminate\Database\QueryException $e) {
                 // Violation de contrainte unique = une commission existe déjà pour ce paiement.
                 // Filet de sécurité ultime : on arrête là, pas de double reversement.
                 \Illuminate\Support\Facades\Log::warning('Commission déjà existante pour ce paiement, reversement ignoré', [
                     'paiement_id' => $paiement->id,
                 ]);
-                return true; // le paiement est bien validé, juste pas de 2e commission/reversement
-            }
-
-            if ($etablissement->numero_momo_reversement) {
-                $resultatReversement = $this->aangaraa->reverserEtablissement(
-                    telephone:   $etablissement->numero_momo_reversement,
-                    operateur:   $etablissement->operateur_momo_reversement ?? 'mtn',
-                    montant:     $paiement->montant,
-                    description: 'Reversement EduPay — ' . $paiement->reference
-                );
-
-                if ($resultatReversement['succes']) {
-                    \App\Models\Commission::where('paiement_id', $paiement->id)
-                        ->update([
-                            'statut'                => 'prelevee',
-                            'reference_reversement' => $resultatReversement['reference'],
-                            'reversed_at'           => now(),
-                        ]);
-                }
             }
 
             return true;
         });
+
+        // Le verrou est relâché (transaction commitée) — l'appel HTTP externe
+        // de reversement se fait maintenant en dehors de toute transaction DB,
+        // via une file d'attente avec retry automatique.
+        if ($resultat && $commissionId) {
+            \App\Jobs\ReverserEtablissementJob::dispatch($commissionId);
+        }
+
+        return $resultat;
     }
 
     // ─────────────────────────────────────────────
@@ -546,6 +523,17 @@ class PaiementController extends Controller
 
         if (! $estParent) {
             abort(403, 'Vous n\'êtes pas autorisé à accéder à ce dossier de paiement.');
+        }
+
+        // 🔒 Sécurité (E-01) : tant que l'établissement n'a pas validé le
+        // rattachement (auto-création via apprenant_id/matricule au moment
+        // de l'onboarding), on bloque l'accès aux frais/solde — évite qu'un
+        // payeur consulte les données financières d'un enfant qui n'est pas
+        // réellement le sien avant vérification par l'école.
+        $apprenant = $fraisApprenant->apprenant;
+        if ($apprenant && ! $apprenant->valide_par_etablissement) {
+            abort(403, 'Ce rattachement est en attente de validation par l\'établissement. '
+                . 'Vous serez notifié dès qu\'il sera confirmé.');
         }
     }
 

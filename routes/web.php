@@ -85,7 +85,7 @@ Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur
     Route::patch('/notifications/{notification}/lu', [\App\Http\Controllers\Payeur\DashboardController::class, 'marquerNotificationLue'])->name('notifications.lu');
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Payeur\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/paiement/{fraisApprenant}', [\App\Http\Controllers\Payeur\PaiementController::class, 'show'])->name('paiement.show');
-    Route::post('/paiement/{fraisApprenant}/initier', [\App\Http\Controllers\Payeur\PaiementController::class, 'initier'])->name('paiement.initier');
+    Route::post('/paiement/{fraisApprenant}/initier', [\App\Http\Controllers\Payeur\PaiementController::class, 'initier'])->middleware('throttle:10,1')->name('paiement.initier');
     Route::get('/paiement/{paiement}/attente',  [\App\Http\Controllers\Payeur\PaiementController::class, 'attente'])->name('paiement.attente');
     Route::get('/paiement/{paiement}/statut',   [\App\Http\Controllers\Payeur\PaiementController::class, 'verifierStatut'])->name('paiement.statut');
     Route::post('/paiement/{paiement}/annuler',  [\App\Http\Controllers\Payeur\PaiementController::class, 'annuler'])->name('paiement.annuler');
@@ -184,7 +184,7 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnemen
 | Routes Super Admin — URL cachée
 |--------------------------------------------------------------------------
 */
-Route::prefix(env('ADMIN_URL_PREFIX', 'admin-ep2026'))
+Route::prefix(config('app.admin_url_prefix'))
     ->name('admin.')
     ->group(base_path('routes/admin.php'));
 

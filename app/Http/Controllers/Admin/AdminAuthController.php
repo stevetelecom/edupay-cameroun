@@ -151,10 +151,30 @@ class AdminAuthController extends Controller
         }
 
         /** @var Admin $admin */
-        $admin         = Admin::findOrFail($adminId);
-        $hashedOtp     = Cache::get('2fa_admin_' . $admin->id);
+        $admin = Admin::findOrFail($adminId);
+
+        // Limite de tentatives anti brute-force (5 max / 15 min)
+        $attemptsKey = 'admin_2fa_attempts_' . $admin->id;
+        if (Cache::get($attemptsKey, 0) >= 5) {
+            $request->session()->forget('admin_2fa_id');
+            Cache::forget('2fa_admin_' . $admin->id);
+            Cache::forget($attemptsKey);
+
+            AuditLog::enregistrer(
+                $admin, 'LOGIN_2FA_BLOQUE',
+                'Trop de tentatives 2FA — session invalidée.',
+                $request, 'CRITICAL'
+            );
+
+            return redirect()->route('admin.login')
+                ->with('error', 'Trop de tentatives. Reconnectez-vous.');
+        }
+
+        $hashedOtp = Cache::get('2fa_admin_' . $admin->id);
 
         if (! $hashedOtp || ! Hash::check($request->code, $hashedOtp)) {
+            Cache::put($attemptsKey, Cache::get($attemptsKey, 0) + 1, now()->addMinutes(15));
+
             AuditLog::enregistrer(
                 $admin,
                 'LOGIN_2FA_ECHEC',
@@ -165,6 +185,8 @@ class AdminAuthController extends Controller
 
             return back()->withErrors(['code' => 'Code incorrect ou expiré.']);
         }
+
+        Cache::forget($attemptsKey);
 
         // Supprimer le code OTP après utilisation
         Cache::forget('2fa_admin_' . $admin->id);
@@ -257,24 +279,36 @@ class AdminAuthController extends Controller
             'password.confirmed'    => 'Les mots de passe ne correspondent pas.',
         ]);
 
-        // Vérifier que le nouveau mot de passe est différent de l'ancien
-        $adminId = $request->session()->get('admin_reset_id');
-        $adminCheck = Admin::findOrFail($adminId);
-        if (Hash::check($request->password, $adminCheck->password)) {
-            return back()->withErrors(['password' => 'Le nouveau mot de passe doit être différent de l\'ancien.']);
-        }
-
         $adminId = $request->session()->get('admin_reset_id');
         if (! $adminId) {
             return redirect()->route('admin.password.forgot')
                 ->with('error', 'Session expirée. Recommencez.');
         }
 
-        $admin     = Admin::findOrFail($adminId);
+        // Limite de tentatives sur le code (anti brute-force)
+        $codeAttemptsKey = 'admin_reset_attempts_' . $adminId;
+        if (Cache::get($codeAttemptsKey, 0) >= 5) {
+            $request->session()->forget('admin_reset_id');
+            Cache::forget($codeAttemptsKey);
+            return redirect()->route('admin.password.forgot')
+                ->with('error', 'Trop de tentatives. Recommencez la procédure.');
+        }
+
+        $admin      = Admin::findOrFail($adminId);
         $hashedCode = Cache::get('admin_reset_' . $admin->id);
 
+        // 1. Vérifier le code EN PREMIER — avant toute autre logique métier
         if (! $hashedCode || ! Hash::check($request->code, $hashedCode)) {
+            Cache::increment($codeAttemptsKey);
+            Cache::put($codeAttemptsKey, Cache::get($codeAttemptsKey, 1), now()->addMinutes(15));
             return back()->withErrors(['code' => 'Code incorrect ou expiré.']);
+        }
+
+        Cache::forget($codeAttemptsKey);
+
+        // 2. Seulement APRÈS validation du code : vérifier que le nouveau mdp diffère de l'ancien
+        if (Hash::check($request->password, $admin->password)) {
+            return back()->withErrors(['password' => 'Le nouveau mot de passe doit être différent de l\'ancien.']);
         }
 
         $admin->update(['password' => bcrypt($request->password)]);

@@ -125,9 +125,10 @@ class LoginController extends Controller
             $request->session()->put('otp_user_id', $user->id);
             $request->session()->put('otp_attempts', 0);
 
-            // À implémenter Sprint 2 : envoyer par SMS via AangaraaPay ou autre service SMS
-            // Pour le test : afficher le code dans les logs
-            Log::info("OTP Code for {$login}: {$otp}");
+            // TODO Sprint 2 : envoyer par SMS via AangaraaPay ou autre service SMS.
+            // Tant que le SMS n'est pas branché, ne JAMAIS logger le code en clair —
+            // seule une trace d'audit sans le code est conservée.
+            Log::info("Demande OTP pour {$login} (envoi SMS non encore implémenté)");
 
             return back()
                 ->with('otp_sent', true)
