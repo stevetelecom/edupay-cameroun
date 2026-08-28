@@ -1,30 +1,30 @@
 @extends('layouts.payeur')
 
-@section('title', 'Historique des paiements')
+@section('title', __('payeur.hist_titre'))
 
 @push('modals')
 <div id="modal-detail-paiement" class="ep-modal-overlay">
   <div class="ep-modal">
     <div class="ep-modal-head">
-      <h3>Détail du paiement</h3>
+      <h3>{{ __('payeur.hist_detail_titre') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-detail-paiement')">×</button>
     </div>
     <div class="ep-modal-body">
-      <div class="row"><span style="color:#888;">Référence</span><strong id="detail-reference"></strong></div>
-      <div class="row"><span style="color:#888;">Enfant</span><strong id="detail-enfant"></strong></div>
-      <div class="row"><span style="color:#888;">Catégorie</span><strong id="detail-categorie"></strong></div>
-      <div class="row"><span style="color:#888;">Montant frais</span><strong id="detail-montant"></strong></div>
-      <div class="row"><span style="color:#888;">Frais de service</span><strong id="detail-frais"></strong></div>
-      <div class="row"><span style="color:#888;">Total débité</span><strong id="detail-total"></strong></div>
-      <div class="row"><span style="color:#888;">Moyen de paiement</span><strong id="detail-moyen"></strong></div>
-      <div class="row"><span style="color:#888;">Opérateur</span><strong id="detail-operateur"></strong></div>
-      <div class="row"><span style="color:#888;">Téléphone</span><strong id="detail-telephone"></strong></div>
-      <div class="row"><span style="color:#888;">Date</span><strong id="detail-date"></strong></div>
-      <div class="row"><span style="color:#888;">Statut</span><span id="detail-statut"></span></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_reference') }}</span><strong id="detail-reference"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_enfant') }}</span><strong id="detail-enfant"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_categorie') }}</span><strong id="detail-categorie"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_montant_frais') }}</span><strong id="detail-montant"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_frais_service') }}</span><strong id="detail-frais"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_total_debite') }}</span><strong id="detail-total"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_moyen') }}</span><strong id="detail-moyen"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_operateur') }}</span><strong id="detail-operateur"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_telephone') }}</span><strong id="detail-telephone"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_date') }}</span><strong id="detail-date"></strong></div>
+      <div class="row"><span style="color:#888;">{{ __('payeur.hist_statut') }}</span><span id="detail-statut"></span></div>
     </div>
     <div class="ep-modal-foot">
       <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
-              onclick="epModal.close('modal-detail-paiement')">Fermer</button>
+              onclick="epModal.close('modal-detail-paiement')">{{ __('payeur.hist_fermer') }}</button>
     </div>
   </div>
 </div>
@@ -32,29 +32,29 @@
 
 @section('content')
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">&#8592; Retour au tableau de bord</a>
+        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">&#8592; {{ __('payeur.hist_retour_dashboard') }}</a>
         <a href="{{ route('payeur.historique') }}?export=pdf" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:#fff;border:1px solid #ddd !important;border-radius:8px;font-size:13px;font-weight:500;color:#444 !important;text-decoration:none;outline:none;box-shadow:none;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Exporter PDF
+            {{ __('payeur.hist_exporter_pdf') }}
         </a>
     </div>
 
 
-    <div style="font-size:17px;font-weight:700;margin-bottom:4px;">Historique des paiements</div>
-    <div style="font-size:12px;color:#888;margin-bottom:18px;">{{ $paiements->total() ?? $paiements->count() }} transaction(s) effectuée(s)</div>
+    <div style="font-size:17px;font-weight:700;margin-bottom:4px;">{{ __('payeur.hist_titre') }}</div>
+    <div style="font-size:12px;color:#888;margin-bottom:18px;">{{ __('payeur.hist_transactions', ['count' => $paiements->total() ?? $paiements->count()]) }}</div>
 
     <div class="epcard" style="padding:0;overflow:hidden;">
         <table class="ep-table">
             <thead>
                 <tr>
-                    <th>Référence</th>
-                    <th>Enfant</th>
-                    <th>Catégorie</th>
-                    <th>Montant</th>
-                    <th>Moyen</th>
-                    <th>Date</th>
-                    <th>Statut</th>
-                    <th style="text-align:right;">Actions</th>
+                    <th>{{ __('payeur.hist_reference') }}</th>
+                    <th>{{ __('payeur.hist_enfant') }}</th>
+                    <th>{{ __('payeur.hist_categorie') }}</th>
+                    <th>{{ __('payeur.hist_montant') }}</th>
+                    <th>{{ __('payeur.hist_moyen') }}</th>
+                    <th>{{ __('payeur.hist_date') }}</th>
+                    <th>{{ __('payeur.hist_statut') }}</th>
+                    <th style="text-align:right;">{{ __('messages.actions') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -70,20 +70,20 @@
                         <td>{{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y H:i') : '—' }}</td>
                         <td>
                             @if($paiement->statut === 'en_attente' && $paiement->annule_manuellement)
-                                <span class="pill pb">Annulé (vérif. en cours)</span>
+                                <span class="pill pb">{{ __('payeur.hist_annule_verif') }}</span>
                             @else
                                 <span class="pill {{ match($paiement->statut) {
                                     'valide' => 'pg', 'en_attente' => 'pa', 'echoue' => 'pr', 'rembourse' => 'pb', default => 'pa',
                                 } }}">
                                     {{ match($paiement->statut) {
-                                        'valide' => 'Validé', 'en_attente' => 'En attente', 'echoue' => 'Échoué', 'rembourse' => 'Remboursé', default => $paiement->statut,
+                                        'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), 'rembourse' => __('payeur.statut_rembourse'), default => $paiement->statut,
                                     } }}
                                 </span>
                             @endif
                             @if($paiement->statut !== 'rembourse' && $paiement->remboursements->isNotEmpty())
                                 @php $totalRembourse = $paiement->remboursements->sum('montant'); @endphp
                                 <div style="font-size:10px;color:#1A4F8A;margin-top:3px;">
-                                    dont {{ number_format($totalRembourse, 0, ',', ' ') }} FCFA remboursés
+                                    {{ __('payeur.hist_dont_rembourses', ['montant' => number_format($totalRembourse, 0, ',', ' ')]) }}
                                 </div>
                             @endif
                         </td>
@@ -101,20 +101,20 @@
                                         data-operateur="{{ $paiement->operateur ?? '—' }}"
                                         data-telephone="{{ $paiement->telephone_paiement ?? '—' }}"
                                         data-date="{{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y H:i') : '—' }}"
-                                        data-statut-badge="{{ match($paiement->statut) { 'valide' => 'Validé', 'en_attente' => 'En attente', 'echoue' => 'Échoué', 'rembourse' => 'Remboursé', default => $paiement->statut } }}"
+                                        data-statut-badge="{{ match($paiement->statut) { 'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), 'rembourse' => __('payeur.statut_rembourse'), default => $paiement->statut } }}"
                                         style="font-size:11px;color:#1A4F8A;background:var(--ep-blue-lt);border:none;padding:5px 10px;border-radius:20px;cursor:pointer;"
-                                        title="Voir le détail">
-                                    Détail
+                                        title="{{ __('payeur.hist_voir_detail') }}">
+                                    {{ __('payeur.hist_detail') }}
                                 </button>
 
                                 @if($paiement->statut === 'en_attente' && ! $paiement->annule_manuellement)
                                     <form method="POST" action="{{ route('payeur.paiement.annuler', $paiement) }}"
-                                          onsubmit="return confirm('Annuler ce paiement en attente ? Si le montant a déjà été débité, il sera automatiquement régularisé plus tard.')">
+                                          onsubmit="return confirm('{{ __('payeur.hist_confirm_annuler') }}')">
                                         @csrf
                                         <button type="submit"
                                                 style="font-size:11px;color:#854F0B;background:var(--ep-gold-lt);border:none;padding:5px 10px;border-radius:20px;cursor:pointer;"
-                                                title="Annuler ce paiement en attente">
-                                            Annuler
+                                                title="{{ __('payeur.hist_annuler_titre') }}">
+                                            {{ __('payeur.hist_annuler') }}
                                         </button>
                                     </form>
                                 @endif
@@ -122,8 +122,8 @@
                                 @if($paiement->statut === 'echoue' && $paiement->fraisApprenant)
                                     <a href="{{ route('payeur.paiement.show', $paiement->fraisApprenant) }}"
                                        style="font-size:11px;color:#085041;background:var(--ep-teal-lt);text-decoration:none;padding:5px 10px;border-radius:20px;display:inline-block;"
-                                       title="Réessayer ce paiement">
-                                        Réessayer
+                                       title="{{ __('payeur.hist_reesayer_titre') }}">
+                                        {{ __('payeur.hist_reesayer') }}
                                     </a>
                                 @endif
                             </div>
@@ -132,7 +132,7 @@
                 @empty
                     <tr>
                         <td colspan="8" style="text-align:center;color:#999;padding:30px 0;">
-                            Aucun paiement enregistré pour le moment.
+                            {{ __('payeur.aucun_paiement_enregistre') }}
                         </td>
                     </tr>
                 @endforelse

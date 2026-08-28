@@ -34,7 +34,7 @@ class AdminSeeder extends Seeder
                 'prenom'    => 'Olivier',
                 'nom'       => 'MEKONTSO',
                 'email'     => 'moffosteve2@gmail.com',
-                'telephone' => '+237690000000',   // À remplacer par le vrai numéro
+                'telephone' => '690000000',   // À remplacer par le vrai numéro (format 9 chiffres, sans +237)
                 'password'  => Hash::make('Admin@EduPay2026!'),  // À changer en production
                 'est_actif' => true,
             ]

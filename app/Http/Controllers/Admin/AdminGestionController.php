@@ -8,9 +8,12 @@ use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\TelephoneCamerounais;
 
 class AdminGestionController extends Controller
 {
+    use TelephoneCamerounais;
+
     private array $rolesDisponibles = [
         'super-admin'          => 'Super Admin — Accès total',
         'superviseur'          => 'Superviseur — Lecture + rapports',
@@ -167,17 +170,22 @@ class AdminGestionController extends Controller
             abort(403, 'Seul un Super Admin peut créer des comptes administrateurs.');
         }
 
+        if ($request->filled('telephone')) {
+            $request->merge(['telephone' => $this->normaliserTelephoneCm((string) $request->input('telephone'))]);
+        }
+
         $validated = $request->validate([
             'prenom'    => ['required', 'string', 'max:80'],
             'nom'       => ['required', 'string', 'max:80'],
             'email'     => ['required', 'email', 'unique:admins,email'],
-            'telephone' => ['required', 'string', 'max:20'],
+            'telephone' => ['required', 'regex:/^6\d{8}$/'],
             'role'      => ['required', 'in:super-admin,superviseur,comptable_plateforme'],
             'password'  => ['required', 'string', 'min:10', 'confirmed'],
         ], [
-            'email.unique'     => 'Cet email est déjà utilisé par un autre admin.',
-            'password.min'     => 'Le mot de passe doit contenir au moins 10 caractères.',
-            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
+            'email.unique'        => 'Cet email est déjà utilisé par un autre admin.',
+            'telephone.regex'     => 'Numéro invalide. Format attendu : 6XXXXXXXX (9 chiffres, mobile camerounais).',
+            'password.min'        => 'Le mot de passe doit contenir au moins 10 caractères.',
+            'password.confirmed'  => 'Les mots de passe ne correspondent pas.',
         ]);
 
         $admin = Admin::create([
@@ -213,15 +221,20 @@ class AdminGestionController extends Controller
             return back()->with('error', 'Utilisez votre profil pour modifier votre propre compte.');
         }
 
+        if ($request->filled('telephone')) {
+            $request->merge(['telephone' => $this->normaliserTelephoneCm((string) $request->input('telephone'))]);
+        }
+
         $validated = $request->validate([
             'prenom'    => ['required', 'string', 'max:80'],
             'nom'       => ['required', 'string', 'max:80'],
             'email'     => ['required', 'email', 'unique:admins,email,' . $admin->id],
-            'telephone' => ['nullable', 'string', 'max:20'],
+            'telephone' => ['nullable', 'regex:/^6\d{8}$/'],
             'role'      => ['required', 'in:super-admin,superviseur,comptable_plateforme'],
             'password'  => ['nullable', 'string', 'min:10', 'confirmed'],
         ], [
             'email.unique'       => 'Cet email est déjà utilisé.',
+            'telephone.regex'    => 'Numéro invalide. Format attendu : 6XXXXXXXX (9 chiffres, mobile camerounais).',
             'password.min'       => 'Minimum 10 caractères.',
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
         ]);

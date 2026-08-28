@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>@yield('title', 'Super Admin') — EduPay Cameroun</title>
+    <title>@yield('title', __('messages.super_admin')) — EduPay Cameroun</title>
 
     {{-- Tailwind CSS + config EduPay --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -53,12 +53,12 @@
                 Edu<span class="text-[#5DCAA5]">Pay</span>
             </span>
             <span class="ml-2 text-sm text-white/50">·</span>
-            <span class="ml-2 text-sm font-semibold text-[#E8A020]">Super Admin</span>
-            <div class="text-xs text-white/40 mt-0.5">Vue globale plateforme · CDC-EDUPAY-CM-2026-001</div>
+            <span class="ml-2 text-sm font-semibold text-[#E8A020]">{{ __('messages.super_admin') }}</span>
+            <div class="text-xs text-white/40 mt-0.5">CDC-EDUPAY-CM-2026-001</div>
         </div>
         <div class="flex items-center gap-4">
             <span class="text-xs px-2.5 py-1 rounded-full bg-[#E8A020]/15 text-[#E8A020] border border-[#E8A020]/30 font-medium">
-                Admin système
+                {{ __('messages.admin_systeme') }}
             </span>
             <span class="text-sm text-white/70">
                 {{ Auth::guard('admin')->user()->nom_complet }}
@@ -93,9 +93,9 @@
                                             'comptable_plateforme' => 'bg-amber-50 text-amber-700 border-amber-200',
                                         ];
                                         $roleLabelsD = [
-                                            'super-admin'          => 'Super Admin',
-                                            'superviseur'          => 'Superviseur',
-                                            'comptable_plateforme' => 'Comptable plateforme',
+                                            'super-admin'          => __('admin.role_super_admin'),
+                                            'superviseur'          => __('admin.role_superviseur'),
+                                            'comptable_plateforme' => __('admin.role_comptable'),
                                         ];
                                         $roleD = Auth::guard('admin')->user()->getRoleNames()->first() ?? 'super-admin';
                                     @endphp
@@ -110,11 +110,11 @@
                     {{-- Infos --}}
                     <div class="px-4 py-3 border-b border-gray-100 space-y-2">
                         <div class="flex justify-between text-xs">
-                            <span class="text-gray-500">Téléphone</span>
+                            <span class="text-gray-500">{{ __('messages.telephone') }}</span>
                             <span class="font-medium text-gray-800">{{ Auth::guard('admin')->user()->telephone ?? '—' }}</span>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span class="text-gray-500">Dernière connexion</span>
+                            <span class="text-gray-500">{{ __('messages.dern_connexion') }}</span>
                             <span class="font-medium text-gray-800">
                                 {{ Auth::guard('admin')->user()->derniere_connexion
                                     ? Auth::guard('admin')->user()->derniere_connexion->diffForHumans()
@@ -122,12 +122,12 @@
                             </span>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span class="text-gray-500">IP dernière connexion</span>
+                            <span class="text-gray-500">{{ __('messages.ip_dern_connexion') }}</span>
                             <span class="font-medium text-gray-800">{{ Auth::guard('admin')->user()->derniere_connexion_ip ?? '—' }}</span>
                         </div>
                         <div class="flex justify-between text-xs">
-                            <span class="text-gray-500">Statut</span>
-                            <span class="text-green-600 font-medium">● Connecté</span>
+                            <span class="text-gray-500">{{ __('messages.statut') }}</span>
+                            <span class="text-green-600 font-medium">● {{ __('messages.connecte') }}</span>
                         </div>
                     </div>
 
@@ -139,7 +139,7 @@
                                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
                             </svg>
-                            Modifier mon profil
+                            {{ __('messages.modifier_profil') }}
                         </button>
                         <form method="POST" action="{{ route('admin.logout') }}">
                             @csrf
@@ -150,18 +150,25 @@
                                     <polyline points="16 17 21 12 16 7"/>
                                     <line x1="21" y1="12" x2="9" y2="12"/>
                                 </svg>
-                                Déconnexion sécurisée
+                                {{ __('messages.deconnexion_securisee') }}
                             </button>
                         </form>
                     </div>
 
                 </div>
             </div>
+            <form method="POST" action="{{ route('locale.switch') }}" class="inline">
+                @csrf
+                <select name="locale" onchange="this.form.submit()" class="text-xs bg-white/10 hover:bg-white/20 border border-white/20 rounded-full px-3 py-1.5 text-white cursor-pointer">
+                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
+                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
+                </select>
+            </form>
             <form method="POST" action="{{ route('admin.logout') }}" class="inline">
                 @csrf
                 <button type="submit"
                     class="text-white/50 hover:text-white text-xs border border-white/20 hover:border-white/40 px-3 py-1.5 rounded-full transition-colors">
-                    Déconnexion
+                    {{ __('messages.deconnexion') }}
                 </button>
             </form>
         </div>
@@ -181,7 +188,7 @@
                         <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
                         <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
                     </svg>
-                    Vue globale
+                    {{ __('messages.vue_globale') }}
                 </a>
 
                 {{-- Établissements --}}
@@ -191,7 +198,7 @@
                     <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="2" y="7" width="20" height="15"/><polyline points="16 2 12 7 8 2"/>
                     </svg>
-                    Établissements
+                    {{ __('messages.etablissements') }}
                 </a>
                 @endif
 
@@ -199,7 +206,7 @@
                 <a href="{{ route('admin.payeurs.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.payeurs.*') ? 'active' : '' }}">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    Comptes payeurs
+                    {{ __('messages.comptes_payeurs') }}
                 </a>
 
                 {{-- Transactions --}}
@@ -210,7 +217,7 @@
                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                         <line x1="1" y1="10" x2="23" y2="10"/>
                     </svg>
-                    Transactions
+                    {{ __('messages.transactions') }}
                 </a>
                 @endif
 
@@ -222,7 +229,7 @@
                         <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
                         <polyline points="17 6 23 6 23 12"/>
                     </svg>
-                    Commissions
+                    {{ __('messages.commissions') }}
                 </a>
                 @endif
 
@@ -234,7 +241,7 @@
                     <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
                     </svg>
-                    Réclamations
+                    {{ __('messages.reclamations') }}
                 </a>
                 @endif
 
@@ -245,7 +252,7 @@
                     <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                     </svg>
-                    Logs sécurité
+                    {{ __('messages.logs_securite') }}
                 </a>
                 @endif
 
@@ -256,7 +263,7 @@
                     <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
                     </svg>
-                    Abonnements
+                    {{ __('messages.abonnements') }}
                 </a>
                 @endif
                 {{-- Exports réglementaires --}}
@@ -267,7 +274,7 @@
                         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
                         <polyline points="14 2 14 8 20 8"/>
                     </svg>
-                    Exports réglementaires
+                    {{ __('messages.exports_reglementaires') }}
                 </a>
                 @endif
 
@@ -279,7 +286,7 @@
                         <circle cx="12" cy="12" r="3"/>
                         <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
                     </svg>
-                    Paramètres sys.
+                    {{ __('messages.params_sys') }}
                 </a>
                 @endif
                 <a href="{{ route('admin.admins.index') }}"
@@ -290,17 +297,17 @@
                         <path d="M23 21v-2a4 4 0 00-3-3.87"/>
                         <path d="M16 3.13a4 4 0 010 7.75"/>
                     </svg>
-                    Équipe admin
+                    {{ __('messages.equipe_admin') }}
                 </a>
             </nav>
 
             {{-- Widget commission active --}}
             <div class="mt-5 bg-[#FEF3DC] rounded-lg p-3 border-l-2 border-[#E8A020]">
-                <div class="text-xs font-semibold text-[#8B5E10]">Commission active</div>
+                <div class="text-xs font-semibold text-[#8B5E10]">{{ __('messages.commission_active') }}</div>
                 <div class="text-2xl font-bold text-[#663E08] mt-1">
                     {{ number_format(($tauxCommission ?? 0.025) * 100, 1, ',', '') }}%
                 </div>
-                <div class="text-xs text-[#8B5E10] mt-0.5">par transaction</div>
+                <div class="text-xs text-[#8B5E10] mt-0.5">{{ __('messages.par_transaction') }}</div>
             </div>
         </aside>
 
@@ -338,7 +345,7 @@
     <div id="modal-profil-admin" class="ep-modal-overlay">
       <div class="ep-modal ep-modal-md">
         <div class="ep-modal-head">
-          <h3>Modifier mon profil</h3>
+          <h3>{{ __('messages.modifier_profil') }}</h3>
           <button class="ep-modal-close" onclick="epModal.close('modal-profil-admin')">x</button>
         </div>
         <form method="POST" action="{{ route('admin.profil.update') }}">
@@ -347,39 +354,39 @@
           <div class="ep-modal-body">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
               <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Prénom</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.prenom') }}</label>
                 <input type="text" name="prenom" required
                        value="{{ old('prenom', Auth::guard('admin')->user()->prenom) }}"
                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
               </div>
               <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Nom</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.nom') }}</label>
                 <input type="text" name="nom" required
                        value="{{ old('nom', Auth::guard('admin')->user()->nom) }}"
                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
               </div>
             </div>
             <div class="mb-3">
-              <label class="block text-xs font-medium text-gray-600 mb-1">Email</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.email') }}</label>
               <input type="email" name="email" required
                      value="{{ old('email', Auth::guard('admin')->user()->email) }}"
                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
             </div>
             <div class="mb-4">
-              <label class="block text-xs font-medium text-gray-600 mb-1">Téléphone</label>
+              <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.telephone') }}</label>
               <input type="text" name="telephone"
                      value="{{ old('telephone', Auth::guard('admin')->user()->telephone) }}"
                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
             </div>
             <div class="border-t border-gray-100 pt-3">
-              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Changer le mot de passe (optionnel)</div>
+              <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ __('admin.changer_mdp_opt') }}</div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Nouveau mot de passe</label>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.nouveau_mdp') }}</label>
                   <div class="ep-pwd-wrap">
                     <input type="password" name="password" minlength="10"
                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
-                    <button type="button" class="ep-pwd-toggle" onclick="togglePasswordVisibility(this)" aria-label="Voir le mot de passe">
+                    <button type="button" class="ep-pwd-toggle" onclick="togglePasswordVisibility(this)" aria-label="{{ __('admin.voir_mdp') }}">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                         <circle cx="12" cy="12" r="3"/>
@@ -388,11 +395,11 @@
                   </div>
                 </div>
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Confirmer</label>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.confirmer') }}</label>
                   <div class="ep-pwd-wrap">
                     <input type="password" name="password_confirmation" minlength="10"
                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
-                    <button type="button" class="ep-pwd-toggle" onclick="togglePasswordVisibility(this)" aria-label="Voir le mot de passe">
+                    <button type="button" class="ep-pwd-toggle" onclick="togglePasswordVisibility(this)" aria-label="{{ __('admin.voir_mdp') }}">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                         <circle cx="12" cy="12" r="3"/>
@@ -401,7 +408,7 @@
                   </div>
                 </div>
               </div>
-              <p class="text-xs text-gray-400 mt-1">Laisser vide pour ne pas changer le mot de passe. Minimum 10 caractères.</p>
+              <p class="text-xs text-gray-400 mt-1">{{ __('admin.laisser_vide_mdp') }}</p>
             </div>
             @if($errors->any())
             <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-3">
@@ -414,11 +421,11 @@
           <div class="ep-modal-foot">
             <button type="button" onclick="epModal.close('modal-profil-admin')"
                     style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
-              Annuler
+              {{ __('messages.annuler') }}
             </button>
             <button type="submit"
                     style="padding:8px 20px;font-size:13px;font-weight:600;background:#0D9E75;color:#fff;border:none;border-radius:8px;cursor:pointer;">
-              Enregistrer
+              {{ __('messages.enregistrer') }}
             </button>
           </div>
         </form>
@@ -679,13 +686,13 @@
             responsive: true,
             language: {
                 search:           '',
-                searchPlaceholder: 'Rechercher...',
-                lengthMenu:        'Afficher _MENU_ lignes',
-                info:              '_START_–_END_ sur _TOTAL_',
-                infoEmpty:         '0 résultat',
-                infoFiltered:      '(filtré sur _MAX_)',
-                zeroRecords:       'Aucun résultat',
-                emptyTable:        'Tableau vide',
+                searchPlaceholder: @json(__('messages.recherche')),
+                lengthMenu:        @json(__('messages.afficher_lignes')),
+                info:              @json(__('admin.dt_info')),
+                infoEmpty:         @json(__('admin.dt_info_empty')),
+                infoFiltered:      @json(__('admin.dt_info_filtered')),
+                zeroRecords:       @json(__('admin.dt_empty_table')),
+                emptyTable:        @json(__('admin.dt_empty_table')),
                 paginate: {
                     first:    '«',
                     previous: '‹',
@@ -695,7 +702,7 @@
             },
             dom: '<"ep-dt-toolbar"l<"dt-search"f>>rt<"ep-dt-foot"i<"dt-paging"p>>',
             pageLength: 15,
-            lengthMenu: [[10, 15, 25, 50, -1], [10, 15, 25, 50, 'Tous']],
+            lengthMenu: [[10, 15, 25, 50, -1], [10, 15, 25, 50, @json(__('admin.dt_all'))]],
         };
         return $(selector).DataTable($.extend(true, defaults, opts || {}));
     };

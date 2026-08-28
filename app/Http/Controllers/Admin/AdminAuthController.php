@@ -14,9 +14,12 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\Admin2FAMail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Traits\TelephoneCamerounais;
 
 class AdminAuthController extends Controller
 {
+    use TelephoneCamerounais;
+
     /**
      * Affiche le formulaire de connexion Super Admin.
      * URL cachée — non indexée, non listée dans la navigation publique.
@@ -410,11 +413,15 @@ class AdminAuthController extends Controller
             abort(404);
         }
 
+        if ($request->filled('telephone')) {
+            $request->merge(['telephone' => $this->normaliserTelephoneCm((string) $request->input('telephone'))]);
+        }
+
         $validated = $request->validate([
             'prenom'     => ['required', 'string', 'max:80'],
             'nom'        => ['required', 'string', 'max:80'],
             'email'      => ['required', 'email', 'unique:admins,email'],
-            'telephone'  => ['required', 'string', 'max:20'],
+            'telephone'  => ['required', 'regex:/^6\d{8}$/'],
             'password'   => ['required', 'string', 'min:10', 'confirmed'],
         ], [
             'prenom.required'    => 'Le prénom est obligatoire.',
@@ -422,6 +429,7 @@ class AdminAuthController extends Controller
             'email.required'     => 'L\'email est obligatoire.',
             'email.unique'       => 'Cet email est déjà utilisé.',
             'telephone.required' => 'Le téléphone est obligatoire.',
+            'telephone.regex'    => 'Numéro invalide. Format attendu : 6XXXXXXXX (9 chiffres, mobile camerounais).',
             'password.required'  => 'Le mot de passe est obligatoire.',
             'password.min'       => 'Le mot de passe doit contenir au moins 10 caractères.',
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',

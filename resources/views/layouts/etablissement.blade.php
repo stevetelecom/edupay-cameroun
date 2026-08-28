@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>@yield('title', 'Tableau de bord') — EduPay Cameroun</title>
+    <title>@yield('title', __('messages.tableau_de_bord')) — EduPay Cameroun</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
@@ -24,14 +24,14 @@
         }
         *{box-sizing:border-box;}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:#f1f3f5;color:#1a1a2e;}
-        .epcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
+        .epcard{background:rgba(255,255,255,.93);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;position:relative;z-index:1;}
         .pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
         .pg{background:#E0F5EE;color:#085041;}.pa{background:#FEF3DC;color:#8B5E10;}
         .pr{background:#FBEAEA;color:#9B2C2C;}.pb{background:#E6F0FB;color:#1A4F8A;}
         .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
         .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
         .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-        .kpi{background:#f8f9fa;border-radius:var(--radius-md);padding:16px;text-align:center;}
+        .kpi{background:rgba(248,249,250,.88);border-radius:var(--radius-md);padding:16px;text-align:center;position:relative;z-index:1;}
         .kval{font-size:22px;font-weight:700;color:#1a1a2e;}
         .klbl{font-size:11px;color:#888;margin-top:4px;}
         .seclbl{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;}
@@ -65,14 +65,13 @@
             background-image:url('{{ asset('images/logo.jpeg') }}');
             background-repeat:no-repeat;
             background-position:center;
-            background-size:340px;
-            opacity:.05;
+            background-size:min(75vw, 780px);
+            opacity:.22;
             pointer-events:none;
             z-index:0;
         }
-        .main-content > *{position:relative;z-index:1;}
         @media (max-width: 900px){
-            .main-content::before{ left:0; background-size:220px; }
+            .main-content::before{ left:0; background-size:min(88vw, 420px); }
         }
         .prog{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px;}
         .pfill{height:100%;background:var(--ep-teal);border-radius:3px;}
@@ -239,7 +238,7 @@
             </span>
             <div style="position:relative;">
                 <button onclick="toggleProfilEtab()"
-                        title="Voir mon profil"
+                        title="{{ __('messages.voir_profil') }}"
                         style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);
                                color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;
                                display:flex;align-items:center;justify-content:center;transition:opacity .15s;"
@@ -279,24 +278,24 @@
                     {{-- Établissement --}}
                     <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
                         <div style="font-size:10px;font-weight:600;color:#aaa;text-transform:uppercase;
-                                    letter-spacing:.05em;margin-bottom:8px;">Établissement</div>
+                                    letter-spacing:.05em;margin-bottom:8px;">{{ __('messages.etablissement') }}</div>
                         <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;">
-                            <span style="color:#888;">Nom</span>
+                            <span style="color:#888;">{{ __('messages.nom') }}</span>
                             <span style="font-weight:600;color:#333;">{{ Auth::user()->etablissement->nom ?? '—' }}</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;">
-                            <span style="color:#888;">Ville</span>
+                            <span style="color:#888;">{{ __('messages.ville') }}</span>
                             <span style="font-weight:600;color:#333;">{{ Auth::user()->etablissement->ville ?? '—' }}</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;">
-                            <span style="color:#888;">Code</span>
+                            <span style="color:#888;">{{ __('messages.code') }}</span>
                             <span style="font-weight:600;color:var(--ep-teal);">
                                 {{ Auth::user()->etablissement->code_etablissement ?? '—' }}
                             </span>
                         </div>
                         <div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;">
-                            <span style="color:#888;">Statut</span>
-                            <span style="color:#0D9E75;font-weight:600;">● Connecté</span>
+                            <span style="color:#888;">{{ __('messages.statut') }}</span>
+                            <span style="color:#0D9E75;font-weight:600;">● {{ __('messages.connecte') }}</span>
                         </div>
                     </div>
 
@@ -323,16 +322,23 @@
                                     <polyline points="16 17 21 12 16 7"/>
                                     <line x1="21" y1="12" x2="9" y2="12"/>
                                 </svg>
-                                Déconnexion
+                                {{ __('messages.deconnexion') }}
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
+            <form method="POST" action="{{ route('locale.switch') }}" style="display:inline-flex;align-items:center;">
+                @csrf
+                <select name="locale" onchange="this.form.submit()" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 10px;font-size:11px;font-weight:500;cursor:pointer;outline:none;">
+                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
+                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
+                </select>
+            </form>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit" style="background:transparent;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.2);padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer;">
-                    Déconnexion
+                    {{ __('messages.deconnexion') }}
                 </button>
             </form>
         </div>
@@ -342,54 +348,54 @@
         <div class="sidebar">
             <a href="{{ route('etablissement.dashboard') }}" class="sbar-item {{ request()->routeIs('etablissement.dashboard') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                Tableau de bord
+                {{ __('messages.tableau_de_bord') }}
             </a>
             <a href="{{ route('etablissement.apprenants.index') }}" class="sbar-item {{ request()->routeIs('etablissement.apprenants.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                Apprenants
+                {{ __('messages.apprenants') }}
             </a>
             <a href="{{ route('etablissement.frais.index') }}" class="sbar-item {{ request()->routeIs('etablissement.frais.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                Frais &amp; échéanciers
+                {{ __('messages.frais_echeanciers') }}
             </a>
             <a href="{{ route('etablissement.paiements.index') }}" class="sbar-item {{ request()->routeIs('etablissement.paiements.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-                Paiements
+                {{ __('messages.paiements') }}
             </a>
             <a href="{{ route('etablissement.impayes.index') }}" class="sbar-item {{ request()->routeIs('etablissement.impayes.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Impayés
+                {{ __('messages.impayes') }}
                 @if(($countImpayes ?? 0) > 0)<span class="badge-cnt">{{ $countImpayes }}</span>@endif
             </a>
             <a href="{{ route('etablissement.rapports.index') }}" class="sbar-item {{ request()->routeIs('etablissement.rapports.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Rapports
+                {{ __('messages.rapports') }}
             </a>
             <a href="{{ route('etablissement.remboursements.index') }}" class="sbar-item {{ request()->routeIs('etablissement.remboursements.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-                Remboursements
+                {{ __('messages.remboursements') }}
             </a>
             <a href="{{ route('etablissement.sites.index') }}" class="sbar-item {{ request()->routeIs('etablissement.sites.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                Multi-sites
+                {{ __('messages.multi_sites') }}
             </a>
             <a href="{{ route('etablissement.parametres.index') }}" class="sbar-item {{ request()->routeIs('etablissement.parametres.*') ? 'on' : '' }}" style="margin-top:4px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                Paramètres
+                {{ __('messages.parametres') }}
             </a>
             <a href="{{ route('etablissement.utilisateurs.index') }}" class="sbar-item {{ request()->routeIs('etablissement.utilisateurs.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                Utilisateurs internes
+                {{ __('messages.utilisateurs_internes') }}
             </a>
             <a href="{{ route('etablissement.aide.index') }}" class="sbar-item {{ request()->routeIs('etablissement.aide.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                Guide &amp; Support
+                {{ __('messages.guide_support') }}
             </a>
             <div style="margin-top:16px;background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:12px;">
-                <div style="font-size:11px;font-weight:600;color:#0F6E56;margin-bottom:4px;">Recouvrement</div>
+                <div style="font-size:11px;font-weight:600;color:#0F6E56;margin-bottom:4px;">{{ __('messages.recouvrement') }}</div>
                 <div style="font-size:24px;font-weight:700;color:#085041;">{{ number_format($tauxRecouvrementDecimal ?? 0, 2, ',', '') }}%</div>
                 <div class="prog"><div class="pfill" style="width:{{ min($tauxRecouvrementDecimal ?? 0, 100) }}%"></div></div>
-                <div style="font-size:10px;color:#1B9E75;margin-top:3px;">Objectif : 80%</div>
+                <div style="font-size:10px;color:#1B9E75;margin-top:3px;">{{ __('messages.objectif_pourcent') }}</div>
             </div>
         </div>
 

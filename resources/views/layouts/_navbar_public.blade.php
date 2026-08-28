@@ -15,13 +15,20 @@
     </button>
     {{-- Desktop uniquement --}}
     <div class="nav-desk">
-      <a href="{{ route('landing') }}" class="nav-link {{ $routeActuelle==='landing'?'nav-link-active':'' }}">Accueil</a>
-      <a href="{{ route('about') }}"   class="nav-link {{ $routeActuelle==='about'?'nav-link-active':'' }}">À propos</a>
-      <a href="{{ route('temoignages') }}" class="nav-link {{ $routeActuelle==='temoignages'?'nav-link-active':'' }}">Témoignages</a>
-      <a href="{{ route('contact') }}" class="nav-link {{ $routeActuelle==='contact'?'nav-link-active':'' }}">Contact</a>
+      <a href="{{ route('landing') }}" class="nav-link {{ $routeActuelle==='landing'?'nav-link-active':'' }}">{{ __('messages.accueil') }}</a>
+      <a href="{{ route('about') }}"   class="nav-link {{ $routeActuelle==='about'?'nav-link-active':'' }}">{{ __('messages.a_propos') }}</a>
+      <a href="{{ route('temoignages') }}" class="nav-link {{ $routeActuelle==='temoignages'?'nav-link-active':'' }}">{{ __('messages.temoignages') }}</a>
+      <a href="{{ route('contact') }}" class="nav-link {{ $routeActuelle==='contact'?'nav-link-active':'' }}">{{ __('messages.contact') }}</a>
       <div class="nav-sep"></div>
-      <a href="{{ route('login') }}" class="nav-btn-ghost">Connexion</a>
-      <a href="{{ route('register.parent.step1') }}" class="nav-btn-main">S'inscrire →</a>
+      <a href="{{ route('login') }}" class="nav-btn-ghost">{{ __('messages.connexion') }}</a>
+      <a href="{{ route('register.parent.step1') }}" class="nav-btn-main">{{ __('messages.s_inscrire') }}</a>
+      <form method="POST" action="{{ route('locale.switch') }}" style="display:inline-flex;align-items:center;margin-left:4px;">
+        @csrf
+        <select name="locale" onchange="this.form.submit()" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 10px;font-size:12px;font-weight:500;cursor:pointer;outline:none;">
+          <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
+          <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
+        </select>
+      </form>
     </div>
   </div>
 </nav>
@@ -47,25 +54,25 @@
      style="color:{{ $routeActuelle==='landing'?'#fff':'rgba(255,255,255,.7)' }};
             text-decoration:none;font-size:15px;padding:12px 14px;border-radius:10px;
             background:{{ $routeActuelle==='landing'?'rgba(255,255,255,.1)':'' }};">
-    Accueil
+    {{ __('messages.accueil') }}
   </a>
   <a href="{{ route('about') }}"
      style="color:{{ $routeActuelle==='about'?'#fff':'rgba(255,255,255,.7)' }};
             text-decoration:none;font-size:15px;padding:12px 14px;border-radius:10px;
             background:{{ $routeActuelle==='about'?'rgba(255,255,255,.1)':'' }};">
-    À propos
+    {{ __('messages.a_propos') }}
   </a>
   <a href="{{ route('temoignages') }}"
      style="color:{{ $routeActuelle==='temoignages'?'#fff':'rgba(255,255,255,.7)' }};
             text-decoration:none;font-size:15px;padding:12px 14px;border-radius:10px;
             background:{{ $routeActuelle==='temoignages'?'rgba(255,255,255,.1)':'' }};">
-    Témoignages
+    {{ __('messages.temoignages') }}
   </a>
   <a href="{{ route('contact') }}"
      style="color:{{ $routeActuelle==='contact'?'#fff':'rgba(255,255,255,.7)' }};
             text-decoration:none;font-size:15px;padding:12px 14px;border-radius:10px;
             background:{{ $routeActuelle==='contact'?'rgba(255,255,255,.1)':'' }};">
-    Contact
+    {{ __('messages.contact') }}
   </a>
 
   <div style="height:1px;background:rgba(255,255,255,.1);margin:8px 0;"></div>
@@ -74,12 +81,20 @@
      style="color:rgba(255,255,255,.85);text-decoration:none;font-size:15px;
             padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.2);
             text-align:center;">
-    Connexion
+    {{ __('messages.connexion') }}
   </a>
   <a href="{{ route('register.parent.step1') }}"
      style="color:#fff;text-decoration:none;font-size:15px;font-weight:600;
             padding:13px 14px;border-radius:10px;background:#0D9E75;
             text-align:center;margin-top:4px;">
-    S'inscrire gratuitement →
+    {{ __('messages.s_inscrire_gratuit') }}
   </a>
+
+  <form method="POST" action="{{ route('locale.switch') }}" style="margin-top:14px;">
+    @csrf
+    <select name="locale" onchange="this.form.submit()" style="width:100%;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:11px 14px;font-size:14px;font-weight:500;cursor:pointer;outline:none;">
+      <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 Français</option>
+      <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 English</option>
+    </select>
+  </form>
 </div>

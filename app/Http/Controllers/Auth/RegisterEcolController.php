@@ -52,25 +52,72 @@ class RegisterEcolController extends Controller
         ]);
     }
 
+    /**
+     * Normalise un numéro camerounais saisi sous n'importe quel format
+     * (+237 6XX XXX XXX, 237699123456, 6 99 12 34 56, etc.) vers 9 chiffres
+     * bruts sans indicatif — format déjà utilisé dans le reste de l'app
+     * (voir LoginController::login()).
+     */
+    private function normaliserTelephoneCm(string $value): string
+    {
+        $digits = preg_replace('/\D/', '', $value);
+        if (strlen($digits) > 9) {
+            $digits = substr($digits, -9);
+        }
+        return $digits;
+    }
+
     public function storeStep2(Request $request): RedirectResponse
     {
+        // Normaliser les numéros AVANT validation (accepte +237, espaces, tirets en saisie)
+        $request->merge([
+            'telephone'               => $this->normaliserTelephoneCm((string) $request->input('telephone', '')),
+            'resp_telephone'          => $this->normaliserTelephoneCm((string) $request->input('resp_telephone', '')),
+            'numero_momo_reversement' => $this->normaliserTelephoneCm((string) $request->input('numero_momo_reversement', '')),
+        ]);
+
         $validated = $request->validate([
-            'telephone'              => 'required|string|max:20',
+            // Téléphone établissement : mobile (6) OU fixe/Camtel (2 ou 3), 9 chiffres
+            'telephone'              => ['required', 'regex:/^[236]\d{8}$/'],
             'email'                  => 'required|email|max:150|unique:etablissements,email',
             'site_web'               => 'nullable|url|max:200',
             'mobile_money_principal'   => 'required|in:mtn,orange',
-            'numero_momo_reversement'  => 'required|string|max:20',
+            // Numéro Mobile Money : forcément un mobile (compte MoMo réel)
+            'numero_momo_reversement'  => ['required', 'regex:/^6\d{8}$/'],
 
             'resp_prenom'    => 'required|string|max:100',
             'resp_nom'       => 'required|string|max:100',
-            'resp_telephone' => 'required|string|max:20|unique:users,telephone',
+            // Téléphone du responsable : mobile uniquement
+            'resp_telephone' => ['required', 'regex:/^6\d{8}$/', 'unique:users,telephone'],
             'resp_email'     => 'required|email|max:150|unique:users,email',
-            'resp_password'  => 'required|string|min:8|confirmed',
+            'resp_password'  => 'nullable|string|min:8|confirmed',
+        ], [
+            'email.unique'          => 'Cet email est déjà utilisé par un autre établissement. Si vous avez déjà un compte, ',
+            'resp_email.unique'     => 'Cet email est déjà utilisé pour un compte existant. ',
+            'resp_telephone.unique' => 'Ce numéro de téléphone est déjà utilisé pour un compte existant. ',
+            'telephone.regex'              => 'Numéro invalide. Format attendu : 6XXXXXXXX (mobile) ou 2XXXXXXXX / 3XXXXXXXX (fixe/Camtel).',
+            'resp_telephone.regex'         => 'Numéro invalide. Format attendu : 6XXXXXXXX (mobile camerounais).',
+            'numero_momo_reversement.regex'=> 'Numéro Mobile Money invalide. Format attendu : 6XXXXXXXX.',
         ]);
 
-        // On hash le mot de passe avant de le stocker en session
-        // (le cast 'hashed' du modèle User détecte qu'il est déjà hashé et ne le re-hash pas)
-        $validated['resp_password'] = Hash::make($validated['resp_password']);
+        // Gestion du mot de passe :
+        // - Nouveau mot de passé saisi → hasher et stocker
+        // - Champ vide (retour arrière) → conserver le hash existant en session
+        // - Aucun hash existant (premier passage) → erreur
+        if (!empty($validated['resp_password'])) {
+            $validated['resp_password'] = Hash::make($validated['resp_password']);
+        } else {
+            $existingPassword = session('register_ecole.step2.resp_password');
+            if ($existingPassword) {
+                $validated['resp_password'] = $existingPassword;
+            } else {
+                return back()->withErrors([
+                    'resp_password' => 'Le mot de passe est obligatoire.',
+                ])->withInput();
+            }
+        }
+
+        unset($validated['resp_password_confirmation']);
 
         $request->session()->put('register_ecole.step2', $validated);
 
@@ -114,7 +161,11 @@ class RegisterEcolController extends Controller
 
     public function validation(): View|RedirectResponse
     {
-        if (!session()->has('register_ecole.step2')) {
+        // Si l'inscription vient d'être finalisée (flash 'inscription_reussie'),
+        // on affiche la page de confirmation même si 'register_ecole' a déjà
+        // été vidée par store(). Sans ce check, la page rebondissait vers
+        // step1 et le toast de succès disparaissait silencieusement.
+        if (!session('inscription_reussie') && !session()->has('register_ecole.step2')) {
             return redirect()->route('register.ecole.step1');
         }
 
@@ -133,6 +184,7 @@ class RegisterEcolController extends Controller
 
         $step1 = session('register_ecole.step1');
         $step2 = session('register_ecole.step2');
+
         $step3 = session('register_ecole.step3', []);
 
         if (!$step1 || !$step2) {
@@ -193,5 +245,63 @@ class RegisterEcolController extends Controller
             ->with('inscription_reussie', true)
             ->with('code_etablissement', $codeEtablissement)
             ->with('success', 'Votre demande d\'inscription a été envoyée avec succès. Notre équipe va étudier votre dossier.');
+    }
+
+    /**
+     * Sauvegarde les données de l'étape en cours (sans validation stricte)
+     * et redirige vers l'étape précédente.
+     * Les boutons « ← Retour » soumettent le formulaire via formaction
+     * pour ne pas perdre les modifications non enregistrées.
+     */
+    public function saveAndBack(Request $request, int $step): \Illuminate\Http\RedirectResponse
+    {
+        $sessionKey = "register_ecole.step{$step}";
+        $existing   = session($sessionKey, []);
+        $incoming   = $request->except(['_token']);
+
+        switch ($step) {
+            case 1:
+                $data = array_merge($existing, $incoming);
+                break;
+
+            case 2:
+                if (!empty($incoming['telephone'])) {
+                    $incoming['telephone'] = $this->normaliserTelephoneCm((string) $incoming['telephone']);
+                }
+                if (!empty($incoming['resp_telephone'])) {
+                    $incoming['resp_telephone'] = $this->normaliserTelephoneCm((string) $incoming['resp_telephone']);
+                }
+                if (!empty($incoming['numero_momo_reversement'])) {
+                    $incoming['numero_momo_reversement'] = $this->normaliserTelephoneCm((string) $incoming['numero_momo_reversement']);
+                }
+                $hasNewPassword  = !empty($incoming['resp_password']);
+                $plainPassword   = $incoming['resp_password'] ?? null;
+                unset($incoming['resp_password'], $incoming['resp_password_confirmation']);
+                $data = array_merge($existing, $incoming);
+                if ($hasNewPassword && $plainPassword !== null) {
+                    $data['resp_password'] = Hash::make($plainPassword);
+                }
+                break;
+
+            case 3:
+                $data = array_merge($existing, $incoming);
+                $data['document_agrement'] = $request->hasFile('document_agrement')
+                    ? $request->file('document_agrement')->store('agrements', 'public')
+                    : ($existing['document_agrement'] ?? null);
+                $data['logo'] = $request->hasFile('logo')
+                    ? $request->file('logo')->store('logos', 'public')
+                    : ($existing['logo'] ?? null);
+                break;
+
+            default:
+                // Étape 4 = validation, pas de données éditables
+                $data = $existing;
+                break;
+        }
+
+        $request->session()->put($sessionKey, $data);
+
+        $previousStep = max(1, $step - 1);
+        return redirect()->route("register.ecole.step{$previousStep}");
     }
 }

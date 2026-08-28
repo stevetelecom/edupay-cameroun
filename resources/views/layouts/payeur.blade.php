@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
-    <title>@yield('title', 'Mon espace') — EduPay Cameroun</title>
+    <title>@yield('title', __('messages.mon_espace')) — EduPay Cameroun</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -27,13 +27,13 @@
         }
         *{box-sizing:border-box;}
         body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:#f1f3f5;color:#1a1a2e;}
-        .epcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
+        .epcard{background:rgba(255,255,255,.93);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;position:relative;z-index:1;}
         .pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;white-space:nowrap;line-height:1.4;}
         .pg{background:#E0F5EE;color:#085041;}.pa{background:#FEF3DC;color:#8B5E10;}
         .pr{background:#FBEAEA;color:#9B2C2C;}.pb{background:#E6F0FB;color:#1A4F8A;}
         .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
         .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-        .kpi{background:#f8f9fa;border-radius:var(--radius-md);padding:16px;text-align:center;}
+        .kpi{background:rgba(248,249,250,.88);border-radius:var(--radius-md);padding:16px;text-align:center;position:relative;z-index:1;}
         .kval{font-size:22px;font-weight:700;color:#1a1a2e;}
         .klbl{font-size:11px;color:#888;margin-top:4px;}
         .seclbl{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;}
@@ -49,7 +49,22 @@
         .app-header{background:var(--ep-navy);color:#fff;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;}
         .app-body{display:flex;min-height:calc(100vh - 58px);}
         .sidebar{width:200px;flex-shrink:0;padding:14px;background:#fff;border-right:1px solid var(--border);}
-        .main-content{flex:1;padding:22px 24px;background:#f5f6f7;overflow-y:auto;}
+        .main-content{flex:1;padding:22px 24px;background:#f5f6f7;overflow-y:auto;position:relative;}
+        .main-content::before{
+            content:'';
+            position:fixed;
+            top:58px; left:200px; right:0; bottom:0;
+            background-image:url('{{ asset('images/logo.jpeg') }}');
+            background-repeat:no-repeat;
+            background-position:center;
+            background-size:min(75vw, 780px);
+            opacity:.22;
+            pointer-events:none;
+            z-index:0;
+        }
+        @media (max-width: 900px){
+            .main-content::before{ left:0; background-size:min(88vw, 420px); }
+        }
         .sbar-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-md);font-size:13px;color:#555;cursor:pointer;margin-bottom:2px;text-decoration:none;}
         .sbar-item svg{width:15px;height:15px;flex-shrink:0;}
         .sbar-item.on{background:var(--ep-teal-lt);color:#085041;font-weight:600;}
@@ -196,7 +211,7 @@
             <span style="font-size:12px;color:rgba(255,255,255,.65);">{{ $headerLabel }}</span>
             <div class="relative" style="position:relative;">
                 <button onclick="toggleProfilPayeur()"
-                        title="Voir mon profil"
+                        title="{{ __('messages.voir_profil') }}"
                         style="width:36px;height:36px;border-radius:50%;background:var(--ep-teal);color:#fff;
                                font-size:13px;font-weight:700;border:none;cursor:pointer;
                                display:flex;align-items:center;justify-content:center;transition:opacity .15s;"
@@ -234,16 +249,16 @@
                     {{-- Infos --}}
                     <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
                         <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;">
-                            <span style="color:#888;">Téléphone</span>
+                            <span style="color:#888;">{{ __('messages.telephone') }}</span>
                             <span style="font-weight:600;color:#333;">{{ Auth::user()->telephone ?? '—' }}</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;">
-                            <span style="color:#888;">Ville</span>
+                            <span style="color:#888;">{{ __('messages.ville') }}</span>
                             <span style="font-weight:600;color:#333;">{{ Auth::user()->ville ?? '—' }}</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;">
-                            <span style="color:#888;">Statut</span>
-                            <span style="color:#0D9E75;font-weight:600;">● Connecté</span>
+                            <span style="color:#888;">{{ __('messages.statut') }}</span>
+                            <span style="color:#0D9E75;font-weight:600;">● {{ __('messages.connecte') }}</span>
                         </div>
                     </div>
 
@@ -256,7 +271,7 @@
                                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                                 <circle cx="12" cy="7" r="4"/>
                             </svg>
-                            Voir mon profil
+                            {{ __('messages.voir_profil') }}
                         </a>
                         <form method="POST" action="{{ route('logout') }}" style="margin-top:8px;">
                             @csrf
@@ -269,16 +284,23 @@
                                     <polyline points="16 17 21 12 16 7"/>
                                     <line x1="21" y1="12" x2="9" y2="12"/>
                                 </svg>
-                                Déconnexion
+                                {{ __('messages.deconnexion') }}
                             </button>
                         </form>
                     </div>
                 </div>
             </div>
+            <form method="POST" action="{{ route('locale.switch') }}" class="inline" style="display:inline-flex;align-items:center;">
+                @csrf
+                <select name="locale" onchange="this.form.submit()" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 10px;font-size:11px;font-weight:500;cursor:pointer;outline:none;">
+                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
+                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
+                </select>
+            </form>
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
                 <button type="submit" style="background:transparent;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.2);padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer;">
-                    Déconnexion
+                    {{ __('messages.deconnexion') }}
                 </button>
             </form>
         </div>
@@ -291,7 +313,7 @@
             <a href="{{ route('payeur.dashboard') }}" id="tab-dashboard" class="sbar-item {{ request()->routeIs('payeur.dashboard') ? 'on' : '' }}"
                @if(request()->routeIs('payeur.dashboard')) onclick="if(window.showVuePane){showVuePane('resume');return false;}" @endif>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-                Tableau de bord
+                {{ __('messages.tableau_de_bord') }}
             </a>
 
             @unless($estSoloLayout)
@@ -304,23 +326,23 @@
                  this.classList.add('on');
                ">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                Mes enfants
+                {{ __('messages.mes_enfants') }}
             </a>
             @endunless
 
             <a href="{{ route('payeur.historique') }}" class="sbar-item {{ request()->routeIs('payeur.historique') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                Historique
+                {{ __('messages.historique') }}
             </a>
 
             <a href="{{ route('payeur.recus.index') }}" class="sbar-item {{ request()->routeIs('payeur.recus.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Reçus &amp; Certificats
+                {{ __('messages.recus_certificats') }}
             </a>
 
             <a href="{{ route('payeur.reclamations.index') }}" class="sbar-item {{ request()->routeIs('payeur.reclamations.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Réclamations
+                {{ __('messages.reclamations') }}
                 @php
                     $nbReclamationsOuvertes = \App\Models\Reclamation::where('user_id', Auth::id())
                         ->whereIn('statut', ['ouvert', 'en_cours'])
@@ -333,7 +355,7 @@
 
             <a href="{{ route('payeur.profil.index') }}" class="sbar-item {{ request()->routeIs('payeur.profil.*') ? 'on' : '' }}" style="margin-top:4px;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                Profil &amp; notifications
+                {{ __('messages.profil_notifications') }}
             </a>
         </div>
 

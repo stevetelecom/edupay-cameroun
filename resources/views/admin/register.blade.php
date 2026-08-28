@@ -67,7 +67,7 @@
 
             <div class="mb-4">
                 <label class="block text-xs font-medium text-gray-600 mb-1.5">Téléphone (pour 2FA) *</label>
-                <input type="text" name="telephone" value="{{ old('telephone') }}" required
+                <input type="text" class="tel-cm-input" data-allow-fixe="false" name="telephone" value="{{ old('telephone') }}" placeholder="6XXXXXXXX" required
                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"
                        placeholder="6XXXXXXXX" />
             </div>
@@ -101,3 +101,6 @@
 
 </body>
 </html>
+
+@include('partials.telephone-cm-script')
+<script>document.addEventListener('DOMContentLoaded', function() { initTelephoneCm('.tel-cm-input'); });</script>

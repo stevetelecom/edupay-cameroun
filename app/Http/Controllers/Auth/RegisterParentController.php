@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\TelephoneCamerounais;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
@@ -11,6 +12,8 @@ use Illuminate\View\View;
 
 class RegisterParentController extends Controller
 {
+    use TelephoneCamerounais;
+
     // STEP 1 — Affiche le formulaire (maquette s-register-parent)
     public function step1(): View
     {
@@ -20,11 +23,15 @@ class RegisterParentController extends Controller
     // POST step1 — Création du compte
     public function storeStep1(Request $request): RedirectResponse
     {
+        if ($request->filled('telephone')) {
+            $request->merge(['telephone' => $this->normaliserTelephoneCm((string) $request->input('telephone'))]);
+        }
+
         $validated = $request->validate([
             'profil'       => 'required|in:parent,eleve,etudiant',
             'prenom'       => 'required|string|max:100',
             'nom'          => 'required|string|max:100',
-            'telephone'    => 'required|string|max:20|unique:users,telephone',
+            'telephone'    => ['required', 'regex:/^6\d{8}$/', 'unique:users,telephone'],
             'email'        => 'nullable|email|max:150|unique:users,email',
             'ville'        => 'required|string|max:100',
             'quartier'     => 'nullable|string|max:100',
@@ -45,6 +52,7 @@ class RegisterParentController extends Controller
             'nom.required'          => 'Le nom est obligatoire.',
             'telephone.required'    => 'Le numéro de téléphone est obligatoire.',
             'telephone.unique'      => 'Ce numéro est déjà utilisé.',
+            'telephone.regex'       => 'Numéro invalide. Format attendu : 6XXXXXXXX (9 chiffres, mobile camerounais).',
             'email.unique'          => 'Cette adresse email est déjà utilisée.',
             'password.min'          => 'Le mot de passe doit contenir au moins 8 caractères.',
             'password.confirmed'    => 'Les mots de passe ne correspondent pas.',

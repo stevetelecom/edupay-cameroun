@@ -3,25 +3,25 @@
 <div id="modal-profil-etab" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-lg">
     <div class="ep-modal-head">
-      <h3>Mon profil</h3>
+      <h3>{{ __('etablissement.mon_profil') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-profil-etab')">×</button>
     </div>
     <div class="ep-modal-body">
 
       {{-- ── Informations personnelles ── --}}
-      <div class="seclbl" style="margin-top:0;">Informations personnelles</div>
+      <div class="seclbl" style="margin-top:0;">{{ __('etablissement.infos_personnelles') }}</div>
       <form method="POST" action="{{ route('etablissement.profil.infos') }}" style="margin-bottom:22px;">
         @csrf @method('PUT')
         <div class="g2" style="margin-bottom:12px;">
           <div>
-            <div class="lbl">Prénom *</div>
+            <div class="lbl">{{ __('etablissement.lbl_prenom') }}</div>
             <input class="inp" name="prenom"
                    value="{{ old('prenom', Auth::user()->prenom ?? explode(' ', Auth::user()->name)[0] ?? '') }}"
                    required />
             @error('prenom')<div style="color:var(--ep-red);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
           </div>
           <div>
-            <div class="lbl">Nom *</div>
+            <div class="lbl">{{ __('etablissement.lbl_nom') }}</div>
             <input class="inp" name="nom"
                    value="{{ old('nom', Auth::user()->nom ?? explode(' ', Auth::user()->name)[1] ?? '') }}"
                    required />
@@ -30,37 +30,37 @@
         </div>
         <div class="g2" style="margin-bottom:12px;">
           <div>
-            <div class="lbl">Téléphone *</div>
+            <div class="lbl">{{ __('etablissement.lbl_telephone') }}</div>
             <input class="inp" name="telephone"
                    value="{{ old('telephone', Auth::user()->telephone) }}"
                    required />
             @error('telephone')<div style="color:var(--ep-red);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
           </div>
           <div>
-            <div class="lbl">Email</div>
+            <div class="lbl">{{ __('etablissement.lbl_email') }}</div>
             <input class="inp" name="email" type="email"
                    value="{{ old('email', Auth::user()->email) }}" />
             @error('email')<div style="color:var(--ep-red);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
           </div>
         </div>
         <div style="margin-bottom:16px;">
-          <div class="lbl">Ville</div>
+          <div class="lbl">{{ __('etablissement.lbl_ville') }}</div>
           <input class="inp" name="ville" value="{{ old('ville', Auth::user()->ville) }}" />
         </div>
         <button type="submit" class="btn-p" style="width:auto;padding:9px 20px;">
-          Enregistrer les modifications
+          {{ __('etablissement.enregistrer_modifs') }}
         </button>
       </form>
 
       {{-- ── Changer le mot de passe ── --}}
-      <div class="seclbl">Changer le mot de passe</div>
+      <div class="seclbl">{{ __('etablissement.changer_mdp') }}</div>
       <form method="POST" action="{{ route('etablissement.profil.password') }}" autocomplete="off">
         <input type="text" style="display:none;" tabindex="-1" autocomplete="username" />
         <input type="password" style="display:none;" tabindex="-1" autocomplete="new-password" />
         @csrf @method('PUT')
 
         <div style="margin-bottom:12px;">
-          <div class="lbl">Mot de passe actuel *</div>
+          <div class="lbl">{{ __('etablissement.mdp_actuel') }}</div>
           <div style="position:relative;">
             <input class="inp" type="password" id="mp-current-password" name="current_password"
                    required autocomplete="current-password" style="padding-right:42px;" />
@@ -74,10 +74,10 @@
         </div>
 
         <div style="margin-bottom:12px;">
-          <div class="lbl">Nouveau mot de passe *</div>
+          <div class="lbl">{{ __('etablissement.mdp_nouveau') }}</div>
           <div style="position:relative;">
             <input class="inp" type="password" id="mp-new-password" name="password"
-                   placeholder="Min. 8 car., 1 maj., 1 min., 1 chiffre, 1 symbole" required
+                   placeholder="{{ __('etablissement.mdp_min_car_placeholder') }}" required
                    autocomplete="new-password" style="padding-right:42px;" />
             <button type="button" onclick="toggleMP('mp-new-password','mp-eye-new','mp-eyeoff-new')" tabindex="-1"
                     style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#888;">
@@ -89,7 +89,7 @@
         </div>
 
         <div style="margin-bottom:16px;">
-          <div class="lbl">Confirmer le nouveau mot de passe *</div>
+          <div class="lbl">{{ __('etablissement.mdp_confirm') }}</div>
           <div style="position:relative;">
             <input class="inp" type="password" id="mp-confirm-password" name="password_confirmation"
                    required autocomplete="new-password" style="padding-right:42px;" />
@@ -106,11 +106,11 @@
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
             <path d="M7 11V7a5 5 0 0110 0v4"/>
           </svg>
-          <span>Authentification forte requise : 8 caractères minimum, avec majuscule, minuscule, chiffre et caractère spécial. Le nouveau mot de passe doit être différent de l'ancien.</span>
+          <span>{{ __('etablissement.mdp_auth_requise') }}</span>
         </div>
 
         <button type="submit" class="btn-p" style="width:auto;padding:9px 20px;">
-          Changer le mot de passe
+          {{ __('etablissement.changer_mdp') }}
         </button>
       </form>
 

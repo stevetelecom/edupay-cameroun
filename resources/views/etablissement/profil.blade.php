@@ -1,5 +1,5 @@
 @extends('layouts.etablissement')
-@section('title', 'Mon profil')
+@section('title', __('etablissement.mon_profil'))
 
 @section('content')
 
@@ -7,20 +7,20 @@
 
   {{-- ── Informations personnelles ── --}}
   <div class="epcard" style="margin-bottom:16px;">
-    <div class="seclbl" style="margin-top:0;">Informations personnelles</div>
+    <div class="seclbl" style="margin-top:0;">{{ __('etablissement.infos_personnelles') }}</div>
 
     <form method="POST" action="{{ route('etablissement.profil.infos') }}">
       @csrf @method('PUT')
       <div class="g2" style="margin-bottom:12px;">
         <div>
-          <div class="lbl">Prénom *</div>
+          <div class="lbl">{{ __('etablissement.lbl_prenom') }}</div>
           <input class="inp" name="prenom"
                  value="{{ old('prenom', $user->prenom ?? explode(' ', $user->name)[0] ?? '') }}"
                  required />
           @error('prenom')<div style="color:var(--ep-red);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
         </div>
         <div>
-          <div class="lbl">Nom *</div>
+          <div class="lbl">{{ __('etablissement.lbl_nom') }}</div>
           <input class="inp" name="nom"
                  value="{{ old('nom', $user->nom ?? explode(' ', $user->name)[1] ?? '') }}"
                  required />
@@ -29,32 +29,32 @@
       </div>
       <div class="g2" style="margin-bottom:12px;">
         <div>
-          <div class="lbl">Téléphone *</div>
-          <input class="inp" name="telephone"
+          <div class="lbl">{{ __('etablissement.lbl_telephone') }}</div>
+          <input class="inp tel-cm-input" data-allow-fixe="false" name="telephone"
                  value="{{ old('telephone', $user->telephone) }}"
                  required />
           @error('telephone')<div style="color:var(--ep-red);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
         </div>
         <div>
-          <div class="lbl">Email</div>
+          <div class="lbl">{{ __('etablissement.lbl_email') }}</div>
           <input class="inp" name="email" type="email"
                  value="{{ old('email', $user->email) }}" />
           @error('email')<div style="color:var(--ep-red);font-size:11px;margin-top:4px;">{{ $message }}</div>@enderror
         </div>
       </div>
       <div style="margin-bottom:16px;">
-        <div class="lbl">Ville</div>
+        <div class="lbl">{{ __('etablissement.lbl_ville') }}</div>
         <input class="inp" name="ville" value="{{ old('ville', $user->ville) }}" />
       </div>
       <button type="submit" class="btn-p" style="width:auto;padding:9px 20px;">
-        Enregistrer les modifications
+        {{ __('etablissement.enregistrer_modifs') }}
       </button>
     </form>
   </div>
 
   {{-- ── Changer le mot de passe ── --}}
   <div class="epcard">
-    <div class="seclbl" style="margin-top:0;">Changer le mot de passe</div>
+    <div class="seclbl" style="margin-top:0;">{{ __('etablissement.changer_mdp') }}</div>
 
     <form method="POST" action="{{ route('etablissement.profil.password') }}" autocomplete="off">
         <input type="text" style="display:none;" tabindex="-1" autocomplete="username" />
@@ -62,7 +62,7 @@
       @csrf @method('PUT')
 
       <div style="margin-bottom:12px;">
-        <div class="lbl">Mot de passe actuel *</div>
+        <div class="lbl">{{ __('etablissement.mdp_actuel') }}</div>
         <div style="position:relative;">
           <input class="inp" type="password" id="current_password" name="current_password"
                  required style="padding-right:42px;" />
@@ -75,10 +75,10 @@
       </div>
 
       <div style="margin-bottom:12px;">
-        <div class="lbl">Nouveau mot de passe *</div>
+        <div class="lbl">{{ __('etablissement.mdp_nouveau') }}</div>
         <div style="position:relative;">
           <input class="inp" type="password" id="new_password" name="password"
-                 placeholder="Min. 8 caractères" required style="padding-right:42px;" />
+                 placeholder="{{ __('etablissement.mdp_min_placeholder') }}" required style="padding-right:42px;" />
           <button type="button" onclick="toggleP('new_password','eye-new','eyeoff-new')" tabindex="-1"
                   style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#888;">
             <svg id="eye-new" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -88,7 +88,7 @@
       </div>
 
       <div style="margin-bottom:16px;">
-        <div class="lbl">Confirmer le nouveau mot de passe *</div>
+        <div class="lbl">{{ __('etablissement.mdp_confirm') }}</div>
         <div style="position:relative;">
           <input class="inp" type="password" id="confirm_password" name="password_confirmation"
                  required style="padding-right:42px;" />
@@ -101,14 +101,16 @@
       </div>
 
       <button type="submit" class="btn-p" style="width:auto;padding:9px 20px;">
-        Changer le mot de passe
+        {{ __('etablissement.changer_mdp') }}
       </button>
     </form>
   </div>
 
 </div>
 
+@include('partials.telephone-cm-script')
 <script>
+  document.addEventListener('DOMContentLoaded', function() { initTelephoneCm('.tel-cm-input'); });
 function toggleP(id, eyeId, eyeOffId) {
   var inp = document.getElementById(id);
   var eye = document.getElementById(eyeId);

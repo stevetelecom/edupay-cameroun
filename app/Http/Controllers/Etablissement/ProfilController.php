@@ -5,9 +5,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\TelephoneCamerounais;
 
 class ProfilController extends Controller
 {
+    use TelephoneCamerounais;
+
     public function index()
     {
         return view('etablissement.profil', [
@@ -19,12 +22,18 @@ class ProfilController extends Controller
     {
         $user = Auth::user();
 
+        if ($request->filled('telephone')) {
+            $request->merge(['telephone' => $this->normaliserTelephoneCm((string) $request->input('telephone'))]);
+        }
+
         $validated = $request->validate([
             'prenom'    => 'required|string|max:100',
             'nom'       => 'required|string|max:100',
-            'telephone' => 'required|string|max:20|unique:users,telephone,' . $user->id,
+            'telephone' => ['required', 'regex:/^6\d{8}$/', 'unique:users,telephone,' . $user->id],
             'email'     => 'nullable|email|max:150|unique:users,email,' . $user->id,
             'ville'     => 'nullable|string|max:100',
+        ], [
+            'telephone.regex' => 'Numéro invalide. Format attendu : 6XXXXXXXX (9 chiffres, mobile camerounais).',
         ]);
 
         $user->update([

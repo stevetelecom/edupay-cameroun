@@ -1,12 +1,12 @@
 @extends('layouts.public')
 
-@section('title', 'Connexion OTP SMS — EduPay Cameroun')
+@section('title', __('auth.otp_title'))
 
 @section('content')
 <div class="video-bg-container" style="min-height:100vh;display:flex;flex-direction:column;"><video class="video-bg" autoplay muted loop playsinline><source src="{{ asset('videos/hero-payment.mp4') }}" type="video/mp4"></video><div class="video-bg-overlay"></div>
   <div class="form-header">
     <div style="display:flex;align-items:center;gap:9px;"><span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span></div>
-    <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:6px 13px;border-radius:20px;font-size:12px;text-decoration:none;">← Accueil</a>
+    <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);padding:6px 13px;border-radius:20px;font-size:12px;text-decoration:none;">{{ __('auth.retour_accueil') }}</a>
   </div>
   <div class="form-body">
     <div style="width:100%;max-width:420px;">
@@ -15,39 +15,39 @@
           <div style="width:48px;height:48px;background:var(--ep-teal-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           </div>
-          <div class="form-title">Connexion par OTP SMS</div>
-          <div class="form-sub">Recevez un code sécurisé par SMS</div>
+          <div class="form-title">{{ __('auth.otp_titre') }}</div>
+          <div class="form-sub">{{ __('auth.otp_sub') }}</div>
         </div>
 
         <form method="POST" action="{{ route('login.otp.verify') }}">
           @csrf
-          <div class="lbl">Téléphone ou adresse email</div>
-          <input class="inp" type="text" id="otp-login-input" name="login" value="{{ old('login', session('otp_login')) }}" placeholder="699 123 456 ou nom@email.com" required />
+          <div class="lbl">{{ __('auth.telephone_ou_email') }}</div>
+          <input class="inp" type="text" id="otp-login-input" name="login" value="{{ old('login', session('otp_login')) }}" placeholder="{{ __('auth.login_placeholder') }}" required />
           
           @if(!session('otp_sent'))
-            <button type="submit" class="btn-p" style="margin-top:18px;margin-bottom:10px;">Envoyer le code OTP</button>
+            <button type="submit" class="btn-p" style="margin-top:18px;margin-bottom:10px;">{{ __('auth.envoyer_code_otp') }}</button>
           @else
-            <div class="lbl" style="margin-top:18px;">Code OTP reçu par SMS</div>
-            <input class="inp" type="text" name="otp_code" id="otp-code-input" placeholder="000000" maxlength="6" pattern="\d{6}" inputmode="numeric" required />
-            <button type="submit" class="btn-p" style="margin-top:18px;margin-bottom:10px;">Vérifier et se connecter</button>
+            <div class="lbl" style="margin-top:18px;">{{ __('auth.otp_recu_par_sms') }}</div>
+            <input class="inp" type="text" name="otp_code" id="otp-code-input" placeholder="{{ __('auth.otp_placeholder') }}" maxlength="6" pattern="\d{6}" inputmode="numeric" required />
+            <button type="submit" class="btn-p" style="margin-top:18px;margin-bottom:10px;">{{ __('auth.verifier_se_connecter') }}</button>
           @endif
         </form>
 
-        <a href="{{ route('login') }}" class="btn-o" style="display:block;text-align:center;">← Retour à la connexion classique</a>
+        <a href="{{ route('login') }}" class="btn-o" style="display:block;text-align:center;">{{ __('auth.retour_connexion_classique') }}</a>
         
         <div class="divider"></div>
-        <div style="font-size:12px;color:#888;text-align:center;">Pas encore de compte ? <a href="{{ route('register.parent.step1') }}" style="color:var(--ep-teal);font-weight:600;">Créer un compte parent →</a></div>
+        <div style="font-size:12px;color:#888;text-align:center;">{{ __('auth.pas_encore_compte') }} <a href="{{ route('register.parent.step1') }}" style="color:var(--ep-teal);font-weight:600;">{{ __('auth.creer_compte_parent') }}</a></div>
       </div>
 
       <div class="epcard" style="background:#f8f9fa;margin-top:10px;">
-        <div style="font-size:12px;color:#888;text-align:center;margin-bottom:10px;">Vous représentez un établissement ?</div>
-        <a href="{{ route('login', ['role' => 'etablissement']) }}" class="btn-o">Accès back-office établissement →</a>
-        <div style="font-size:12px;color:#888;text-align:center;margin-top:10px;">Pas encore inscrit ? <a href="{{ route('register.ecole.step1') }}" style="color:var(--ep-teal);font-weight:600;">Inscrire mon établissement →</a></div>
+        <div style="font-size:12px;color:#888;text-align:center;margin-bottom:10px;">{{ __('auth.representez_etablissement') }}</div>
+        <a href="{{ route('login', ['role' => 'etablissement']) }}" class="btn-o">{{ __('auth.acces_backoffice') }}</a>
+        <div style="font-size:12px;color:#888;text-align:center;margin-top:10px;">{{ __('auth.pas_encore_inscrit') }} <a href="{{ route('register.ecole.step1') }}" style="color:var(--ep-teal);font-weight:600;">{{ __('auth.inscrire_etablissement') }}</a></div>
       </div>
     </div>
   </div>
   <div style="background:var(--ep-navy);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;">
-    <div style="font-size:11px;color:rgba(255,255,255,.35);">© 2026 EduPay Cameroun · Connexion chiffrée TLS 1.3</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.35);">{{ __('auth.footer_connexion_chiffree') }}</div>
     <div style="display:flex;gap:8px;"><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span></div>
   </div>
 </div>

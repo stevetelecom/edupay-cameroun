@@ -1,6 +1,6 @@
 @extends('layouts.payeur')
 
-@section('title', 'Réclamations')
+@section('title', __('payeur.recl_titre'))
 
 @push('modals')
 
@@ -8,7 +8,7 @@
 <div id="modal-create-reclamation" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-md">
     <div class="ep-modal-head">
-      <h3>+ Nouvelle réclamation</h3>
+      <h3>+ {{ __('payeur.recl_nouvelle') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-create-reclamation')">×</button>
     </div>
     <form method="POST" action="{{ route('payeur.reclamations.store') }}">
@@ -23,33 +23,33 @@
           </div>
         @endif
 
-        <div class="lbl">Transaction concernée</div>
+        <div class="lbl">{{ __('payeur.recl_transaction_concernee') }}</div>
         <select class="inp" name="paiement_id" style="margin-bottom:12px;">
-          <option value="">Autre / paiement introuvable</option>
+          <option value="">{{ __('payeur.recl_autre_introuvable') }}</option>
           @foreach($paiements as $p)
             <option value="{{ $p->id }}" {{ old('paiement_id') == $p->id ? 'selected' : '' }}>
-              Réf. #{{ $p->reference }} — {{ $p->fraisApprenant->categorieFrais->nom ?? 'Paiement' }}
+              {{ __('payeur.recl_ref') }} #{{ $p->reference }} — {{ $p->fraisApprenant->categorieFrais->nom ?? __('payeur.paiement') }}
               ({{ number_format($p->montant, 0, ',', ' ') }} FCFA)
             </option>
           @endforeach
         </select>
 
-        <div class="lbl">Objet *</div>
+        <div class="lbl">{{ __('payeur.recl_objet') }} *</div>
         <input class="inp" name="sujet" maxlength="150" required
-               placeholder="Ex : Paiement débité deux fois"
+               placeholder="{{ __('payeur.recl_ex_objet') }}"
                value="{{ old('sujet') }}" />
 
-        <div class="lbl">Description *</div>
+        <div class="lbl">{{ __('payeur.recl_description') }} *</div>
         <textarea class="inp" name="description" rows="4" required
                   style="resize:vertical;"
-                  placeholder="Expliquez le problème rencontré…">{{ old('description') }}</textarea>
+                  placeholder="{{ __('payeur.recl_ex_description') }}">{{ old('description') }}</textarea>
 
       </div>
       <div class="ep-modal-foot">
         <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
-                onclick="epModal.close('modal-create-reclamation')">Annuler</button>
+                onclick="epModal.close('modal-create-reclamation')">{{ __('payeur.annuler') }}</button>
         <button type="submit" class="btn-p" style="width:auto;padding:8px 20px;">
-          Envoyer
+          {{ __('payeur.recl_envoyer') }}
         </button>
       </div>
     </form>
@@ -61,10 +61,10 @@
 @section('content')
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-    <div style="font-size:17px;font-weight:700;">Mes réclamations</div>
+    <div style="font-size:17px;font-weight:700;">{{ __('payeur.recl_mes_reclamations') }}</div>
     <button class="btn-p" style="width:auto;padding:9px 16px;font-size:12px;"
             onclick="epModal.open('modal-create-reclamation')">
-        + Nouvelle réclamation
+        + {{ __('payeur.recl_nouvelle') }}
     </button>
 </div>
 
@@ -76,9 +76,9 @@
                     #{{ $reclamation->numero_ticket }} — {{ $reclamation->sujet }}
                 </div>
                 <div style="font-size:11px;color:#888;">
-                    Ouvert le {{ $reclamation->created_at->format('d M Y') }}
+                    {{ __('payeur.recl_ouvert_le') }} {{ $reclamation->created_at->format('d M Y') }}
                     @if($reclamation->paiement)
-                        · {{ $reclamation->paiement->fraisApprenant->categorieFrais->nom ?? 'Paiement' }}
+                        · {{ $reclamation->paiement->fraisApprenant->categorieFrais->nom ?? __('payeur.paiement') }}
                     @endif
                 </div>
             </div>
@@ -86,13 +86,13 @@
                 'resolu' => 'pg', 'en_cours' => 'pa', 'rejete' => 'pr', 'ouvert' => 'pb', default => 'pa',
             } }}">
                 {{ match($reclamation->statut) {
-                    'resolu' => 'Résolu', 'en_cours' => 'En cours', 'rejete' => 'Rejetée', 'ouvert' => 'Ouvert', default => $reclamation->statut,
+                    'resolu' => __('payeur.recl_statut_resolu'), 'en_cours' => __('payeur.recl_statut_en_cours'), 'rejete' => __('payeur.recl_statut_rejetee'), 'ouvert' => __('payeur.recl_statut_ouvert'), default => $reclamation->statut,
                 } }}
             </span>
         </div>
     @empty
         <div style="text-align:center;color:#999;font-size:13px;padding:20px 0;">
-            Vous n'avez envoyé aucune réclamation pour le moment.
+            {{ __('payeur.recl_aucune') }}
         </div>
     @endforelse
 </div>

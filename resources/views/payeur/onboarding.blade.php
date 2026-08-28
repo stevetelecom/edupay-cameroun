@@ -1,12 +1,12 @@
 @extends('layouts.public')
-@section('title', 'Rattachement — EduPay Cameroun')
+@section('title', __('payeur.onb_titre_pdf'))
 
 @section('content')
 <div class="video-bg-container" style="min-height:100vh;display:flex;flex-direction:column;"><video class="video-bg" autoplay muted loop playsinline><source src="{{ asset('videos/hero-payment.mp4') }}" type="video/mp4"></video><div class="video-bg-overlay"></div>
 
   <div class="form-header">
     <div style="display:flex;align-items:center;gap:9px;"><span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span></div>
-    <div style="font-size:12px;color:rgba(255,255,255,.5);">Étape 2 sur 3</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.5);">{{ __('payeur.onb_etape_2_sur_3') }}</div>
   </div>
 
   <div class="form-body" style="padding-top:28px;padding-bottom:40px;">
@@ -18,25 +18,25 @@
           <div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
-          <div style="font-size:11px;font-weight:600;color:var(--ep-teal);">Compte</div>
+          <div style="font-size:11px;font-weight:600;color:var(--ep-teal);">{{ __('payeur.onb_compte') }}</div>
         </div>
         <div style="flex:1;height:2px;background:var(--ep-teal);margin-top:-16px;"></div>
         <div style="flex:1;text-align:center;">
           <div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">2</div>
           <div style="font-size:11px;font-weight:600;color:var(--ep-teal);">
-            {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? 'Mon école' : 'Mon enfant' }}
+            {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? __('payeur.onb_mon_ecole') : __('payeur.onb_mon_enfant') }}
           </div>
         </div>
         <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
         <div style="flex:1;text-align:center;">
           <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">3</div>
-          <div style="font-size:11px;color:#aaa;">Confirmation</div>
+          <div style="font-size:11px;color:#aaa;">{{ __('payeur.onb_confirmation') }}</div>
         </div>
       </div>
 
       @if($errors->any())
       <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:8px;padding:12px 16px;margin-bottom:18px;">
-        <div style="font-size:13px;font-weight:600;color:#991B1B;margin-bottom:6px;">Veuillez corriger les erreurs :</div>
+        <div style="font-size:13px;font-weight:600;color:#991B1B;margin-bottom:6px;">{{ __('payeur.onb_corriger_erreurs') }}</div>
         <ul style="margin:0;padding-left:18px;">
           @foreach($errors->all() as $e)<li style="font-size:12px;color:#B91C1C;">{{ $e }}</li>@endforeach
         </ul>
@@ -46,23 +46,23 @@
       @php $estSolo = in_array(Auth::user()->profil, ['eleve','etudiant']); @endphp
 
       <div style="font-size:18px;font-weight:700;margin-bottom:6px;">
-        {{ $estSolo ? 'Rattachez votre profil à votre établissement' : 'Rattachez votre enfant à son établissement' }}
+        {{ $estSolo ? __('payeur.onb_titre_profil') : __('payeur.onb_titre_enfant') }}
       </div>
       <div style="font-size:13px;color:#888;margin-bottom:20px;">
         {{ $estSolo
-            ? 'Recherchez votre établissement partenaire EduPay, puis retrouvez votre profil dans l\'annuaire.'
-            : 'Recherchez l\'établissement de votre enfant, puis retrouvez-le dans l\'annuaire. Vous pourrez en ajouter d\'autres depuis votre tableau de bord.' }}
+            ? __('payeur.onb_ss_profil')
+            : __('payeur.onb_ss_enfant') }}
       </div>
 
       {{-- ══ ÉTAPE A : Recherche établissement ══ --}}
       <div id="o-step1">
         <div style="font-size:11px;font-weight:700;color:#0D9E75;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">
-          Étape 1 — Choisir l'établissement
+          {{ __('payeur.onb_etape1') }}
         </div>
 
         <div style="position:relative;margin-bottom:10px;">
           <input type="text" id="o-etab-search"
-                 placeholder="Tapez le nom ou la ville…"
+                 placeholder="{{ __('payeur.onb_recherche_etab') }}"
                  style="width:100%;padding:11px 12px 11px 36px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
                  oninput="oFiltrerEtabs(this.value)"
                  onfocus="document.getElementById('o-etab-liste').style.display='block'" />
@@ -105,7 +105,7 @@
           @endforeach
           @if($etablissements->isEmpty())
           <div style="padding:20px;text-align:center;color:#aaa;font-size:13px;">
-            Aucun établissement partenaire pour le moment.
+            {{ __('payeur.onb_aucun_etab') }}
           </div>
           @endif
         </div>
@@ -115,11 +115,11 @@
       <div id="o-step2" style="display:none;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="font-size:11px;font-weight:700;color:#0D9E75;text-transform:uppercase;letter-spacing:.05em;">
-            Étape 2 — Trouver dans l'annuaire
+            {{ __('payeur.onb_etape2') }}
           </div>
           <button type="button" onclick="oReinitEtab()"
                   style="font-size:11px;color:#888;background:none;border:none;cursor:pointer;text-decoration:underline;">
-            Changer d'établissement
+            {{ __('payeur.onb_changer_etab') }}
           </button>
         </div>
 
@@ -133,7 +133,7 @@
 
         <div style="position:relative;margin-bottom:10px;">
           <input type="text" id="o-apprenant-search"
-                 placeholder="Chercher par nom, prénom ou classe…"
+                 placeholder="{{ __('payeur.onb_recherche_apprenant') }}"
                  style="width:100%;padding:11px 12px 11px 36px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
                  oninput="oRechercherApprenant(this.value)" />
           <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#aaa;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -142,7 +142,7 @@
         <div id="o-apprenant-liste"
              style="border:1px solid #e0e0e0;border-radius:8px;background:#fff;max-height:200px;overflow-y:auto;margin-bottom:16px;">
           <div style="padding:16px;text-align:center;color:#aaa;font-size:13px;">
-            Chargement de l'annuaire…
+            {{ __('payeur.onb_chargement') }}
           </div>
         </div>
 
@@ -171,41 +171,41 @@
           <div id="o-saisie-manuelle" style="display:none;">
             <div style="font-size:12px;color:#888;margin-bottom:12px;padding:10px 12px;background:#f9fafb;border-radius:6px;">
               @if($estSolo)
-                Pas trouvé dans l'annuaire ? Remplissez ci-dessous — votre demande sera validée par l'établissement.
+                {{ __('payeur.onb_pas_trouve_profil') }}
               @else
-                Pas trouvé dans l'annuaire ? Saisissez les informations de l'enfant manuellement.
+                {{ __('payeur.onb_pas_trouve_enfant') }}
               @endif
             </div>
 
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
               @unless($estSolo)
               <div>
-                <div class="lbl">Prénom de l'enfant *</div>
+                <div class="lbl">{{ __('payeur.onb_prenom_enfant') }}</div>
                 <input class="inp" id="o-prenom" name="prenom_apprenant" value="{{ old('prenom_apprenant') }}" placeholder="Brice" />
               </div>
               <div>
-                <div class="lbl">Nom *</div>
+                <div class="lbl">{{ __('payeur.onb_nom') }}</div>
                 <input class="inp" id="o-nom" name="nom_apprenant" value="{{ old('nom_apprenant') }}" placeholder="FONO" />
               </div>
               @endunless
               <div>
-                <div class="lbl">{{ Auth::user()->profil === 'etudiant' ? 'Filière / Niveau *' : 'Classe *' }}</div>
+                <div class="lbl">{{ Auth::user()->profil === 'etudiant' ? __('payeur.onb_filiere') : __('payeur.onb_classe') }}</div>
                 <input class="inp" id="o-classe" name="classe" value="{{ old('classe') }}"
-                       placeholder="{{ Auth::user()->profil === 'etudiant' ? 'Ex : Licence 2 GSI' : 'Ex : 3ème A' }}" />
+                       placeholder="{{ Auth::user()->profil === 'etudiant' ? __('payeur.onb_ex_filiere') : __('payeur.onb_ex_classe') }}" />
               </div>
               <div>
-                <div class="lbl">Matricule (si connu)</div>
-                <input class="inp" id="o-matricule" name="matricule" value="{{ old('matricule') }}" placeholder="Ex : EP-1184" />
+                <div class="lbl">{{ __('payeur.onb_matricule') }}</div>
+                <input class="inp" id="o-matricule" name="matricule" value="{{ old('matricule') }}" placeholder="{{ __('payeur.onb_ex_matricule') }}" />
               </div>
             </div>
           </div>
 
           <div style="display:flex;gap:10px;margin-top:8px;">
             <a href="{{ route('payeur.dashboard') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">
-              Plus tard
+              {{ __('payeur.onb_plus_tard') }}
             </a>
             <button type="submit" class="btn-p" id="btn-submit" style="flex:1;">
-              Terminer et accéder à mon tableau de bord →
+              {{ __('payeur.onb_terminer') }} →
             </button>
           </div>
         </form>
@@ -224,6 +224,17 @@
 </div>
 
 <script>
+var ONB_L10N = {
+    chargement: @json(__('payeur.onb_chargement')),
+    aucun_resultat: @json(__('payeur.onb_aucun_resultat')),
+    aucun_apprenant: @json(__('payeur.onb_aucun_apprenant')),
+    remplir_champs: @json(__('payeur.onb_remplir_champs')),
+    mat_abbr: @json(__('payeur.onb_mat_abbr')),
+    erreur_connexion: @json(__('payeur.onb_erreur_connexion')),
+    alert_etab: @json(__('payeur.onb_alert_select_etab')),
+    alert_classe: @json(__('payeur.onb_alert_classe')),
+};
+
 var oEtabSelecte = null;
 var oApprenantSelectionne = null;
 var oAnnuaireTimeout = null;
@@ -292,7 +303,7 @@ function oRechercherApprenant(q) {
 
     clearTimeout(oAnnuaireTimeout);
     var liste = document.getElementById('o-apprenant-liste');
-    liste.innerHTML = '<div style="padding:14px;text-align:center;color:#888;font-size:12px;">Chargement de l\'annuaire…</div>';
+    liste.innerHTML = '<div style="padding:14px;text-align:center;color:#888;font-size:12px;">' + ONB_L10N.chargement + '</div>';
 
     oAnnuaireTimeout = setTimeout(function() {
         var url = '{{ route("payeur.onboarding.search") }}?etablissement_id=' + etabId + '&q=' + encodeURIComponent(q);
@@ -307,12 +318,12 @@ function oRechercherApprenant(q) {
         .then(function(apprenants) {
             if (apprenants.length === 0) {
                 var msgVide = q.trim()
-                    ? 'Aucun résultat pour "<strong>' + q + '</strong>"'
-                    : 'Aucun apprenant enregistré dans cet établissement pour le moment.';
+                    ? ONB_L10N.aucun_resultat.replace('%%Q%%', q)
+                    : ONB_L10N.aucun_apprenant;
                 liste.innerHTML =
                     '<div style="padding:16px;text-align:center;">' +
                     '<div style="font-size:13px;color:#888;margin-bottom:6px;">' + msgVide + '</div>' +
-                    '<div style="font-size:11px;color:#aaa;">Remplissez les champs ci-dessous pour un pré-rattachement.</div>' +
+                    '<div style="font-size:11px;color:#aaa;">' + ONB_L10N.remplir_champs + '</div>' +
                     '</div>';
                 oAfficherSaisieManuelle(true);
                 return;
@@ -329,7 +340,7 @@ function oRechercherApprenant(q) {
                     '<div>' +
                     '<div style="font-size:13px;font-weight:600;">' + a.prenom + ' ' + a.nom + '</div>' +
                     '<div style="font-size:11px;color:#888;">' + (a.classe||'—') +
-                    (a.matricule ? ' · Mat. ' + a.matricule : '') + '</div>' +
+                    (a.matricule ? ' · ' + ONB_L10N.mat_abbr + ' ' + a.matricule : '') + '</div>' +
                     '</div>' +
                     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2" ' +
                     'class="o-app-check" style="opacity:0;flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>' +
@@ -339,7 +350,7 @@ function oRechercherApprenant(q) {
             oAfficherSaisieManuelle(false);
         })
         .catch(function() {
-            liste.innerHTML = '<div style="padding:14px;color:var(--ep-red);font-size:12px;">Erreur de connexion — vérifiez votre réseau.</div>';
+            liste.innerHTML = '<div style="padding:14px;color:var(--ep-red);font-size:12px;">' + ONB_L10N.erreur_connexion + '</div>';
         });
     }, 350);
 }
@@ -391,7 +402,7 @@ function oReinitApprenant() {
     document.getElementById('h-apprenant-id').value = '';
     document.getElementById('o-app-badge').style.display = 'none';
     var liste = document.getElementById('o-apprenant-liste');
-    liste.innerHTML = '<div style="padding:16px;text-align:center;color:#aaa;font-size:13px;">Chargement de l\'annuaire…</div>';
+    liste.innerHTML = '<div style="padding:16px;text-align:center;color:#aaa;font-size:13px;">' + ONB_L10N.chargement + '</div>';
     liste.style.display = 'block';
     var searchInp = document.getElementById('o-apprenant-search');
     if (searchInp) searchInp.value = '';
@@ -411,7 +422,7 @@ document.addEventListener('click', function(e) {
 document.getElementById('onb-form').addEventListener('submit', function(e) {
     if (!document.getElementById('h-etab-id').value && !document.getElementById('h-etab-nom').value) {
         e.preventDefault();
-        alert('Veuillez sélectionner un établissement.');
+        alert(ONB_L10N.alert_etab);
         return;
     }
     var classeInp = document.getElementById('o-classe');
@@ -419,7 +430,7 @@ document.getElementById('onb-form').addEventListener('submit', function(e) {
         e.preventDefault();
         classeInp.style.border = '1.5px solid var(--ep-red)';
         classeInp.focus();
-        alert('Veuillez indiquer la classe.');
+        alert(ONB_L10N.alert_classe);
     }
 });
 </script>

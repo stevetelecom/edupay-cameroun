@@ -1,6 +1,6 @@
 @extends('layouts.payeur')
 
-@section('title', 'Paiement en attente')
+@section('title', __('payeur.pa_titre'))
 
 @section('content')
 
@@ -35,15 +35,14 @@
             $operateurAffiche = match($paiement->operateur ?? null) {
                 'MTN_Cameroon'    => ['nom' => 'MTN Mobile Money', 'court' => 'MTN',    'bg' => '#FFFBE6', 'border' => '#FFCC00', 'texte' => '#996600', 'chip_texte' => '#553300'],
                 'Orange_Cameroon' => ['nom' => 'Orange Money',      'court' => 'Orange', 'bg' => '#FFF5EE', 'border' => '#FF6600', 'texte' => '#CC4400', 'chip_texte' => '#ffffff'],
-                default           => ['nom' => 'Mobile Money',      'court' => 'votre opérateur', 'bg' => '#f5f5f5', 'border' => '#ddd', 'texte' => '#555', 'chip_texte' => '#555'],
+                default           => ['nom' => 'Mobile Money',      'court' => __('payeur.pa_votre_operateur'), 'bg' => '#f5f5f5', 'border' => '#ddd', 'texte' => '#555', 'chip_texte' => '#555'],
             };
         @endphp
         <div id="msg-attente">
-            <div id="msg-attente-titre" style="font-size:17px;font-weight:700;margin-bottom:8px;">En attente de confirmation</div>
+            <div id="msg-attente-titre" style="font-size:17px;font-weight:700;margin-bottom:8px;">{{ __('payeur.pa_attente_titre') }}</div>
             <div style="font-size:13px;color:#888;margin-bottom:14px;">
-                Confirmez le paiement de <strong>{{ number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' ') }} FCFA</strong>
-                sur votre téléphone <strong>{{ $paiement->telephone_paiement }}</strong>.<br><br>
-                Réf. : <code>{{ $paiement->reference }}</code>
+                {!! __('payeur.pa_attente_confirm', ['montant' => number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' '), 'tel' => $paiement->telephone_paiement]) !!}<br><br>
+                {{ __('payeur.pa_ref') }} : <code>{{ $paiement->reference }}</code>
             </div>
             <div style="display:inline-flex;align-items:center;gap:8px;background:{{ $operateurAffiche['bg'] }};border:1px solid {{ $operateurAffiche['border'] }};border-radius:20px;padding:5px 14px;margin-bottom:16px;font-size:12px;font-weight:700;color:{{ $operateurAffiche['texte'] }};">
                 <span style="background:{{ $operateurAffiche['border'] }};padding:1px 6px;border-radius:3px;font-size:10px;color:{{ $operateurAffiche['chip_texte'] }};">{{ $operateurAffiche['court'] }}</span>
@@ -54,47 +53,47 @@
                       style="font-size:18px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;">
                     smartphone
                 </span>
-                Consultez votre téléphone {{ $operateurAffiche['court'] }} maintenant
+                {{ __('payeur.pa_attente_phone', ['operateur' => $operateurAffiche['court']]) }}
             </div>
             <div id="msg-attente-detail" style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;">
-                Une notification va apparaître sur votre téléphone.<br>
-                <strong>Si rien n'arrive dans 30 secondes</strong>, tapez
+                {!! __('payeur.pa_attente_notif') !!}<br>
+                <strong>{{ __('payeur.pa_attente_si30s') }}</strong>
                 <span style="background:#f0fdf4;color:#085041;font-weight:700;
                              padding:2px 8px;border-radius:4px;font-family:monospace;">*126#</span>
-                pour ouvrir votre menu Mobile Money — une demande de paiement en attente doit y apparaître.
-                <strong>Ne rejetez rien par erreur</strong> : validez uniquement si vous reconnaissez ce montant et cette référence.
+                {!! __('payeur.pa_attente_menu') !!}
+                <strong>{{ __('payeur.pa_attente_rejetez') }}</strong> {{ __('payeur.pa_attente_validez') }}
             </div>
             <div id="msg-attente-prolonge" style="display:none;background:#FEF9EC;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#854F0B;line-height:1.6;text-align:left;">
-                Cela prend plus de temps que prévu — c'est normal, certaines confirmations Mobile Money sont plus lentes. Nous continuons à vérifier automatiquement, ne fermez pas cette page. Si le prélèvement a bien eu lieu sur votre compte mais que rien ne se passe ici après plusieurs minutes, contactez le support avec la référence <code>{{ $paiement->reference }}</code>.
+                {!! __('payeur.pa_attente_prolonge', ['ref' => $paiement->reference]) !!}
             </div>
-            <div style="font-size:11px;color:#aaa;">Vérification automatique en cours…</div>
+            <div style="font-size:11px;color:#aaa;">{{ __('payeur.pa_attente_verification') }}</div>
             <button type="button" onclick="verifierMaintenant()" id="btn-verifier-maintenant"
                     style="display:none;margin-top:12px;background:transparent;border:1px solid #ddd;color:#555;font-size:12px;padding:8px 16px;border-radius:8px;cursor:pointer;">
-                Vérifier maintenant
+                {{ __('payeur.pa_attente_verifier_btn') }}
             </button>
         </div>
 
         <div id="msg-valide" style="display:none;">
-            <div style="font-size:17px;font-weight:700;color:#085041;margin-bottom:8px;">Paiement confirmé !</div>
+            <div style="font-size:17px;font-weight:700;color:#085041;margin-bottom:8px;">{{ __('payeur.pa_valide_titre') }}</div>
             <div style="font-size:13px;color:#888;margin-bottom:20px;">
-                Votre paiement de <strong>{{ number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' ') }} FCFA</strong> a bien été reçu.
+                {!! __('payeur.pa_valide_confirme', ['montant' => number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' ')]) !!}
             </div>
             <a href="{{ route('payeur.dashboard') }}" class="btn-p" style="width:auto;padding:10px 24px;">
-                Retour au tableau de bord
+                {{ __('payeur.pa_retour_dashboard') }}
             </a>
         </div>
 
         <div id="msg-echec" style="display:none;">
-            <div style="font-size:17px;font-weight:700;color:var(--ep-red);margin-bottom:8px;">Paiement échoué</div>
+            <div style="font-size:17px;font-weight:700;color:var(--ep-red);margin-bottom:8px;">{{ __('payeur.pa_echec_titre') }}</div>
             <div id="msg-echec-detail" style="font-size:13px;color:#888;margin-bottom:20px;">
-                Le paiement n'a pas pu être confirmé.
+                {{ __('payeur.pa_echec_detail') }}
             </div>
             <a href="{{ route('payeur.paiement.show', $paiement->fraisApprenant) }}"
                class="btn-p" style="width:auto;padding:10px 24px;margin-bottom:10px;display:inline-block;">
-                Réessayer
+                {{ __('payeur.pa_reesayer') }}
             </a><br>
             <a href="{{ route('payeur.dashboard') }}" class="btn-o" style="width:auto;padding:10px 24px;">
-                Retour au tableau de bord
+                {{ __('payeur.pa_retour_dashboard') }}
             </a>
         </div>
 
@@ -111,6 +110,12 @@
 
 @push('scripts')
 <script>
+const PAYEUR_L10N = {
+    verifier_btn: @json(__('payeur.pa_attente_verifier_btn')),
+    verification: @json(__('payeur.pa_attente_verification_ellipsis')),
+    fin: @json(__('payeur.pa_attente_fin')),
+};
+
 const statutUrl = "{{ route('payeur.paiement.statut', $paiement) }}";
 
 // Phase 1 : vérification rapide, toutes les 5s, pendant 6 minutes (72 tentatives)
@@ -189,17 +194,14 @@ async function verifier() {
     // automatique mais on NE déclare PAS d'échec — l'utilisateur peut vérifier
     // manuellement ou contacter le support avec la référence.
     passerEnPhase2();
-    document.getElementById('msg-attente-detail').innerHTML =
-        "Nous n'avons toujours pas reçu de confirmation définitive de l'opérateur. " +
-        "Si le prélèvement a bien eu lieu sur votre compte, contactez le support avec la référence ci-dessus. " +
-        "Sinon, cliquez sur « Vérifier maintenant » ou revenez plus tard.";
+    document.getElementById('msg-attente-detail').textContent = PAYEUR_L10N.fin;
 }
 
 async function verifierMaintenant() {
     if (verificationManuelleEnCours) return;
     verificationManuelleEnCours = true;
     const btn = document.getElementById('btn-verifier-maintenant');
-    btn.textContent = 'Vérification…';
+    btn.textContent = PAYEUR_L10N.verification;
     btn.disabled = true;
 
     const data = await appelStatut();
@@ -211,7 +213,7 @@ async function verifierMaintenant() {
         if (detail && data.message) detail.textContent = data.message;
         afficher('echec');
     } else {
-        btn.textContent = 'Vérifier maintenant';
+        btn.textContent = PAYEUR_L10N.verifier_btn;
         btn.disabled = false;
         verificationManuelleEnCours = false;
     }

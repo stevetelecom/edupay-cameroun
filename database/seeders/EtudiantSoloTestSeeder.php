@@ -33,7 +33,7 @@ class EtudiantSoloTestSeeder extends Seeder
                 'region'            => 'littoral',
                 'ville'             => 'Douala',
                 'quartier'          => 'Bonamoussadi',
-                'telephone'         => '233401234',
+                'telephone'         => '699401234',
                 'email'             => 'contact@univ-douala.cm',
                 'statut'            => 'actif',
             ]

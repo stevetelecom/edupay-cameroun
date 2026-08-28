@@ -23,6 +23,16 @@ class ParametreController extends Controller
     {
         $etablissement = Auth::user()->etablissement;
 
+        // Normaliser les numéros AVANT validation (accepte +237, espaces, tirets en saisie)
+        $normaliserTelephoneCm = function (string $value): string {
+            $digits = preg_replace('/\D/', '', $value);
+            return strlen($digits) > 9 ? substr($digits, -9) : $digits;
+        };
+        $request->merge([
+            'telephone'               => $normaliserTelephoneCm((string) $request->input('telephone', '')),
+            'numero_momo_reversement' => $normaliserTelephoneCm((string) $request->input('numero_momo_reversement', '')),
+        ]);
+
         $validated = $request->validate([
             'nom'                    => ['required', 'string', 'max:150'],
             'type'                   => ['required', Rule::in(['maternelle','primaire','secondaire','universitaire','formation'])],
@@ -33,14 +43,18 @@ class ParametreController extends Controller
             'ville'                  => ['required', 'string', 'max:100'],
             'quartier'               => ['nullable', 'string', 'max:100'],
             'boite_postale'          => ['nullable', 'string', 'max:50'],
-            'telephone'              => ['required', 'string', 'max:20'],
+            // Téléphone établissement : mobile (6) OU fixe/Camtel (2 ou 3), 9 chiffres
+            'telephone'              => ['required', 'regex:/^[236]\d{8}$/'],
             'email'                  => ['required', 'email', 'max:150'],
             'site_web'               => ['nullable', 'url', 'max:200'],
             'description'            => ['nullable', 'string', 'max:1000'],
             'mobile_money_principal'      => ['required', Rule::in(['mtn', 'orange'])],
-            'numero_momo_reversement'     => ['required', 'string', 'max:20'],
+            'numero_momo_reversement'     => ['required', 'regex:/^6\d{8}$/'],
             'logo'                   => ['nullable', 'file', 'mimes:png,jpg,jpeg,svg', 'max:2048'],
             'document_agrement'      => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+        ], [
+            'telephone.regex'               => 'Numéro invalide. Format attendu : 6XXXXXXXX (mobile) ou 2XXXXXXXX / 3XXXXXXXX (fixe/Camtel).',
+            'numero_momo_reversement.regex' => 'Numéro Mobile Money invalide. Format attendu : 6XXXXXXXX.',
         ]);
 
         if ($request->hasFile('logo')) {

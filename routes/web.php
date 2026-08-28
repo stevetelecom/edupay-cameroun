@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Auth;
 */
 
 Route::get('/', [LandingController::class, 'index'])->name('landing');
+
+// Bascule de langue (FR / EN)
+Route::post('/langue', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');
 Route::get('/a-propos', [LandingController::class, 'about'])->name('about');
 Route::get('/temoignages', [LandingController::class, 'temoignages'])->name('temoignages');
 Route::get('/tarifs', [LandingController::class, 'tarifs'])->name('tarifs');
@@ -57,6 +60,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/inscription/etablissement/step3',      [RegisterEcolController::class, 'storeStep3'])->name('register.ecole.step3.post');
     Route::get('/inscription/etablissement/validation',  [RegisterEcolController::class, 'validation'])->name('register.ecole.validation');
     Route::post('/inscription/etablissement/validation', [RegisterEcolController::class, 'store'])->name('register.ecole.store');
+
+    // Sauvegarder les données d'une étape et revenir à la précédente (boutons "← Retour")
+    Route::post('/inscription/etablissement/save-back/{step}', [RegisterEcolController::class, 'saveAndBack'])
+        ->where('step', '[1-4]')
+        ->name('register.ecole.back');
 });
 
 // Déconnexion

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -217,6 +217,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       .nav-desk{display:none;}
       .nav-burger{display:flex;}
     }
+
+    /* ══ TOGGLE LANGUE ══ */
+    .lang-toggle{position:relative;display:inline-flex;align-items:center;}
+    .lang-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);
+              border:1px solid rgba(255,255,255,.2);border-radius:20px;
+              padding:6px 12px;cursor:pointer;font-size:12px;font-weight:500;
+              color:#fff;transition:all .15s;}
+    .lang-btn:hover{background:rgba(255,255,255,.18);}
+    .lang-btn svg{width:14px;height:14px;flex-shrink:0;}
+    .lang-dropdown{position:absolute;top:calc(100% + 6px);right:0;
+                   background:#fff;border-radius:10px;
+                   box-shadow:0 8px 24px rgba(0,0,0,.15);
+                   border:1px solid #eee;min-width:120px;
+                   display:none;z-index:999;overflow:hidden;}
+    .lang-dropdown.open{display:block;}
+    .lang-option{display:flex;align-items:center;gap:8px;
+                 padding:10px 14px;font-size:13px;color:#333;
+                 cursor:pointer;transition:background .12s;}
+    .lang-option:hover{background:#f5f5f5;}
+    .lang-option.active{background:var(--ep-teal-lt);color:#085041;font-weight:600;}
+    .lang-flag{font-size:16px;}
+    /* ══ FIN TOGGLE LANGUE ══ */
     /* ══ FIN NAVBAR ══ */
 </style>
   <link rel="stylesheet" href="{{ asset('css/scroll-reveal.css') }}">
@@ -228,6 +250,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
+
 
 {{-- ══ TOASTS ══ --}}
 <div class="toast-wrap" id="toast-wrap">
@@ -257,6 +280,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
 
 
+
+
+// ── Toggle langue ──
+function toggleLangDropdown() {
+    var d = document.getElementById('lang-dropdown');
+    if (d) d.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+    var widget = document.getElementById('lang-widget');
+    if (widget && !widget.contains(e.target)) {
+        var d = document.getElementById('lang-dropdown');
+        if (d) d.classList.remove('open');
+    }
+});
 
 // ── Navbar mobile ──
 function toggleNav(){

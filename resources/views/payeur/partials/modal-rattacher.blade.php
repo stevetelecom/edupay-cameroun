@@ -2,7 +2,7 @@
   <div class="ep-modal ep-modal-lg">
     <div class="ep-modal-head">
       <h3>
-        {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? 'Me rattacher à un établissement' : 'Rattacher un enfant / étudiant' }}
+        {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? __('payeur.rattacher_modal_titre_solo') : __('payeur.rattacher_modal_titre') }}
       </h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-rattacher')">×</button>
     </div>
@@ -11,26 +11,26 @@
       {{-- ETAPE 1 : Recherche établissement --}}
       <div id="m-step1">
         <div style="font-size:11px;font-weight:600;color:#0D9E75;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">
-          Étape 1 — Choisir l'établissement
+          {{ __('payeur.m_etape1_titre') }}
         </div>
 
         {{-- Filtres --}}
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <div style="position:relative;flex:1;">
             <input type="text" id="m-etab-search"
-                   placeholder="Nom de l'établissement…"
+                   placeholder="{{ __('payeur.m_nom_etablissement') }}…"
                    style="width:100%;padding:9px 12px 9px 34px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
                    oninput="mFiltrerEtabs()"
                  onfocus="document.getElementById('m-etab-liste').style.display='block'" />
             <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#aaa;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </div>
           <input type="text" id="m-etab-ville"
-                 placeholder="Ville…"
+                 placeholder="{{ __('payeur.m_ville') }}…"
                  style="width:130px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"
                  oninput="mFiltrerEtabs()"
                  onfocus="document.getElementById('m-etab-liste').style.display='block'" />
           <input type="text" id="m-etab-code"
-                 placeholder="Code…"
+                 placeholder="{{ __('payeur.m_code') }}…"
                  style="width:110px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"
                  oninput="mFiltrerEtabs()"
                  onfocus="document.getElementById('m-etab-liste').style.display='block'" />
@@ -38,7 +38,7 @@
                   style="background:var(--ep-teal);color:#fff;border:none;padding:9px 16px;
                          border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="margin-right:4px;vertical-align:middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            Rechercher
+            {{ __('payeur.m_rechercher') }}
           </button>
         </div>
 
@@ -87,7 +87,7 @@
             </div>
           @endforeach
           @if(($etablissements ?? collect())->isEmpty())
-            <div style="padding:20px;text-align:center;color:#aaa;font-size:13px;">Aucun établissement partenaire disponible.</div>
+            <div style="padding:20px;text-align:center;color:#aaa;font-size:13px;">{{ __('payeur.m_aucun_etab_partenaire') }}</div>
           @endif
         </div>
       </div>
@@ -96,11 +96,11 @@
       <div id="m-step2" style="display:none;margin-top:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <div style="font-size:11px;font-weight:600;color:#0D9E75;text-transform:uppercase;letter-spacing:.05em;">
-            Étape 2 — Trouver dans l'annuaire
+            {{ __('payeur.m_etape2_titre') }}
           </div>
           <button type="button" onclick="mReinitEtab()"
                   style="font-size:11px;color:#888;background:none;border:none;cursor:pointer;text-decoration:underline;">
-            Changer d'établissement
+            {{ __('payeur.m_changer_etablissement') }}
           </button>
         </div>
 
@@ -119,7 +119,7 @@
         {{-- Recherche dans annuaire --}}
         <div style="position:relative;margin-bottom:10px;">
           <input type="text" id="m-apprenant-search"
-                 placeholder="Chercher par nom, prénom ou classe…"
+                 placeholder="{{ __('payeur.m_chercher_annuaire') }}…"
                  style="width:100%;padding:9px 12px 9px 34px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
                  oninput="mRechercherApprenant(this.value)" />
           <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#aaa;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -128,7 +128,7 @@
         <div id="m-apprenant-liste"
              style="border:1px solid #e0e0e0;border-radius:8px;background:#fff;max-height:160px;overflow-y:auto;margin-bottom:12px;">
           <div style="padding:16px;text-align:center;color:#aaa;font-size:13px;">
-            Tapez un nom pour rechercher dans l'annuaire…
+            {{ __('payeur.m_tapez_nom') }}…
           </div>
         </div>
 
@@ -159,20 +159,20 @@
           <div id="m-saisie-manuelle" style="display:none;">
             <div style="font-size:12px;color:#888;margin-bottom:10px;padding:8px 12px;background:#f9fafb;border-radius:6px;">
               @if(in_array(Auth::user()->profil, ['eleve','etudiant']))
-                Pas trouvé dans l'annuaire ? Remplissez ci-dessous — votre demande sera validée par l'établissement.
+                {{ __('payeur.m_pas_trouve_solo') }}
               @else
-                Pas trouvé dans l'annuaire ? Saisissez les informations de l'enfant manuellement.
+                {{ __('payeur.m_pas_trouve_parent') }}
               @endif
             </div>
 
             <div class="g2" style="margin-bottom:10px;">
               <div>
-                <div class="lbl">Prénom {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? '' : "de l'enfant" }} *</div>
+                <div class="lbl">{{ __('messages.prenom') }} {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? '' : __('payeur.m_de_enfant') }} *</div>
                 <input class="inp" id="m-prenom" name="prenom_apprenant"
                        placeholder="{{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? Auth::user()->prenom : 'Brice' }}" />
               </div>
               <div>
-                <div class="lbl">Nom *</div>
+                <div class="lbl">{{ __('messages.nom') }} *</div>
                 <input class="inp" id="m-nom" name="nom_apprenant"
                        placeholder="{{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? Auth::user()->nom : 'FONO' }}" />
               </div>
@@ -180,12 +180,12 @@
 
             <div class="g2">
               <div>
-                <div class="lbl">{{ Auth::user()->profil === 'etudiant' ? 'Filière / Niveau *' : 'Classe *' }}</div>
+                <div class="lbl">{{ Auth::user()->profil === 'etudiant' ? __('payeur.m_filiere_niveau') : __('payeur.m_classe_obligatoire') }}</div>
                 <input class="inp" id="m-classe" name="classe"
-                       placeholder="{{ Auth::user()->profil === 'etudiant' ? 'Ex : Licence 2 GSI' : 'Ex : 3ème A' }}" />
+                       placeholder="{{ Auth::user()->profil === 'etudiant' ? __('payeur.m_ex_filiere') : __('payeur.m_ex_classe') }}" />
               </div>
               <div>
-                <div class="lbl">Matricule</div>
+                <div class="lbl">{{ __('payeur.matricule') }}</div>
                 <input class="inp" id="m-mat-display" name="matricule_display" placeholder="EP-1184" readonly
                        style="background:#f5f5f5;" />
               </div>
@@ -200,10 +200,10 @@
     </div>
     <div class="ep-modal-foot">
       <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
-              onclick="epModal.close('modal-rattacher')">Annuler</button>
+              onclick="epModal.close('modal-rattacher')">{{ __('messages.annuler') }}</button>
       <button type="button" class="btn-p" style="width:auto;padding:8px 20px;" id="m-btn-submit"
               onclick="mSoumettre()">
-        {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? 'Me rattacher →' : 'Rattacher →' }}
+        {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? __('payeur.me_rattacher').' →' : __('payeur.rattacher').' →' }}
       </button>
     </div>
   </div>

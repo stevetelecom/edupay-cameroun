@@ -1,21 +1,26 @@
 @extends('layouts.etablissement')
 
-@section('title', 'Impayés')
+@section('title', __('etablissement.impaye'))
 
 @section('content')
 
+<script>
+    window.EP_LANG = window.EP_LANG || {};
+    window.EP_LANG.confirm_relance_sms = {!! json_encode(__('etablissement.confirm_relance_sms')) !!};
+</script>
+
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
     <div>
-        <div style="font-size:17px;font-weight:700;">Dossiers impayés</div>
+        <div style="font-size:17px;font-weight:700;">{{ __('etablissement.dossiers_impayes') }}</div>
         <div style="font-size:12px;color:#888;">
-            {{ $fraisImpayes->total() }} dossier(s) en attente · Relances automatiques J‑5 actives (E07)
+            {{ __('etablissement.dossiers_attente', ['count' => $fraisImpayes->total()]) }}
         </div>
     </div>
     <form method="POST" action="{{ route('etablissement.impayes.relancer') }}">
         @csrf
         <button type="submit" class="btn-p" style="width:auto;"
-                onclick="return confirm('Envoyer un SMS de relance à tous les parents concernés ?')">
-            📱 Relancer tous par SMS
+                onclick="return confirm(window.EP_LANG.confirm_relance_sms)">
+            📱 {{ __('etablissement.relancer_tous_sms') }}
         </button>
     </form>
 </div>
@@ -26,15 +31,15 @@
         <div class="kval" style="color:var(--ep-red);">
             {{ number_format($totalImpaye ?? 0, 0, ',', ' ') }}
         </div>
-        <div class="klbl">FCFA total impayé</div>
+        <div class="klbl">{{ __('etablissement.fcfa_total_impaye') }}</div>
     </div>
     <div class="kpi">
         <div class="kval">{{ $fraisImpayes->total() }}</div>
-        <div class="klbl">Dossiers concernés</div>
+        <div class="klbl">{{ __('etablissement.dossiers_concernes') }}</div>
     </div>
     <div class="kpi">
         <div class="kval" style="color:var(--ep-gold);">{{ $tauxRecouvrement ?? 0 }}%</div>
-        <div class="klbl">Taux de recouvrement</div>
+        <div class="klbl">{{ __('etablissement.taux_recouvrement') }}</div>
     </div>
 </div>
 
@@ -42,9 +47,9 @@
 <form method="GET" action="{{ route('etablissement.impayes.index') }}"
       class="epcard" style="margin-bottom:16px;display:flex;gap:10px;align-items:flex-end;">
     <div style="flex:1;">
-        <div class="lbl">Filtrer par classe</div>
+        <div class="lbl">{{ __('etablissement.filtrer_classe2') }}</div>
         <select name="classe" class="select" style="margin-bottom:0;">
-            <option value="">Toutes les classes</option>
+            <option value="">{{ __('etablissement.toutes_classes') }}</option>
             @foreach($classes as $classe)
                 <option value="{{ $classe }}" @selected(request('classe') === $classe)>
                     {{ $classe }}
@@ -52,10 +57,10 @@
             @endforeach
         </select>
     </div>
-    <button type="submit" class="btn-p" style="width:auto;padding:10px 20px;">Filtrer</button>
+    <button type="submit" class="btn-p" style="width:auto;padding:10px 20px;">{{ __('etablissement.filtrer') }}</button>
     @if(request('classe'))
         <a href="{{ route('etablissement.impayes.index') }}"
-           class="btn-o" style="width:auto;padding:10px 16px;">Réinitialiser</a>
+           class="btn-o" style="width:auto;padding:10px 16px;">{{ __('etablissement.reinitialiser') }}</a>
     @endif
 </form>
 
@@ -64,14 +69,14 @@
     <table class="ep-table">
         <thead>
             <tr>
-                <th>Apprenant</th>
-                <th>Classe</th>
-                <th>Catégorie</th>
-                <th>Total</th>
-                <th>Reste à payer</th>
-                <th>Statut</th>
-                <th>Échéance</th>
-                <th style="text-align:right;">Actions</th>
+                <th>{{ __('etablissement.apprenant_col') }}</th>
+                <th>{{ __('etablissement.classe') }}</th>
+                <th>{{ __('etablissement.categorie') }}</th>
+                <th>{{ __('etablissement.total') }}</th>
+                <th>{{ __('etablissement.reste_a_payer') }}</th>
+                <th>{{ __('etablissement.statut') }}</th>
+                <th>{{ __('etablissement.echeance_col') }}</th>
+                <th style="text-align:right;">{{ __('etablissement.actions') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -99,7 +104,7 @@
                 </td>
                 <td>
                     <span class="pill {{ $frais->statut === 'partiel' ? 'pa' : 'pr' }}">
-                        {{ $frais->statut === 'partiel' ? 'Partiel' : 'Impayé' }}
+                        {{ $frais->statut === 'partiel' ? __('etablissement.partiel') : __('etablissement.impaye') }}
                     </span>
                 </td>
                 <td>
@@ -110,7 +115,7 @@
                         @if($joursRestants !== null && $joursRestants <= 5 && $joursRestants >= 0)
                             <span class="pill pa" style="font-size:10px;">J‑{{ $joursRestants }}</span>
                         @elseif($joursRestants !== null && $joursRestants < 0)
-                            <span class="pill pr" style="font-size:10px;">Dépassée</span>
+                            <span class="pill pr" style="font-size:10px;">{{ __('etablissement.depassee') }}</span>
                         @endif
                     @else
                         <span style="color:#aaa;font-size:11px;">—</span>
@@ -121,7 +126,7 @@
                         <a href="{{ route('etablissement.apprenants.show', $frais->apprenant) }}"
                            style="font-size:11px;color:var(--ep-teal);text-decoration:none;
                                   border:1px solid var(--ep-teal);padding:3px 10px;border-radius:20px;">
-                            Dossier
+                            {{ __('etablissement.dossier') }}
                         </a>
                         <form method="POST"
                               action="{{ route('etablissement.impayes.relancer.apprenant', $frais->apprenant) }}">
@@ -130,7 +135,7 @@
                                     style="font-size:11px;color:#888;background:none;
                                            border:1px solid #ddd;padding:3px 10px;
                                            border-radius:20px;cursor:pointer;"
-                                    title="Envoyer un SMS de relance au parent">
+                                    title="{{ __('etablissement.sms_relance_title') }}">
                                 📱 SMS
                             </button>
                         </form>
@@ -140,7 +145,7 @@
             @empty
             <tr>
                 <td colspan="8" style="text-align:center;color:#999;padding:30px 0;">
-                    Aucun impayé — tous les dossiers sont à jour 🎉
+                    {{ __('etablissement.aucun_impaye') }}
                 </td>
             </tr>
             @endforelse

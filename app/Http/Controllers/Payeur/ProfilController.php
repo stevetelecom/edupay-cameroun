@@ -7,10 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\TelephoneCamerounais;
 use Illuminate\View\View;
 
 class ProfilController extends Controller
 {
+    use TelephoneCamerounais;
+
     public function index(): View
     {
         return view('payeur.profil', [
@@ -22,13 +25,18 @@ class ProfilController extends Controller
     {
         $user = Auth::user();
 
+        if ($request->filled('telephone')) {
+            $request->merge(['telephone' => $this->normaliserTelephoneCm((string) $request->input('telephone'))]);
+        }
+
         $validated = $request->validate([
             'prenom'    => 'required|string|max:100',
             'nom'       => 'required|string|max:100',
-            'telephone' => 'required|string|max:20|unique:users,telephone,' . $user->id,
+            'telephone' => ['required', 'regex:/^6\d{8}$/', 'unique:users,telephone,' . $user->id],
             'email'     => 'nullable|email|max:150|unique:users,email,' . $user->id,
         ], [
             'telephone.unique' => 'Ce numéro est déjà utilisé par un autre compte.',
+            'telephone.regex'  => 'Numéro invalide. Format attendu : 6XXXXXXXX (9 chiffres, mobile camerounais).',
             'email.unique'     => 'Cette adresse email est déjà utilisée par un autre compte.',
         ]);
 

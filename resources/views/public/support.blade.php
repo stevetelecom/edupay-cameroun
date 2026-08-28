@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Support dédié — EduPay Cameroun')
+@section('title', __('public.support_title'))
 
 @section('content')
 
@@ -8,50 +8,50 @@
 
 <div class="hero-band">
   <div style="padding:36px 28px 28px;text-align:center;background:#0B2545">
-    <div class="hero-tag" style="justify-content:center;">Support dédié</div>
-    <div style="font-size:28px;font-weight:700;color:#fff;margin:10px 0;line-height:1.3;">Nous sommes <em style="font-style:normal;color:#5DCAA5;">là pour vous aider</em></div>
-    <div style="font-size:14px;color:rgba(255,255,255,.55);max-width:520px;margin:0 auto;line-height:1.7;">Retrouvez les réponses aux questions les plus fréquentes, ou contactez directement notre équipe.</div>
+    <div class="hero-tag" style="justify-content:center;">{{ __('public.support_hero_tag') }}</div>
+    <div style="font-size:28px;font-weight:700;color:#fff;margin:10px 0;line-height:1.3;">{!! __('public.support_hero_h1') !!}</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.55);max-width:520px;margin:0 auto;line-height:1.7;">{{ __('public.support_hero_sub') }}</div>
   </div>
 </div>
 
 <div class="ep-body2">
 
-  <div class="seclbl" style="margin-top:4px;">Questions fréquentes</div>
+  <div class="seclbl" style="margin-top:4px;">{{ __('public.questions_frequentes') }}</div>
   <div style="display:grid;gap:10px;margin-bottom:24px;">
 
     <div class="epcard">
-      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">Combien de temps pour activer mon compte établissement ?</div>
-      <div style="font-size:13px;color:#666;line-height:1.7;">Après soumission de votre dossier d'inscription, l'équipe EduPay étudie les informations et l'agrément fourni sous 24 à 48h. Vous recevez un email de confirmation dès l'activation.</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">{{ __('public.faq_1_q') }}</div>
+      <div style="font-size:13px;color:#666;line-height:1.7;">{{ __('public.faq_1_a') }}</div>
     </div>
 
     <div class="epcard">
-      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">Quels moyens de paiement sont disponibles pour les familles ?</div>
-      <div style="font-size:13px;color:#666;line-height:1.7;">MTN Mobile Money et Orange Money, avec confirmation USSD directement sur le téléphone du payeur. Le paiement peut être intégral ou fractionné en plusieurs tranches selon l'échéancier défini par l'établissement.</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">{{ __('public.faq_2_q') }}</div>
+      <div style="font-size:13px;color:#666;line-height:1.7;">{{ __('public.faq_2_a') }}</div>
     </div>
 
     <div class="epcard">
-      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">Comment ajouter mes apprenants sur la plateforme ?</div>
-      <div style="font-size:13px;color:#666;line-height:1.7;">Depuis le module Apprenants du back-office, ajoutez-les un par un ou importez toute votre liste en une fois via un fichier CSV/Excel avec le modèle fourni.</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">{{ __('public.faq_3_q') }}</div>
+      <div style="font-size:13px;color:#666;line-height:1.7;">{{ __('public.faq_3_a') }}</div>
     </div>
 
     <div class="epcard">
-      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">Que faire si le paiement d'un parent a échoué ?</div>
-      <div style="font-size:13px;color:#666;line-height:1.7;">Le parent peut réessayer directement depuis son espace. Si le prélèvement a bien eu lieu sans confirmation côté EduPay, contactez notre support avec la référence de la transaction affichée dans son historique.</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">{{ __('public.faq_4_q') }}</div>
+      <div style="font-size:13px;color:#666;line-height:1.7;">{{ __('public.faq_4_a') }}</div>
     </div>
 
     <div class="epcard">
-      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">Comment obtenir un reçu ou une attestation de paiement ?</div>
-      <div style="font-size:13px;color:#666;line-height:1.7;">Chaque paiement validé génère automatiquement un reçu PDF téléchargeable depuis l'espace du payeur, envoyé également par email et SMS.</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">{{ __('public.faq_5_q') }}</div>
+      <div style="font-size:13px;color:#666;line-height:1.7;">{{ __('public.faq_5_a') }}</div>
     </div>
 
     <div class="epcard">
-      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">Puis-je gérer plusieurs sites d'un même groupe scolaire ?</div>
-      <div style="font-size:13px;color:#666;line-height:1.7;">Oui, le module Multi-sites permet une administration centralisée de plusieurs établissements rattachés à un même groupe.</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:5px;color:#0B2545;">{{ __('public.faq_6_q') }}</div>
+      <div style="font-size:13px;color:#666;line-height:1.7;">{{ __('public.faq_6_a') }}</div>
     </div>
 
   </div>
 
-  <div class="seclbl">Contactez-nous directement</div>
+  <div class="seclbl">{{ __('public.contactez_directement') }}</div>
   <div class="g2" style="margin-bottom:8px;">
 
     <div style="background:#E0F5EE;border-radius:16px;padding:18px;display:flex;gap:14px;align-items:flex-start;">
@@ -59,8 +59,8 @@
         <span class="material-symbols-outlined">place</span>
       </span>
       <div>
-        <div style="font-size:13px;font-weight:700;color:#0B2545;">Adresse</div>
-        <div style="font-size:13px;color:#555;line-height:1.6;">Yaoundé, Cameroun<br>Quartier Minboman</div>
+        <div style="font-size:13px;font-weight:700;color:#0B2545;">{{ __('public.adresse') }}</div>
+        <div style="font-size:13px;color:#555;line-height:1.6;">{{ __('public.adresse_val') }}</div>
       </div>
     </div>
 
@@ -69,7 +69,7 @@
         <span class="material-symbols-outlined">call</span>
       </span>
       <div>
-        <div style="font-size:13px;font-weight:700;color:#0B2545;">Téléphone</div>
+        <div style="font-size:13px;font-weight:700;color:#0B2545;">{{ __('public.telephone_label') }}</div>
         <div style="font-size:13px;color:#555;line-height:1.6;">+237 654 862 989<br>+237 688 462 229</div>
       </div>
     </div>
@@ -79,8 +79,8 @@
         <span class="material-symbols-outlined">email</span>
       </span>
       <div>
-        <div style="font-size:13px;font-weight:700;color:#0B2545;">Email</div>
-        <div style="font-size:13px;color:#555;line-height:1.6;">contact@mekontso.gsi2026.com</div>
+        <div style="font-size:13px;font-weight:700;color:#0B2545;">{{ __('public.email_label') }}</div>
+        <div style="font-size:13px;color:#555;line-height:1.6;">{{ __('public.email_val') }}</div>
       </div>
     </div>
 
@@ -89,27 +89,27 @@
         <span class="material-symbols-outlined">schedule</span>
       </span>
       <div>
-        <div style="font-size:13px;font-weight:700;color:#0B2545;">Disponibilité</div>
-        <div style="font-size:13px;color:#555;line-height:1.6;">Lundi – Vendredi, 8h – 18h</div>
+        <div style="font-size:13px;font-weight:700;color:#0B2545;">{{ __('public.disponibilite') }}</div>
+        <div style="font-size:13px;color:#555;line-height:1.6;">{{ __('public.disponibilite_val') }}</div>
       </div>
     </div>
 
   </div>
 
   <div style="text-align:center;margin-top:20px;">
-    <a href="{{ route('contact') }}" style="background:#0D9E75;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:12px 26px;border-radius:10px;display:inline-block;">Envoyer un message →</a>
+    <a href="{{ route('contact') }}" style="background:#0D9E75;color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:12px 26px;border-radius:10px;display:inline-block;">{{ __('public.envoyer_un_message') }} →</a>
   </div>
 
 </div>
 
 <div class="ep-footer">
   <div class="footer-grid">
-    <div><div class="footer-logo" style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>EduPay Cameroun</div><div class="footer-desc">La première plateforme de paiement scolaire made in Cameroon.</div><div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div></div>
-    <div><div class="footer-col-title">Produit</div><a class="footer-link" href="{{ route('landing') }}">Accueil</a><a class="footer-link" href="{{ route('temoignages') }}">Témoignages</a></div>
-    <div><div class="footer-col-title">Établissements</div><a class="footer-link" href="{{ route('register.ecole.step1') }}">Inscription</a><a class="footer-link" href="{{ route('guide') }}">Guide</a></div>
-    <div><div class="footer-col-title">Légal</div><a class="footer-link" href="{{ route('confidentialite') }}">Confidentialité</a><a class="footer-link" href="{{ route('cgu') }}">CGU</a></div>
+    <div><div class="footer-logo" style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>EduPay Cameroun</div><div class="footer-desc">{{ __('public.footer_school_brief') }}</div><div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div></div>
+    <div><div class="footer-col-title">{{ __('public.footer_col_produit') }}</div><a class="footer-link" href="{{ route('landing') }}">{{ __('public.footer_accueil') }}</a><a class="footer-link" href="{{ route('temoignages') }}">{{ __('public.footer_temoignages') }}</a></div>
+    <div><div class="footer-col-title">{{ __('public.footer_col_etablissements') }}</div><a class="footer-link" href="{{ route('register.ecole.step1') }}">{{ __('public.footer_inscription') }}</a><a class="footer-link" href="{{ route('guide') }}">{{ __('public.footer_guide') }}</a></div>
+    <div><div class="footer-col-title">{{ __('public.footer_col_legal') }}</div><a class="footer-link" href="{{ route('confidentialite') }}">{{ __('public.footer_confidentialite') }}</a><a class="footer-link" href="{{ route('cgu') }}">CGU</a></div>
   </div>
-  <div class="footer-bottom"><div class="footer-legal">© 2026 EduPay Cameroun — Tous droits réservés</div><div class="footer-socials">
+  <div class="footer-bottom"><div class="footer-legal">{{ __('public.footer_legal') }}</div><div class="footer-socials">
   <a href="#" target="_blank" rel="noopener" class="social-btn" aria-label="LinkedIn" title="LinkedIn" style="background:#0A66C2;border-color:#0A66C2;color:#fff;">
     <i class="fa-brands fa-linkedin-in"></i>
   </a>

@@ -1,0 +1,370 @@
+@extends('layouts.public')
+@section('title', __('auth.register_ecole_title'))
+@section('content')
+<div class="video-bg-container" style="min-height:100vh;display:flex;flex-direction:column;"><video class="video-bg" autoplay muted loop playsinline><source src="{{ asset('videos/hero-payment.mp4') }}" type="video/mp4"></video><div class="video-bg-overlay"></div>
+  <div class="form-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="{{ route('landing') }}" style="background:transparent;color:rgba(255,255,255,.7);border:none;cursor:pointer;padding:0;text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+      <div style="display:flex;align-items:center;gap:9px;"><span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span></div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,.5);">{{ __('auth.deja_inscrit') }} <a href="{{ route('login') }}" style="color:#5DCAA5;">{{ __('auth.acceder_backoffice') }}</a></div>
+  </div>
+
+  <div class="form-body" style="padding-top:28px;">
+    <div class="form-card-wide">
+
+      {{-- Barre 4 étapes --}}
+      <div style="display:flex;align-items:center;margin-bottom:24px;">
+        @foreach ([__('auth.etape_ecole'), __('auth.etape_responsable'), __('auth.etape_configuration'), __('auth.etape_validation')] as $i => $label)
+          @php $n = $i + 1; @endphp
+          <div style="flex:1;text-align:center;">
+            <div style="width:30px;height:30px;border-radius:50%;{{ $step >= $n ? 'background:var(--ep-teal);color:#fff;' : 'border:2px solid #ddd;color:#ccc;' }}display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">{{ $n }}</div>
+            <div style="font-size:11px;font-weight:{{ $step >= $n ? '600' : '400' }};color:{{ $step >= $n ? 'var(--ep-teal)' : '#aaa' }};">{{ $label }}</div>
+          </div>
+          @if (!$loop->last)
+            <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+          @endif
+        @endforeach
+      </div>
+
+      @if (session('error'))
+        <div id="edupay-error-box" style="background:#FEE2E2;color:#7F1D1D;border:2px solid #B91C1C;border-left-width:6px;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;font-weight:500;line-height:1.6;">{{ session('error') }}</div>
+      @endif
+      @if ($errors->any())
+        <div id="edupay-error-box" style="background:#FEE2E2;color:#7F1D1D;border:2px solid #B91C1C;border-left-width:6px;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;font-weight:500;line-height:1.6;">
+          <strong style="font-size:14px;">{{ __('auth.merci_corriger') }}</strong>
+          <ul style="margin:6px 0 0 18px;">
+            @foreach ($errors->all() as $error)
+              <li>
+                @if (str_contains($error, 'Cet email est déjà utilisé') || str_contains($error, 'Ce numéro de téléphone est déjà utilisé'))
+                  {{ rtrim($error, '. ') }} —
+                  <a href="{{ route('login') }}" style="text-decoration:underline;color:#7F1D1D;font-weight:700;">{{ __('auth.connectez_vous_compte') }}</a>.
+                @else
+                  {{ $error }}
+                @endif
+              </li>
+            @endforeach
+          </ul>
+        </div>
+      @endif
+
+      {{-- ───────────────────────── ÉTAPE 1 : ÉTABLISSEMENT ───────────────────────── --}}
+      @if ($step === 1)
+        <div class="form-title">{{ __('auth.infos_etablissement') }}</div>
+        <div class="form-sub">{{ __('auth.infos_etab_sub') }}</div>
+
+        <form method="POST" action="{{ route('register.ecole.step1.post') }}">
+          @csrf
+
+          <div class="form-section">{{ __('auth.identite_etablissement') }}</div>
+          <div class="lbl">{{ __('auth.nom_officiel') }}</div>
+          <input class="inp" name="nom" value="{{ old('nom', $old['nom'] ?? '') }}" placeholder="{{ __('auth.nom_etab_placeholder') }}" required />
+
+          <div class="inp-row">
+            <div>
+              <div class="lbl">{{ __('auth.type_etablissement') }}</div>
+              <select class="select" name="type" required>
+                <option value="">{{ __('auth.choisir') }}</option>
+                @foreach ([
+                  'maternelle' => __('auth.type_maternelle'), 'primaire' => __('auth.type_primaire'),
+                  'college' => __('auth.type_college'), 'lycee_general' => __('auth.type_lycee_general'),
+                  'lycee_technique' => __('auth.type_lycee_technique'), 'universite' => __('auth.type_universite'),
+                  'institut_prive' => __('auth.type_institut_prive'), 'groupe_scolaire' => __('auth.type_groupe_scolaire'),
+                ] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('type', $old['type'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div>
+              <div class="lbl">{{ __('auth.statut_juridique') }}</div>
+              <select class="select" name="statut_juridique" required>
+                <option value="">{{ __('auth.choisir') }}</option>
+                @foreach ([
+                  'public' => __('auth.statut_public'), 'prive_laic' => __('auth.statut_prive_laic'),
+                  'prive_catholique' => __('auth.statut_prive_catholique'),
+                  'prive_protestant' => __('auth.statut_prive_protestant'),
+                  'prive_islamique' => __('auth.statut_prive_islamique'),
+                ] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('statut_juridique', $old['statut_juridique'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
+          <div class="inp-row">
+            <div><div class="lbl">{{ __('auth.numero_agrement') }}</div><input class="inp" name="numero_agrement" value="{{ old('numero_agrement', $old['numero_agrement'] ?? '') }}" placeholder="{{ __('auth.agrement_placeholder') }}" required /></div>
+            <div>
+              <div class="lbl">{{ __('auth.nb_approx_eleves') }}</div>
+              <select class="select" name="nb_eleves">
+                <option value="">{{ __('auth.choisir') }}</option>
+                @foreach ([
+                  'moins_100' => __('auth.nb_moins_100'), '100_300' => __('auth.nb_100_300'),
+                  '300_500' => __('auth.nb_300_500'), '500_1000' => __('auth.nb_500_1000'), 'plus_1000' => __('auth.nb_plus_1000'),
+                ] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('nb_eleves', $old['nb_eleves'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+
+          <div class="form-section">{{ __('auth.localisation') }}</div>
+          <div class="inp-row">
+            <div>
+              <div class="lbl">{{ __('auth.region') }}</div>
+              <select class="select" name="region" required>
+                <option value="">{{ __('auth.choisir_region') }}</option>
+                @foreach ([
+                  'centre' => __('auth.region_centre'), 'littoral' => __('auth.region_littoral'), 'ouest' => __('auth.region_ouest'),
+                  'nord' => __('auth.region_nord'), 'adamaoua' => __('auth.region_adamaoua'), 'est' => __('auth.region_est'),
+                  'sud' => __('auth.region_sud'), 'sud_ouest' => __('auth.region_sud_ouest'), 'nord_ouest' => __('auth.region_nord_ouest'), 'extreme_nord' => __('auth.region_extreme_nord'),
+                ] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('region', $old['region'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div><div class="lbl">{{ __('auth.ville') }}</div><input class="inp" name="ville" value="{{ old('ville', $old['ville'] ?? '') }}" placeholder="{{ __('auth.ville_placeholder') }}" required /></div>
+          </div>
+          <div class="inp-row">
+            <div><div class="lbl">{{ __('auth.quartier') }}</div><input class="inp" name="quartier" value="{{ old('quartier', $old['quartier'] ?? '') }}" placeholder="{{ __('auth.quartier_placeholder') }}" /></div>
+            <div><div class="lbl">{{ __('auth.boite_postale') }}</div><input class="inp" name="boite_postale" value="{{ old('boite_postale', $old['boite_postale'] ?? '') }}" placeholder="{{ __('auth.bp_placeholder') }}" /></div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <a href="{{ route('landing') }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">{{ __('auth.annuler') }}</a>
+            <button type="submit" class="btn-p">{{ __('auth.continuer') }}</button>
+          </div>
+        </form>
+      @endif
+
+      {{-- ───────────────────────── ÉTAPE 2 : RESPONSABLE ───────────────────────── --}}
+      @if ($step === 2)
+        <div class="form-title">{{ __('auth.contact_compte_responsable') }}</div>
+        <div class="form-sub">{{ __('auth.responsable_sub') }}</div>
+
+        <form method="POST" action="{{ route('register.ecole.step2.post') }}">
+          @csrf
+
+          <div class="form-section">{{ __('auth.coordonnees_etab') }}</div>
+          <div class="inp-row">
+            <div><div class="lbl">{{ __('auth.telephone_principal') }}</div><input class="inp phone-input-ecole" name="telephone" value="{{ old('telephone', $old['telephone'] ?? '') }}" placeholder="{{ __('auth.telephone_placeholder') }}" required /></div>
+            <div><div class="lbl">{{ __('auth.email_officiel') }}</div><input class="inp" name="email" value="{{ old('email', $old['email'] ?? '') }}" placeholder="{{ __('auth.email_officiel_placeholder') }}" required /></div>
+          </div>
+          <div class="inp-row">
+            <div><div class="lbl">{{ __('auth.site_web') }}</div><input class="inp" name="site_web" value="{{ old('site_web', $old['site_web'] ?? '') }}" placeholder="{{ __('auth.site_web_placeholder') }}" /></div>
+            <div>
+              <div class="lbl">{{ __('auth.compte_momo_principal') }}</div>
+              <select class="select" name="mobile_money_principal" required>
+                <option value="">{{ __('auth.choisir') }}</option>
+                @foreach (['mtn' => __('auth.mtn_momo'), 'orange' => __('auth.orange_money')] as $value => $label)
+                  <option value="{{ $value }}" @selected(old('mobile_money_principal', $old['mobile_money_principal'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+          <div class="inp-row">
+            <div>
+              <div class="lbl">{{ __('auth.numero_momo_reception') }}</div>
+              <input class="inp phone-input-ecole" name="numero_momo_reversement"
+                     value="{{ old('numero_momo_reversement', $old['numero_momo_reversement'] ?? '') }}"
+                     placeholder="{{ __('auth.telephone_placeholder') }}" required />
+              <div style="font-size:11px;color:#888;margin-top:4px;">
+                {{ __('auth.momo_reversement_note') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">{{ __('auth.compte_admin_principal') }}</div>
+          <div class="inp-row">
+            <div><div class="lbl">{{ __('auth.prenom_directeur') }}</div><input class="inp" name="resp_prenom" value="{{ old('resp_prenom', $old['resp_prenom'] ?? '') }}" placeholder="{{ __('auth.prenom_directeur_placeholder') }}" required /></div>
+            <div><div class="lbl">{{ __('auth.resp_nom') }}</div><input class="inp" name="resp_nom" value="{{ old('resp_nom', $old['resp_nom'] ?? '') }}" placeholder="{{ __('auth.resp_nom_placeholder') }}" required /></div>
+          </div>
+          <div class="inp-row">
+            <div><div class="lbl">{{ __('auth.telephone_responsable') }}</div><input class="inp phone-input-ecole" name="resp_telephone" value="{{ old('resp_telephone', $old['resp_telephone'] ?? '') }}" placeholder="{{ __('auth.telephone_placeholder') }}" required /></div>
+            <div><div class="lbl">{{ __('auth.email_responsable') }}</div><input class="inp" name="resp_email" value="{{ old('resp_email', $old['resp_email'] ?? '') }}" placeholder="{{ __('auth.email_responsable_placeholder') }}" required /></div>
+          </div>
+          <div class="inp-row">
+            <div>
+              <div class="lbl">{{ __('auth.mot_de_passe_etoile') }}</div>
+              <div style="position:relative;">
+                <input class="inp" type="password" name="resp_password" id="resp-pwd" placeholder="{{ __('auth.min_8_caracteres') }}" required style="padding-right:40px;" />
+                <span onclick="togglePwdEcole('resp-pwd')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:#aaa;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </span>
+              </div>
+            </div>
+            <div>
+              <div class="lbl">{{ __('auth.confirmer_mdp_etoile') }}</div>
+              <div style="position:relative;">
+                <input class="inp" type="password" name="resp_password_confirmation" id="resp-pwd2" placeholder="{{ __('auth.repetez_placeholder') }}" required style="padding-right:40px;" />
+                <span onclick="togglePwdEcole('resp-pwd2')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:#aaa;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <button type="submit" formaction="{{ route('register.ecole.back', 2) }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">{{ __('auth.retour') }}</button>
+            <button type="submit" class="btn-p">{{ __('auth.continuer') }}</button>
+          </div>
+        </form>
+      @endif
+
+      {{-- ───────────────────────── ÉTAPE 3 : CONFIGURATION / DOCUMENT ───────────────────────── --}}
+      @if ($step === 3)
+        <div class="form-title">{{ __('auth.document_justificatif') }}</div>
+        <div class="form-sub">{{ __('auth.doc_just_sub') }}</div>
+
+        <form method="POST" action="{{ route('register.ecole.step3.post') }}" enctype="multipart/form-data">
+          @csrf
+
+          <div class="form-section" style="margin-top:0;">{{ __('auth.identite_visuelle') }}</div>
+          <div class="lbl">{{ __('auth.logo_etablissement') }}</div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+            <div id="school-logo-preview" style="width:56px;height:56px;border-radius:var(--radius-md);background:var(--ep-teal-lt);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>
+            </div>
+            <div style="flex:1;">
+              <label for="school-logo-input" style="display:inline-block;background:#fff;border:1px solid #ddd;padding:9px 16px;border-radius:var(--radius-md);font-size:12px;font-weight:600;cursor:pointer;color:#333;">{{ __('auth.choisir_fichier') }}</label>
+              <input type="file" name="logo" id="school-logo-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none;" onchange="previewSchoolLogo(this)" />
+              <div style="font-size:11px;color:#888;margin-top:6px;">{{ __('auth.logo_hint') }}</div>
+            </div>
+          </div>
+
+          <div class="form-section">{{ __('auth.document_justificatif') }}</div>
+          <label style="display:block;border:2px dashed #ddd;border-radius:8px;padding:20px;text-align:center;margin-bottom:12px;cursor:pointer;background:#fafafa;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" style="display:block;margin:0 auto 8px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div style="font-size:13px;font-weight:600;color:#888;">{{ __('auth.deposer_agrement') }}</div>
+            <div style="font-size:11px;color:#aaa;margin-top:4px;">{{ __('auth.doc_format_hint') }}</div>
+            <input type="file" name="document_agrement" accept=".pdf,.jpg,.jpeg,.png" required style="margin-top:10px;" />
+          </label>
+
+          <div class="form-section">{{ __('auth.infos_supplementaires') }}</div>
+          <div class="lbl">{{ __('auth.decrivez_etab') }}</div>
+          <textarea class="textarea" name="description" placeholder="{{ __('auth.description_placeholder') }}">{{ old('description', $old['description'] ?? '') }}</textarea>
+
+          <div style="display:flex;gap:10px;margin-top:10px;">
+            <button type="submit" formaction="{{ route('register.ecole.back', 3) }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">{{ __('auth.retour') }}</button>
+            <button type="submit" class="btn-p">{{ __('auth.continuer') }}</button>
+          </div>
+        </form>
+      @endif
+
+      {{-- ───────────────────────── ÉTAPE 4 : VALIDATION ───────────────────────── --}}
+      @if ($step === 4)
+        @if (session('inscription_reussie'))
+          <div class="form-title">🎉 {{ __('auth.demande_envoyee') }}</div>
+          <div class="form-sub">{!! __('auth.votre_code_etab', ['code' => session('code_etablissement')]) !!}</div>
+          <div style="background:var(--ep-teal-lt);border-radius:8px;padding:14px;margin:16px 0;font-size:13px;color:#085041;">
+            {{ __('auth.verification_24h') }}
+          </div>
+          <a href="{{ route('login') }}" class="btn-p" style="display:inline-block;text-decoration:none;text-align:center;">{{ __('auth.aller_connexion') }}</a>
+        @else
+          <div class="form-title">{{ __('auth.recapitulatif') }}</div>
+          <div class="form-sub">{{ __('auth.recap_sub') }}</div>
+
+          <div style="background:#fafafa;border-radius:8px;padding:16px;margin-bottom:16px;font-size:13px;line-height:1.8;">
+            <strong>{{ __('auth.recap_etablissement') }}</strong> {{ $data['step1']['nom'] ?? '' }}<br>
+            <strong>{{ __('auth.recap_ville') }}</strong> {{ $data['step1']['ville'] ?? '' }}<br>
+            <strong>{{ __('auth.recap_email') }}</strong> {{ $data['step2']['email'] ?? '' }}<br>
+            <strong>{{ __('auth.recap_responsable') }}</strong> {{ ($data['step2']['resp_prenom'] ?? '') . ' ' . ($data['step2']['resp_nom'] ?? '') }}<br>
+            <strong>{{ __('auth.recap_email_responsable') }}</strong> {{ $data['step2']['resp_email'] ?? '' }}
+          </div>
+
+          <form method="POST" action="{{ route('register.ecole.store') }}">
+            @csrf
+            <div class="check-row"><input type="checkbox" name="certification_accepted" value="1" required /><label>{!! __('auth.certifie_infos') !!}</label></div>
+            <div class="check-row"><input type="checkbox" name="cgu_accepted" value="1" required /><label>{!! __('auth.accepte_cg_pp') !!}</label></div>
+
+            <div style="display:flex;gap:10px;margin-top:14px;">
+              <button type="submit" formaction="{{ route('register.ecole.back', 4) }}" class="btn-o" style="flex:0 0 auto;width:auto;padding:10px 20px;">{{ __('auth.retour') }}</button>
+              <button type="submit" class="btn-p">{{ __('auth.soumettre_demande') }}</button>
+            </div>
+          </form>
+        @endif
+      @endif
+
+    </div>
+  </div>
+
+  <div style="background:var(--ep-navy);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;margin-top:24px;">
+    <div style="font-size:11px;color:rgba(255,255,255,.35);">{{ __('auth.footer_onboarding') }}</div>
+    <div style="display:flex;gap:8px;"><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span></div>
+  </div>
+</div>
+
+<script>
+function previewSchoolLogo(input) {
+    const preview = document.getElementById('school-logo-preview');
+    if (!preview || !input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = e => {
+        preview.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;" />`;
+    };
+    reader.readAsDataURL(file);
+}
+
+// Afficher/cacher mot de passe
+function togglePwdEcole(id) {
+  var inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+// Formatage +237 pour téléphone
+document.addEventListener('DOMContentLoaded', function() {
+  const phoneInputsEcole = document.querySelectorAll('.phone-input-ecole');
+  
+  phoneInputsEcole.forEach(function(input) {
+    // Formater au chargement (old('telephone') ou old('resp_telephone'))
+    formatPhoneNumber(input);
+    
+    // Formater à chaque saisie
+    input.addEventListener('input', function(e) {
+      formatPhoneNumber(e.target);
+    });
+  });
+});
+
+function formatPhoneNumber(input) {
+  let value = input.value.trim();
+  
+  // Si c'est un email, ne pas modifier
+  if (value.includes('@')) return;
+  
+  // Enlever tous les caractères non-numériques sauf le +
+  value = value.replace(/[^\d+]/g, '');
+  
+  // Si commence par +237, c'est bon
+  if (value.startsWith('+237')) {
+    input.value = value;
+    return;
+  }
+  
+  // Si commence par 237 sans +, ajouter le +
+  if (value.startsWith('237')) {
+    input.value = '+' + value;
+    return;
+  }
+  
+  // Si commence par 6 ou 7, ajouter +237
+  if (value && /^[67]/.test(value)) {
+    input.value = '+237' + value;
+    return;
+  }
+  
+  // Sinon laisser tel quel
+  input.value = value;
+}
+
+// Faire défiler automatiquement jusqu'au message d'erreur en haut du formulaire
+document.addEventListener('DOMContentLoaded', function () {
+  const errorBox = document.getElementById('edupay-error-box');
+  if (errorBox) {
+    errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+});
+</script>
+@endsection

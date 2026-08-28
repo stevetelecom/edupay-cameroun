@@ -1,4 +1,14 @@
 <script>
+var PAYEUR_L10N = {
+    select_etab: {!! json_encode(__('payeur.alert_select_etab')) !!},
+    select_classe: {!! json_encode(__('payeur.alert_select_classe')) !!},
+    chargement_annuaire: {!! json_encode(__('payeur.l10n_chargement_annuaire')) !!},
+    aucun_resultat: {!! json_encode(__('payeur.l10n_aucun_resultat')) !!},
+    aucun_apprenant: {!! json_encode(__('payeur.l10n_aucun_apprenant')) !!},
+    remplir_champs: {!! json_encode(__('payeur.l10n_remplir_champs')) !!},
+    erreur_connexion: {!! json_encode(__('payeur.l10n_erreur_connexion')) !!},
+    tapez_nom: {!! json_encode(__('payeur.l10n_tapez_nom')) !!}
+};
 function mEscapeHtml(str) {
     if (str === null || str === undefined) return '';
     return String(str)
@@ -95,7 +105,7 @@ function mSoumettre() {
     if (!etabId && !etabNom) {
         document.getElementById('m-etab-search').style.border = '1.5px solid var(--ep-red)';
         document.getElementById('m-etab-search').focus();
-        alert('Veuillez sélectionner un établissement.');
+        alert(PAYEUR_L10N.select_etab);
         return;
     }
 
@@ -112,7 +122,7 @@ function mSoumettre() {
     if (classeInp && !classeInp.value.trim()) {
         classeInp.style.border = '1.5px solid var(--ep-red)';
         classeInp.focus();
-        alert('Veuillez indiquer la classe.');
+        alert(PAYEUR_L10N.select_classe);
         return;
     }
 
@@ -148,7 +158,7 @@ function mRechercherApprenant(q) {
 
     clearTimeout(mAnnuaireTimeout);
     var liste = document.getElementById('m-apprenant-liste');
-    liste.innerHTML = '<div style="padding:12px;text-align:center;color:#888;font-size:12px;">Chargement de l\'annuaire…</div>';
+    liste.innerHTML = '<div style="padding:12px;text-align:center;color:#888;font-size:12px;">' + PAYEUR_L10N.chargement_annuaire + '</div>';
     liste.style.display = 'block';
 
     mAnnuaireTimeout = setTimeout(function() {
@@ -164,12 +174,12 @@ function mRechercherApprenant(q) {
         .then(function(apprenants) {
             if (apprenants.length === 0) {
                 var msgVide = q.trim()
-                    ? 'Aucun résultat pour "<strong>' + mEscapeHtml(q) + '</strong>"'
-                    : 'Aucun apprenant enregistré dans cet établissement pour le moment.';
+                    ? PAYEUR_L10N.aucun_resultat.replace('%%Q%%', mEscapeHtml(q))
+                    : PAYEUR_L10N.aucun_apprenant;
                 liste.innerHTML =
                     '<div style="padding:14px;text-align:center;">' +
                     '<div style="font-size:13px;color:#888;margin-bottom:8px;">' + msgVide + '</div>' +
-                    '<div style="font-size:11px;color:#aaa;">Remplissez les champs ci-dessous pour un pré-rattachement.</div>' +
+                    '<div style="font-size:11px;color:#aaa;">' + PAYEUR_L10N.remplir_champs + '</div>' +
                     '</div>';
                 mAfficherSaisieManuelle(true);
                 return;
@@ -201,7 +211,7 @@ function mRechercherApprenant(q) {
             mAfficherSaisieManuelle(false);
         })
         .catch(function() {
-            liste.innerHTML = '<div style="padding:12px;color:var(--ep-red);font-size:12px;">Erreur de connexion — vérifiez votre réseau.</div>';
+            liste.innerHTML = '<div style="padding:12px;color:var(--ep-red);font-size:12px;">' + PAYEUR_L10N.erreur_connexion + '</div>';
         });
     }, 350);
 }
@@ -268,7 +278,7 @@ function mReinitApprenant() {
     if (badge) badge.style.display = 'none';
     var liste = document.getElementById('m-apprenant-liste');
     if (liste) {
-        liste.innerHTML = '<div style="padding:12px;text-align:center;color:#aaa;font-size:12px;">Tapez un nom pour rechercher dans l\'annuaire…</div>';
+        liste.innerHTML = '<div style="padding:12px;text-align:center;color:#aaa;font-size:12px;">' + PAYEUR_L10N.tapez_nom + '</div>';
         liste.style.display = 'block';
     }
     var searchInp = document.getElementById('m-apprenant-search');

@@ -33,15 +33,15 @@
     <div style="max-width:900px;margin:22px auto 0;display:flex;gap:22px;flex-wrap:wrap;">
       <div style="text-align:center;">
         <div style="font-size:20px;font-weight:700;color:#5DCAA5;">{{ $nbApprenants }}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">Apprenant(s) inscrit(s)</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);">{{ __('public.etab_apprenants_inscrits') }}</div>
       </div>
       <div style="text-align:center;">
         <div style="font-size:20px;font-weight:700;color:#5DCAA5;">{{ $etablissement->categoriesFrais->count() }}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">Catégorie(s) de frais</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);">{{ __('public.etab_categories_frais') }}</div>
       </div>
       <div style="text-align:center;">
         <div style="font-size:20px;font-weight:700;color:#5DCAA5;">{{ $etablissement->code_etablissement }}</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">Code établissement</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);">{{ __('public.etab_code') }}</div>
       </div>
     </div>
   </div>
@@ -50,26 +50,26 @@
 <div class="ep-body2" style="max-width:900px;">
 
   {{-- ── Informations générales ── --}}
-  <div class="seclbl" style="margin-top:4px;">Informations générales</div>
+  <div class="seclbl" style="margin-top:4px;">{{ __('public.etab_infos_generales') }}</div>
   <div class="epcard" style="margin-bottom:20px;">
     <div class="g2">
       <div style="padding:8px 0;border-bottom:1px solid #f5f5f5;">
-        <div style="font-size:11px;color:#888;">Statut juridique</div>
+        <div style="font-size:11px;color:#888;">{{ __('public.etab_statut_juridique') }}</div>
         <div style="font-size:13px;font-weight:600;">{{ ucfirst(str_replace('_', ' ', $etablissement->statut_juridique)) }}</div>
       </div>
       <div style="padding:8px 0;border-bottom:1px solid #f5f5f5;">
-        <div style="font-size:11px;color:#888;">Région</div>
+        <div style="font-size:11px;color:#888;">{{ __('public.etab_region') }}</div>
         <div style="font-size:13px;font-weight:600;">{{ ucfirst($etablissement->region) }}</div>
       </div>
       @if($etablissement->telephone)
       <div style="padding:8px 0;border-bottom:1px solid #f5f5f5;">
-        <div style="font-size:11px;color:#888;">Téléphone</div>
+        <div style="font-size:11px;color:#888;">{{ __('public.etab_telephone') }}</div>
         <div style="font-size:13px;font-weight:600;">{{ $etablissement->telephone }}</div>
       </div>
       @endif
       @if($etablissement->email)
       <div style="padding:8px 0;border-bottom:1px solid #f5f5f5;">
-        <div style="font-size:11px;color:#888;">Email</div>
+        <div style="font-size:11px;color:#888;">{{ __('public.etab_email') }}</div>
         <div style="font-size:13px;font-weight:600;">{{ $etablissement->email }}</div>
       </div>
       @endif
@@ -82,10 +82,10 @@
   </div>
 
   {{-- ── Frais scolaires ── --}}
-  <div class="seclbl">Frais scolaires proposés</div>
+  <div class="seclbl">{{ __('public.etab_frais_proposes') }}</div>
   @if($etablissement->categoriesFrais->isEmpty())
     <div class="epcard" style="text-align:center;color:#999;padding:24px 0;margin-bottom:20px;">
-      Aucune catégorie de frais publiée pour le moment.
+      {{ __('public.etab_aucune_categorie') }}
     </div>
   @else
     <div class="g2" style="margin-bottom:20px;">
@@ -94,7 +94,7 @@
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
             <div style="font-size:14px;font-weight:700;">{{ $frais->nom }}</div>
             @if($frais->fractionnable)
-              <span class="pill pb" style="font-size:10px;">Fractionnable</span>
+              <span class="pill pb" style="font-size:10px;">{{ __('public.etab_fractionnable') }}</span>
             @endif
           </div>
           <div style="font-size:18px;font-weight:700;color:var(--ep-teal);">
@@ -107,9 +107,9 @@
   @endif
 
   {{-- ── Rejoindre cet établissement — 3 profils ── --}}
-  <div class="seclbl">Rejoindre {{ $etablissement->nom }}</div>
+  <div class="seclbl">{{ __('public.etab_rejoindre') }} {{ $etablissement->nom }}</div>
   <div style="font-size:13px;color:#666;margin-bottom:16px;">
-    Créez votre compte EduPay pour payer les frais scolaires en ligne, quel que soit votre profil.
+    {{ __('public.etab_rejoindre_desc') }}
   </div>
 
   <div class="g3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:32px;">
@@ -123,8 +123,8 @@
                   display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
         <span class="material-symbols-outlined" style="font-size:24px;color:#0D9E75;">family_restroom</span>
       </div>
-      <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">Je suis Parent</div>
-      <div style="font-size:12px;color:#888;">Payer les frais de mes enfants</div>
+      <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">{{ __('public.etab_je_suis_parent') }}</div>
+      <div style="font-size:12px;color:#888;">{{ __('public.etab_payer_frais_enfants') }}</div>
     </a>
 
     <a href="{{ route('register.parent.step1', ['code_etablissement' => $etablissement->code_etablissement, 'profil' => 'eleve']) }}"
@@ -136,8 +136,8 @@
                   display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
         <span class="material-symbols-outlined" style="font-size:24px;color:#185FA5;">school</span>
       </div>
-      <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">Je suis Élève</div>
-      <div style="font-size:12px;color:#888;">Gérer et payer mes propres frais</div>
+      <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">{{ __('public.etab_je_suis_eleve') }}</div>
+      <div style="font-size:12px;color:#888;">{{ __('public.etab_payer_propres_frais') }}</div>
     </a>
 
     <a href="{{ route('register.parent.step1', ['code_etablissement' => $etablissement->code_etablissement, 'profil' => 'etudiant']) }}"
@@ -149,15 +149,15 @@
                   display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
         <span class="material-symbols-outlined" style="font-size:24px;color:#7C3AED;">history_edu</span>
       </div>
-      <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">Je suis Étudiant</div>
-      <div style="font-size:12px;color:#888;">Gérer mes frais universitaires</div>
+      <div style="font-size:14px;font-weight:700;color:#1a1a2e;margin-bottom:4px;">{{ __('public.etab_je_suis_etudiant') }}</div>
+      <div style="font-size:12px;color:#888;">{{ __('public.etab_payer_frais_univ') }}</div>
     </a>
 
   </div>
 
   <div style="text-align:center;margin-bottom:24px;">
     <a href="{{ route('landing') }}" style="color:var(--ep-teal);text-decoration:none;font-size:13px;font-weight:500;">
-      ← Retour à la liste des établissements
+      {{ __('public.retour_liste_etabs') }}
     </a>
   </div>
 

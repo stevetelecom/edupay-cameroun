@@ -43,7 +43,7 @@
 
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">Téléphone (pour 2FA) *</label>
-          <input type="text" name="telephone" required
+          <input type="text" class="tel-cm-input" data-allow-fixe="false" name="telephone" placeholder="6XXXXXXXX" required
                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"
                  placeholder="6XXXXXXXX" />
         </div>
@@ -242,7 +242,7 @@
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">Téléphone</label>
-          <input type="text" name="telephone" id="edit-telephone"
+          <input type="text" class="tel-cm-input" data-allow-fixe="false" name="telephone" id="edit-telephone"
                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
         </div>
         <div>
@@ -322,7 +322,9 @@
 @endsection
 
 @push('scripts')
+@include('partials.telephone-cm-script')
 <script>
+  document.addEventListener('DOMContentLoaded', function() { initTelephoneCm('.tel-cm-input'); });
 function ouvrirModal(id) {
     var el = document.getElementById(id);
     el.classList.remove('hidden');
