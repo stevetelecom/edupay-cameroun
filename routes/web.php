@@ -17,7 +17,6 @@ Route::get('/', [LandingController::class, 'index'])->name('landing');
 Route::get('/a-propos', [LandingController::class, 'about'])->name('about');
 Route::get('/temoignages', [LandingController::class, 'temoignages'])->name('temoignages');
 Route::get('/tarifs', [LandingController::class, 'tarifs'])->name('tarifs');
-Route::get('/etablissement/{etablissement:code_etablissement}', [LandingController::class, 'etablissement'])->name('etablissement.show');
 Route::get('/guide', [LandingController::class, 'guide'])->name('guide');
 Route::get('/support', [LandingController::class, 'support'])->name('support');
 Route::get('/politique-confidentialite', [LandingController::class, 'confidentialite'])->name('confidentialite');
@@ -177,6 +176,10 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnemen
     Route::put('/sites/{site}', [\App\Http\Controllers\Etablissement\SiteController::class, 'update'])->name('sites.update');
     Route::delete('/sites/{site}', [\App\Http\Controllers\Etablissement\SiteController::class, 'destroy'])->name('sites.destroy');
 });
+
+// Fiche publique établissement — APRÈS le groupe protégé pour ne pas
+// intercepter les routes statiques /etablissement/tableau-de-bord, /frais, etc.
+Route::get('/etablissement/{etablissement:code_etablissement}', [LandingController::class, 'etablissement'])->name('etablissement.show');
 
 
 /*
