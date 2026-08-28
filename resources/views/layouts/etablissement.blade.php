@@ -57,7 +57,23 @@
         .sbar-item svg{width:15px;height:15px;flex-shrink:0;}
         .sbar-item.on{background:var(--ep-teal-lt);color:#085041;font-weight:600;}
         .sbar-item:hover:not(.on){background:#f0f0f0;}
-        .main-content{flex:1;padding:22px 24px;background:#f5f6f7;overflow-y:auto;}
+        .main-content{flex:1;padding:22px 24px;background:#f5f6f7;overflow-y:auto;position:relative;}
+        .main-content::before{
+            content:'';
+            position:fixed;
+            top:58px; left:200px; right:0; bottom:0;
+            background-image:url('{{ asset('images/logo.jpeg') }}');
+            background-repeat:no-repeat;
+            background-position:center;
+            background-size:340px;
+            opacity:.05;
+            pointer-events:none;
+            z-index:0;
+        }
+        .main-content > *{position:relative;z-index:1;}
+        @media (max-width: 900px){
+            .main-content::before{ left:0; background-size:220px; }
+        }
         .prog{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px;}
         .pfill{height:100%;background:var(--ep-teal);border-radius:3px;}
         .dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
@@ -208,12 +224,11 @@
                 </div>
             @endif
             <div>
-                <div style="display:flex;align-items:center;gap:9px;">
-                    <span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>
-                  </div>
-                <div style="font-size:11px;color:rgba(255,255,255,.5);">
+                <div style="font-size:14px;font-weight:700;color:#fff;">
                     {{ Auth::user()->etablissement->nom ?? 'Mon établissement' }}
-                    @if(Auth::user()->etablissement->ville ?? false) — {{ Auth::user()->etablissement->ville }}@endif
+                </div>
+                <div style="font-size:11px;color:rgba(255,255,255,.5);">
+                    @if(Auth::user()->etablissement->ville ?? false){{ Auth::user()->etablissement->ville }}@endif
                 </div>
             </div>
         </div>
