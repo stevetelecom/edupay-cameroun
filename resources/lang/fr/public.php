@@ -1,5 +1,14 @@
 <?php
 return [
+    // ── Bios équipe (modals À propos) ──
+    'team_bio_olivier'              => "Chef de projet et développeur principal d'EduPay Cameroun. En charge de l'architecture technique globale (Laravel, base de données, intégrations Mobile Money), de la coordination de l'équipe et du suivi du cahier des charges CDC-EDUPAY-CM-2026-001.",
+    'team_bio_marcelle'             => "En charge du design UI/UX et de la conception des maquettes visuelles d'EduPay Cameroun. Apporte une expertise en communication visuelle et identité de marque au projet.",
+    'team_bio_estelle'              => "Développeuse back-end sur EduPay Cameroun, en charge de la logique métier côté serveur et des API utilisées par les modules Paiement et Établissement.",
+    'team_bio_bikoro'               => "Développeur front-end, en charge de l'intégration des interfaces utilisateur et de l'expérience visuelle des différents espaces de la plateforme (parent, établissement).",
+    'team_bio_makueta'              => "En charge du module Back-office École — gestion des apprenants, des frais et de l'annuaire côté établissement scolaire.",
+    'team_bio_maffo'                => "En charge de l'assurance qualité (QA) et des aspects DevOps du projet — tests fonctionnels, suivi des anomalies et fiabilité de la plateforme.",
+    'team_bio_maguy'                => "En charge de la conception du logo EduPay Cameroun et des éléments graphiques de la charte visuelle du projet.",
+    'team_bio_jerome'               => "En charge du support et de l'assurance qualité, veille au bon fonctionnement des parcours utilisateurs et à la remontée des anomalies rencontrées lors des tests.",
     // ── Rôles équipe (modals À propos) ──
     'team_role_olivier'             => 'Chef de groupe du projet · Génie Informatique (GSI)',
     'team_role_marcelle'            => 'Génie des Systèmes Audiovisuels (GSA)',

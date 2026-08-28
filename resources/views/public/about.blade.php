@@ -266,7 +266,7 @@
         <div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:4px;">{{ __("public.team_role_$key") }}</div>
       </div>
       <div style="padding:22px 24px;">
-        <div style="font-size:13px;color:#555;line-height:1.6;margin-bottom:16px;">{{ $member['bio'] }}</div>
+        <div style="font-size:13px;color:#555;line-height:1.6;margin-bottom:16px;">{{ __("public.team_bio_$key") }}</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:{{ isset($member['link']) ? '16px' : '4px' }};">
           @foreach($member['skills'] as $skill)
             <span style="font-size:11px;padding:4px 10px;border-radius:20px;background:#f3f4f6;color:#555;">{{ isset($skillMap[$skill]) ? __("public.$skillMap[$skill]") : $skill }}</span>          @endforeach

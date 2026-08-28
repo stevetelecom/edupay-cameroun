@@ -1,5 +1,14 @@
 <?php
 return [
+    // ── Team bios (About modals) ──
+    'team_bio_olivier'              => "Project lead and lead developer of EduPay Cameroun. In charge of the overall technical architecture (Laravel, database, Mobile Money integrations), team coordination and tracking of the CDC-EDUPAY-CM-2026-001 specifications.",
+    'team_bio_marcelle'             => "In charge of UI/UX design and the visual mockups of EduPay Cameroun. Brings expertise in visual communication and brand identity to the project.",
+    'team_bio_estelle'              => "Back-end developer on EduPay Cameroun, in charge of server-side business logic and the APIs used by the Payment and School modules.",
+    'team_bio_bikoro'               => "Front-end developer, in charge of integrating user interfaces and the visual experience across the platform's spaces (parent, school).",
+    'team_bio_makueta'              => "In charge of the School Back-office module — managing students, fees and the directory on the school side.",
+    'team_bio_maffo'                => "In charge of quality assurance (QA) and the DevOps aspects of the project — functional testing, bug tracking and platform reliability.",
+    'team_bio_maguy'                => "In charge of designing the EduPay Cameroun logo and the graphic elements of the project's visual identity.",
+    'team_bio_jerome'               => "In charge of support and quality assurance, ensuring smooth user journeys and reporting issues found during testing.",
     // ── Team roles (About modals) ──
     'team_role_olivier'             => 'Project Lead · Computer Engineering (GSI)',
     'team_role_marcelle'            => 'Audiovisual Systems Engineering (GSA)',
