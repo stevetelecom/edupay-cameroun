@@ -65,13 +65,13 @@
             background-image:url('{{ asset('images/logo-watermark.png') }}');
             background-repeat:no-repeat;
             background-position:center;
-            background-size:min(75vw, 780px);
+            background-size:min(38vw, 380px);
             opacity:.22;
             pointer-events:none;
             z-index:0;
         }
         @media (max-width: 900px){
-            .main-content::before{ left:0; background-size:min(88vw, 420px); }
+            .main-content::before{ left:0; background-size:min(55vw, 240px); }
         }
         .prog{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:6px;}
         .pfill{height:100%;background:var(--ep-teal);border-radius:3px;}

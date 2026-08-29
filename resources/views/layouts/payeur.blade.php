@@ -57,13 +57,13 @@
             background-image:url('{{ asset('images/logo-watermark.png') }}');
             background-repeat:no-repeat;
             background-position:center;
-            background-size:min(75vw, 780px);
+            background-size:min(38vw, 380px);
             opacity:.22;
             pointer-events:none;
             z-index:0;
         }
         @media (max-width: 900px){
-            .main-content::before{ left:0; background-size:min(88vw, 420px); }
+            .main-content::before{ left:0; background-size:min(55vw, 240px); }
         }
         .sbar-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-md);font-size:13px;color:#555;cursor:pointer;margin-bottom:2px;text-decoration:none;}
         .sbar-item svg{width:15px;height:15px;flex-shrink:0;}
