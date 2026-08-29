@@ -312,7 +312,7 @@
         </aside>
 
         {{-- Contenu principal --}}
-        <main class="flex-1 overflow-y-auto p-6">
+        <main class="flex-1 overflow-y-auto p-6 admin-main-content">
 
             {{-- Contenu de la page --}}
             @yield('content')
@@ -435,6 +435,27 @@
     {{-- Modals injectés par les pages --}}
     @stack('modals')
 
+
+    {{-- CSS filigrane EduPay --}}
+    <style>
+        .admin-main-content{position:relative;}
+        .admin-main-content::before{
+            content:'';
+            position:fixed;
+            top:0; left:208px; right:0; bottom:0;
+            background-image:url('{{ asset('images/logo-watermark.png') }}');
+            background-repeat:no-repeat;
+            background-position:center;
+            background-size:min(38vw, 380px);
+            opacity:.22;
+            pointer-events:none;
+            z-index:0;
+        }
+        .admin-main-content > *{position:relative;z-index:1;}
+        @media (max-width: 900px){
+            .admin-main-content::before{ left:0; background-size:min(55vw, 240px); }
+        }
+    </style>
 
     {{-- CSS sidebar-link utilitaire --}}
     <style>
