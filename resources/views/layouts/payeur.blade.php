@@ -206,6 +206,7 @@
     <div class="app-header">
         <div style="display:flex;align-items:center;gap:9px;">
           <span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>
+          <span style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-.01em;">Edu<span style="color:#5DCAA5;">Pay</span></span>
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
             <span style="font-size:12px;color:rgba(255,255,255,.65);">{{ $headerLabel }}</span>
