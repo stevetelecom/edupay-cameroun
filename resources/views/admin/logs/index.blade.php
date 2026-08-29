@@ -1,12 +1,12 @@
 @extends('layouts.admin')
-@section('title', 'Logs securite')
+@section('title', __('messages.logs_securite'))
 
 @push('modals')
 {{-- MODAL DETAIL LOG --}}
 <div id="modal-detail-log" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-md">
     <div class="ep-modal-head">
-      <h3>Detail du log</h3>
+      <h3>{{ __('admin.detail_log') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-detail-log')">x</button>
     </div>
     <div id="modal-detail-log-content" class="ep-modal-body"></div>
@@ -18,13 +18,13 @@
 
 <div class="flex items-center justify-between mb-5">
   <div>
-    <h1 class="text-xl font-bold text-gray-900">Logs de securite</h1>
-    <p class="text-sm text-gray-500 mt-0.5">Audit complet — Conforme COBAC/BEAC</p>
+    <h1 class="text-xl font-bold text-gray-900">{{ __('messages.logs_securite') }}</h1>
+    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.audit_complet') }}</p>
   </div>
   <a href="{{ route('admin.logs.index', array_merge(request()->query(), ['export'=>1])) }}"
      style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:13px;font-weight:500;color:#444;text-decoration:none;">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-    Exporter CSV
+    {{ __('admin.exporter_csv') }}
   </a>
 </div>
 
@@ -36,7 +36,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-gray-900">{{ $stats['total_jour'] }}</div>
-      <div class="text-xs text-gray-400">Evenements aujourd'hui</div>
+      <div class="text-xs text-gray-400">{{ __('admin.evenements_aujourdhui') }}</div>
     </div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
@@ -45,7 +45,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-red-700">{{ $stats['critiques'] }}</div>
-      <div class="text-xs text-gray-400">Critiques aujourd'hui</div>
+      <div class="text-xs text-gray-400">{{ __('admin.critiques_aujourdhui') }}</div>
     </div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
@@ -54,7 +54,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-yellow-700">{{ $stats['warnings'] }}</div>
-      <div class="text-xs text-gray-400">Warnings aujourd'hui</div>
+      <div class="text-xs text-gray-400">{{ __('admin.warnings_aujourdhui') }}</div>
     </div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
@@ -63,7 +63,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-blue-700">{{ $stats['connexions'] }}</div>
-      <div class="text-xs text-gray-400">Connexions aujourd'hui</div>
+      <div class="text-xs text-gray-400">{{ __('admin.connexions_aujourdhui') }}</div>
     </div>
   </div>
 </div>
@@ -72,10 +72,10 @@
 <div class="bg-white border border-gray-200 rounded-xl p-4 mb-4">
   <form method="GET" action="{{ route('admin.logs.index') }}" class="flex items-center gap-3 flex-wrap">
     <input type="text" name="search" value="{{ request('search') }}"
-           placeholder="Action, detail, IP..."
+           placeholder="{{ __('admin.ph_recherche_log') }}"
            class="flex-1 min-w-50 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
     <select name="niveau" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
-      <option value="">Tous niveaux</option>
+      <option value="">{{ __('admin.tous_niveaux') }}</option>
       <option value="INFO"     {{ request('niveau')==='INFO'     ? 'selected' : '' }}>INFO</option>
       <option value="WARNING"  {{ request('niveau')==='WARNING'  ? 'selected' : '' }}>WARNING</option>
       <option value="CRITICAL" {{ request('niveau')==='CRITICAL' ? 'selected' : '' }}>CRITICAL</option>
@@ -85,7 +85,7 @@
     <input type="date" name="date_fin" value="{{ request('date_fin') }}"
            class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
     <button type="submit" class="bg-[#0D9E75] hover:bg-[#0A8562] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
-      Filtrer
+      {{ __('admin.filtrer') }}
     </button>
     @if(request()->hasAny(['search','niveau','date_debut','date_fin']))
     <a href="{{ route('admin.logs.index') }}" class="text-sm text-gray-400 hover:text-gray-600 px-2">Reinitialiser</a>
@@ -99,12 +99,12 @@
     <table class="min-w-255 w-full text-sm">
     <thead class="bg-gray-50 border-b border-gray-200">
       <tr>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</th>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Niveau</th>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Action</th>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Detail</th>
-        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">IP</th>
-        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Detail</th>
+        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.date_col') }}</th>
+        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.niveau_col') }}</th>
+        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.action_col') }}</th>
+        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.detail_log') }}</th>
+        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.adresse_ip') }}</th>
+        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.detail_log') }}</th>
       </tr>
     </thead>
     <tbody class="divide-y divide-gray-100">
@@ -135,14 +135,14 @@
         <td class="px-4 py-3 font-mono text-xs text-gray-500">{{ $log->ip_address ?? '—' }}</td>
         <td class="px-4 py-3 text-center">
           <button onclick="ouvrirDetailLog({{ $log->id }})"
-                  class="w-7 h-7 flex items-center justify-center rounded-lg bg-[#E0F5EE] hover:bg-[#c4eadb] text-[#0D9E75] transition-colors mx-auto" title="Detail">
+                  class="w-7 h-7 flex items-center justify-center rounded-lg bg-[#E0F5EE] hover:bg-[#c4eadb] text-[#0D9E75] transition-colors mx-auto" title="{{ __('admin.detail_log') }}">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </td>
       </tr>
       @empty
       <tr>
-        <td colspan="6" class="px-4 py-10 text-center text-sm text-gray-400">Aucun log trouve.</td>
+        <td colspan="6" class="px-4 py-10 text-center text-sm text-gray-400">{{ __('admin.aucun_log') }}</td>
       </tr>
       @endforelse
     </tbody>
@@ -164,7 +164,7 @@ function ouvrirDetailLog(id) {
     fetch('/admin-ep2026/logs-securite/' + id, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
         .then(r => r.text())
         .then(html => { content.innerHTML = html; })
-        .catch(() => { content.innerHTML = '<p style="text-align:center;color:#dc2626;padding:20px;">Erreur de chargement.</p>'; });
+        .catch(() => { content.innerHTML = '<p style="text-align:center;color:#dc2626;padding:20px;">' + @json(__('admin.erreur_chargement')) + '</p>'; });
 }
 </script>
 @endpush

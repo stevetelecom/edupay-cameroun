@@ -13,17 +13,17 @@ body{font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;}
 <div class="wrap">
   <div class="hd"><div class="logo">Edu<span>Pay</span> Cameroun</div></div>
   <div class="bd">
-    <p style="font-size:16px;font-weight:700;color:#0B2545;margin-bottom:8px;">Réinitialisation de mot de passe</p>
+    <p style="font-size:16px;font-weight:700;color:#0B2545;margin-bottom:8px;">{{ __('admin.em_reset_titre') }}</p>
     <p style="font-size:13px;color:#555;margin-bottom:16px;">
-      Bonjour <strong>{{ $admin->prenom }}</strong>,<br>
-      Voici votre code de réinitialisation. Il expire dans <strong>10 minutes</strong>.
+      {!! __('admin.em_reset_bonjour', ['prenom' => $admin->prenom]) !!}
+      {!! __('admin.em_reset_code_intro') !!}
     </p>
     <div class="code">{{ $code }}</div>
     <p style="font-size:12px;color:#888;">
-      Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.
-      Votre mot de passe ne sera pas modifié.
+      {{ __('admin.em_reset_ignorer') }}
+      {{ __('admin.em_reset_mdp_inchange') }}
     </p>
   </div>
-  <div class="ft">© 2026 EduPay Cameroun · Accès Super Admin · TLS 1.3</div>
+  <div class="ft">© {{ date('Y') }} · {{ __('admin.em_reset_footer') }}</div>
 </div>
 </body></html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rappel échéance — EduPay</title>
+  <title>{{ __('payeur.em_rappel_titre', ['jours' => 5]) }}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background:#f5f5f5; margin:0; padding:0; -webkit-text-size-adjust:100%; }
@@ -55,60 +55,59 @@
   </div>
 
   <div class="body">
-    <div class="title">⏰ Rappel — Échéance dans 5 jours</div>
+    <div class="title">{{ __('payeur.em_rappel_titre', ['jours' => 5]) }}</div>
 
     <div class="text">
-      Bonjour <strong>{{ $apprenant->parents->first()?->prenom ?? 'Parent' }}</strong>,<br>
-      Une échéance approche pour <strong>{{ $apprenant->nom }} {{ $apprenant->prenom }}</strong>.
+      {!! __('payeur.em_bonjour_nom', ['nom' => $apprenant->parents->first()?->prenom ?? __('payeur.em_parent_fallback')]) !!}
+      {!! __('payeur.em_rappel_intro', ['enfant' => $apprenant->nom.' '.$apprenant->prenom]) !!}
     </div>
 
     <div class="countdown">
-      <div class="days">J-5</div>
-      <div class="days-label">jours restants avant l'échéance</div>
+      <div class="days">{!! __('payeur.em_rappel_j', ['n' => 5]) !!}</div>
+      <div class="days-label">{{ __('payeur.em_rappel_jours_label') }}</div>
     </div>
 
     <div class="info-box">
       <div class="info-row">
-        <span class="info-label">Apprenant</span>
+        <span class="info-label">{{ __('payeur.em_label_apprenant') }}</span>
         <span class="info-value">{{ $apprenant->nom }} {{ $apprenant->prenom }}</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Classe</span>
+        <span class="info-label">{{ __('payeur.em_label_classe') }}</span>
         <span class="info-value">{{ $apprenant->classe }}</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Type de frais</span>
+        <span class="info-label">{{ __('payeur.em_label_type_frais') }}</span>
         <span class="info-value">{{ $categorieFraisNom }}</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Reste à payer</span>
+        <span class="info-label">{{ __('etablissement.reste_a_payer') }}</span>
         <span class="info-value">{{ number_format($resteAPayer, 0, ',', ' ') }} FCFA</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Date limite</span>
+        <span class="info-label">{{ __('payeur.em_label_date_limite') }}</span>
         <span class="info-value">{{ $dateEcheance }}</span>
       </div>
     </div>
 
     <div class="btn-wrap">
       <a href="{{ config('app.url') }}/payeur/dashboard" class="btn">
-        Payer maintenant sur EduPay
+        {{ __('payeur.em_rappel_btn') }}
       </a>
     </div>
 
     <div class="tip">
-      <strong>💡 Modes de paiement :</strong><br>
-      MTN MoMo &nbsp;·&nbsp; Orange Money &nbsp;·&nbsp; Carte bancaire
+      <strong>{{ __('payeur.em_modes_paiement_label') }}</strong>
     </div>
 
     <div class="text" style="color:#999; font-size:12px; margin-top:20px;">
-      Cordialement,<br><strong>L'équipe EduPay Cameroun</strong>
+      {{ __('payeur.em_cordialement') }}<br><strong>{{ __('payeur.em_equipe_edupay') }}</strong>
     </div>
   </div>
 
   <div class="footer">
-    © 2026 EduPay Cameroun — Tous droits réservés.<br>
-    Vous recevez cet email car vous avez activé les rappels d'échéances.
+    {{ __('payeur.em_footer_tous_droits') }}<br>
+    {{ __('payeur.em_rappel_footer_note') }}
   </div>
 
 </div>

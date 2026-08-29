@@ -25,27 +25,28 @@
             <div class="logo">Edu<span>Pay</span> Cameroun</div>
         </div>
         <div class="body">
-            <div class="title">Bienvenue, {{ $utilisateur->prenom }} !</div>
+            <div class="title">{{ __('etablissement.em_invitation_titre', ['prenom' => $utilisateur->prenom]) }}</div>
             <div class="text">
-                Vous avez été invité(e) à rejoindre l'espace Back-office de
-                <strong>{{ $utilisateur->etablissement->nom ?? 'votre établissement' }}</strong>
-                sur EduPay, avec le rôle de <strong>{{ $roleLabel }}</strong>.
+                {!! __('etablissement.em_invitation_intro', [
+                    'etab' => $utilisateur->etablissement->nom ?? __('etablissement.em_invitation_etab_fallback'),
+                    'role' => $roleLabel
+                ]) !!}
             </div>
 
             <div class="credentials-box">
-                <div class="row"><span class="label">Email :</span> <span class="value">{{ $utilisateur->email }}</span></div>
-                <div class="row"><span class="label">Mot de passe temporaire :</span> <span class="value">{{ $motDePasseTemporaire }}</span></div>
+                <div class="row"><span class="label">{{ __('etablissement.email') }} :</span> <span class="value">{{ $utilisateur->email }}</span></div>
+                <div class="row"><span class="label">{{ __('etablissement.em_label_mdp_temporaire') }}</span> <span class="value">{{ $motDePasseTemporaire }}</span></div>
             </div>
 
             <div class="text">
-                Connectez-vous dès maintenant et pensez à modifier ce mot de passe temporaire dans vos paramètres de compte.
+                {{ __('etablissement.em_invitation_connectez') }}
             </div>
 
-            <a href="{{ route('login') }}" class="btn">Accéder au Back-office →</a>
+            <a href="{{ route('login') }}" class="btn">{{ __('etablissement.em_btn_invitation') }} →</a>
         </div>
         <div class="footer">
-            EduPay Cameroun — Plateforme de paiement des frais scolaires<br/>
-            Si vous n'attendiez pas cet email, vous pouvez l'ignorer en toute sécurité.
+            {{ __('etablissement.em_footer_plateforme') }}<br/>
+            {{ __('etablissement.em_invitation_footer_note') }}
         </div>
     </div>
 </body>

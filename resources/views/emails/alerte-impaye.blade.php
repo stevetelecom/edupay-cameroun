@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alerte impayé — EduPay</title>
+  <title>{{ __('payeur.em_impaye_titre') }}</title>
   <style>
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family:Arial, sans-serif; background:#f5f5f5; margin:0; padding:0; -webkit-text-size-adjust:100%; }
@@ -56,66 +56,62 @@
   </div>
 
   <div class="body">
-    <div class="title">⚠️ Alerte — Paiement impayé</div>
+    <div class="title">{{ __('payeur.em_impaye_titre') }}</div>
 
     <div class="text">
-      Bonjour <strong>{{ $apprenant->parents->first()?->prenom ?? 'Parent' }}</strong>,<br>
-      Un paiement <strong style="color:#D94040;">n'a pas encore été effectué</strong>
-      pour <strong>{{ $apprenant->nom }} {{ $apprenant->prenom }}</strong>.
+      {!! __('payeur.em_bonjour_nom', ['nom' => $apprenant->parents->first()?->prenom ?? __('payeur.em_parent_fallback')]) !!}
+      {!! __('payeur.em_impaye_intro', ['enfant' => $apprenant->nom.' '.$apprenant->prenom]) !!}
     </div>
 
     <div class="montant-block">
       <div class="montant">{{ number_format($montantDu, 0, ',', ' ') }} FCFA</div>
-      <div class="montant-label">Montant dû</div>
+      <div class="montant-label">{{ __('payeur.em_montant_du') }}</div>
     </div>
 
     <div class="info-box">
       <div class="info-row">
-        <span class="info-label">Apprenant</span>
+        <span class="info-label">{{ __('payeur.em_label_apprenant') }}</span>
         <span class="info-value">{{ $apprenant->nom }} {{ $apprenant->prenom }}</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Classe</span>
+        <span class="info-label">{{ __('payeur.em_label_classe') }}</span>
         <span class="info-value">{{ $apprenant->classe }}</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Type de frais</span>
+        <span class="info-label">{{ __('payeur.em_label_type_frais') }}</span>
         <span class="info-value">{{ $categorieFraisNom }}</span>
       </div>
       @if($dateEcheance)
       <div class="info-row">
-        <span class="info-label">Date limite</span>
+        <span class="info-label">{{ __('payeur.em_label_date_limite') }}</span>
         <span class="info-value">{{ $dateEcheance }}</span>
       </div>
       @endif
     </div>
 
     <div class="modes">
-      <strong>💳 Modes de paiement acceptés :</strong><br><br>
-      • MTN MoMo<br>
-      • Orange Money<br>
-      • Carte bancaire
+      {{ __('payeur.em_modes_paiement_acceptes') }}
     </div>
 
     <div class="btn-wrap">
       <a href="{{ config('app.url') }}/payeur/dashboard" class="btn">
-        Régulariser maintenant
+        {{ __('payeur.em_regulariser_maintenant') }}
       </a>
     </div>
 
     <div class="tip">
-      <strong>📞 Besoin d'aide ?</strong><br>
-      Contactez le support : <a href="mailto:edupay@mekontso.gsi2026.com" style="color:#D94040;">edupay@mekontso.gsi2026.com</a>
+      <strong>📞 {{ __('payeur.em_besoin_aide') }}</strong><br>
+      {{ __('payeur.em_contacter_support') }} : <a href="mailto:edupay@mekontso.gsi2026.com" style="color:#D94040;">edupay@mekontso.gsi2026.com</a>
     </div>
 
     <div class="text" style="color:#999; font-size:12px; margin-top:20px;">
-      Cordialement,<br><strong>L'équipe EduPay Cameroun</strong>
+      {{ __('payeur.em_cordialement') }}<br><strong>{{ __('payeur.em_equipe_edupay') }}</strong>
     </div>
   </div>
 
   <div class="footer">
-    © 2026 EduPay Cameroun — Tous droits réservés.<br>
-    Gestion intelligente des frais de scolarité.
+    {{ __('payeur.em_footer_tous_droits') }}<br>
+    {{ __('payeur.em_footer_scolaire_simplifie') }}
   </div>
 
 </div>

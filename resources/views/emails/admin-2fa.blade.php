@@ -29,28 +29,28 @@
     <div class="container">
         <div class="header">
             <div class="logo">Edu<span>Pay</span> Cameroun</div>
-            <div class="header-sub">Espace Super Administrateur · Sécurisé</div>
+            <div class="header-sub">{{ __('admin.em_2fa_header_sub') }}</div>
         </div>
         <div class="body">
-            <div class="title">🔐 Code de vérification 2FA</div>
+            <div class="title">{{ __('admin.em_2fa_titre') }}</div>
             <div class="text">
-                Bonjour <strong>{{ $admin->prenom }} {{ $admin->nom }}</strong>,<br/>
-                Une tentative de connexion à votre espace Super Admin a été détectée.
-                Voici votre code de vérification à usage unique :
+                {!! __('admin.em_2fa_bonjour', ['nom' => $admin->prenom.' '.$admin->nom]) !!}
+                {{ __('admin.em_2fa_connexion_detectee') }}
+                {{ __('admin.em_2fa_code_usage_unique') }}
             </div>
 
             <div class="code-box">
                 <div class="code">{{ $otpCode }}</div>
-                <div class="expires">⏱ Code valide pendant 5 minutes</div>
+                <div class="expires">{{ __('admin.em_2fa_code_expire') }}</div>
             </div>
 
             <div style="background:#f8f9fa;border-radius:8px;padding:14px 16px;margin-bottom:20px;">
                 <div class="info-row">
-                    <span class="info-label">Compte</span>
+                    <span class="info-label">{{ __('admin.em_label_compte') }}</span>
                     <span class="info-val">{{ $admin->email }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Date</span>
+                    <span class="info-label">{{ __('admin.em_label_date') }}</span>
                     <span class="info-val">{{ now()->format('d/m/Y à H:i') }}</span>
                 </div>
                 <div class="info-row">
@@ -60,14 +60,14 @@
             </div>
 
             <div class="warning">
-                <p><strong>⚠️ Sécurité :</strong> Si vous n'êtes pas à l'origine de cette connexion,
-                ignorez cet email et changez immédiatement votre mot de passe.
-                Ce code ne doit jamais être partagé.</p>
+                <p>{!! __('admin.em_2fa_securite_label') !!}
+                {{ __('admin.em_2fa_securite_texte') }}
+                {{ __('admin.em_2fa_code_confidentiel') }}</p>
             </div>
         </div>
         <div class="footer">
-            EduPay Cameroun — Plateforme de paiement des frais scolaires<br/>
-            © {{ date('Y') }} · Authentification 2FA obligatoire · TLS 1.3
+            {{ __('admin.em_footer_plateforme') }}<br/>
+            © {{ date('Y') }} · {{ __('admin.em_2fa_footer_tls') }}
         </div>
     </div>
 </body>

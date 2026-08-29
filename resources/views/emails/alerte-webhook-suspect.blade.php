@@ -21,31 +21,27 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-title">🚨 Alerte sécurité — Webhook paiement suspect</div>
+            <div class="header-title">{{ __('admin.em_webhook_titre') }}</div>
         </div>
         <div class="body">
             <div class="alert-box">
-                Un appel au webhook <strong>/webhook/aangaraapay</strong> a annoncé un statut différent
-                de celui confirmé par revérification API. Le système a automatiquement ignoré la valeur
-                non fiable et s'est basé uniquement sur la vérification serveur-à-serveur, donc
-                <strong>aucun paiement frauduleux n'a été validé</strong>. Ceci est une alerte préventive
-                à examiner.
+                {!! __('admin.em_webhook_texte') !!}
             </div>
 
             <div class="info-box">
-                <div class="info-row"><span class="info-label">Référence paiement</span><span class="info-val">{{ $reference }}</span></div>
-                <div class="info-row"><span class="info-label">Statut annoncé (non fiable)</span><span class="info-val">{{ $statutAnnonce ?? 'absent' }}</span></div>
-                <div class="info-row"><span class="info-label">Statut réel (revérifié API)</span><span class="info-val">{{ $statutReel }}</span></div>
-                <div class="info-row"><span class="info-label">Adresse IP appelante</span><span class="info-val">{{ $ip }}</span></div>
-                <div class="info-row"><span class="info-label">Date/heure</span><span class="info-val">{{ now()->format('d/m/Y H:i:s') }}</span></div>
+                <div class="info-row"><span class="info-label">{{ __('admin.em_label_reference') }}</span><span class="info-val">{{ $reference }}</span></div>
+                <div class="info-row"><span class="info-label">{{ __('admin.em_webhook_statut_annonce') }}</span><span class="info-val">{{ $statutAnnonce ?? __('admin.em_absent') }}</span></div>
+                <div class="info-row"><span class="info-label">{{ __('admin.em_webhook_statut_reel') }}</span><span class="info-val">{{ $statutReel }}</span></div>
+                <div class="info-row"><span class="info-label">{{ __('admin.em_webhook_ip') }}</span><span class="info-val">{{ $ip }}</span></div>
+                <div class="info-row"><span class="info-label">{{ __('admin.em_webhook_date_heure') }}</span><span class="info-val">{{ now()->format('d/m/Y H:i:s') }}</span></div>
             </div>
 
-            <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:6px;">Payload complet reçu :</div>
+            <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:6px;">{{ __('admin.em_webhook_payload') }}</div>
             <div class="payload-box">{{ json_encode($payloadComplet, JSON_PRETTY_PRINT) }}</div>
         </div>
         <div class="footer">
-            EduPay Cameroun — Système de sécurité automatisé<br/>
-            Consultez les logs complets : <code>storage/logs/laravel.log</code>
+            EduPay Cameroun — {{ __('admin.em_webhook_footer') }}<br/>
+            {{ __('admin.em_webhook_logs') }} <code>storage/logs/laravel.log</code>
         </div>
     </div>
 </body>

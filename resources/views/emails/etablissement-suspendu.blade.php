@@ -29,47 +29,45 @@
     <div class="container">
         <div class="header">
             <div class="logo">Edu<span>Pay</span> Cameroun</div>
-            <div class="header-sub">Plateforme de paiement des frais scolaires</div>
+            <div class="header-sub">{{ __('etablissement.em_header_plateforme') }}</div>
         </div>
         <div class="body">
-            <div class="badge"><span>⚠️ Établissement suspendu</span></div>
-            <div class="title">Bonjour {{ $responsable->prenom }},</div>
+            <div class="badge"><span>{{ __('etablissement.em_suspendu_badge') }}</span></div>
+            <div class="title">{!! __('etablissement.em_bonjour_prenom', ['prenom' => $responsable->prenom]) !!}</div>
             <div class="text">
-                Nous vous informons que votre établissement <strong>{{ $etablissement->nom }}</strong>
-                a été <strong style="color:#E8A020;">temporairement suspendu</strong> sur la plateforme EduPay Cameroun.
-                Pendant cette période, les paiements en ligne sont désactivés.
+                {!! __('etablissement.em_suspendu_texte', ['etab' => $etablissement->nom]) !!}
+                {{ __('etablissement.em_suspendu_paiements_desactives') }}
             </div>
             <div class="info-box">
                 <div class="info-row">
-                    <span class="info-label">Établissement</span>
+                    <span class="info-label">{{ __('messages.etablissement') }}</span>
                     <span class="info-val">{{ $etablissement->nom }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Code</span>
+                    <span class="info-label">{{ __('etablissement.em_label_code') }}</span>
                     <span class="info-val" style="font-family:monospace;color:#E8A020;">{{ $etablissement->code_etablissement }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Statut</span>
-                    <span class="info-val" style="color:#E8A020;">⚠️ Suspendu</span>
+                    <span class="info-label">{{ __('etablissement.statut') }}</span>
+                    <span class="info-val" style="color:#E8A020;">⚠️ {{ __('etablissement.em_suspendu') }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Date</span>
+                    <span class="info-label">{{ __('etablissement.date') }}</span>
                     <span class="info-val">{{ now()->format('d/m/Y à H:i') }}</span>
                 </div>
             </div>
             @if($raison)
             <div class="raison-box">
-                <strong>Motif de suspension :</strong><br/>{{ $raison }}
+                <strong>{{ __('etablissement.em_motif_suspension') }}</strong><br/>{{ $raison }}
             </div>
             @endif
             <div class="contact-box">
-                📧 Pour contester cette décision ou régulariser votre situation, contactez-nous à
-                <strong>contact@mekontso.gsi2026.com</strong> en indiquant votre code établissement.
+                📧 {{ __('etablissement.em_suspendu_contester') }}
             </div>
         </div>
         <div class="footer">
-            EduPay Cameroun — Plateforme de paiement des frais scolaires<br/>
-            © {{ date('Y') }} · Notification administrative automatique.
+            {{ __('etablissement.em_footer_plateforme') }}<br/>
+            © {{ date('Y') }} · {{ __('etablissement.em_footer_notif_admin') }}
         </div>
     </div>
 </body>

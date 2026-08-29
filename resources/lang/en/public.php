@@ -363,4 +363,8 @@ return [
     'voir_tous_etabs'               => 'See all schools',
     'votre_email'                   => 'Your email',
     'votre_nom'                     => 'Your full name',
+
+    // ── Contact message email ──
+    'em_contact_titre' => 'New contact message',
+    'em_contact_footer' => 'This email was generated from the contact form of the EduPay Cameroon website.',
 ];

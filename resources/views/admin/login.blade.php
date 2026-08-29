@@ -13,7 +13,7 @@
         <div class="text-2xl font-bold text-[#0B2545] tracking-tight">
             Edu<span class="text-[#0D9E75]">Pay</span> Cameroun
         </div>
-        <div class="text-xs text-gray-400 mt-1">Espace Super Admin</div>
+        <div class="text-xs text-gray-400 mt-1">{{ __('admin.espace_super_admin') }}</div>
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8 w-full max-w-sm">
@@ -26,9 +26,9 @@
             </div>
         </div>
 
-        <h1 class="text-lg font-bold text-center text-gray-900 mb-1">Connexion sécurisée</h1>
+        <h1 class="text-lg font-bold text-center text-gray-900 mb-1">{{ __('admin.connexion_securisee') }}</h1>
         <p class="text-sm text-gray-500 text-center mb-6">
-            Accès réservé aux administrateurs système. Authentification 2FA obligatoire.
+            {{ __('admin.acces_reserve_admins') }}
         </p>
 
         @if (session('info'))
@@ -56,7 +56,7 @@
 
             <div class="mb-4">
                 <label for="email" class="block text-xs font-medium text-gray-600 mb-1.5">
-                    Adresse email
+                    {{ __('auth.adresse_email') }}
                 </label>
                 <input
                     type="email"
@@ -76,7 +76,7 @@
 
             <div class="mb-5">
                 <label for="password" class="block text-xs font-medium text-gray-600 mb-1.5">
-                    Mot de passe
+                    {{ __('auth.mot_de_passe') }}
                 </label>
                 <div style="position:relative;">
                     <input
@@ -128,18 +128,18 @@
             <button
                 type="submit"
                 class="w-full bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold text-sm py-3 rounded-lg transition-colors">
-                Continuer vers la vérification 2FA
+                {{ __('admin.continuer_2fa') }}
             </button>
         </form>
         <div class="mt-4 text-center">
             <a href="{{ route('admin.password.forgot') }}" class="text-xs text-gray-400 hover:text-[#0D9E75] transition-colors">
-                Mot de passe oublié ?
+                {{ __('auth.mot_de_passe_oublie') }}
             </a>
         </div>
     </div>
 
     <div class="mt-6 text-xs text-gray-400 text-center">
-        © 2026 EduPay Cameroun · TLS 1.3 · Accès restreint
+        {{ __('admin.copyright_tls') }}
     </div>
 
 </body>

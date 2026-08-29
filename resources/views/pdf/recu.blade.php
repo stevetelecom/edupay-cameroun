@@ -109,98 +109,98 @@
 
     <div class="header">
         <div class="logo">Edu<span>Pay</span> Cameroun</div>
-        <div class="doc-type">Reçu de paiement</div>
+        <div class="doc-type">{{ __('payeur.pdf_recu_titre') }}</div>
     </div>
 
     <div class="meta-box">
         <div class="meta-row">
-            <div class="meta-label">Référence du paiement</div>
+            <div class="meta-label">{{ __('payeur.hist_reference') }}</div>
             <div class="meta-value">{{ $paiement->reference }}</div>
         </div>
         <div class="meta-row">
-            <div class="meta-label">Date de paiement</div>
+            <div class="meta-label">{{ __('payeur.pdf_recu_date') }} de paiement</div>
             <div class="meta-value">
                 {{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y à H:i') : '—' }}
             </div>
         </div>
         <div class="meta-row">
-            <div class="meta-label">Statut</div>
+            <div class="meta-label">{{ __('etablissement.statut') }}</div>
             <div class="meta-value">
-                <span class="status-badge">{{ $paiement->statut === 'valide' ? 'Validé' : ucfirst($paiement->statut) }}</span>
+                <span class="status-badge">{{ $paiement->statut === 'valide' ? __('payeur.statut_valide') : ucfirst($paiement->statut) }}</span>
             </div>
         </div>
     </div>
 
-    <div class="section-title">Payeur</div>
+    <div class="section-title">{{ __('payeur.pdf_section_payeur') }}</div>
     <table class="detail-table">
         <tr>
-            <td style="width:50%;"><strong>Nom</strong><br/>{{ $paiement->user->name ?? '—' }}</td>
-            <td><strong>Téléphone</strong><br/>{{ $paiement->telephone_paiement ?? $paiement->user->telephone ?? '—' }}</td>
+            <td style="width:50%;"><strong>{{ __('messages.nom') }}</strong><br/>{{ $paiement->user->name ?? '—' }}</td>
+            <td><strong>{{ __('public.telephone_label') }}</strong><br/>{{ $paiement->telephone_paiement ?? $paiement->user->telephone ?? '—' }}</td>
         </tr>
     </table>
 
-    <div class="section-title">Apprenant concerné</div>
+    <div class="section-title">{{ __('payeur.pdf_section_apprenant') }}</div>
     <table class="detail-table">
         <tr>
             <td style="width:50%;">
-                <strong>Nom</strong><br/>
+                <strong>{{ __('messages.nom') }}</strong><br/>
                 {{ $paiement->apprenant->prenom ?? '' }} {{ $paiement->apprenant->nom ?? '' }}
             </td>
             <td>
-                <strong>Établissement</strong><br/>
+                <strong>{{ __('messages.etablissement') }}</strong><br/>
                 {{ $paiement->apprenant->etablissement->nom ?? '—' }}
             </td>
         </tr>
         <tr>
             <td>
-                <strong>Classe</strong><br/>
+                <strong>{{ __('etablissement.classe') }}</strong><br/>
                 {{ $paiement->apprenant->classe ?? '—' }}
             </td>
             <td>
-                <strong>Frais réglé</strong><br/>
+                <strong>{{ __('payeur.pdf_frais_regle') }}</strong><br/>
                 {{ $paiement->fraisApprenant->categorieFrais->nom ?? '—' }}
                 ({{ $paiement->fraisApprenant->annee_scolaire ?? '—' }})
             </td>
         </tr>
     </table>
 
-    <div class="section-title">Détail du paiement</div>
+    <div class="section-title">{{ __('payeur.pdf_section_detail') }}</div>
     <table class="detail-table">
         <thead>
             <tr>
-                <th>Mode de paiement</th>
-                <th>Type</th>
-                <th>N° tranche</th>
+                <th>{{ __('payeur.em_label_mode') }}</th>
+                <th>{{ __('etablissement.type_lbl') }}</th>
+                <th>{{ __('etablissement.tranche') }}</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>
                     {{ match($paiement->mode_paiement) {
-                        'mtn_momo' => 'MTN Mobile Money',
-                        'orange_money' => 'Orange Money',
-                        'carte' => 'Carte bancaire',
+                        'mtn_momo' => __('etablissement.mt_mtn'),
+                        'orange_money' => __('etablissement.mt_orange'),
+                        'carte' => __('etablissement.carte'),
                         default => $paiement->mode_paiement,
                     } }}
                 </td>
-                <td>{{ $paiement->type_paiement === 'integral' ? 'Paiement intégral' : 'Paiement par tranche' }}</td>
-                <td>{{ $paiement->numero_tranche ?? '—' }}</td>
+                <td>{{ $paiement->type_paiement === 'integral' ? __('payeur.pay_integral') : __('payeur.pay_tranche') }}</td>
+                <td>{{ __('payeur.pdf_numero_tranche', ['n' => $paiement->numero_tranche ?? '—']) }}</td>
             </tr>
         </tbody>
     </table>
 
     <div class="amount-box">
-        <div class="label">Montant payé</div>
+        <div class="label">{{ __('payeur.em_montant_paye') }}</div>
         <div class="value">{{ number_format($paiement->montant, 0, ',', ' ') }} FCFA</div>
     </div>
 
     <div class="footer">
-        EduPay Cameroun — Plateforme de paiement des frais scolaires<br/>
-        Ce document est une preuve de paiement électronique générée automatiquement, valable sans signature manuscrite.
+        {{ __('admin.em_footer_plateforme') }}<br/>
+        {{ __('payeur.pdf_recu_footer') }}
     </div>
 
     <div class="verif-box">
-        Document généré le {{ now()->format('d/m/Y à H:i') }} · Référence unique : {{ $paiement->reference }}
+        {{ __('payeur.pdf_recu_verif', ['ref' => $paiement->reference, 'date' => now()->format('d/m/Y à H:i')]) }}
     </div>
 
 </body>

@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Etablissements')
+@section('title', __('messages.etablissements'))
 
 @push('modals')
 
@@ -7,7 +7,7 @@
 <div id="modal-detail-etab" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-lg">
     <div class="ep-modal-head">
-      <h3>Detail de l'etablissement</h3>
+      <h3>{{ __('admin.detail_etablissement') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-detail-etab')">x</button>
     </div>
     <div id="modal-detail-etab-content" class="ep-modal-body">
@@ -22,7 +22,7 @@
 <div id="modal-activer-etab" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3>Activer l'etablissement</h3>
+      <h3>{{ __('admin.activer_etablissement') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-activer-etab')">x</button>
     </div>
     <div class="ep-modal-body">
@@ -31,22 +31,22 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div>
-          <div style="font-size:13px;font-weight:600;color:#111;">Confirmer l'activation</div>
+          <div style="font-size:13px;font-weight:600;color:#111;">{{ __('admin.confirmer_activation') }}</div>
           <div style="font-size:12px;color:#888;" id="activer-etab-nom"></div>
         </div>
       </div>
-      <p style="font-size:13px;color:#555;">Cet etablissement sera immediatement actif. Les payeurs pourront effectuer des paiements.</p>
+      <p style="font-size:13px;color:#555;">{{ __('admin.actif_msg_activation') }}</p>
     </div>
     <div class="ep-modal-foot">
       <form id="form-activer-etab" method="POST">
         @csrf @method('PATCH')
         <button type="button" onclick="epModal.close('modal-activer-etab')"
                 style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;margin-right:8px;">
-          Annuler
+          {{ __('messages.annuler') }}
         </button>
         <button type="submit"
                 style="padding:8px 20px;font-size:13px;font-weight:600;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">
-          Activer
+          {{ __('admin.activer') }}
         </button>
       </form>
     </div>
@@ -57,7 +57,7 @@
 <div id="modal-suspendre-etab" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3>Suspendre l'etablissement</h3>
+      <h3>{{ __('admin.suspendre_etablissement') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-suspendre-etab')">x</button>
     </div>
     <div class="ep-modal-body">
@@ -66,26 +66,26 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         </div>
         <div>
-          <div style="font-size:13px;font-weight:600;color:#111;">Confirmer la suspension</div>
+          <div style="font-size:13px;font-weight:600;color:#111;">{{ __('admin.confirmer_suspension') }}</div>
           <div style="font-size:12px;color:#888;" id="suspendre-etab-nom"></div>
         </div>
       </div>
       <form id="form-suspendre-etab" method="POST">
         @csrf @method('PATCH')
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">Raison (optionnelle)</label>
+          <label style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">{{ __('admin.raison_optionnelle') }}</label>
           <textarea name="raison" rows="3"
-                    placeholder="Ex : Documents manquants, audit en cours..."
+                    placeholder="{{ __('admin.ph_raison') }}"
                     style="width:100%;padding:8px 12px;font-size:13px;border:1px solid #ddd;border-radius:8px;resize:none;box-sizing:border-box;"></textarea>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" onclick="epModal.close('modal-suspendre-etab')"
                   style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
-            Annuler
+            {{ __('messages.annuler') }}
           </button>
           <button type="submit"
                   style="padding:8px 20px;font-size:13px;font-weight:600;background:#ca8a04;color:#fff;border:none;border-radius:8px;cursor:pointer;">
-            Suspendre
+            {{ __('admin.suspendre') }}
           </button>
         </div>
       </form>
@@ -97,7 +97,7 @@
 <div id="modal-supprimer-etab" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3>Supprimer l'etablissement</h3>
+      <h3>{{ __('admin.supprimer_etablissement') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-supprimer-etab')">x</button>
     </div>
     <div class="ep-modal-body">
@@ -106,23 +106,23 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         </div>
         <div>
-          <div style="font-size:13px;font-weight:600;color:#111;">Confirmer la suppression</div>
+          <div style="font-size:13px;font-weight:600;color:#111;">{{ __('admin.confirmer_suppression') }}</div>
           <div style="font-size:12px;color:#888;" id="supprimer-etab-nom"></div>
         </div>
       </div>
       <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:16px;">
-        <p style="font-size:12px;color:#b91c1c;margin:0;">Action irreversible — les donnees seront archivees (soft delete).</p>
+        <p style="font-size:12px;color:#b91c1c;margin:0;">{{ __('admin.irreversible_archive') }}</p>
       </div>
       <form id="form-supprimer-etab" method="POST">
         @csrf @method('DELETE')
         <div style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" onclick="epModal.close('modal-supprimer-etab')"
                   style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
-            Annuler
+            {{ __('messages.annuler') }}
           </button>
           <button type="submit"
                   style="padding:8px 20px;font-size:13px;font-weight:600;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">
-            Supprimer
+            {{ __('admin.supprimer') }}
           </button>
         </div>
       </form>
@@ -136,8 +136,8 @@
 
 <div class="flex items-center justify-between mb-5">
   <div>
-    <h1 class="text-xl font-bold text-gray-900">Etablissements partenaires</h1>
-    <p class="text-sm text-gray-500 mt-0.5">Gestion, activation et supervision de toutes les ecoles</p>
+    <h1 class="text-xl font-bold text-gray-900">{{ __('admin.etablissements_partenaires') }}</h1>
+    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.gestion_activation_supervision') }}</p>
   </div>
 </div>
 
@@ -149,7 +149,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-gray-900">{{ $stats['total'] }}</div>
-      <div class="text-xs text-gray-400">Total</div>
+      <div class="text-xs text-gray-400">{{ __('admin.total') }}</div>
     </div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
@@ -158,7 +158,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-green-700">{{ $stats['actifs'] }}</div>
-      <div class="text-xs text-gray-400">Actifs</div>
+      <div class="text-xs text-gray-400">{{ __('admin.actifs') }}</div>
     </div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
@@ -167,7 +167,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-yellow-700">{{ $stats['en_attente'] }}</div>
-      <div class="text-xs text-gray-400">En attente</div>
+      <div class="text-xs text-gray-400">{{ __('admin.en_attente_s') }}</div>
     </div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
@@ -176,7 +176,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-red-700">{{ $stats['suspendus'] }}</div>
-      <div class="text-xs text-gray-400">Suspendus</div>
+      <div class="text-xs text-gray-400">{{ __('admin.suspendus') }}</div>
     </div>
   </div>
 </div>
@@ -185,21 +185,21 @@
 <div class="bg-white border border-gray-200 rounded-xl p-4 mb-4">
   <form method="GET" action="{{ route('admin.etablissements.index') }}" class="flex items-center gap-3 flex-wrap">
     <input type="text" name="search" value="{{ request('search') }}"
-           placeholder="Rechercher par nom, ville, email..."
+           placeholder="{{ __('admin.rechercher_nom_ville_email') }}"
            class="flex-1 min-w-50 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
     <select name="statut" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
-      <option value="">Tous les statuts</option>
+      <option value="">{{ __('admin.tous_statuts') }}</option>
       <option value="actif"      {{ request('statut')==='actif'      ? 'selected' : '' }}>Actif</option>
       <option value="en_attente" {{ request('statut')==='en_attente' ? 'selected' : '' }}>En attente</option>
       <option value="suspendu"   {{ request('statut')==='suspendu'   ? 'selected' : '' }}>Suspendu</option>
     </select>
     <select name="type" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
-      <option value="">Tous les types</option>
-      <option value="maternelle"    {{ request('type')==='maternelle'    ? 'selected' : '' }}>Maternelle</option>
-      <option value="primaire"      {{ request('type')==='primaire'      ? 'selected' : '' }}>Primaire</option>
-      <option value="secondaire"    {{ request('type')==='secondaire'    ? 'selected' : '' }}>Secondaire</option>
-      <option value="universitaire" {{ request('type')==='universitaire' ? 'selected' : '' }}>Universitaire</option>
-      <option value="formation"     {{ request('type')==='formation'     ? 'selected' : '' }}>Formation pro.</option>
+      <option value="">{{ __('admin.tous_les_types') }}</option>
+      <option value="maternelle"    {{ request('type')==='maternelle'    ? 'selected' : '' }}>{{ __('admin.maternelle') }}</option>
+      <option value="primaire"      {{ request('type')==='primaire'      ? 'selected' : '' }}>{{ __('admin.primaire') }}</option>
+      <option value="secondaire"    {{ request('type')==='secondaire'    ? 'selected' : '' }}>{{ __('admin.secondaire') }}</option>
+      <option value="universitaire" {{ request('type')==='universitaire' ? 'selected' : '' }}>{{ __('admin.universitaire') }}</option>
+      <option value="formation"     {{ request('type')==='formation'     ? 'selected' : '' }}>{{ __('admin.formation_pro') }}</option>
     </select>
     <button type="submit" class="bg-[#0D9E75] hover:bg-[#0A8562] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
       Filtrer
@@ -216,13 +216,13 @@
     <table id="dt-etablissements" class="ep-dt text-sm">
     <thead>
       <tr>
-        <th>Etablissement</th>
-        <th>Type / Région</th>
-        <th>Contact</th>
-        <th>Apprenants</th>
-        <th>Statut</th>
-        <th>Inscrit le</th>
-        <th data-orderable="false">Actions</th>
+        <th>{{ __('messages.etablissement') }}</th>
+        <th>{{ __('admin.type_region') }}</th>
+        <th>{{ __('messages.contact') }}</th>
+        <th>{{ __('messages.apprenants') }}</th>
+        <th>{{ __('messages.statut') }}</th>
+        <th>{{ __('admin.inscrit_le') }}</th>
+        <th data-orderable="false">{{ __('messages.actions') }}</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -327,15 +327,15 @@ function epSubmitAjax(form, modalId, btnSelector) {
     .then(r => r.json().then(data => ({ status: r.status, body: data })))
     .then(({ status, body }) => {
         if (status >= 200 && status < 300 && body.success) {
-            epToast(body.message || 'Action effectuée.', 'success');
+            epToast(body.message || @json(__('admin.action_effectuee')), 'success');
             epModal.close(modalId);
             dtEtab.ajax.reload(null, false);
         } else {
-            epToast(body.message || 'Une erreur est survenue.', 'error');
+            epToast(body.message || @json(__('admin.une_erreur_survenue')), 'error');
         }
     })
     .catch(() => {
-        epToast('Erreur réseau — veuillez réessayer.', 'error');
+        epToast(@json(__('admin.erreur_reseau')), 'error');
     })
     .finally(() => {
         if (btn) { btn.disabled = false; btn.textContent = btnTexteOriginal; }

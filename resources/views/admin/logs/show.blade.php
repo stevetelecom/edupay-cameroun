@@ -19,19 +19,19 @@
     </div>
 
     <div style="background:#f9fafb;border-radius:8px;padding:12px;">
-        <div style="font-size:11px;color:#999;margin-bottom:4px;">Detail</div>
+        <div style="font-size:11px;color:#999;margin-bottom:4px;">{{ __("admin.detail_log") }}</div>
         <div style="font-size:13px;color:#333;line-height:1.5;">{{ $log->detail ?? "—" }}</div>
     </div>
 
     <div class="grid grid-cols-2 gap-3">
         <div style="background:#f9fafb;border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:#999;margin-bottom:4px;">Adresse IP</div>
+            <div style="font-size:11px;color:#999;margin-bottom:4px;">{{ __("admin.adresse_ip") }}</div>
             <div style="font-size:13px;font-weight:600;font-family:monospace;color:#111;">{{ $log->ip_address ?? "—" }}</div>
         </div>
         <div style="background:#f9fafb;border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:#999;margin-bottom:4px;">Acteur</div>
+            <div style="font-size:11px;color:#999;margin-bottom:4px;">{{ __("admin.acteur_lbl") }}</div>
             <div style="font-size:13px;font-weight:600;color:#111;">
-                {{ class_basename($log->acteur_type) }} #{{ $log->acteur_id ?? "anonyme" }}
+                {{ class_basename($log->acteur_type) }} #{{ $log->acteur_id ?? __("admin.anonyme") }}
             </div>
         </div>
         <div style="background:#f9fafb;border-radius:8px;padding:12px;grid-column:span 2;">
@@ -44,13 +44,13 @@
     <div class="grid grid-cols-2 gap-3">
         @if($log->donnees_avant)
         <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:#b91c1c;margin-bottom:6px;font-weight:600;">Avant</div>
+            <div style="font-size:11px;color:#b91c1c;margin-bottom:6px;font-weight:600;">{{ __("admin.avant_lbl") }}</div>
             <pre style="font-size:11px;color:#333;white-space:pre-wrap;margin:0;">{{ json_encode($log->donnees_avant, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
         </div>
         @endif
         @if($log->donnees_apres)
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px;">
-            <div style="font-size:11px;color:#166534;margin-bottom:6px;font-weight:600;">Apres</div>
+            <div style="font-size:11px;color:#166534;margin-bottom:6px;font-weight:600;">{{ __("admin.apres_lbl") }}</div>
             <pre style="font-size:11px;color:#333;white-space:pre-wrap;margin:0;">{{ json_encode($log->donnees_apres, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
         </div>
         @endif

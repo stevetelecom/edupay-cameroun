@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Nouveau message de contact</title>
+    <title>{{ __('public.em_contact_titre') }}</title>
     <style>
         body { font-family: Arial, sans-serif; color: #1a1a2e; }
         .wrapper { max-width: 680px; margin: 0 auto; padding: 24px; background: #f8f9fb; }
@@ -17,30 +17,30 @@
 <body>
 <div class="wrapper">
     <div class="card">
-        <div class="title">Nouveau message de contact</div>
+        <div class="title">{{ __('public.em_contact_titre') }}</div>
 
         <div class="row">
-            <div class="label">Nom</div>
+            <div class="label">{{ __('messages.nom') }}</div>
             <div class="value">{{ $contact['name'] }}</div>
         </div>
         <div class="row">
-            <div class="label">Email</div>
+            <div class="label">{{ __('public.email_label') }}</div>
             <div class="value">{{ $contact['email'] }}</div>
         </div>
         <div class="row">
-            <div class="label">Téléphone</div>
+            <div class="label">{{ __('public.telephone_label') }}</div>
             <div class="value">{{ $contact['phone'] }}</div>
         </div>
         <div class="row">
-            <div class="label">Sujet</div>
+            <div class="label">{{ __('public.sujet') }}</div>
             <div class="value">{{ $contact['subject'] }}</div>
         </div>
         <div class="row">
-            <div class="label">Message</div>
+            <div class="label">{{ __('public.message_label') }}</div>
             <div class="value">{!! nl2br(e($contact['message'])) !!}</div>
         </div>
 
-        <div class="footer">Message envoyé depuis le formulaire de contact EduPay Cameroun.</div>
+        <div class="footer">{{ __('public.em_contact_footer') }}</div>
     </div>
 </div>
 </body>

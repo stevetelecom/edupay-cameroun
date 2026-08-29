@@ -112,62 +112,64 @@
 
     <div class="header">
         <div class="logo">Edu<span>Pay</span> Cameroun</div>
-        <div class="ref">Réf. CERT-{{ now()->format('Y') }}-{{ str_pad($apprenant->id, 5, '0', STR_PAD_LEFT) }}</div>
+        <div class="ref">{{ __('payeur.pdf_ref') }} CERT-{{ now()->format('Y') }}-{{ str_pad($apprenant->id, 5, '0', STR_PAD_LEFT) }}</div>
     </div>
 
-    <div class="title">Attestation de paiement à jour</div>
-    <div class="subtitle">Année scolaire {{ $anneeScolaire }}</div>
+    <div class="title">{{ __('payeur.pdf_cert_titre') }}</div>
+    <div class="subtitle">{{ __('etablissement.annee_scolaire') }} {{ $anneeScolaire }}</div>
 
     <div class="body-text">
-        EduPay Cameroun atteste par la présente que les frais scolaires de
-        <strong>{{ $apprenant->prenom }} {{ $apprenant->nom }}</strong>,
-        inscrit(e) en classe de <strong>{{ $apprenant->classe }}</strong>
-        à <strong>{{ $apprenant->etablissement->nom ?? '—' }}</strong>,
-        sont à jour à la date d'émission du présent document, selon les paiements
-        enregistrés sur la plateforme EduPay.
+        {!! __('payeur.pdf_cert_texte', [
+            'nom'    => $apprenant->prenom.' '.$apprenant->nom,
+            'classe' => $apprenant->classe,
+            'etab'   => $apprenant->etablissement->nom ?? '—',
+        ]) !!}
     </div>
 
     <div class="stamp-box">
-        <div class="pct">{{ $pourcentage }}% réglé</div>
-        <div class="lbl">{{ number_format($montantPaye, 0, ',', ' ') }} FCFA payés sur {{ number_format($montantTotal, 0, ',', ' ') }} FCFA dus</div>
+        <div class="pct">{!! __('payeur.pdf_pct_regle', ['pct' => $pourcentage]) !!}</div>
+        <div class="lbl">{{ __('payeur.pdf_fcfa_payes_sur', [
+            'paye'  => number_format($montantPaye, 0, ',', ' '),
+            'total' => number_format($montantTotal, 0, ',', ' '),
+        ]) }}</div>
     </div>
 
     <table class="info-table">
         <tr>
-            <td>Apprenant</td>
+            <td>{{ __('payeur.em_label_apprenant') }}</td>
             <td>{{ $apprenant->prenom }} {{ $apprenant->nom }}</td>
         </tr>
         <tr>
-            <td>Matricule</td>
+            <td>{{ __('etablissement.matricule') }}</td>
             <td>{{ $apprenant->matricule ?? '—' }}</td>
         </tr>
         <tr>
-            <td>Établissement</td>
+            <td>{{ __('messages.etablissement') }}</td>
             <td>{{ $apprenant->etablissement->nom ?? '—' }}@if($apprenant->etablissement?->ville), {{ $apprenant->etablissement->ville }}@endif</td>
         </tr>
         <tr>
-            <td>Classe</td>
+            <td>{{ __('etablissement.classe') }}</td>
             <td>{{ $apprenant->classe }}</td>
         </tr>
         <tr>
-            <td>Année scolaire</td>
+            <td>{{ __('etablissement.annee_scolaire') }}</td>
             <td>{{ $anneeScolaire }}</td>
         </tr>
     </table>
 
     <div class="signature-block">
         <div class="left">
-            <div class="sign-line">Cachet EduPay Cameroun</div>
+            <div class="sign-line">{{ __('payeur.pdf_cachet') }}</div>
         </div>
         <div class="right">
-            Fait à Yaoundé, le {{ now()->format('d/m/Y') }}
-            <div class="sign-line">Signature électronique</div>
+            {{ __('payeur.pdf_fait', ['ville' => $apprenant->etablissement?->ville ?? 'Yaoundé', 'date' => now()->format('d/m/Y')]) }}
+            <div class="sign-line">{{ __('payeur.pdf_signature') }}</div>
         </div>
     </div>
 
     <div class="footer">
-        EduPay Cameroun — Plateforme de paiement des frais scolaires<br/>
-        Document généré automatiquement et valable sans signature manuscrite. Vérifiable via la référence ci-dessus.
+        {{ __('admin.em_footer_plateforme') }}<br/>
+        {{ __('payeur.pdf_footer_cert') }}
     </div>
 
 </body>

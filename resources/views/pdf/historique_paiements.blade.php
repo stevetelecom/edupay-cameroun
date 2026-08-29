@@ -27,40 +27,40 @@
 
 <div class="header">
     <div class="logo">Edu<span>Pay</span> Cameroun</div>
-    <div class="titre">Historique des paiements</div>
+    <div class="titre">{{ __('payeur.pdf_hist_titre') }}</div>
     <div class="meta">
         {{ $user->prenom ?? '' }} {{ $user->nom ?? '' }} &nbsp;·&nbsp;
         {{ $user->email ?? '' }} &nbsp;·&nbsp;
-        Généré le {{ now()->format('d/m/Y à H:i') }}
+        {{ __('payeur.pdf_generer_le', ['date' => now()->format('d/m/Y à H:i')]) }}
     </div>
 </div>
 
 <table>
     <thead>
         <tr>
-            <th>Référence</th>
-            <th>Enfant</th>
-            <th>Catégorie</th>
-            <th>Montant</th>
-            <th>Moyen</th>
-            <th>Date</th>
-            <th>Statut</th>
+            <th>{{ __('payeur.hist_reference') }}</th>
+            <th>{{ __('payeur.hist_enfant') }}</th>
+            <th>{{ __('payeur.hist_categorie') }}</th>
+            <th>{{ __('payeur.hist_montant') }}</th>
+            <th>{{ __('payeur.hist_moyen') }}</th>
+            <th>{{ __('payeur.hist_date') }}</th>
+            <th>{{ __('payeur.hist_statut') }}</th>
         </tr>
     </thead>
     <tbody>
         @forelse($paiements as $p)
         @php
             $statutLabel = match($p->statut) {
-                'valide'     => 'Validé',
-                'en_attente' => 'En attente',
-                'echoue'     => 'Échoué',
-                'rembourse'  => 'Remboursé',
+                'valide'     => __('payeur.statut_valide'),
+                'en_attente' => __('payeur.statut_en_attente'),
+                'echoue'     => __('payeur.statut_echoue'),
+                'rembourse'  => __('payeur.statut_rembourse'),
                 default      => $p->statut,
             };
             $moyenLabel = match($p->mode_paiement) {
-                'mtn_momo'     => 'MTN MoMo',
-                'orange_money' => 'Orange Money',
-                'carte'        => 'Carte',
+                'mtn_momo'     => __('etablissement.mt_mtn'),
+                'orange_money' => __('etablissement.mt_orange'),
+                'carte'        => __('etablissement.carte'),
                 default        => $p->mode_paiement,
             };
         @endphp
@@ -75,7 +75,7 @@
         </tr>
         @empty
         <tr>
-            <td colspan="7" style="text-align:center;color:#999;padding:20px;">Aucun paiement trouvé.</td>
+            <td colspan="7" style="text-align:center;color:#999;padding:20px;">{{ __('payeur.pdf_aucun_paiement') }}</td>
         </tr>
         @endforelse
     </tbody>
@@ -87,12 +87,12 @@
 @endphp
 
 <div class="total-box">
-    <div class="lbl">Total validé ({{ $nbTotal }} transaction(s))</div>
+    <div class="lbl">{{ __('payeur.pdf_total_valide', ['nb' => $nbTotal]) }}</div>
     <div class="val">{{ number_format($totalValide, 0, ',', ' ') }} FCFA</div>
 </div>
 
 <div class="footer">
-    EduPay Cameroun · Plateforme de paiement scolaire · Document généré automatiquement · Non contractuel
+    {{ __('payeur.pdf_footer_hist') }}
 </div>
 
 </body>

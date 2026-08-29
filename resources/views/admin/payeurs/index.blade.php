@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-@section('title', 'Comptes payeurs')
+@section('title', __('messages.comptes_payeurs'))
 
 @push('modals')
 
@@ -7,7 +7,7 @@
 <div id="modal-detail-payeur" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-lg">
     <div class="ep-modal-head">
-      <h3>Détail du compte payeur</h3>
+      <h3>{{ __('admin.detail_compte_payeur') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-detail-payeur')">x</button>
     </div>
     <div id="modal-detail-payeur-content" class="ep-modal-body">
@@ -22,7 +22,7 @@
 <div id="modal-activer-payeur" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3>Réactiver le compte</h3>
+      <h3>{{ __('admin.reactiver_compte') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-activer-payeur')">x</button>
     </div>
     <div class="ep-modal-body">
@@ -31,22 +31,22 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div>
-          <div style="font-size:13px;font-weight:600;color:#111;">Confirmer la réactivation</div>
+          <div style="font-size:13px;font-weight:600;color:#111;">{{ __('admin.confirmer_reactivation') }}</div>
           <div style="font-size:12px;color:#888;" id="activer-payeur-nom"></div>
         </div>
       </div>
-      <p style="font-size:13px;color:#555;">Ce compte pourra de nouveau se connecter et effectuer des paiements.</p>
+      <p style="font-size:13px;color:#555;">{{ __('admin.msg_reactivation') }}</p>
     </div>
     <div class="ep-modal-foot">
       <form id="form-activer-payeur" method="POST">
         @csrf @method('PATCH')
         <button type="button" onclick="epModal.close('modal-activer-payeur')"
                 style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;margin-right:8px;">
-          Annuler
+          {{ __('messages.annuler') }}
         </button>
         <button type="submit"
                 style="padding:8px 20px;font-size:13px;font-weight:600;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;">
-          Réactiver
+          {{ __('admin.reactiver') }}
         </button>
       </form>
     </div>
@@ -57,7 +57,7 @@
 <div id="modal-suspendre-payeur" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3>Suspendre le compte</h3>
+      <h3>{{ __('admin.suspendre_compte') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-suspendre-payeur')">x</button>
     </div>
     <div class="ep-modal-body">
@@ -66,29 +66,29 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         </div>
         <div>
-          <div style="font-size:13px;font-weight:600;color:#111;">Confirmer la suspension</div>
+          <div style="font-size:13px;font-weight:600;color:#111;">{{ __('admin.confirmer_suspension') }}</div>
           <div style="font-size:12px;color:#888;" id="suspendre-payeur-nom"></div>
         </div>
       </div>
       <form id="form-suspendre-payeur" method="POST">
         @csrf @method('PATCH')
         <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">Raison (optionnelle)</label>
+          <label style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">{{ __('admin.raison_optionnelle') }}</label>
           <textarea name="raison" rows="3"
                     placeholder="Ex : Fraude suspectée, non-respect des conditions..."
                     style="width:100%;padding:8px 12px;font-size:13px;border:1px solid #ddd;border-radius:8px;resize:none;box-sizing:border-box;"></textarea>
         </div>
         <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:14px;">
-          <p style="font-size:12px;color:#92400e;margin:0;">Le compte sera immédiatement déconnecté et ne pourra plus se reconnecter.</p>
+          <p style="font-size:12px;color:#92400e;margin:0;">{{ __('admin.msg_suspension') }}</p>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" onclick="epModal.close('modal-suspendre-payeur')"
                   style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
-            Annuler
+            {{ __('messages.annuler') }}
           </button>
           <button type="submit"
                   style="padding:8px 20px;font-size:13px;font-weight:600;background:#ca8a04;color:#fff;border:none;border-radius:8px;cursor:pointer;">
-            Suspendre
+            {{ __('admin.suspendre') }}
           </button>
         </div>
       </form>
@@ -100,7 +100,7 @@
 <div id="modal-supprimer-payeur" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3>Supprimer le compte</h3>
+      <h3>{{ __('admin.supprimer_compte') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-supprimer-payeur')">x</button>
     </div>
     <div class="ep-modal-body">
@@ -109,23 +109,23 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
         </div>
         <div>
-          <div style="font-size:13px;font-weight:600;color:#111;">Confirmer la suppression</div>
+          <div style="font-size:13px;font-weight:600;color:#111;">{{ __('admin.confirmer_suppression') }}</div>
           <div style="font-size:12px;color:#888;" id="supprimer-payeur-nom"></div>
         </div>
       </div>
       <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:16px;">
-        <p style="font-size:12px;color:#b91c1c;margin:0;">Action irréversible — les données seront archivées (soft delete).</p>
+        <p style="font-size:12px;color:#b91c1c;margin:0;">{{ __('admin.irreversible_archive') }}</p>
       </div>
       <form id="form-supprimer-payeur" method="POST">
         @csrf @method('DELETE')
         <div style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" onclick="epModal.close('modal-supprimer-payeur')"
                   style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
-            Annuler
+            {{ __('messages.annuler') }}
           </button>
           <button type="submit"
                   style="padding:8px 20px;font-size:13px;font-weight:600;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">
-            Supprimer
+            {{ __('admin.supprimer') }}
           </button>
         </div>
       </form>
@@ -139,8 +139,8 @@
 
 <div class="flex items-center justify-between mb-5">
   <div>
-    <h1 class="text-xl font-bold text-gray-900">Comptes payeurs</h1>
-    <p class="text-sm text-gray-500 mt-0.5">Parents, élèves et étudiants inscrits sur la plateforme</p>
+    <h1 class="text-xl font-bold text-gray-900">{{ __('admin.comptes_payeurs') }}</h1>
+    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.parents_eleves_etudiants') }}</p>
   </div>
 </div>
 
@@ -152,7 +152,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-gray-900">{{ $stats['total'] }}</div>
-      <div class="text-xs text-gray-400">Total</div>
+      <div class="text-xs text-gray-400">{{ __('admin.total') }}</div>
     </div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
@@ -161,7 +161,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-green-700">{{ $stats['actifs'] }}</div>
-      <div class="text-xs text-gray-400">Actifs</div>
+      <div class="text-xs text-gray-400">{{ __('admin.actifs') }}</div>
     </div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
@@ -170,7 +170,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-red-700">{{ $stats['suspendus'] }}</div>
-      <div class="text-xs text-gray-400">Suspendus</div>
+      <div class="text-xs text-gray-400">{{ __('admin.suspendus') }}</div>
     </div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
@@ -179,7 +179,7 @@
     </div>
     <div>
       <div class="text-xl font-bold text-[#854F0B]">{{ $stats['parents'] }}</div>
-      <div class="text-xs text-gray-400">Parents</div>
+      <div class="text-xs text-gray-400">{{ __('admin.parents') }}</div>
     </div>
   </div>
 </div>
@@ -190,20 +190,20 @@
     <input type="text" name="search" placeholder="Rechercher par nom, email, téléphone..."
            class="flex-1 min-w-50 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
     <select name="statut" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
-      <option value="">Tous les statuts</option>
+      <option value="">{{ __('admin.tous_statuts') }}</option>
       <option value="actif">Actif</option>
       <option value="suspendu">Suspendu</option>
     </select>
     <select name="profil" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
-      <option value="">Tous les profils</option>
-      <option value="parent">Parent</option>
-      <option value="eleve">Élève</option>
-      <option value="etudiant">Étudiant</option>
+      <option value="">{{ __('admin.tous_profils') }}</option>
+      <option value="parent">{{ __('admin.parent') }}</option>
+      <option value="eleve">{{ __('admin.eleve') }}</option>
+      <option value="etudiant">{{ __('admin.etudiant') }}</option>
     </select>
     <button type="button" onclick="dtPayeurs.ajax.reload()" class="bg-[#0D9E75] hover:bg-[#0A8562] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
       Filtrer
     </button>
-    <button type="button" onclick="reinitialiserFiltresPayeurs()" class="text-sm text-gray-400 hover:text-gray-600 px-2">Réinitialiser</button>
+    <button type="button" onclick="reinitialiserFiltresPayeurs()" class="text-sm text-gray-400 hover:text-gray-600 px-2">{{ __('admin.reinitialiser') }}</button>
   </div>
 </div>
 
@@ -213,12 +213,12 @@
     <table id="dt-payeurs" class="ep-dt text-sm">
     <thead>
       <tr>
-        <th>Payeur</th>
-        <th>Contact</th>
-        <th>Enfants</th>
-        <th>Statut</th>
-        <th>Inscrit le</th>
-        <th data-orderable="false">Actions</th>
+        <th>{{ __('admin.payeur_col') }}</th>
+        <th>{{ __('messages.contact') }}</th>
+        <th>{{ __('admin.enfants') }}</th>
+        <th>{{ __('messages.statut') }}</th>
+        <th>{{ __('admin.inscrit_le') }}</th>
+        <th data-orderable="false">{{ __('messages.actions') }}</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -322,15 +322,15 @@ function epSubmitAjaxPayeur(form, modalId, btnSelector) {
     .then(r => r.json().then(data => ({ status: r.status, body: data })))
     .then(({ status, body }) => {
         if (status >= 200 && status < 300 && body.success) {
-            epToast(body.message || 'Action effectuée.', 'success');
+            epToast(body.message || @json(__('admin.action_effectuee')), 'success');
             epModal.close(modalId);
             dtPayeurs.ajax.reload(null, false);
         } else {
-            epToast(body.message || 'Une erreur est survenue.', 'error');
+            epToast(body.message || @json(__('admin.une_erreur_survenue')), 'error');
         }
     })
     .catch(() => {
-        epToast('Erreur réseau — veuillez réessayer.', 'error');
+        epToast(@json(__('admin.erreur_reseau')), 'error');
     })
     .finally(() => {
         if (btn) { btn.disabled = false; btn.textContent = btnTexteOriginal; }

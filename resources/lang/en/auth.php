@@ -211,4 +211,16 @@ return [
     'ville_residence'           => 'City of residence',
     'votre_code_etab'           => 'School code',
     'vous_etes'                 => 'You are:',
+
+    // ── Password reset email ──
+    'em_bonjour_nom' => 'Hello <strong>:nom</strong>,<br/>',
+    'em_reset_demande' => 'We received a request to reset your password.',
+    'em_reset_code_expire' => 'Use the code below. It expires in <strong>:duree</strong>.',
+    'em_reset_entrez_code' => 'Enter this code on the reset page:',
+    'em_reset_attention' => '<strong>⚠️ Important:</strong> if you did not request this, ignore this email. Your password will remain unchanged.',
+    'em_reset_ignore' => "If you didn't request this reset, ignore this email.",
+    'em_reset_questions' => 'A question?',
+    'em_reset_contactez_support' => 'Contact our support.',
+    'em_footer_tous_droits' => '© 2026 EduPay Cameroon — All rights reserved',
+    'em_reset_footer_sent' => 'This email was sent to you automatically following your request.',
 ];

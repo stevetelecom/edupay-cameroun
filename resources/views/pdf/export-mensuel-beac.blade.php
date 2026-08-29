@@ -21,26 +21,26 @@
 </head>
 <body>
     <div class="header">
-        <h1>EduPay Cameroun — Rapport mensuel des flux financiers</h1>
-        <p>{{ $periodeLabel }} — Toutes écoles — Généré le {{ now()->format('d/m/Y à H:i') }}</p>
+        <h1>{{ __('admin.pdf_beac_titre') }}</h1>
+        <p>{!! __('admin.pdf_generer_le', ['periode' => $periodeLabel, 'date' => now()->format('d/m/Y à H:i')]) !!}</p>
     </div>
     <div class="goldline"></div>
 
     <div class="content">
-        <div class="conformite">Document conforme aux directives BEAC sur la déclaration des flux financiers de monnaie électronique.</div>
+        <div class="conformite">{{ __('admin.pdf_beac_conformite') }}</div>
 
         <table class="kpis">
             <tr>
-                <td><span class="val">{{ number_format($volumeTotal, 0, ',', ' ') }}</span>FCFA encaissés</td>
-                <td><span class="val">{{ number_format($commissionsTotal, 0, ',', ' ') }}</span>FCFA commissions</td>
-                <td><span class="val">{{ $nbTransactions }}</span>Transactions validées</td>
-                <td><span class="val">{{ $etablissementsActifs }}</span>Établissements actifs</td>
+                <td><span class="val">{{ number_format($volumeTotal, 0, ',', ' ') }}</span>{{ __('admin.pdf_kpi_encaisse') }}</td>
+                <td><span class="val">{{ number_format($commissionsTotal, 0, ',', ' ') }}</span>{{ __('admin.pdf_kpi_commissions') }}</td>
+                <td><span class="val">{{ $nbTransactions }}</span>{{ __('admin.pdf_kpi_transactions_validees') }}</td>
+                <td><span class="val">{{ $etablissementsActifs }}</span>{{ __('admin.pdf_kpi_etablissements_actifs') }}</td>
             </tr>
         </table>
 
-        <div class="section-title">Répartition par opérateur Mobile Money</div>
+        <div class="section-title">{{ __('admin.pdf_section_repartition_operateur') }}</div>
         <table>
-            <tr><th>Opérateur</th><th>Nb transactions</th><th>Volume (FCFA)</th></tr>
+            <tr><th>{{ __('admin.pdf_col_operateur') }}</th><th>{{ __('admin.pdf_col_nb_transactions') }}</th><th>{{ __('admin.pdf_col_volume') }}</th></tr>
             @forelse ($repartitionOperateur as $op)
                 <tr>
                     <td>{{ str_replace('_Cameroon', '', $op->operateur) }}</td>
@@ -48,13 +48,13 @@
                     <td>{{ number_format($op->volume, 0, ',', ' ') }}</td>
                 </tr>
             @empty
-                <tr><td colspan="3">Aucune transaction sur la période.</td></tr>
+                <tr><td colspan="3">{{ __('admin.pdf_aucune_transaction_periode') }}</td></tr>
             @endforelse
         </table>
 
-        <div class="section-title">Top 5 établissements (volume)</div>
+        <div class="section-title">{{ __('admin.pdf_section_top5') }}</div>
         <table>
-            <tr><th>Établissement</th><th>Volume (FCFA)</th><th>Commission (FCFA)</th></tr>
+            <tr><th>{{ __('admin.pdf_col_etablissement') }}</th><th>{{ __('admin.pdf_col_volume') }}</th><th>{{ __('admin.pdf_col_commission') }}</th></tr>
             @forelse ($topEtablissements as $te)
                 <tr>
                     <td>{{ $te->etablissement->nom ?? '—' }}</td>
@@ -62,11 +62,11 @@
                     <td>{{ number_format($te->commission, 0, ',', ' ') }}</td>
                 </tr>
             @empty
-                <tr><td colspan="3">Aucune donnée disponible.</td></tr>
+                <tr><td colspan="3">{{ __('admin.pdf_aucune_donnee') }}</td></tr>
             @endforelse
         </table>
 
-        <div class="footer">Document généré automatiquement par la plateforme EduPay Cameroun — Réf. CDC-EDUPAY-CM-2026-001</div>
+        <div class="footer">{{ __('admin.pdf_footer_auto') }}</div>
     </div>
 </body>
 </html>

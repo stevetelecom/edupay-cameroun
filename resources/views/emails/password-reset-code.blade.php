@@ -21,34 +21,35 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Réinitialisation de mot de passe</h1>
+            <h1>{{ __('auth.reset_titre') }}</h1>
             <p style="margin: 10px 0 0; opacity: 0.9;">EduPay Cameroun</p>
         </div>
         
         <div class="content">
-            <p>Bonjour <strong>{{ $userName }}</strong>,</p>
+            {!! __('auth.em_bonjour_nom', ['nom' => $userName]) !!}
             
-            <p>Nous avons reçu une demande de réinitialisation de votre mot de passe. Voici votre code de vérification à 6 chiffres:</p>
+            <p>{{ __('auth.em_reset_demande') }}</p>
             
             <div class="code-box">
                 <div class="code">{{ $code }}</div>
-                <div class="expires">Code valide pendant {{ $expiresIn }}</div>
+                <div class="expires">{!! __('auth.em_reset_code_expire', ['duree' => $expiresIn]) !!}</div>
             </div>
 
-            <p>Entrez ce code sur la page de réinitialisation pour continuer.</p>
+            <p>{{ __('auth.em_reset_entrez_code') }}</p>
 
             <div class="warning">
-                <p><strong>⚠️ Attention:</strong> Si vous n'avez pas demandé la réinitialisation de votre mot de passe, ignorez cet email. Votre compte reste sécurisé.</p>
+                <p>{!! __('auth.em_reset_attention') !!}</p>
             </div>
 
             <p style="color: #666; font-size: 13px; margin-top: 25px;">
-                <strong>Questions?</strong> Contactez notre équipe support à <a href="mailto:edupay@mekontso.gsi2026.com" style="color: #0D9E75;">edupay@mekontso.gsi2026.com</a>
+                <strong>{{ __('auth.em_reset_questions') }}</strong> {{ __('auth.em_reset_contactez_support') }}
+                <a href="mailto:edupay@mekontso.gsi2026.com" style="color: #0D9E75;">edupay@mekontso.gsi2026.com</a>
             </p>
         </div>
 
         <div class="footer">
-            <p>© {{ date('Y') }} EduPay Cameroun. Tous droits réservés.</p>
-            <p>Cet email a été envoyé à votre adresse email associée à votre compte EduPay.</p>
+            <p>{{ __('auth.em_footer_tous_droits') }}</p>
+            <p>{{ __('auth.em_reset_footer_sent') }}</p>
         </div>
     </div>
 </body>

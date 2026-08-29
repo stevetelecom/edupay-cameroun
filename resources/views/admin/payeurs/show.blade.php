@@ -6,9 +6,9 @@
         default    => 'bg-gray-100 text-gray-600',
     };
     $profilLabel = match($payeur->profil) {
-        'parent'   => 'Parent',
-        'eleve'    => 'Élève',
-        'etudiant' => 'Étudiant',
+        'parent'   => __('admin.profil_parent'),
+        'eleve'    => __('admin.profil_eleve'),
+        'etudiant' => __('admin.profil_etudiant'),
         default    => ucfirst($payeur->profil),
     };
 @endphp
@@ -32,55 +32,55 @@
 
     @if($payeur->suspendu)
     <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm">
-        <div class="font-semibold text-red-800 mb-1">Compte suspendu</div>
-        <div class="text-red-700 text-xs">{{ $payeur->suspendu_raison ?? 'Aucune raison précisée.' }}</div>
-        <div class="text-red-500 text-xs mt-1">Depuis {{ $payeur->suspendu_at?->format('d/m/Y à H:i') ?? '—' }}</div>
+        <div class="font-semibold text-red-800 mb-1">{{ __('admin.compte_suspendu') }}</div>
+        <div class="text-red-700 text-xs">{{ $payeur->suspendu_raison ?? __('admin.aucune_raison_precisee') }}</div>
+        <div class="text-red-500 text-xs mt-1">{{ __('admin.depuis') }} {{ $payeur->suspendu_at?->format('d/m/Y à H:i') ?? '—' }}</div>
     </div>
     @endif
 
     <div>
-        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Coordonnées</h4>
+        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ __('admin.coordonnees') }}</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-xs text-gray-400 mb-1">Téléphone</div>
+                <div class="text-xs text-gray-400 mb-1">{{ __('messages.telephone') }}</div>
                 <div class="font-medium text-gray-800 break-words">{{ $payeur->telephone ?? '—' }}</div>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-xs text-gray-400 mb-1">Email</div>
+                <div class="text-xs text-gray-400 mb-1">{{ __('admin.email') }}</div>
                 <div class="font-medium text-gray-800 break-all">{{ $payeur->email ?? '—' }}</div>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-xs text-gray-400 mb-1">Ville</div>
+                <div class="text-xs text-gray-400 mb-1">{{ __('messages.ville') }}</div>
                 <div class="font-medium text-gray-800 break-words">{{ $payeur->ville ?? '—' }}</div>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
-                <div class="text-xs text-gray-400 mb-1">Quartier</div>
+                <div class="text-xs text-gray-400 mb-1">{{ __('admin.quartier') }}</div>
                 <div class="font-medium text-gray-800 break-words">{{ $payeur->quartier ?? '—' }}</div>
             </div>
         </div>
     </div>
 
     <div>
-        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Activité</h4>
+        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ __('admin.activite') }}</h4>
         <div class="grid grid-cols-3 gap-3 text-center">
             <div class="bg-[#E0F5EE] rounded-lg p-3">
                 <div class="text-xl font-bold text-[#0D9E75]">{{ $payeur->apprenants_count }}</div>
-                <div class="text-xs text-[#085041] mt-0.5">Enfants rattachés</div>
+                <div class="text-xs text-[#085041] mt-0.5">{{ __('admin.enfants_rattaches') }}</div>
             </div>
             <div class="bg-[#FEF3DC] rounded-lg p-3">
                 <div class="text-xl font-bold text-[#854F0B]">{{ $totalPaiements }}</div>
-                <div class="text-xs text-[#854F0B] mt-0.5">Paiements</div>
+                <div class="text-xs text-[#854F0B] mt-0.5">{{ __('messages.paiements') }}</div>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
                 <div class="text-lg font-bold text-gray-700">{{ number_format($montantTotalPaye, 0, ',', ' ') }}</div>
-                <div class="text-xs text-gray-500 mt-0.5">FCFA payés</div>
+                <div class="text-xs text-gray-500 mt-0.5">{{ __('admin.fcfa_payes') }}</div>
             </div>
         </div>
     </div>
 
     @if($payeur->apprenants->isNotEmpty())
     <div>
-        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Enfants / apprenants rattachés</h4>
+        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ __('admin.enfants_apprenants_rattaches') }}</h4>
         <div class="space-y-2">
             @foreach($payeur->apprenants as $apprenant)
             <div class="bg-gray-50 rounded-lg p-3 flex items-center justify-between gap-2">
@@ -95,7 +95,7 @@
     @endif
 
     <div class="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-100">
-        <span>Inscrit le {{ $payeur->created_at->format('d/m/Y') }}</span>
-        <span>Mis à jour {{ $payeur->updated_at->diffForHumans() }}</span>
+        <span>{{ __('admin.inscrit_le') }} {{ $payeur->created_at->format('d/m/Y') }}</span>
+        <span>{{ __('admin.mis_a_jour') }} {{ $payeur->updated_at->diffForHumans() }}</span>
     </div>
 </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirmation paiement — EduPay</title>
+  <title>{{ __('payeur.em_confirme_titre') }}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background:#f5f5f5; margin:0; padding:0; -webkit-text-size-adjust:100%; }
@@ -56,70 +56,69 @@
   </div>
 
   <div class="body">
-    <div class="title">✅ Paiement confirmé</div>
+    <div class="title">{{ __('payeur.em_confirme_titre') }}</div>
 
     <div class="text">
-      Bonjour <strong>{{ $paiement->user->prenom ?? 'Utilisateur' }}</strong>,<br>
-      Votre paiement a été <strong style="color:#0D9E75;">correctement validé</strong>.
-      Merci d'avoir utilisé EduPay Cameroun !
+      {!! __('payeur.em_bonjour_nom', ['nom' => $paiement->user->prenom ?? __('payeur.em_utilisateur_fallback')]) !!}
+      {!! __('payeur.em_confirme_intro', ['enfant' => $paiement->apprenant->nom.' '.$paiement->apprenant->prenom]) !!}
     </div>
 
     <div class="montant-block">
       <div class="montant">{{ number_format($paiement->montant, 0, ',', ' ') }} FCFA</div>
-      <div class="montant-label">Montant payé</div>
+      <div class="montant-label">{{ __('payeur.em_montant_paye') }}</div>
     </div>
 
     <div class="info-box">
       <div class="info-row">
-        <span class="info-label">Apprenant</span>
+        <span class="info-label">{{ __('payeur.em_label_apprenant') }}</span>
         <span class="info-value">{{ $paiement->apprenant->nom }} {{ $paiement->apprenant->prenom }}</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Type de frais</span>
-        <span class="info-value">{{ $paiement->fraisApprenant->categorieFrais->nom ?? 'Frais' }}</span>
+        <span class="info-label">{{ __('payeur.em_label_type_frais') }}</span>
+        <span class="info-value">{{ $paiement->fraisApprenant->categorieFrais->nom ?? __('payeur.frais') }}</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Référence</span>
+        <span class="info-label">{{ __('payeur.hist_reference') }}</span>
         <span class="info-value">{{ $paiement->reference }}</span>
       </div>
       <div class="info-row">
-        <span class="info-label">Mode</span>
+        <span class="info-label">{{ __('payeur.em_label_mode') }}</span>
         <span class="info-value">
           @switch($paiement->mode_paiement)
             @case('mtn_momo') MTN MoMo @break
             @case('orange_money') Orange Money @break
-            @case('carte') Carte Bancaire @break
+            @case('carte') {{ __('etablissement.carte') }} @break
             @default {{ ucfirst($paiement->mode_paiement) }}
           @endswitch
         </span>
       </div>
       <div class="info-row">
-        <span class="info-label">Date</span>
+        <span class="info-label">{{ __('payeur.hist_date') }}</span>
         <span class="info-value">
-          {{ $paiement->date_validation ? \Carbon\Carbon::parse($paiement->date_validation)->format('d/m/Y à H:i') : 'Aujourd\'hui' }}
+          {{ $paiement->date_validation ? \Carbon\Carbon::parse($paiement->date_validation)->format('d/m/Y à H:i') : __('payeur.em_aujourdhui') }}
         </span>
       </div>
     </div>
 
     <div class="btn-wrap">
       <a href="{{ config('app.url') }}/payeur/historique" class="btn">
-        Voir mes paiements
+        {{ __('payeur.em_voir_mes_paiements') }}
       </a>
     </div>
 
     <div class="tip">
-      <strong>💡 Besoin d'aide ?</strong><br>
-      Contactez le support : <a href="mailto:edupay@mekontso.gsi2026.com" style="color:#0D9E75;">edupay@mekontso.gsi2026.com</a>
+      <strong>💡 {{ __('payeur.em_besoin_aide') }}</strong><br>
+      {{ __('payeur.em_contacter_support') }} : <a href="mailto:edupay@mekontso.gsi2026.com" style="color:#0D9E75;">edupay@mekontso.gsi2026.com</a>
     </div>
 
     <div class="text" style="color:#999; font-size:12px; margin-top:20px;">
-      Cordialement,<br><strong>L'équipe EduPay Cameroun</strong>
+      {{ __('payeur.em_cordialement') }}<br><strong>{{ __('payeur.em_equipe_edupay') }}</strong>
     </div>
   </div>
 
   <div class="footer">
-    © 2026 EduPay Cameroun — Tous droits réservés.<br>
-    Gestion intelligente des frais de scolarité.
+    {{ __('payeur.em_footer_tous_droits') }}<br>
+    {{ __('payeur.em_footer_scolaire_simplifie') }}
   </div>
 
 </div>

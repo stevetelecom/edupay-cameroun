@@ -4,7 +4,7 @@
 <body class="h-full bg-gray-100 flex flex-col items-center justify-center font-sans antialiased">
 <div class="mb-6 text-center">
   <div class="text-2xl font-bold text-[#0B2545] tracking-tight">Edu<span class="text-[#0D9E75]">Pay</span> Cameroun</div>
-  <div class="text-xs text-gray-400 mt-1">Réinitialisation Super Admin</div>
+  <div class="text-xs text-gray-400 mt-1">{{ __('admin.reinitialisation_super_admin') }}</div>
 </div>
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8 w-full max-w-sm">
   <div class="flex justify-center mb-5">
@@ -15,9 +15,9 @@
       </svg>
     </div>
   </div>
-  <h1 class="text-lg font-bold text-center text-gray-900 mb-1">Mot de passe oublié ?</h1>
+  <h1 class="text-lg font-bold text-center text-gray-900 mb-1">{{ __('auth.mot_de_passe_oublie') }}</h1>
   <p class="text-sm text-gray-500 text-center mb-6">
-    Entrez votre adresse email administrateur. Nous vous enverrons un code de réinitialisation.
+    {{ __('admin.entrez_email_admin') }}
   </p>
   @if(session('info'))
   <div class="mb-4 bg-blue-50 border border-blue-200 text-blue-700 text-sm px-4 py-3 rounded-lg text-center">{{ session('info') }}</div>
@@ -30,21 +30,21 @@
   <form method="POST" action="{{ route('admin.password.forgot.send') }}">
     @csrf
     <div class="mb-5">
-      <label for="email" class="block text-xs font-medium text-gray-600 mb-1.5">Adresse email</label>
+      <label for="email" class="block text-xs font-medium text-gray-600 mb-1.5">{{ __('auth.adresse_email') }}</label>
       <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus
              placeholder="admin@edupay.cm"
              class="w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none transition-colors border-gray-300 focus:border-[#0D9E75]" />
       @error('email')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
     </div>
     <button type="submit" class="w-full bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold text-sm py-3 rounded-lg transition-colors">
-      Envoyer le code de réinitialisation
+      {{ __('admin.envoyer_code_reinit') }}
     </button>
   </form>
   <div class="mt-4 text-center">
     <a href="{{ route('admin.login') }}" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-      Retour à la connexion
+      {{ __('auth.retour_connexion') }}
     </a>
   </div>
 </div>
-<div class="mt-6 text-xs text-gray-400 text-center">© 2026 EduPay Cameroun · TLS 1.3 · Accès restreint</div>
+<div class="mt-6 text-xs text-gray-400 text-center">{{ __('admin.copyright_tls') }}</div>
 </body></html>

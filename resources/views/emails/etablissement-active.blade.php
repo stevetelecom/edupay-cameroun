@@ -32,55 +32,52 @@
     <div class="container">
         <div class="header">
             <div class="logo">Edu<span>Pay</span> Cameroun</div>
-            <div class="header-sub">Plateforme de paiement des frais scolaires</div>
+            <div class="header-sub">{{ __('etablissement.em_header_plateforme') }}</div>
         </div>
         <div class="body">
             <div class="badge-actif">
-                <span>✅ Établissement activé</span>
+                <span>{{ __('etablissement.em_active_badge') }}</span>
             </div>
-            <div class="title">Félicitations, {{ $responsable->prenom }} !</div>
+            <div class="title">{!! __('etablissement.em_active_felicitations', ['prenom' => $responsable->prenom]) !!}</div>
             <div class="text">
-                Votre dossier a été examiné et validé par l'équipe EduPay Cameroun.
-                Votre établissement <strong>{{ $etablissement->nom }}</strong> est maintenant
-                <strong style="color:#0D9E75;">actif sur la plateforme</strong> et peut commencer
-                à collecter les frais de scolarité en ligne.
+                {!! __('etablissement.em_active_texte', ['etab' => $etablissement->nom]) !!}
             </div>
             <div class="info-box">
                 <div class="info-row">
-                    <span class="info-label">Établissement</span>
+                    <span class="info-label">{{ __('messages.etablissement') }}</span>
                     <span class="info-val">{{ $etablissement->nom }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Code établissement</span>
+                    <span class="info-label">{{ __('etablissement.em_label_code_etab') }}</span>
                     <span class="info-val" style="color:#0D9E75;font-family:monospace;">{{ $etablissement->code_etablissement }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Ville</span>
+                    <span class="info-label">{{ __('auth.ville') }}</span>
                     <span class="info-val">{{ $etablissement->ville }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Statut</span>
-                    <span class="info-val" style="color:#0D9E75;">✅ Actif</span>
+                    <span class="info-label">{{ __('etablissement.statut') }}</span>
+                    <span class="info-val" style="color:#0D9E75;">✅ {{ __('etablissement.em_actif') }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Activé le</span>
+                    <span class="info-label">{{ __('etablissement.em_label_active_le') }}</span>
                     <span class="info-val">{{ now()->format('d/m/Y à H:i') }}</span>
                 </div>
             </div>
             <div class="steps">
-                <div class="steps-title">🚀 Prochaines étapes</div>
-                <div class="step"><div class="step-num">1</div><div>Connectez-vous à votre back-office avec vos identifiants</div></div>
-                <div class="step"><div class="step-num">2</div><div>Configurez vos catégories de frais et échéanciers</div></div>
-                <div class="step"><div class="step-num">3</div><div>Importez votre liste d'apprenants</div></div>
-                <div class="step"><div class="step-num">4</div><div>Partagez votre code <strong>{{ $etablissement->code_etablissement }}</strong> aux parents</div></div>
+                <div class="steps-title">🚀 {{ __('etablissement.em_prochaines_etapes') }}</div>
+                <div class="step"><div class="step-num">1</div><div>{{ __('etablissement.em_etape_backoffice') }}</div></div>
+                <div class="step"><div class="step-num">2</div><div>{{ __('etablissement.em_etape_frais') }}</div></div>
+                <div class="step"><div class="step-num">3</div><div>{{ __('etablissement.em_etape_annuaire') }}</div></div>
+                <div class="step"><div class="step-num">4</div><div>{!! __('etablissement.em_etape_partage', ['code' => $etablissement->code_etablissement]) !!}</div></div>
             </div>
             <a href="{{ config('app.url') }}/connexion" class="btn">
-                Accéder à mon back-office →
+                {{ __('etablissement.em_btn_backoffice') }} →
             </a>
         </div>
         <div class="footer">
-            EduPay Cameroun — Plateforme de paiement des frais scolaires<br/>
-            © {{ date('Y') }} · Cet email vous a été envoyé car votre établissement vient d'être activé.
+            {{ __('etablissement.em_footer_plateforme') }}<br/>
+            © {{ date('Y') }} · {{ __('etablissement.em_actif_footer_note') }}
         </div>
     </div>
 </body>

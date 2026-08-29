@@ -4,7 +4,7 @@
 <body class="h-full bg-gray-100 flex flex-col items-center justify-center font-sans antialiased">
 <div class="mb-6 text-center">
   <div class="text-2xl font-bold text-[#0B2545] tracking-tight">Edu<span class="text-[#0D9E75]">Pay</span> Cameroun</div>
-  <div class="text-xs text-gray-400 mt-1">Nouveau mot de passe</div>
+  <div class="text-xs text-gray-400 mt-1">{{ __('auth.reset_title') }}</div>
 </div>
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8 w-full max-w-sm">
   <div class="flex justify-center mb-5">
@@ -14,8 +14,8 @@
       </svg>
     </div>
   </div>
-  <h1 class="text-lg font-bold text-center text-gray-900 mb-1">Nouveau mot de passe</h1>
-  <p class="text-sm text-gray-500 text-center mb-6">Entrez le code reçu par email et choisissez un nouveau mot de passe.</p>
+  <h1 class="text-lg font-bold text-center text-gray-900 mb-1">{{ __('auth.reset_title') }}</h1>
+  <p class="text-sm text-gray-500 text-center mb-6">{{ __('admin.entrez_code_choisissez') }}</p>
   @if($errors->any())
   <div class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
     @foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach
@@ -25,7 +25,7 @@
     @csrf
     {{-- 6 cases OTP --}}
     <div class="mb-5">
-      <label class="block text-xs font-medium text-gray-600 mb-2 text-center">Code reçu par email</label>
+      <label class="block text-xs font-medium text-gray-600 mb-2 text-center">{{ __('admin.code_recu_email') }}</label>
       <input type="hidden" name="code" id="reset-code-hidden" />
       <div style="display:flex;gap:8px;justify-content:center;margin-bottom:6px;">
         @for($i = 1; $i <= 6; $i++)
@@ -41,7 +41,7 @@
     </div>
     {{-- Nouveau mot de passe --}}
     <div class="mb-4">
-      <label class="block text-xs font-medium text-gray-600 mb-1.5">Nouveau mot de passe</label>
+      <label class="block text-xs font-medium text-gray-600 mb-1.5">{{ __('auth.nouveau_mot_de_passe') }}</label>
       <div style="position:relative;">
         <input type="password" id="password" name="password" required minlength="10"
                style="padding-right:44px;"
@@ -55,7 +55,7 @@
       @error('password')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
     </div>
     <div class="mb-5">
-      <label class="block text-xs font-medium text-gray-600 mb-1.5">Confirmer le mot de passe</label>
+      <label class="block text-xs font-medium text-gray-600 mb-1.5">{{ __('auth.confirmer_mot_de_passe') }}</label>
       <div style="position:relative;">
         <input type="password" id="password_confirmation" name="password_confirmation" required
                style="padding-right:44px;"
@@ -69,14 +69,14 @@
       @error('password_confirmation')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
     </div>
     <button type="submit" class="w-full bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold text-sm py-3 rounded-lg transition-colors">
-      Réinitialiser le mot de passe
+      {{ __('auth.reinitialiser_mot_de_passe') }}
     </button>
   </form>
   <div class="mt-4 text-center">
-    <a href="{{ route('admin.login') }}" class="text-xs text-gray-400 hover:text-gray-600">Retour à la connexion</a>
+    <a href="{{ route('admin.login') }}" class="text-xs text-gray-400 hover:text-gray-600">{{ __('auth.retour_connexion') }}</a>
   </div>
 </div>
-<div class="mt-6 text-xs text-gray-400 text-center">© 2026 EduPay Cameroun · TLS 1.3</div>
+<div class="mt-6 text-xs text-gray-400 text-center">{{ __('admin.copyright_tls_court') }}</div>
 <script>
 function toggleP(id,e1,e2){
   var i=document.getElementById(id);

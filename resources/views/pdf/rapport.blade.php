@@ -20,45 +20,45 @@
 </head>
 <body>
     <div class="header">
-        <h1>EduPay Cameroun — Rapport financier</h1>
-        <p>{{ Auth::user()->etablissement->nom ?? '' }} — Année {{ $anneeScolaire }} — Généré le {{ now()->format('d/m/Y à H:i') }}</p>
+        <h1>EduPay Cameroun — {{ __('etablissement.pdf_rapport_titre') }}</h1>
+        <p>{!! __('etablissement.pdf_rapport_soustitre', ['etab' => Auth::user()->etablissement->nom ?? '', 'annee' => $anneeScolaire, 'date' => now()->format('d/m/Y à H:i')]) !!}</p>
     </div>
     <div class="goldline"></div>
 
     <div class="content">
         <table class="kpis">
             <tr>
-                <td><span class="val">{{ number_format($totalEncaisseAnnee, 0, ',', ' ') }}</span>FCFA encaissés</td>
-                <td><span class="val">{{ number_format($totalImpayeAnnee, 0, ',', ' ') }}</span>FCFA impayés</td>
-                <td><span class="val">{{ $tauxRecouvrement }}%</span>Taux de recouvrement</td>
-                <td><span class="val">{{ $nbApprenants }}</span>Apprenants suivis</td>
+                <td><span class="val">{{ number_format($totalEncaisseAnnee, 0, ',', ' ') }}</span>{{ __('etablissement.fcfa_encaisse') }}</td>
+                <td><span class="val">{{ number_format($totalImpayeAnnee, 0, ',', ' ') }}</span>FCFA {{ __('messages.impayes') }}</td>
+                <td><span class="val">{{ $tauxRecouvrement }}%</span>{{ __('etablissement.taux_recouvrement') }}</td>
+                <td><span class="val">{{ $nbApprenants }}</span>{{ __('etablissement.apprenants_suivis') }}</td>
             </tr>
         </table>
 
-        <div class="section-title">Répartition par moyen de paiement</div>
+        <div class="section-title">{{ __('etablissement.pdf_section_moyen_paiement') }}</div>
         <table>
-            <tr><th>Moyen de paiement</th><th>Pourcentage</th></tr>
+            <tr><th>{{ __('payeur.hist_moyen') }}</th><th>{{ __('etablissement.pdf_col_pourcentage') }}</th></tr>
             @forelse($repartitionMoyens as $m)
                 <tr>
-                    <td>{{ match($m['mode']) { 'mtn_momo' => 'MTN Mobile Money', 'orange_money' => 'Orange Money', 'carte' => 'Carte bancaire', default => $m['mode'] } }}</td>
+                    <td>{{ match($m['mode']) { 'mtn_momo' => __('etablissement.mt_mtn'), 'orange_money' => __('etablissement.mt_orange'), 'carte' => __('etablissement.carte'), default => $m['mode'] } }}</td>
                     <td>{{ $m['pourcentage'] }}%</td>
                 </tr>
             @empty
-                <tr><td colspan="2">Aucune donnée disponible.</td></tr>
+                <tr><td colspan="2">{{ __('admin.pdf_aucune_donnee') }}</td></tr>
             @endforelse
         </table>
 
-        <div class="section-title">Recouvrement par classe</div>
+        <div class="section-title">{{ __('etablissement.recouvrement_classe') }}</div>
         <table>
-            <tr><th>Classe</th><th>Apprenants</th><th>Taux de recouvrement</th></tr>
+            <tr><th>{{ __('etablissement.classe') }}</th><th>{{ __('etablissement.apprenants') }}</th><th>{{ __('etablissement.taux_recouvrement') }}</th></tr>
             @forelse($repartitionClasses as $c)
                 <tr><td>{{ $c['nom'] }}</td><td>{{ $c['nb_apprenants'] }}</td><td>{{ $c['taux'] }}%</td></tr>
             @empty
-                <tr><td colspan="3">Aucune donnée disponible.</td></tr>
+                <tr><td colspan="3">{{ __('admin.pdf_aucune_donnee') }}</td></tr>
             @endforelse
         </table>
 
-        <div class="footer">Document généré automatiquement par la plateforme EduPay Cameroun — Réf. CDC-EDUPAY-CM-2026-001</div>
+        <div class="footer">{{ __('admin.pdf_footer_auto') }}</div>
     </div>
 </body>
 </html>

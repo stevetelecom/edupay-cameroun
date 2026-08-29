@@ -1,6 +1,6 @@
 @extends('layouts.payeur')
 
-@section('title', 'Modifier — ' . $apprenant->prenom . ' ' . $apprenant->nom)
+@section('title', __('payeur.modifier_titre', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]))
 
 @push('modals')
 
@@ -8,22 +8,22 @@
 <div id="modal-detach-apprenant" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm ep-modal-danger">
     <div class="ep-modal-head">
-      <h3>Retirer {{ $apprenant->prenom }} ?</h3>
+      <h3>{{ __('payeur.retirer_confirm_titre', ['prenom' => $apprenant->prenom]) }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-detach-apprenant')">×</button>
     </div>
     <div class="ep-modal-body">
       <p style="font-size:13px;color:#555;line-height:1.6;">
-        Vous allez retirer <strong>{{ $apprenant->prenom }} {{ $apprenant->nom }}</strong> de votre compte.<br><br>
-        Cette action est irréversible. L'apprenant ne sera plus visible depuis votre espace.
+        {!! __('payeur.retirer_confirm_body', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]) !!}<br><br>
+        {{ __('payeur.retirer_confirm_irreversible') }}
       </p>
     </div>
     <div class="ep-modal-foot">
       <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
-              onclick="epModal.close('modal-detach-apprenant')">Annuler</button>
+              onclick="epModal.close('modal-detach-apprenant')">{{ __('payeur.annuler') }}</button>
       <form method="POST" action="{{ route('payeur.apprenant.detach', $apprenant) }}" style="display:inline;">
         @csrf @method('DELETE')
         <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">
-          Retirer {{ $apprenant->prenom }}
+          {{ __('payeur.retirer') }} {{ $apprenant->prenom }}
         </button>
       </form>
     </div>
@@ -35,13 +35,13 @@
 @section('content')
 
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">← Retour</a>
+        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">← {{ __('payeur.retour') }}</a>
     </div>
 
     <div style="max-width:560px;margin:0 auto;">
 
         <div style="font-size:17px;font-weight:700;margin-bottom:4px;">
-            Modifier — {{ $apprenant->prenom }} {{ $apprenant->nom }}
+            {{ __('payeur.modifier_titre', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]) }}
         </div>
         <div style="font-size:12px;color:#888;margin-bottom:20px;">
             {{ $apprenant->etablissement->nom ?? '—' }} · {{ $apprenant->classe }}
@@ -49,7 +49,7 @@
 
         @if($errors->any())
             <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:8px;padding:12px 16px;margin-bottom:18px;">
-                <div style="font-size:13px;font-weight:600;color:#991B1B;margin-bottom:6px;">Erreurs :</div>
+                <div style="font-size:13px;font-weight:600;color:#991B1B;margin-bottom:6px;">{{ __('payeur.erreurs') }}</div>
                 <ul style="margin:0;padding-left:18px;">
                     @foreach($errors->all() as $e)
                         <li style="font-size:12px;color:#B91C1C;">{{ $e }}</li>
@@ -61,11 +61,11 @@
         <div class="epcard">
 
             <div style="margin-bottom:16px;">
-                <div class="lbl">Établissement *</div>
+                <div class="lbl">{{ __('messages.etablissement') }} *</div>
                 <div style="position:relative;margin-bottom:8px;">
                     <input type="text" id="etab-search"
                            value="{{ $apprenant->etablissement->nom ?? '' }}"
-                           placeholder="Rechercher un établissement…"
+                           placeholder="{{ __('payeur.rechercher_etablissement') }}"
                            style="width:100%;padding:11px 12px 11px 36px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"
                            oninput="filtrerEtabs(this.value)"
                            onfocus="document.getElementById('etab-liste').style.display='block'" />
@@ -105,22 +105,22 @@
 
                 <div class="g2">
                     <div>
-                        <div class="lbl">Prénom *</div>
+                        <div class="lbl">{{ __('payeur.prenom_lbl') }} *</div>
                         <input type="text" name="prenom" class="inp"
                                value="{{ old('prenom', $apprenant->prenom) }}" required>
                     </div>
                     <div>
-                        <div class="lbl">Nom *</div>
+                        <div class="lbl">{{ __('payeur.nom_lbl') }} *</div>
                         <input type="text" name="nom" class="inp"
                                value="{{ old('nom', $apprenant->nom) }}" required>
                     </div>
                     <div>
-                        <div class="lbl">Classe *</div>
+                        <div class="lbl">{{ __('etablissement.classe') }} *</div>
                         <input type="text" name="classe" class="inp"
                                value="{{ old('classe', $apprenant->classe) }}" required>
                     </div>
                     <div>
-                        <div class="lbl">Matricule</div>
+                        <div class="lbl">{{ __('etablissement.matricule') }}</div>
                         <input type="text" name="matricule" class="inp"
                                value="{{ old('matricule', $apprenant->matricule) }}">
                     </div>
@@ -128,15 +128,15 @@
 
                 @if($apprenant->paiements()->exists())
                     <div style="background:var(--ep-gold-lt);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#854F0B;">
-                        ⚠ Des paiements existent — l'établissement ne peut plus être modifié.
+                        {{ __('payeur.des_paiements_existent') }}
                     </div>
                 @endif
 
                 <div style="display:flex;gap:10px;margin-top:8px;">
                     <a href="{{ route('payeur.dashboard') }}"
-                       class="btn-o" style="width:auto;padding:10px 20px;">Annuler</a>
+                       class="btn-o" style="width:auto;padding:10px 20px;">{{ __('payeur.annuler') }}</a>
                     <button type="submit" class="btn-p" style="flex:1;">
-                        Enregistrer les modifications
+                        {{ __('payeur.enregistrer_modifications') }}
                     </button>
                 </div>
             </form>
@@ -147,7 +147,7 @@
             <div style="margin-top:16px;text-align:center;">
                 <button onclick="epModal.open('modal-detach-apprenant')"
                         style="background:none;border:none;color:var(--ep-red);font-size:12px;cursor:pointer;text-decoration:underline;">
-                    Retirer {{ $apprenant->prenom }} de mon compte
+                    {{ __('payeur.retirer_de_mon_compte', ['prenom' => $apprenant->prenom]) }}
                 </button>
             </div>
         @endunless

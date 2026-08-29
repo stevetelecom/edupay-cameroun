@@ -1,12 +1,12 @@
 @extends('layouts.admin')
 
-@section('title', 'Exports réglementaires')
+@section('title', __('messages.exports_reglementaires'))
 
 @section('content')
 
     <div class="mb-5">
-        <h1 class="text-xl font-bold text-gray-900">Exports réglementaires COBAC / BEAC</h1>
-        <p class="text-sm text-gray-500 mt-0.5">Génération de rapports financiers conformes pour les autorités de régulation.</p>
+        <h1 class="text-xl font-bold text-gray-900">{{ __('messages.exports_reglementaires') }} COBAC / BEAC</h1>
+        <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.generation_rapports_conformes') }}</p>
     </div>
 
     <div class="space-y-4 max-w-3xl">
@@ -15,8 +15,8 @@
         <div class="bg-white border border-gray-200 rounded-xl p-5">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <div class="text-sm font-bold text-gray-900">Rapport mensuel des flux financiers</div>
-                    <div class="text-xs text-gray-500 mt-0.5">Conforme directives BEAC · volume, commissions, répartition opérateur</div>
+                    <div class="text-sm font-bold text-gray-900">{{ __('admin.rapport_mensuel_flux') }}</div>
+                    <div class="text-xs text-gray-500 mt-0.5">{{ __('admin.conforme_beac') }}</div>
                 </div>
             </div>
             <form method="GET" action="{{ route('admin.exports.mensuel') }}" class="flex items-center gap-3 mt-4">
@@ -28,7 +28,7 @@
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                         <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
-                    Générer PDF
+                    {{ __('admin.generer_pdf') }}
                 </button>
             </form>
         </div>
@@ -37,8 +37,8 @@
         <div class="bg-white border border-gray-200 rounded-xl p-5">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <div class="text-sm font-bold text-gray-900">Déclaration trimestrielle COBAC</div>
-                    <div class="text-xs text-gray-500 mt-0.5">Volume, commissions, anomalies (échecs, remboursements, réclamations)</div>
+                    <div class="text-sm font-bold text-gray-900">{{ __('admin.declaration_cobac') }}</div>
+                    <div class="text-xs text-gray-500 mt-0.5">{{ __('admin.volume_commissions_anomalies') }}</div>
                 </div>
             </div>
             <form method="GET" action="{{ route('admin.exports.cobac') }}" class="flex items-center gap-3 mt-4">
@@ -54,7 +54,7 @@
                         <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
                         <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
-                    Générer PDF
+                    {{ __('admin.generer_pdf') }}
                 </button>
             </form>
         </div>

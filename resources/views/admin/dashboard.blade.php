@@ -1,30 +1,29 @@
 @extends('layouts.admin')
 
-@section('title', 'Tableau de bord')
+@section('title', __('messages.tableau_de_bord'))
 
 @section('content')
 
     {{-- En-tête de page --}}
     <div class="flex items-center justify-between mb-5">
         <div>
-            <h1 class="text-xl font-bold text-gray-900">KPIs globaux — {{ $mois }}</h1>
-            <p class="text-sm text-gray-500 mt-0.5">Toutes les écoles · Données en temps réel</p>
+            <h1 class="text-xl font-bold text-gray-900">{{ __('admin.kpis_globaux') }} — {{ $mois }}</h1>
+            <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.toutes_ecoles_temps_reel_dash') }}</p>
         </div>
         <div class="flex items-center gap-2">
             <span class="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full font-medium">
                 <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse inline-block"></span>
-                Système opérationnel
+                {{ __('admin.systeme_operationnel') }}
             </span>
         </div>
     </div>
 
-    {{-- ── KPIs principaux ── --}}
     <div class="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
 
         {{-- Volume de transactions --}}
         <div class="bg-white border border-gray-200 rounded-xl p-4">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Volume (mois)</span>
+                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('admin.volume_mois') }}</span>
                 <div class="w-8 h-8 bg-[#E0F5EE] rounded-lg flex items-center justify-center">
                     <svg class="w-4 h-4 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="1" x2="12" y2="23"/>
@@ -35,13 +34,13 @@
             <div class="text-2xl font-bold text-[#0D9E75]">
                 {{ number_format($volumeMois, 0, ',', ' ') }}
             </div>
-            <div class="text-xs text-gray-500 mt-1">FCFA encaissés</div>
+            <div class="text-xs text-gray-500 mt-1">{{ __('admin.fcfa_encaisse_dash') }}</div>
         </div>
 
         {{-- Commissions --}}
         <div class="bg-white border border-gray-200 rounded-xl p-4">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Commissions</span>
+                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('messages.commissions') }}</span>
                 <div class="w-8 h-8 bg-[#FEF3DC] rounded-lg flex items-center justify-center">
                     <svg class="w-4 h-4 text-[#E8A020]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
@@ -52,13 +51,13 @@
             <div class="text-2xl font-bold text-[#E8A020]">
                 {{ number_format($commissionsMois, 0, ',', ' ') }}
             </div>
-            <div class="text-xs text-gray-500 mt-1">FCFA ce mois</div>
+            <div class="text-xs text-gray-500 mt-1">{{ __('admin.fcfa_ce_mois') }}</div>
         </div>
 
         {{-- Établissements actifs --}}
         <div class="bg-white border border-gray-200 rounded-xl p-4">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Établissements</span>
+                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('messages.etablissements') }}</span>
                 <div class="w-8 h-8 bg-[#E6F0FB] rounded-lg flex items-center justify-center">
                     <svg class="w-4 h-4 text-[#185FA5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="2" y="7" width="20" height="15"/>
@@ -67,13 +66,13 @@
                 </div>
             </div>
             <div class="text-2xl font-bold text-gray-900">{{ $etablissementsActifs }}</div>
-            <div class="text-xs text-gray-500 mt-1">actifs sur la plateforme</div>
+            <div class="text-xs text-gray-500 mt-1">{{ __('admin.actifs_sur_plateforme') }}</div>
         </div>
 
         {{-- Transactions --}}
         <div class="bg-white border border-gray-200 rounded-xl p-4">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Transactions</span>
+                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('messages.transactions') }}</span>
                 <div class="w-8 h-8 bg-[#FBEAEA] rounded-lg flex items-center justify-center">
                     <svg class="w-4 h-4 text-[#D94040]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
@@ -82,13 +81,13 @@
                 </div>
             </div>
             <div class="text-2xl font-bold text-gray-900">{{ number_format($transactionsMois, 0, ',', ' ') }}</div>
-            <div class="text-xs text-gray-500 mt-1">validées ce mois</div>
+            <div class="text-xs text-gray-500 mt-1">{{ __('admin.validees_ce_mois_dash') }}</div>
         </div>
 
         {{-- Réclamations --}}
         <div class="bg-white border border-gray-200 rounded-xl p-4">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">Réclamations</span>
+                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('messages.reclamations') }}</span>
                 <div class="w-8 h-8 bg-[#FCEAEA] rounded-lg flex items-center justify-center">
                     <svg class="w-4 h-4 text-[#C53030]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 9v4"/>
@@ -98,7 +97,7 @@
                 </div>
             </div>
             <div class="text-2xl font-bold text-[#D32F2F]">{{ number_format($reclamationsMois, 0, ',', ' ') }}</div>
-            <div class="text-xs text-gray-500 mt-1">créées ce mois</div>
+            <div class="text-xs text-gray-500 mt-1">{{ __('admin.crees_ce_mois') }}</div>
         </div>
     </div>
 
@@ -107,13 +106,13 @@
 
         {{-- Répartition par moyen de paiement --}}
         <div class="bg-white border border-gray-200 rounded-xl p-5">
-            <h2 class="text-sm font-bold text-gray-900 mb-4">Répartition des paiements</h2>
+            <h2 class="text-sm font-bold text-gray-900 mb-4">{{ __('admin.repartition_paiements') }}</h2>
 
             @php
                 $moyens = [
                     'mtn_momo'     => ['label' => 'MTN Mobile Money', 'couleur' => '#FFCC00', 'bg' => '#FFFBE6'],
                     'orange_money' => ['label' => 'Orange Money',     'couleur' => '#FF6600', 'bg' => '#FFF0E6'],
-                    'carte'        => ['label' => 'Carte bancaire',   'couleur' => '#185FA5', 'bg' => '#E6F0FB'],
+                    'carte'        => ['label' => __('admin.carte_bancaire'), 'couleur' => '#185FA5', 'bg' => '#E6F0FB'],
                 ];
                 $totalTx = $repartitionMoyens->sum('total') ?: 1;
             @endphp
@@ -149,11 +148,11 @@
         {{-- Derniers établissements inscrits --}}
         <div class="bg-white border border-gray-200 rounded-xl p-5">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-sm font-bold text-gray-900">Derniers établissements inscrits</h2>
+                <h2 class="text-sm font-bold text-gray-900">{{ __('admin.derniers_etablissements_inscrits') }}</h2>
                 @if (Route::has('admin.etablissements.index'))
                 <a href="{{ route('admin.etablissements.index') }}"
                    class="text-xs text-[#0D9E75] hover:underline font-medium">
-                    Voir tout
+                    {{ __('admin.voir_tout') }}
                 </a>
                 @endif
             </div>
@@ -170,7 +169,7 @@
                         </span>
                     </div>
                 @empty
-                    <p class="text-sm text-gray-400 text-center py-4">Aucun établissement encore inscrit.</p>
+                    <p class="text-sm text-gray-400 text-center py-4">{{ __('admin.aucun_etablissement_inscrit') }}</p>
                 @endforelse
             </div>
         </div>
@@ -180,12 +179,12 @@
     <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
         <div class="flex items-center justify-between mb-4">
             <div>
-                <h2 class="text-sm font-bold text-gray-900">Taux de recouvrement — Plateforme globale</h2>
-                <p class="text-xs text-gray-500 mt-1">Calcul : montant payé / montant total</p>
+                <h2 class="text-sm font-bold text-gray-900">{{ __('admin.taux_recouvrement_plateforme') }}</h2>
+                <p class="text-xs text-gray-500 mt-1">{{ __('admin.calcul_taux') }}</p>
             </div>
             <div class="text-right">
                 <div class="text-4xl font-bold text-[#0D9E75]">{{ number_format($tauxRecouvrementGlobal, 2, ',', '') }}%</div>
-                <p class="text-xs text-gray-500 mt-1">Taux global</p>
+                <p class="text-xs text-gray-500 mt-1">{{ __('admin.taux_global') }}</p>
             </div>
         </div>
         <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -200,13 +199,13 @@
 
         {{-- Taux par région --}}
         <div class="bg-white border border-gray-200 rounded-xl p-5">
-            <h2 class="text-sm font-bold text-gray-900 mb-4">Taux par région</h2>
+            <h2 class="text-sm font-bold text-gray-900 mb-4">{{ __('admin.taux_par_region') }}</h2>
             <div class="space-y-2.5 max-h-72 overflow-y-auto">
                 @forelse ($tauxParRegion as $region)
                     <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg">
                         <div class="flex-1">
-                            <div class="text-sm font-semibold text-gray-800">{{ $region->region ?: 'Non spécifiée' }}</div>
-                            <div class="text-xs text-gray-400">{{ $region->nb_etablissements }} établissement(s)</div>
+                            <div class="text-sm font-semibold text-gray-800">{{ $region->region ?: __('admin.non_specifiee') }}</div>
+                            <div class="text-xs text-gray-400">{{ $region->nb_etablissements }} {{ __('admin.etab_suffix') }}</div>
                         </div>
                         <div class="text-right">
                             <div class="text-lg font-bold text-[#0D9E75]">{{ number_format($region->taux_recouvrement ?? 0, 2, ',', '') }}%</div>
@@ -214,14 +213,14 @@
                         </div>
                     </div>
                 @empty
-                    <p class="text-sm text-gray-400 text-center py-4">Aucune donnée disponible</p>
+                    <p class="text-sm text-gray-400 text-center py-4">{{ __('admin.dt_empty_table') }}</p>
                 @endforelse
             </div>
         </div>
 
         {{-- Top 10 établissements par taux de recouvrement --}}
         <div class="bg-white border border-gray-200 rounded-xl p-5">
-            <h2 class="text-sm font-bold text-gray-900 mb-4">Top établissements (taux recouvrement)</h2>
+            <h2 class="text-sm font-bold text-gray-900 mb-4">{{ __('admin.top_etablissements_taux') }}</h2>
             <div class="space-y-2.5 max-h-72 overflow-y-auto">
                 @forelse ($tauxParEtablissement as $index => $etab)
                     <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg">
@@ -242,7 +241,7 @@
                         </div>
                     </div>
                 @empty
-                    <p class="text-sm text-gray-400 text-center py-4">Aucune donnée disponible</p>
+                    <p class="text-sm text-gray-400 text-center py-4">{{ __('admin.dt_empty_table') }}</p>
                 @endforelse
             </div>
         </div>
@@ -250,15 +249,15 @@
 
     {{-- ── Évolution mensuelle du taux de recouvrement ── --}}
     <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
-        <h2 class="text-sm font-bold text-gray-900 mb-4">Évolution mensuelle du taux de recouvrement (12 mois)</h2>
+        <h2 class="text-sm font-bold text-gray-900 mb-4">{{ __('admin.evolution_mensuelle_taux') }}</h2>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-200">
-                        <th class="text-left py-2 px-3 text-xs font-bold text-gray-600">Mois</th>
-                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">Montant payé</th>
-                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">Montant total</th>
-                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">Taux</th>
+                        <th class="text-left py-2 px-3 text-xs font-bold text-gray-600">{{ __('admin.mois_col') }}</th>
+                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">{{ __('admin.montant_paye_col') }}</th>
+                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">{{ __('admin.montant_total_col') }}</th>
+                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">{{ __('admin.taux_col') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -281,10 +280,10 @@
 
     <div class="bg-[#FEF3DC] rounded-xl border-l-4 border-[#E8A020] px-5 py-4 flex items-center justify-between">
         <div>
-            <div class="text-sm font-bold text-[#854F0B]">Taux de commission — configurable</div>
+            <div class="text-sm font-bold text-[#854F0B]">{{ __('admin.taux_commission_configurable') }}</div>
             <div class="text-xs text-[#BA7517] mt-1">
                 <strong>{{ number_format($tauxCommission * 100, 1, ',', '') }}%</strong>
-                par transaction · Profil Standard · Conforme COBAC/BEAC
+                {{ __('messages.par_transaction') }} · {{ __('admin.profil_std_cobac') }}
             </div>
         </div>
         @if (Route::has('admin.commissions.index'))
@@ -294,7 +293,7 @@
                 <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
                 <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
-            Modifier le taux
+            {{ __('admin.modifier_taux') }}
         </a>
         @endif
     </div>

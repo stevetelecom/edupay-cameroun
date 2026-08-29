@@ -363,4 +363,8 @@ return [
     'voir_tous_etabs'               => 'Voir tous les établissements',
     'votre_email'                   => 'Votre email',
     'votre_nom'                     => 'Votre nom complet',
+
+    // ── E-mail message de contact ──
+    'em_contact_titre' => 'Nouveau message de contact',
+    'em_contact_footer' => 'Cet email a été généré depuis le formulaire de contact du site EduPay Cameroun.',
 ];

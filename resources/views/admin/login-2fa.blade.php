@@ -13,7 +13,7 @@
         <div class="text-2xl font-bold text-[#0B2545] tracking-tight">
             Edu<span class="text-[#0D9E75]">Pay</span> Cameroun
         </div>
-        <div class="text-xs text-gray-400 mt-1">Vérification en deux étapes</div>
+        <div class="text-xs text-gray-400 mt-1">{{ __('admin.verification_deux_etapes') }}</div>
     </div>
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8 w-full max-w-sm">
@@ -28,10 +28,9 @@
             </div>
         </div>
 
-        <h1 class="text-lg font-bold text-center text-gray-900 mb-1">Code de vérification</h1>
+        <h1 class="text-lg font-bold text-center text-gray-900 mb-1">{{ __('auth.code_verification') }}</h1>
         <p class="text-sm text-gray-500 text-center mb-6">
-            Entrez le code à 6 chiffres envoyé à votre adresse email administrateur.
-            Ce code expire dans <strong class="text-gray-700">5 minutes</strong>.
+            {{ __('admin.code_6_chiffres_expire') }}
         </p>
 
         @if (session('info'))
@@ -54,7 +53,7 @@
             {{-- Champ code OTP — 6 cases séparées --}}
             <div class="mb-5">
                 <label class="block text-xs font-medium text-gray-600 mb-3 text-center">
-                    Code à 6 chiffres
+                    {{ __('admin.code_6_chiffres') }}
                 </label>
                 <input type="hidden" name="code" id="code-hidden" />
                 <div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px;">
@@ -130,7 +129,7 @@
             <button
                 type="submit"
                 class="w-full bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold text-sm py-3 rounded-lg transition-colors">
-                Vérifier et accéder au tableau de bord
+                {{ __('admin.verifier_acceder_tdb') }}
             </button>
         </form>
 
@@ -138,17 +137,17 @@
             <form method="POST" action="{{ route('admin.login.2fa.resend') }}" style="display:inline;">
                 @csrf
                 <button type="submit" class="text-xs text-[#0D9E75] hover:underline bg-transparent border-none cursor-pointer">
-                    Pas reçu ? Renvoyer le code
+                    {{ __('admin.pas_recu_renvoyer') }}
                 </button>
             </form>
             <a href="{{ route('admin.login') }}" class="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-                Annuler et revenir à la connexion
+                {{ __('admin.annuler_revenir') }}
             </a>
         </div>
     </div>
 
     <div class="mt-6 text-xs text-gray-400 text-center">
-        © 2026 EduPay Cameroun · TLS 1.3 · Authentification 2FA obligatoire
+        {{ __('admin.copyright_tls_2fa') }}
     </div>
 
 </body>

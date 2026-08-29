@@ -29,40 +29,39 @@
     <div class="container">
         <div class="header">
             <div class="logo">Edu<span>Pay</span> Cameroun</div>
-            <div class="header-sub">Plateforme de paiement des frais scolaires</div>
+            <div class="header-sub">{{ __('etablissement.em_header_plateforme') }}</div>
         </div>
         <div class="body">
-            <div class="badge"><span>❌ Établissement retiré</span></div>
-            <div class="title">Bonjour {{ $responsable->prenom }},</div>
+            <div class="badge"><span>{{ __('etablissement.em_supprime_badge') }}</span></div>
+            <div class="title">{!! __('etablissement.em_bonjour_prenom', ['prenom' => $responsable->prenom]) !!}</div>
             <div class="text">
-                Nous vous informons que l'établissement <strong>{{ $nomEtablissement }}</strong>
-                a été <strong style="color:#DC2626;">définitivement retiré</strong> de la plateforme EduPay Cameroun.
-                Tous les accès associés à cet établissement ont été désactivés.
+                {!! __('etablissement.em_supprime_texte', ['etab' => $nomEtablissement]) !!}
+                {{ __('etablissement.em_supprime_acces_desactives') }}
             </div>
             <div class="info-box">
                 <div class="info-row">
-                    <span class="info-label">Établissement</span>
+                    <span class="info-label">{{ __('messages.etablissement') }}</span>
                     <span class="info-val">{{ $nomEtablissement }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Statut</span>
-                    <span class="info-val" style="color:#DC2626;">❌ Supprimé</span>
+                    <span class="info-label">{{ __('etablissement.statut') }}</span>
+                    <span class="info-val" style="color:#DC2626;">❌ {{ __('etablissement.em_supprime') }}</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">Date</span>
+                    <span class="info-label">{{ __('etablissement.date') }}</span>
                     <span class="info-val">{{ now()->format('d/m/Y à H:i') }}</span>
                 </div>
             </div>
             <div class="warning-box">
-                ⚠️ Cette action est irréversible. Les données de votre établissement ont été archivées conformément à nos obligations légales.
+                ⚠️ {{ __('etablissement.em_supprime_irreversible') }}
             </div>
             <div class="contact-box">
-                📧 Pour toute question, contactez-nous à <strong>support@edupay.cm</strong>.
+                📧 {{ __('etablissement.em_supprime_contact') }}
             </div>
         </div>
         <div class="footer">
-            EduPay Cameroun — Plateforme de paiement des frais scolaires<br/>
-            © {{ date('Y') }} · Notification administrative automatique.
+            {{ __('etablissement.em_footer_plateforme') }}<br/>
+            © {{ date('Y') }} · {{ __('etablissement.em_footer_notif_admin') }}
         </div>
     </div>
 </body>

@@ -211,4 +211,16 @@ return [
     'ville_residence'           => 'Ville de résidence',
     'votre_code_etab'           => "Code de l'établissement",
     'vous_etes'                 => 'Vous êtes :',
+
+    // ── E-mail code de réinitialisation ──
+    'em_bonjour_nom' => 'Bonjour <strong>:nom</strong>,<br/>',
+    'em_reset_demande' => 'Nous avons reçu une demande de réinitialisation de votre mot de passe.',
+    'em_reset_code_expire' => 'Utilisez le code ci-dessous. Il expire dans <strong>:duree</strong>.',
+    'em_reset_entrez_code' => 'Saisissez ce code sur la page de réinitialisation :',
+    'em_reset_attention' => '<strong>⚠️ Important :</strong> si vous n\'êtes pas à l\'origine de cette demande, ignorez cet email. Votre mot de passe restera inchangé.',
+    'em_reset_ignore' => 'Si vous n\'avez pas demandé cette réinitialisation, ignorez cet email.',
+    'em_reset_questions' => 'Une question ?',
+    'em_reset_contactez_support' => 'Contactez notre support.',
+    'em_footer_tous_droits' => '© 2026 EduPay Cameroun — Tous droits réservés',
+    'em_reset_footer_sent' => 'Cet email vous a été envoyé automatiquement suite à votre demande.',
 ];
