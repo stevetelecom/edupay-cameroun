@@ -54,7 +54,7 @@
             content:'';
             position:fixed;
             top:58px; left:200px; right:0; bottom:0;
-            background-image:url('{{ asset('images/logo.jpeg') }}');
+            background-image:url('{{ asset('images/logo-watermark.png') }}');
             background-repeat:no-repeat;
             background-position:center;
             background-size:min(75vw, 780px);
