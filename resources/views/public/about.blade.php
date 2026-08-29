@@ -179,7 +179,7 @@
         'linkLabel' => 'Voir le portfolio',
       ],
       'marcelle' => [
-        'name' => 'MELOUNI MARCELLE ANAIS',
+        'name' => 'Ze MELOUNI MARCELLE ANAIS',
         'role' => 'Génie des Systèmes Audiovisuels (GSA)',
         'color' => '#5B21B6',
         'bio' => "En charge du design UI/UX et de la conception des maquettes visuelles d'EduPay Cameroun. Apporte une expertise en communication visuelle et identité de marque au projet.",
@@ -214,7 +214,7 @@
         'skills' => ['Tests QA', 'DevOps', 'CI/CD'],
       ],
       'maguy' => [
-        'name' => 'Maguy Leticia',
+        'name' => 'Eyamo Maguy Leticia',
         'role' => 'Génie des Systèmes Audiovisuels (GSA)',
         'color' => '#5B21B6',
         'bio' => "En charge de la conception du logo EduPay Cameroun et des éléments graphiques de la charte visuelle du projet.",
