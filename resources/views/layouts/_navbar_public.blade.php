@@ -8,7 +8,8 @@
 <nav class="pub-nav">
   <div class="pub-nav-inner">
     <a href="{{ route('landing') }}" style="text-decoration:none;display:flex;align-items:center;gap:10px;">
-      <span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span></span>
+      <span style="width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:5px;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo-icon-only.png') }}" alt="EduPay" style="width:100%;height:100%;object-fit:contain;" /></span>
+      <span style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.01em;white-space:nowrap;">Edu<span style="color:#5DCAA5;">Pay</span></span>
     </a>
     <button class="nav-burger" id="nav-burger" onclick="toggleNav()" aria-label="Menu">
       <span></span><span></span><span></span>
