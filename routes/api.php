@@ -30,6 +30,12 @@ Route::prefix('v1')->group(function () {
     Route::post('/contact', [\App\Http\Controllers\Api\ContactController::class, 'submit'])
         ->name('api.v1.contact.submit');
 
+    // ── Public : stats globales + détail établissement (équivalent landing) ──
+    Route::get('/stats', [\App\Http\Controllers\Api\EtablissementPublicController::class, 'stats'])
+        ->name('api.v1.stats');
+    Route::get('/etablissements/{code}', [\App\Http\Controllers\Api\EtablissementPublicController::class, 'show'])
+        ->name('api.v1.etablissements.show');
+
     // ── Routes protégées (token Sanctum) ───────────────────────
     Route::middleware('auth:sanctum')->group(function () {
 
