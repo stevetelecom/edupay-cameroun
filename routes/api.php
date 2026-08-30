@@ -54,4 +54,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/notifications',       [\App\Http\Controllers\Api\NotificationController::class, 'index'])->name('api.v1.notifications.index');
         Route::post('/notifications/lire', [\App\Http\Controllers\Api\NotificationController::class, 'lire'])->name('api.v1.notifications.lire');
     });
+
+    // ── Back-office Établissement (directeur / comptable / caissier) ──
+    Route::prefix('etablissement')->middleware('auth:sanctum')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Api\Etablissement\DashboardController::class, 'index'])->name('api.v1.etablissement.dashboard');
+    });
 });
