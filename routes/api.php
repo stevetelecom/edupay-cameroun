@@ -26,6 +26,10 @@ Route::prefix('v1')->group(function () {
             ->name('api.v1.auth.logout');
     });
 
+    // ── Contact public (formulaire de contact → email support) ───
+    Route::post('/contact', [\App\Http\Controllers\Api\ContactController::class, 'submit'])
+        ->name('api.v1.contact.submit');
+
     // ── Routes protégées (token Sanctum) ───────────────────────
     Route::middleware('auth:sanctum')->group(function () {
 
