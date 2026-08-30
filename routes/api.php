@@ -45,6 +45,7 @@ Route::prefix('v1')->group(function () {
 
         // Frais
         Route::get('/frais/{apprenant}', [\App\Http\Controllers\Api\FraisController::class, 'index'])->name('api.v1.frais.index');
+        Route::get('/frais-apprenants/{frais_apprenant}', [\App\Http\Controllers\Api\FraisController::class, 'show'])->name('api.v1.frais-apprenants.show');
 
         // Paiements
         Route::get('/paiements',                [\App\Http\Controllers\Api\PaiementController::class, 'index'])->name('api.v1.paiements.index');
