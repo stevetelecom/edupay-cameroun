@@ -29,7 +29,7 @@ class PaiementController extends Controller
             ->latest('date_paiement')
             ->paginate($request->integer('per_page', 15));
 
-        return PaiementResource::collection($paiements);
+        return PaiementResource::collection($paiements)->response();
     }
 
     /**
