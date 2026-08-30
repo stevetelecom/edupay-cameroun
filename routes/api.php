@@ -38,6 +38,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/apprenants/mes-enfants',       [\App\Http\Controllers\Api\ApprenantController::class, 'mesEnfants'])->name('api.v1.apprenants.mesEnfants');
         Route::get('/apprenants/etablissements',    [\App\Http\Controllers\Api\ApprenantController::class, 'etablissements'])->name('api.v1.apprenants.etablissements');
         Route::post('/apprenants/rattacher',        [\App\Http\Controllers\Api\ApprenantController::class, 'rattacher'])->name('api.v1.apprenants.rattacher');
+        Route::put('/apprenants/{apprenant}',       [\App\Http\Controllers\Api\ApprenantController::class, 'updateInfo'])->name('api.v1.apprenants.update');
         Route::delete('/apprenants/{apprenant}',    [\App\Http\Controllers\Api\ApprenantController::class, 'detacher'])->name('api.v1.apprenants.detacher');
 
         // Frais
@@ -110,5 +111,15 @@ Route::prefix('v1')->group(function () {
         Route::post('/remboursements',                             [\App\Http\Controllers\Api\Etablissement\RemboursementController::class, 'store'])->name('api.v1.etablissement.remboursements.store');
         Route::post('/remboursements/{remboursement}/approuver',   [\App\Http\Controllers\Api\Etablissement\RemboursementController::class, 'approuver'])->name('api.v1.etablissement.remboursements.approuver');
         Route::post('/remboursements/{remboursement}/refuser',     [\App\Http\Controllers\Api\Etablissement\RemboursementController::class, 'refuser'])->name('api.v1.etablissement.remboursements.refuser');
+
+        // Abonnement
+        Route::get('/abonnement', [\App\Http\Controllers\Api\Etablissement\DashboardController::class, 'abonnement'])->name('api.v1.etablissement.abonnement');
+
+        // Profil & paramètres de l'établissement
+        Route::get('/profil',              [\App\Http\Controllers\Api\Etablissement\ProfilController::class, 'index'])->name('api.v1.etablissement.profil');
+        Route::put('/profil',              [\App\Http\Controllers\Api\Etablissement\ProfilController::class, 'updateInfos'])->name('api.v1.etablissement.profil.update');
+        Route::put('/profil/password',     [\App\Http\Controllers\Api\Etablissement\ProfilController::class, 'updatePassword'])->name('api.v1.etablissement.profil.password');
+        Route::get('/parametres',          [\App\Http\Controllers\Api\Etablissement\ParametreController::class, 'index'])->name('api.v1.etablissement.parametres');
+        Route::put('/parametres',          [\App\Http\Controllers\Api\Etablissement\ParametreController::class, 'update'])->name('api.v1.etablissement.parametres.update');
     });
 });

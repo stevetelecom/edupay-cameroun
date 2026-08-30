@@ -109,4 +109,58 @@ class DashboardController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Abonnement actuel de l'établissement + listes des plans disponibles.
+     */
+    public function abonnement(): JsonResponse
+    {
+        $user = auth()->user();
+        $this->autoriser();
+
+        $etablissementId = $user->etablissement_id;
+
+        $abonnement = Abonnement::where('etablissement_id', $etablissementId)
+            ->whereIn('statut', ['actif', 'grace_period'])
+            ->latest()
+            ->first();
+
+        $planActuel = $abonnement?->plan;
+
+        return response()->json([
+            'data' => [
+                'abonnement'   => $abonnement ? [
+                    'statut'             => $abonnement->statut,
+                    'plan'               => $planActuel,
+                    'plan_nom'           => \App\Models\Abonnement::PLANS[$planActuel]['nom'] ?? null,
+                    'date_debut'         => $abonnement->created_at?->toDateString(),
+                    'date_fin'           => $abonnement->date_fin?->toDateString(),
+                    'grace_period_fin'   => $abonnement->grace_period_fin?->toDateString(),
+                    'est_actif'          => $abonnement->estActif(),
+                    'en_grace_period'    => $abonnement->enGracePeriod(),
+                    'jours_restants'     => $abonnement->joursRestants(),
+                ] : null,
+                'plans'        => collect(\App\Models\Abonnement::PLANS)
+                    ->map(fn ($p, $slug) => [
+                        'slug'            => $slug,
+                        'nom'             => $p['nom'],
+                        'montant'         => $p['montant'],
+                        'max_apprenants'  => $p['max_apprenants'],
+                        'sms_mensuel'     => $p['sms_mensuel'],
+                        'multi_sites'     => $p['multi_sites'],
+                        'exports_cobac'   => $p['exports_cobac'],
+                        'actuel'          => $slug === $planActuel,
+                    ])->values(),
+            ],
+        ]);
+    }
+
+    private function autoriser(): void
+    {
+        $user = auth()->user();
+
+        if (! $user->hasAnyRole(self::ROLES_ETABLISSEMENT) || ! $user->etablissement_id) {
+            abort(403, 'Ce compte n\'a pas accès au back-office établissement.');
+        }
+    }
 }

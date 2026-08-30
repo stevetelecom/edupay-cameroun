@@ -119,10 +119,80 @@ class ApprenantController extends Controller
             return response()->json(['message' => 'Cet apprenant ne vous est pas rattaché.'], 403);
         }
 
+        if ($apprenant->paiements()->exists()) {
+            return response()->json([
+                'message' => 'Impossible de retirer ' . $apprenant->prenom
+                    . ' : des paiements sont enregistrés. Contactez votre établissement.',
+            ], 422);
+        }
+
         $user->apprenants()->detach($apprenant->id);
 
         return response()->json([
             'message' => 'Apprenant détaché avec succès.',
+        ]);
+    }
+
+    /**
+     * Le parent met à jour les informations de l'enfant rattaché
+     * (classe, prénom, nom, établissement par nom). Miroir de l'onboarding web.
+     */
+    public function updateInfo(Request $request, Apprenant $apprenant): JsonResponse
+    {
+        $user = $request->user();
+
+        $estRattache = $user->apprenants()->where('apprenants.id', $apprenant->id)->exists();
+        if (! $estRattache) {
+            return response()->json(['message' => 'Cet apprenant ne vous est pas rattaché.'], 403);
+        }
+
+        $validated = $request->validate([
+            'etablissement_id'  => ['nullable', 'exists:etablissements,id'],
+            'etablissement_nom' => ['required_without:etablissement_id', 'nullable', 'string', 'max:150'],
+            'classe'            => ['required', 'string', 'max:50'],
+            'matricule'         => ['nullable', 'string', 'max:50'],
+            'prenom'            => ['required', 'string', 'max:100'],
+            'nom'               => ['required', 'string', 'max:100'],
+        ]);
+
+        foreach (['prenom', 'nom', 'classe', 'etablissement_nom', 'matricule'] as $champ) {
+            if (! empty($validated[$champ])) {
+                $validated[$champ] = strip_tags(trim($validated[$champ]));
+            }
+        }
+
+        if (! empty($validated['etablissement_id'])) {
+            $etablissement = Etablissement::find($validated['etablissement_id']);
+        } else {
+            $etablissement = Etablissement::where('nom', 'like', '%' . $validated['etablissement_nom'] . '%')
+                ->where('statut', 'actif')
+                ->first();
+        }
+
+        if (! $etablissement) {
+            return response()->json([
+                'message' => 'Établissement introuvable.',
+                'errors'  => ['etablissement_nom' => ['Établissement introuvable.']],
+            ], 422);
+        }
+
+        if ($apprenant->paiements()->exists() && $apprenant->etablissement_id !== $etablissement->id) {
+            return response()->json([
+                'message' => 'Impossible de changer l\'établissement : des paiements sont déjà enregistrés pour cet apprenant.',
+            ], 422);
+        }
+
+        $apprenant->update([
+            'etablissement_id' => $etablissement->id,
+            'prenom'           => $validated['prenom'],
+            'nom'              => $validated['nom'],
+            'classe'           => $validated['classe'],
+            'matricule'        => $validated['matricule'] ?? $apprenant->matricule,
+        ]);
+
+        return response()->json([
+            'message' => 'Informations de ' . $apprenant->prenom . ' mises à jour.',
+            'data'    => new ApprenantResource($apprenant->fresh(['etablissement', 'frais.categorieFrais.echeanciers'])),
         ]);
     }
 
