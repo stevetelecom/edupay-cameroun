@@ -45,6 +45,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/paiements',                [\App\Http\Controllers\Api\PaiementController::class, 'index'])->name('api.v1.paiements.index');
         Route::post('/paiements/initier',       [\App\Http\Controllers\Api\PaiementController::class, 'initier'])->name('api.v1.paiements.initier');
         Route::post('/paiements/{paiement}/verifier', [\App\Http\Controllers\Api\PaiementController::class, 'verifier'])->name('api.v1.paiements.verifier');
+        Route::post('/paiements/{paiement}/annuler',  [\App\Http\Controllers\Api\PaiementController::class, 'annuler'])->name('api.v1.paiements.annuler');
 
         // Réclamations
         Route::get('/reclamations',   [\App\Http\Controllers\Api\ReclamationController::class, 'index'])->name('api.v1.reclamations.index');
@@ -87,5 +88,17 @@ Route::prefix('v1')->group(function () {
 
         // Historique des paiements
         Route::get('/paiements', [\App\Http\Controllers\Api\Etablissement\PaiementController::class, 'index'])->name('api.v1.etablissement.paiements.index');
+
+        // Utilisateurs internes (directeur/comptable/caissier)
+        Route::get('/utilisateurs',                                [\App\Http\Controllers\Api\Etablissement\UtilisateurController::class, 'index'])->name('api.v1.etablissement.utilisateurs.index');
+        Route::post('/utilisateurs',                               [\App\Http\Controllers\Api\Etablissement\UtilisateurController::class, 'store'])->name('api.v1.etablissement.utilisateurs.store');
+        Route::put('/utilisateurs/{utilisateur}/role',             [\App\Http\Controllers\Api\Etablissement\UtilisateurController::class, 'updateRole'])->name('api.v1.etablissement.utilisateurs.role');
+        Route::delete('/utilisateurs/{utilisateur}',               [\App\Http\Controllers\Api\Etablissement\UtilisateurController::class, 'destroy'])->name('api.v1.etablissement.utilisateurs.destroy');
+
+        // Remboursements
+        Route::get('/remboursements',                              [\App\Http\Controllers\Api\Etablissement\RemboursementController::class, 'index'])->name('api.v1.etablissement.remboursements.index');
+        Route::post('/remboursements',                             [\App\Http\Controllers\Api\Etablissement\RemboursementController::class, 'store'])->name('api.v1.etablissement.remboursements.store');
+        Route::post('/remboursements/{remboursement}/approuver',   [\App\Http\Controllers\Api\Etablissement\RemboursementController::class, 'approuver'])->name('api.v1.etablissement.remboursements.approuver');
+        Route::post('/remboursements/{remboursement}/refuser',     [\App\Http\Controllers\Api\Etablissement\RemboursementController::class, 'refuser'])->name('api.v1.etablissement.remboursements.refuser');
     });
 });

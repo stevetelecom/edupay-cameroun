@@ -205,6 +205,34 @@ class PaiementController extends Controller
         return response()->json(['statut' => 'en_attente']);
     }
 
+    /**
+     * Annule (manuellement) un paiement encore en attente : débloque un nouvel
+     * essai sans toucher au statut réel, cohérent avec la logique web (ne
+     * bloque jamais une confirmation tardive et légitime de l'opérateur).
+     */
+    public function annuler(Paiement $paiement): JsonResponse
+    {
+        $user = auth()->user();
+
+        if ($paiement->user_id !== $user->id) {
+            return response()->json(['message' => 'Accès non autorisé à ce paiement.'], 403);
+        }
+
+        if ($paiement->statut !== 'en_attente') {
+            return response()->json([
+                'message' => 'Ce paiement ne peut plus être annulé.',
+            ], 422);
+        }
+
+        $paiement->update(['annule_manuellement' => true]);
+
+        return response()->json([
+            'message' => 'Paiement marqué comme annulé. S\'il a tout de même été débité sur votre compte, il sera automatiquement régularisé dès confirmation de l\'opérateur.',
+            'statut'  => $paiement->statut,
+            'annule_manuellement' => true,
+        ]);
+    }
+
     private function autoriserAccesFrais($user, FraisApprenant $frais): ?JsonResponse
     {
         $estParent = $user->apprenants()
