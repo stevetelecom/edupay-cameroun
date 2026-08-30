@@ -35,6 +35,8 @@ Route::prefix('v1')->group(function () {
 
         // Apprenants / rattachement
         Route::get('/apprenants',                   [\App\Http\Controllers\Api\ApprenantController::class, 'index'])->name('api.v1.apprenants.index');
+        Route::get('/apprenants/mes-enfants',       [\App\Http\Controllers\Api\ApprenantController::class, 'mesEnfants'])->name('api.v1.apprenants.mesEnfants');
+        Route::get('/apprenants/etablissements',    [\App\Http\Controllers\Api\ApprenantController::class, 'etablissements'])->name('api.v1.apprenants.etablissements');
         Route::post('/apprenants/rattacher',        [\App\Http\Controllers\Api\ApprenantController::class, 'rattacher'])->name('api.v1.apprenants.rattacher');
         Route::delete('/apprenants/{apprenant}',    [\App\Http\Controllers\Api\ApprenantController::class, 'detacher'])->name('api.v1.apprenants.detacher');
 
@@ -54,6 +56,14 @@ Route::prefix('v1')->group(function () {
         // Notifications
         Route::get('/notifications',       [\App\Http\Controllers\Api\NotificationController::class, 'index'])->name('api.v1.notifications.index');
         Route::post('/notifications/lire', [\App\Http\Controllers\Api\NotificationController::class, 'lire'])->name('api.v1.notifications.lire');
+
+        // Dashboard payeur
+        Route::get('/dashboard',              [\App\Http\Controllers\Api\DashboardController::class, 'index'])->name('api.v1.dashboard');
+        Route::post('/notifications/{notification}/lue', [\App\Http\Controllers\Api\DashboardController::class, 'marquerNotificationLue'])->name('api.v1.notifications.lue');
+
+        // Documents PDF (reçus & certificats)
+        Route::get('/paiements/{paiement}/recu',        [\App\Http\Controllers\Api\DocumentPayeurController::class, 'telechargerRecu'])->name('api.v1.paiements.recu');
+        Route::get('/apprenants/{apprenant}/certificat', [\App\Http\Controllers\Api\DocumentPayeurController::class, 'genererCertificat'])->name('api.v1.apprenants.certificat');
     });
 
     // ── Back-office Établissement (directeur / comptable / caissier) ──

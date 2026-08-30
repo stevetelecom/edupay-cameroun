@@ -126,6 +126,96 @@ class ApprenantController extends Controller
         ]);
     }
 
+    /**
+     * Liste enrichie "Mes enfants" (parents) / "Mon dossier" (élève, premier apprenant) :
+     * infos établissement, total du/payé, premier impayé. Miroir du web.
+     */
+    public function mesEnfants(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $apprenants = $user->apprenants()
+            ->with(['frais.categorieFrais', 'etablissement'])
+            ->get();
+
+        $premierFraisImpaye = null;
+        foreach ($apprenants as $apprenant) {
+            $fraisImpaye = $apprenant->frais->first(fn ($f) => $f->statut !== 'regle');
+            if ($fraisImpaye) {
+                $premierFraisImpaye = $fraisImpaye;
+                break;
+            }
+        }
+
+        $monDossier = null;
+        if (in_array($user->profil ?? '', ['eleve', 'etudiant'])) {
+            $monDossier = $apprenants->first();
+        }
+
+        return response()->json([
+            'data' => [
+                'apprenants'          => $apprenants->map(fn ($a) => [
+                    'id'                 => $a->id,
+                    'nom'                => $a->nom,
+                    'prenom'             => $a->prenom,
+                    'matricule'          => $a->matricule,
+                    'classe'             => $a->classe,
+                    'statut_paiement'    => $a->statut_paiement,
+                    'valide_par_etablissement' => (bool) $a->valide_par_etablissement,
+                    'etablissement'      => [
+                        'id'   => $a->etablissement?->id,
+                        'nom'  => $a->etablissement?->nom,
+                        'ville'=> $a->etablissement?->ville,
+                        'logo' => $a->etablissement?->logo ? asset('storage/' . $a->etablissement->logo) : null,
+                    ],
+                    'total_du'           => $a->frais->sum(fn ($f) => $f->montant_total - $f->montant_paye),
+                    'total_paye'         => $a->frais->sum('montant_paye'),
+                    'premier_frais_impaye' => $this->fraisImpayeApercu($a->frais->first(fn ($f) => $f->statut !== 'regle')),
+                ]),
+                'premier_frais_impaye' => $this->fraisImpayeApercu($premierFraisImpaye),
+                'mon_dossier'          => $monDossier ? $this->fraisImpayeApercu($monDossier->frais->first(fn ($f) => $f->statut !== 'regle')) : null,
+            ],
+        ]);
+    }
+
+    /**
+     * Liste des établissements actifs (pour sélection lors d'un rattachement).
+     */
+    public function etablissements(Request $request): JsonResponse
+    {
+        $etablissements = Etablissement::where('statut', 'actif')
+            ->orderBy('nom')
+            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement', 'logo']);
+
+        return response()->json([
+            'data' => $etablissements->map(fn ($e) => [
+                'id'                 => $e->id,
+                'nom'                => $e->nom,
+                'ville'              => $e->ville,
+                'type'               => $e->type,
+                'code_etablissement' => $e->code_etablissement,
+                'logo'               => $e->logo ? asset('storage/' . $e->logo) : null,
+            ]),
+        ]);
+    }
+
+    private function fraisImpayeApercu($frais): ?array
+    {
+        if (! $frais) {
+            return null;
+        }
+
+        return [
+            'id'             => $frais->id,
+            'categorie'      => $frais->categorieFrais?->nom,
+            'montant_total'  => (float) $frais->montant_total,
+            'montant_paye'   => (float) $frais->montant_paye,
+            'reste'          => (float) ($frais->montant_total - $frais->montant_paye),
+            'statut'         => $frais->statut,
+            'annee_scolaire' => $frais->annee_scolaire,
+        ];
+    }
+
     private function rattacherEtRetourner(User $user, Apprenant $apprenant, array $valid): JsonResponse
     {
         $dejaRattache = $user->apprenants()->where('apprenants.id', $apprenant->id)->exists();
