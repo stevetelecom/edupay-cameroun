@@ -17,8 +17,9 @@ class LoginRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $login = (string) $this->input('login');
-        // Si on a reçu un téléphone (chiffres présents / long) on normalise en 9 chiffres
-        if ($this->filled('login') && preg_match('/\d/', $login)) {
+        // Un email valide n'est jamais normalisé ; sinon on normalise le téléphone
+        // en 9 chiffres (accepte +237, espaces, tirets en saisie).
+        if ($this->filled('login') && ! filter_var($login, FILTER_VALIDATE_EMAIL)) {
             $this->merge(['login' => $this->normaliserTelephoneCm($login)]);
         }
     }

@@ -33,16 +33,23 @@ class AuthController extends Controller
             'profil'     => $validated['profil'],
             'prenom'     => $validated['prenom'],
             'nom'        => $validated['nom'],
+            'name'       => $validated['prenom'] . ' ' . $validated['nom'],
             'telephone'  => $validated['telephone'],
             'email'      => $validated['email'] ?? null,
             'ville'      => $validated['ville'],
             'quartier'   => $validated['quartier'] ?? null,
-            'password'   => $validated['password'],
+            'password'   => Hash::make($validated['password']),
             'notif_sms'  => $validated['notif_sms'] ?? true,
             'notif_email' => $validated['notif_email'] ?? true,
             'notif_rappel_echeance' => $validated['notif_rappel_echeance'] ?? true,
             'suspendu'   => false,
         ]);
+
+        $role = match ($validated['profil']) {
+            'eleve', 'etudiant' => 'eleve',
+            default             => 'parent',
+        };
+        $user->assignRole($role);
 
         $token = $user->createToken('mobile')->plainTextToken;
 
@@ -77,8 +84,18 @@ class AuthController extends Controller
             ], 403);
         }
 
-        if (! $user->hasVerifiedEmail()) {
-            // L'email est optionnel à l'inscription (pas toujours vérifié) — on laisse passer.
+        // Miroir web LoginController : blocage systématique des comptes d'établissement
+        // tant que l'établissement n'est pas actif.
+        if ($user->hasAnyRole(['directeur', 'comptable', 'caissier'])) {
+            $etablissement = $user->etablissement;
+            if ($etablissement && $etablissement->statut !== 'actif') {
+                $message = match ($etablissement->statut) {
+                    'en_attente' => 'Votre dossier est en cours d\'examen par l\'équipe EduPay. Vous serez notifié(e) par email dès activation à l\'adresse ' . $user->email . '.',
+                    'suspendu'   => 'Votre établissement a été suspendu. Contactez le support EduPay pour plus d\'informations.',
+                    default      => 'Votre compte établissement n\'est pas encore actif.',
+                };
+                return response()->json(['message' => $message], 403);
+            }
         }
 
         $token = $user->createToken('mobile')->plainTextToken;
