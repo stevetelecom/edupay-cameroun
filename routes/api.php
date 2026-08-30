@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | API REST EduPay Cameroun — version 1
 |--------------------------------------------------------------------------
-| Socle consommé par le frontend mobile (Mobine).
+| Socle consommé par le frontend mobile (WanDji Estelle ).
 | Authentification : token Sanctum (Bearer).
 */
 
@@ -15,6 +15,7 @@ Route::prefix('v1')->group(function () {
     // ── Authentification publique ──────────────────────────────
     Route::prefix('auth')->group(function () {
         Route::post('/register',            [\App\Http\Controllers\Api\AuthController::class, 'register'])->name('api.v1.auth.register');
+        Route::post('/inscription-etablissement', [\App\Http\Controllers\Api\InscriptionEtablissementController::class, 'store'])->name('api.v1.auth.inscription-etablissement');
         Route::post('/login',               [\App\Http\Controllers\Api\AuthController::class, 'login'])->name('api.v1.auth.login');
         Route::post('/forgot-password',     [\App\Http\Controllers\Api\AuthController::class, 'forgotPassword'])->name('api.v1.auth.forgot');
         Route::post('/reset-password',      [\App\Http\Controllers\Api\AuthController::class, 'resetPassword'])->name('api.v1.auth.reset');
@@ -130,5 +131,11 @@ Route::prefix('v1')->group(function () {
         Route::put('/profil/password',     [\App\Http\Controllers\Api\Etablissement\ProfilController::class, 'updatePassword'])->name('api.v1.etablissement.profil.password');
         Route::get('/parametres',          [\App\Http\Controllers\Api\Etablissement\ParametreController::class, 'index'])->name('api.v1.etablissement.parametres');
         Route::put('/parametres',          [\App\Http\Controllers\Api\Etablissement\ParametreController::class, 'update'])->name('api.v1.etablissement.parametres.update');
+
+        // Sites (multi-sites)
+        Route::get('/sites',     [\App\Http\Controllers\Api\Etablissement\SiteController::class, 'index'])->name('api.v1.etablissement.sites.index');
+        Route::post('/sites',    [\App\Http\Controllers\Api\Etablissement\SiteController::class, 'store'])->name('api.v1.etablissement.sites.store');
+        Route::put('/sites/{site}',   [\App\Http\Controllers\Api\Etablissement\SiteController::class, 'update'])->name('api.v1.etablissement.sites.update');
+        Route::delete('/sites/{site}', [\App\Http\Controllers\Api\Etablissement\SiteController::class, 'destroy'])->name('api.v1.etablissement.sites.destroy');
     });
 });
