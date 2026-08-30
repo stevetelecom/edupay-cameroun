@@ -70,8 +70,22 @@ Route::prefix('v1')->group(function () {
 
         // Impayés
         Route::get('/impayes', [\App\Http\Controllers\Api\Etablissement\ImpayeController::class, 'index'])->name('api.v1.etablissement.impayes.index');
+        Route::post('/impayes/relancer', [\App\Http\Controllers\Api\Etablissement\ImpayeController::class, 'relancerSms'])->name('api.v1.etablissement.impayes.relancer');
+        Route::post('/impayes/apprenants/{apprenant}/relancer', [\App\Http\Controllers\Api\Etablissement\ImpayeController::class, 'relancerApprenant'])->name('api.v1.etablissement.impayes.relancerApprenant');
 
         // Rapports
         Route::get('/rapports', [\App\Http\Controllers\Api\Etablissement\RapportController::class, 'index'])->name('api.v1.etablissement.rapports.index');
+
+        // Catégories de frais & échéanciers
+        Route::get('/frais',                               [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'index'])->name('api.v1.etablissement.frais.index');
+        Route::post('/frais',                              [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'store'])->name('api.v1.etablissement.frais.store');
+        Route::put('/frais/{frais}',                       [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'update'])->name('api.v1.etablissement.frais.update');
+        Route::delete('/frais/{frais}',                    [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'destroy'])->name('api.v1.etablissement.frais.destroy');
+        Route::post('/frais/{frais}/affecter',             [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'affecter'])->name('api.v1.etablissement.frais.affecter');
+        Route::post('/frais/{frais}/echeanciers',          [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'storeEcheancier'])->name('api.v1.etablissement.frais.echeanciers.store');
+        Route::delete('/frais/{frais}/echeanciers/{echeancier}', [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'destroyEcheancier'])->name('api.v1.etablissement.frais.echeanciers.destroy');
+
+        // Historique des paiements
+        Route::get('/paiements', [\App\Http\Controllers\Api\Etablissement\PaiementController::class, 'index'])->name('api.v1.etablissement.paiements.index');
     });
 });
