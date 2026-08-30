@@ -16,7 +16,11 @@ class ApprenantResource extends JsonResource
             'nom_complet'             => trim($this->prenom . ' ' . $this->nom),
             'classe'                  => $this->classe,
             'matricule'               => $this->matricule,
-            'date_naissance'          => $this->date_naissance?->format('Y-m-d'),
+            'date_naissance'          => $this->date_naissance
+                ? ($this->date_naissance instanceof \DateTimeInterface
+                    ? $this->date_naissance->format('Y-m-d')
+                    : (string) substr($this->date_naissance, 0, 10))
+                : null,
             'sexe'                    => $this->sexe,
             'statut_paiement'         => $this->statut_paiement,
             'valide_par_etablissement' => (bool) $this->valide_par_etablissement,

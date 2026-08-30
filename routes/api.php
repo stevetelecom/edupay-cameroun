@@ -58,5 +58,20 @@ Route::prefix('v1')->group(function () {
     // ── Back-office Établissement (directeur / comptable / caissier) ──
     Route::prefix('etablissement')->middleware('auth:sanctum')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\Etablissement\DashboardController::class, 'index'])->name('api.v1.etablissement.dashboard');
+
+        // Apprenants
+        Route::get('/apprenants',              [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'index'])->name('api.v1.etablissement.apprenants.index');
+        Route::post('/apprenants',             [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'store'])->name('api.v1.etablissement.apprenants.store');
+        Route::get('/apprenants/{apprenant}',  [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'show'])->name('api.v1.etablissement.apprenants.show');
+        Route::put('/apprenants/{apprenant}',  [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'update'])->name('api.v1.etablissement.apprenants.update');
+        Route::delete('/apprenants/{apprenant}', [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'destroy'])->name('api.v1.etablissement.apprenants.destroy');
+        Route::post('/apprenants/{apprenant}/valider', [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'valider'])->name('api.v1.etablissement.apprenants.valider');
+        Route::post('/apprenants/{apprenant}/rejeter', [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'rejeter'])->name('api.v1.etablissement.apprenants.rejeter');
+
+        // Impayés
+        Route::get('/impayes', [\App\Http\Controllers\Api\Etablissement\ImpayeController::class, 'index'])->name('api.v1.etablissement.impayes.index');
+
+        // Rapports
+        Route::get('/rapports', [\App\Http\Controllers\Api\Etablissement\RapportController::class, 'index'])->name('api.v1.etablissement.rapports.index');
     });
 });
