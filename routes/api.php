@@ -32,6 +32,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/me',     [\App\Http\Controllers\Api\AuthController::class, 'me'])->name('api.v1.me');
         Route::get('/profil', [\App\Http\Controllers\Api\ProfilController::class, 'show'])->name('api.v1.profil.show');
         Route::put('/profil', [\App\Http\Controllers\Api\ProfilController::class, 'update'])->name('api.v1.profil.update');
+        Route::put('/profil/notifications', [\App\Http\Controllers\Api\ProfilController::class, 'updateNotifications'])->name('api.v1.profil.notifications');
+        Route::put('/profil/password',       [\App\Http\Controllers\Api\ProfilController::class, 'updatePassword'])->name('api.v1.profil.password');
 
         // Apprenants / rattachement
         Route::get('/apprenants',                   [\App\Http\Controllers\Api\ApprenantController::class, 'index'])->name('api.v1.apprenants.index');
@@ -74,6 +76,8 @@ Route::prefix('v1')->group(function () {
         // Apprenants
         Route::get('/apprenants',              [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'index'])->name('api.v1.etablissement.apprenants.index');
         Route::post('/apprenants',             [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'store'])->name('api.v1.etablissement.apprenants.store');
+        Route::get('/apprenants/import/model',  [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'importTemplate'])->name('api.v1.etablissement.apprenants.importModel');
+        Route::post('/apprenants/import',       [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'import'])->name('api.v1.etablissement.apprenants.import');
         Route::get('/apprenants/{apprenant}',  [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'show'])->name('api.v1.etablissement.apprenants.show');
         Route::put('/apprenants/{apprenant}',  [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'update'])->name('api.v1.etablissement.apprenants.update');
         Route::delete('/apprenants/{apprenant}', [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'destroy'])->name('api.v1.etablissement.apprenants.destroy');
@@ -86,15 +90,19 @@ Route::prefix('v1')->group(function () {
         Route::post('/impayes/apprenants/{apprenant}/relancer', [\App\Http\Controllers\Api\Etablissement\ImpayeController::class, 'relancerApprenant'])->name('api.v1.etablissement.impayes.relancerApprenant');
 
         // Rapports
-        Route::get('/rapports', [\App\Http\Controllers\Api\Etablissement\RapportController::class, 'index'])->name('api.v1.etablissement.rapports.index');
+        Route::get('/rapports',             [\App\Http\Controllers\Api\Etablissement\RapportController::class, 'index'])->name('api.v1.etablissement.rapports.index');
+        Route::get('/rapports/export/pdf',  [\App\Http\Controllers\Api\Etablissement\RapportController::class, 'exportPdf'])->name('api.v1.etablissement.rapports.exportPdf');
+        Route::get('/rapports/export/excel', [\App\Http\Controllers\Api\Etablissement\RapportController::class, 'exportExcel'])->name('api.v1.etablissement.rapports.exportExcel');
 
         // Catégories de frais & échéanciers
         Route::get('/frais',                               [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'index'])->name('api.v1.etablissement.frais.index');
         Route::post('/frais',                              [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'store'])->name('api.v1.etablissement.frais.store');
+        Route::get('/frais/{frais}',                       [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'show'])->name('api.v1.etablissement.frais.show');
         Route::put('/frais/{frais}',                       [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'update'])->name('api.v1.etablissement.frais.update');
         Route::delete('/frais/{frais}',                    [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'destroy'])->name('api.v1.etablissement.frais.destroy');
         Route::post('/frais/{frais}/affecter',             [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'affecter'])->name('api.v1.etablissement.frais.affecter');
         Route::post('/frais/{frais}/echeanciers',          [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'storeEcheancier'])->name('api.v1.etablissement.frais.echeanciers.store');
+        Route::put('/frais/{frais}/echeanciers/{echeancier}', [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'updateEcheancier'])->name('api.v1.etablissement.frais.echeanciers.update');
         Route::delete('/frais/{frais}/echeanciers/{echeancier}', [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'destroyEcheancier'])->name('api.v1.etablissement.frais.echeanciers.destroy');
 
         // Historique des paiements

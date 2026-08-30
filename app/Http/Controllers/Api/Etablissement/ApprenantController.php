@@ -237,6 +237,132 @@ class ApprenantController extends Controller
         return response()->json(['message' => 'Apprenant supprimé avec succès.']);
     }
 
+    /**
+     * Télécharge le modèle d'import CSV (équivalent web importTemplate).
+     */
+    public function importTemplate(Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        $this->autoriser();
+
+        $file = public_path('templates/apprenants_template.csv');
+
+        if (! file_exists($file)) {
+            abort(404, 'Modèle d\'import indisponible.');
+        }
+
+        return response()->download($file, 'modele_import_apprenants.csv');
+    }
+
+    /**
+     * Import en masse d'apprenants depuis un fichier CSV (équivalent web import).
+     */
+    public function import(Request $request): JsonResponse
+    {
+        $etablissementId = $this->autoriser();
+
+        $request->validate([
+            'fichier_csv' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
+        ], [
+            'fichier_csv.required' => 'Veuillez sélectionner un fichier CSV.',
+            'fichier_csv.mimes'    => 'Le fichier doit être au format CSV (.csv).',
+            'fichier_csv.max'      => 'Le fichier ne doit pas dépasser 2 Mo.',
+        ]);
+
+        $handle = fopen($request->file('fichier_csv')->getRealPath(), 'r');
+
+        if ($handle === false) {
+            return response()->json(['message' => 'Impossible de lire le fichier CSV.'], 422);
+        }
+
+        // Sauter la ligne d'en-tête
+        $header = fgetcsv($handle, 1000, ',');
+        if ($header === false) {
+            fclose($handle);
+            return response()->json(['message' => 'Le fichier CSV est vide ou corrompu.'], 422);
+        }
+
+        $succes   = 0;
+        $doublons = 0;
+        $erreurs  = [];
+        $ligne    = 1;
+
+        while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+            $ligne++;
+            $row = array_map('trim', $row);
+
+            if (count($row) < 3) {
+                $erreurs[] = "Ligne $ligne : données insuffisantes (nom, prénom, classe obligatoires).";
+                continue;
+            }
+
+            $nom           = $row[0] ?? null;
+            $prenom        = $row[1] ?? null;
+            $classe        = $row[2] ?? null;
+            $matricule     = ! empty($row[3]) ? strtoupper($row[3]) : null;
+            $dateNaissance = ! empty($row[4]) ? $row[4] : null;
+            $sexe          = ! empty($row[5]) ? strtoupper(substr(trim($row[5]), 0, 1)) : null;
+
+            if (empty($nom) || empty($prenom) || empty($classe)) {
+                $erreurs[] = "Ligne $ligne : nom, prénom et classe sont obligatoires.";
+                continue;
+            }
+
+            if ($dateNaissance) {
+                $d = \DateTime::createFromFormat('Y-m-d', $dateNaissance);
+                if (! $d || $d->format('Y-m-d') !== $dateNaissance) {
+                    $erreurs[] = "Ligne $ligne : date_naissance invalide — format attendu AAAA-MM-JJ.";
+                    continue;
+                }
+            }
+
+            if ($sexe && ! in_array($sexe, ['M', 'F'])) {
+                $sexe = null;
+            }
+
+            if ($matricule) {
+                $search = ['etablissement_id' => $etablissementId, 'matricule' => $matricule];
+            } else {
+                $search = [
+                    'etablissement_id' => $etablissementId,
+                    'nom'              => strtoupper($nom),
+                    'prenom'           => $prenom,
+                    'classe'           => $classe,
+                ];
+            }
+
+            if (\App\Models\Apprenant::where($search)->exists()) {
+                $doublons++;
+                continue;
+            }
+
+            try {
+                \App\Models\Apprenant::create([
+                    'etablissement_id' => $etablissementId,
+                    'prenom'           => $prenom,
+                    'nom'              => strtoupper($nom),
+                    'classe'           => $classe,
+                    'matricule'        => $matricule,
+                    'date_naissance'   => $dateNaissance ?: null,
+                    'sexe'             => $sexe ?: null,
+                    'actif'            => true,
+                    'valide_par_etablissement' => true,
+                ]);
+                $succes++;
+            } catch (\Throwable $e) {
+                $erreurs[] = "Ligne $ligne : erreur lors de l'insertion.";
+            }
+        }
+
+        fclose($handle);
+
+        return response()->json([
+            'message'      => "$succes apprenant(s) importé(s) avec succès" . ($doublons ? ", $doublons doublon(s) ignoré(s)" : '') . ($erreurs ? ', ' . count($erreurs) . ' ligne(s) en erreur.' : '.'),
+            'importes'     => $succes,
+            'doublons'     => $doublons,
+            'erreurs'      => $erreurs,
+        ]);
+    }
+
     private function genererMatricule(int $etablissementId): string
     {
         $etablissement = auth()->user()->etablissement;

@@ -202,6 +202,57 @@ class FraisController extends Controller
     }
 
     /**
+     * Détail d'une catégorie de frais (avec échéanciers).
+     */
+    public function show(CategoriesFrais $frais): JsonResponse
+    {
+        $this->autoriser();
+        $this->autoriserFrais($frais);
+
+        return response()->json([
+            'data' => $this->formaterCategorie($frais->load('echeanciers')),
+        ]);
+    }
+
+    /**
+     * Met à jour un échéancier existant.
+     */
+    public function updateEcheancier(Request $request, CategoriesFrais $frais, Echeancier $echeancier): JsonResponse
+    {
+        $this->autoriser();
+        $this->autoriserFrais($frais);
+
+        if ($echeancier->categorie_frais_id !== $frais->id) {
+            return response()->json(['message' => 'Échéance non liée à cette catégorie.'], 403);
+        }
+
+        $validated = $request->validate([
+            'numero_tranche' => ['required', 'integer', 'min:1'],
+            'montant'        => ['required', 'numeric', 'min:0'],
+            'date_echeance'  => ['required', 'date'],
+            'libelle'        => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $echeancier->update([
+            'numero_tranche' => $validated['numero_tranche'],
+            'montant'        => $validated['montant'],
+            'date_echeance'  => $validated['date_echeance'],
+            'libelle'        => $validated['libelle'] ?? $echeancier->libelle,
+        ]);
+
+        return response()->json([
+            'message' => 'Échéance mise à jour.',
+            'data'    => [
+                'id'             => $echeancier->id,
+                'numero_tranche' => (int) $echeancier->numero_tranche,
+                'montant'        => (float) $echeancier->montant,
+                'date_echeance'  => $echeancier->date_echeance?->format('Y-m-d'),
+                'libelle'        => $echeancier->libelle,
+            ],
+        ]);
+    }
+
+    /**
      * Supprime un échéancier.
      */
     public function destroyEcheancier(Request $request, CategoriesFrais $frais, Echeancier $echeancier): JsonResponse
