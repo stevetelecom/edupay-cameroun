@@ -366,11 +366,13 @@ class ApprenantController extends Controller
     private function genererMatricule(int $etablissementId): string
     {
         $etablissement = auth()->user()->etablissement;
-        $prefix = $etablissement->code_etablissement
-            ? strtoupper(explode('-', $etablissement->code_etablissement)[0])
+
+        // Base = code complet de l'établissement (ex. LYC-MEL-2026) ou initiales du nom
+        $base = $etablissement->code_etablissement
+            ? strtoupper(trim($etablissement->code_etablissement))
             : strtoupper(substr(preg_replace('/[^A-Z]/i', '', $etablissement->nom), 0, 3));
 
-        $dernier = Apprenant::where('etablissement_id', $etablissementId)
+        $dernier = Apprenant::withTrashed()->where('etablissement_id', $etablissementId)
             ->whereNotNull('matricule')->orderByDesc('id')->value('matricule');
 
         $numero = 1;
@@ -378,7 +380,14 @@ class ApprenantController extends Controller
             $numero = (int) $m[1] + 1;
         }
 
-        return $prefix . '-' . date('Y') . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+        // Boucle de retry : garantit l'unicité (contrainte UNIQUE en base)
+        do {
+            $matricule = $base . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+            $libre = ! Apprenant::withTrashed()->where('matricule', $matricule)->exists();
+            $numero++;
+        } while (! $libre);
+
+        return $matricule;
     }
 
     private function autoriser(): int

@@ -274,9 +274,10 @@ class ApprenantController extends Controller
         // Génération automatique du matricule si non fourni
         if (empty($validated['matricule'])) {
             $etablissement = Auth::user()->etablissement;
-            // Préfixe basé sur le code établissement ou les initiales
-            $prefix = $etablissement->code_etablissement
-                ? strtoupper(explode('-', $etablissement->code_etablissement)[0])
+
+            // Base = code complet de l'établissement (ex. LYC-MEL-2026) ou initiales du nom
+            $base = $etablissement->code_etablissement
+                ? strtoupper(trim($etablissement->code_etablissement))
                 : strtoupper(substr(preg_replace('/[^A-Z]/i', '', $etablissement->nom), 0, 3));
 
             // Numéro séquentiel : dernier matricule de cet établissement + 1.
@@ -296,7 +297,7 @@ class ApprenantController extends Controller
             }
 
             do {
-                $matriculeGenere = $prefix . '-' . date('Y') . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+                $matriculeGenere = $base . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
                 $libre = ! \App\Models\Apprenant::withTrashed()->where('matricule', $matriculeGenere)->exists();
                 $numero++;
             } while (! $libre);
