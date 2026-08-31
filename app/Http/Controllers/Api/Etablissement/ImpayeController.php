@@ -4,12 +4,13 @@ namespace App\Http\Controllers\Api\Etablissement;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\FraisResource;
+use App\Mail\RelanceImpayeMail;
 use App\Models\Apprenant;
 use App\Models\FraisApprenant;
-use App\Services\SmsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ImpayeController extends Controller
 {
@@ -73,9 +74,9 @@ class ImpayeController extends Controller
     }
 
     /**
-     * Relance SMS groupée à tous les parents ayant des impayés.
+     * Relance groupée à tous les parents ayant des impayés (par email).
      */
-    public function relancerSms(Request $request, SmsService $smsService): JsonResponse
+    public function relancerSms(Request $request): JsonResponse
     {
         $etablissementId = $this->autoriser();
         $anneeScolaire   = '2025-2026';
@@ -86,14 +87,14 @@ class ImpayeController extends Controller
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
             ->get();
 
-        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes, $smsService);
+        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes);
 
-        Log::channel('admin')->info("E07 relance groupée — Étab #{$etablissementId} (API) : {$nbEnvoyes} envoyés, {$nbEchecs} échecs.");
+        Log::channel('admin')->info("E07 relance groupée — Étab #{$etablissementId} (API) : {$nbEnvoyes} emails envoyés, {$nbEchecs} échecs.");
 
         return response()->json([
             'message'   => $nbEnvoyes > 0
-                ? "{$nbEnvoyes} SMS envoyé(s)." . ($nbEchecs > 0 ? " ({$nbEchecs} échec(s))" : '')
-                : 'Aucun SMS envoyé. Vérifiez les numéros et les préférences de notification.',
+                ? "{$nbEnvoyes} relance(s) envoyée(s) par email." . ($nbEchecs > 0 ? " ({$nbEchecs} échec(s))" : '')
+                : 'Aucun email envoyé. Vérifiez les adresses email et les préférences de notification.',
             'envoi'     => [
                 'envoyes' => $nbEnvoyes,
                 'echecs'  => $nbEchecs,
@@ -102,9 +103,9 @@ class ImpayeController extends Controller
     }
 
     /**
-     * Relance SMS pour un apprenant précis.
+     * Relance pour un apprenant précis (par email).
      */
-    public function relancerApprenant(Request $request, Apprenant $apprenant, SmsService $smsService): JsonResponse
+    public function relancerApprenant(Request $request, Apprenant $apprenant): JsonResponse
     {
         $etablissementId = $this->autoriser();
 
@@ -118,12 +119,12 @@ class ImpayeController extends Controller
             ->where('statut', '!=', 'regle')
             ->get();
 
-        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes, $smsService);
+        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes);
 
         return response()->json([
             'message' => $nbEnvoyes > 0
-                ? "SMS de relance envoyé à {$apprenant->prenom} {$apprenant->nom}."
-                : 'Échec — vérifiez le numéro du parent ou ses préférences SMS.',
+                ? "Relance envoyée à {$apprenant->prenom} {$apprenant->nom}."
+                : 'Échec — vérifiez l\'email du parent ou ses préférences de notification.',
             'envoi'   => [
                 'envoyes' => $nbEnvoyes,
                 'echecs'  => $nbEchecs,
@@ -131,7 +132,7 @@ class ImpayeController extends Controller
         ], $nbEnvoyes > 0 ? 200 : 422);
     }
 
-    private function envoyerRelancesGroupe($fraisCollection, SmsService $smsService): array
+    private function envoyerRelancesGroupe($fraisCollection): array
     {
         $nbEnvoyes = 0;
         $nbEchecs  = 0;
@@ -143,22 +144,22 @@ class ImpayeController extends Controller
             }
 
             foreach ($frais->apprenant->parents as $parent) {
-                if (! $parent->telephone) {
+                if (! $parent->email || ! $parent->notif_email) {
                     $nbEchecs++;
                     continue;
                 }
 
-                $message = sprintf(
-                    "EduPay: %s %s - solde impaye %s FCFA (%s). Regularisez sur l'app EduPay Cameroun.",
-                    $frais->apprenant->nom,
-                    $frais->apprenant->prenom,
-                    number_format($reste, 0, ',', ' '),
-                    $frais->categorieFrais->nom ?? 'frais scolaires'
-                );
-
-                $smsService->envoyerRelance($parent->telephone, $message)
-                    ? $nbEnvoyes++
-                    : $nbEchecs++;
+                try {
+                    Mail::to($parent->email)->send(new RelanceImpayeMail(
+                        $frais->apprenant,
+                        $frais->categorieFrais->nom ?? 'frais scolaires',
+                        (float) $reste,
+                    ));
+                    $nbEnvoyes++;
+                } catch (\Throwable $e) {
+                    $nbEchecs++;
+                    Log::channel('admin')->error('E07 échec envoi relance email à ' . $parent->email . ' : ' . $e->getMessage());
+                }
             }
         }
 

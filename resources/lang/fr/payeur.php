@@ -361,4 +361,14 @@ return [
     'pdf_numero_tranche' => 'Tranche :n',
     'pdf_recu_footer' => 'Reçu électronique généré par la plateforme EduPay Cameroun.',
     'pdf_recu_verif' => 'Vérifiable sur EduPay avec la référence :ref — :date',
+
+    'em_relance_header_sub' => 'Rappel de solde impayé',
+    'em_relance_titre' => 'Solde impayé à régulariser',
+    'em_relance_bonjour' => 'Bonjour, vous êtes tuteur de <strong>:nom</strong>,',
+    'em_relance_intro' => 'un solde est encore impayé sur votre dossier. Pour éviter toute pénalité, nous vous invitons à le régulariser dès que possible.',
+    'em_relance_apprenant' => 'Apprenant',
+    'em_relance_motif' => 'Motif',
+    'em_relance_reste' => 'Reste à payer',
+    'em_relance_btn' => 'Régulariser maintenant',
+    'em_relance_aide' => 'Vous pouvez régler via Mobile Money (MTN, Orange) ou carte bancaire directement sur l\'application EduPay Cameroun.',
 ];

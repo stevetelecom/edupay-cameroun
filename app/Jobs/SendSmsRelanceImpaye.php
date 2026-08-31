@@ -4,9 +4,8 @@ namespace App\Jobs;
 
 use App\Models\Echeancier;
 use App\Models\FraisApprenant;
-use App\Services\SmsService;
-use Illuminate\Foundation\Bus\Dispatchable;
 use App\Mail\RappelEcheanceMail;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -14,7 +13,7 @@ class SendSmsRelanceImpaye
 {
     use Dispatchable;
 
-    public function handle(SmsService $smsService): void
+    public function handle(): void
     {
         $dateJ5 = now()->addDays(5)->toDateString();
 
@@ -43,37 +42,24 @@ class SendSmsRelanceImpaye
 
                 foreach ($apprenant->parents as $parent) {
                     if (!$parent->notif_rappel_echeance) continue;
-                    if (!$parent->telephone) continue;
+                    if (!$parent->email) { $nbEchecs++; continue; }
 
-                    $message = sprintf(
-                        "EduPay Cameroun : Rappel echeance dans 5 jours.\n%s %s - %s\nReste a payer : %s FCFA\nDate limite : %s\nPayez via l'app EduPay.",
-                        $apprenant->nom,
-                        $apprenant->prenom,
-                        $categorie->nom,
-                        number_format($reste, 0, ',', ' '),
-                        $echeance->date_echeance->format('d/m/Y')
-                    );
-
-                    $ok = $smsService->envoyerRelance($parent->telephone, $message);
-                    $ok ? $nbEnvoyes++ : $nbEchecs++;
-
-                    // F12-B — Email rappel échéance
-                    if ($parent->email && $parent->notif_rappel_echeance) {
-                        try {
-                            Mail::to($parent->email)->send(new RappelEcheanceMail(
-                                $apprenant,
-                                $categorie->nom,
-                                $reste,
-                                $echeance->date_echeance->format('d/m/Y')
-                            ));
-                        } catch (\Exception $e) {
-                            Log::channel('admin')->error('Erreur email rappel echeance', ['error' => $e->getMessage()]);
-                        }
+                    try {
+                        Mail::to($parent->email)->send(new RappelEcheanceMail(
+                            $apprenant,
+                            $categorie->nom,
+                            $reste,
+                            $echeance->date_echeance->format('d/m/Y')
+                        ));
+                        $nbEnvoyes++;
+                    } catch (\Exception $e) {
+                        $nbEchecs++;
+                        Log::channel('admin')->error('Erreur email rappel echeance', ['error' => $e->getMessage()]);
                     }
                 }
             }
         }
 
-        Log::channel('admin')->info("E07 SendSmsRelanceImpaye — date_echeance={$dateJ5} : {$nbEnvoyes} SMS envoyes, {$nbEchecs} echecs.");
+        Log::channel('admin')->info("E07 SendSmsRelanceImpaye — date_echeance={$dateJ5} : {$nbEnvoyes} emails envoyés, {$nbEchecs} échecs.");
     }
 }

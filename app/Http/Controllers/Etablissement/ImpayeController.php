@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Etablissement;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RelanceImpayeMail;
 use App\Models\Apprenant;
 use App\Models\FraisApprenant;
-use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ImpayeController extends Controller
 {
@@ -56,7 +57,7 @@ class ImpayeController extends Controller
         ));
     }
 
-    public function relancerSms(Request $request, SmsService $smsService)
+    public function relancerSms(Request $request)
     {
         $etablissementId = Auth::user()->etablissement_id;
         $anneeScolaire   = '2025-2026';
@@ -67,19 +68,19 @@ class ImpayeController extends Controller
             ->whereHas('apprenant', fn($q) => $q->where('etablissement_id', $etablissementId))
             ->get();
 
-        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes, $smsService);
+        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes);
 
-        Log::channel('admin')->info("E07 relance groupée — Étab #{$etablissementId} : {$nbEnvoyes} envoyés, {$nbEchecs} échecs.");
+        Log::channel('admin')->info("E07 relance groupée — Étab #{$etablissementId} : {$nbEnvoyes} emails envoyés, {$nbEchecs} échecs.");
 
         return back()->with(
             $nbEnvoyes > 0 ? 'success' : 'error',
             $nbEnvoyes > 0
-                ? "{$nbEnvoyes} SMS envoyé(s)." . ($nbEchecs > 0 ? " ({$nbEchecs} échec(s))" : '')
-                : 'Aucun SMS envoyé. Vérifiez les numéros et les préférences de notification.'
+                ? "{$nbEnvoyes} relance(s) envoyée(s) par email." . ($nbEchecs > 0 ? " ({$nbEchecs} échec(s))" : '')
+                : 'Aucun email envoyé. Vérifiez les adresses email et les préférences de notification.'
         );
     }
 
-    public function relancerApprenant(Apprenant $apprenant, SmsService $smsService)
+    public function relancerApprenant(Apprenant $apprenant)
     {
         if ($apprenant->etablissement_id !== Auth::user()->etablissement_id) {
             abort(403);
@@ -91,17 +92,17 @@ class ImpayeController extends Controller
             ->where('statut', '!=', 'regle')
             ->get();
 
-        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes, $smsService);
+        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes);
 
         return back()->with(
             $nbEnvoyes > 0 ? 'success' : 'error',
             $nbEnvoyes > 0
-                ? "SMS de relance envoyé à {$apprenant->prenom} {$apprenant->nom}."
-                : 'Échec — vérifiez le numéro du parent ou ses préférences SMS.'
+                ? "Relance envoyée à {$apprenant->prenom} {$apprenant->nom}."
+                : 'Échec — vérifiez l\'email du parent ou ses préférences de notification.'
         );
     }
 
-    private function envoyerRelancesGroupe($fraisCollection, SmsService $smsService): array
+    private function envoyerRelancesGroupe($fraisCollection): array
     {
         $nbEnvoyes = 0;
         $nbEchecs  = 0;
@@ -111,19 +112,19 @@ class ImpayeController extends Controller
             if ($reste <= 0) continue;
 
             foreach ($frais->apprenant->parents as $parent) {
-                if (!$parent->telephone) { $nbEchecs++; continue; }
+                if (!$parent->email || !$parent->notif_email) { $nbEchecs++; continue; }
 
-                $message = sprintf(
-                    "EduPay: %s %s - solde impaye %s FCFA (%s). Regularisez sur l'app EduPay Cameroun.",
-                    $frais->apprenant->nom,
-                    $frais->apprenant->prenom,
-                    number_format($reste, 0, ',', ' '),
-                    $frais->categorieFrais->nom ?? 'frais scolaires'
-                );
-
-                $smsService->envoyerRelance($parent->telephone, $message)
-                    ? $nbEnvoyes++
-                    : $nbEchecs++;
+                try {
+                    Mail::to($parent->email)->send(new RelanceImpayeMail(
+                        $frais->apprenant,
+                        $frais->categorieFrais->nom ?? 'frais scolaires',
+                        (float) $reste,
+                    ));
+                    $nbEnvoyes++;
+                } catch (\Throwable $e) {
+                    $nbEchecs++;
+                    Log::channel('admin')->error('E07 échec envoi relance email à ' . $parent->email . ' : ' . $e->getMessage());
+                }
             }
         }
 

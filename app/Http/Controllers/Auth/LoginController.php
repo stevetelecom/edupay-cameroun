@@ -1,10 +1,13 @@
 <?php
 namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
+use App\Mail\ParentOtpMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 class LoginController extends Controller
 {
@@ -117,22 +120,36 @@ class LoginController extends Controller
                 ->withInput();
         }
 
-        // Si l'OTP n'a pas encore été envoyé, générer et envoyer
+        // Si l'OTP n'a pas encore été envoyé, générer et envoyer par EMAIL
         if (!$request->filled('otp_code')) {
-            $otp = random_int(100000, 999999);
-            $request->session()->put('otp_code', $otp);
+            if (!$user->email) {
+                return back()
+                    ->with('error', 'Aucune adresse email n\'est associée à ce compte. Utilisez la connexion classique par mot de passe.')
+                    ->withInput();
+            }
+
+            $otp = (string) random_int(100000, 999999);
+            $key = 'otp_parent_' . $user->id;
+            Cache::put($key, Hash::make($otp), now()->addMinutes(5));
+
             $request->session()->put('otp_login', $login);
             $request->session()->put('otp_user_id', $user->id);
             $request->session()->put('otp_attempts', 0);
 
-            // TODO Sprint 2 : envoyer par SMS via AangaraaPay ou autre service SMS.
-            // Tant que le SMS n'est pas branché, ne JAMAIS logger le code en clair —
-            // seule une trace d'audit sans le code est conservée.
-            Log::info("Demande OTP pour {$login} (envoi SMS non encore implémenté)");
+            try {
+                Mail::to($user->email)->send(new ParentOtpMail($user, $otp));
+                Log::info("OTP envoyé par email à {$login}");
+            } catch (\Throwable $e) {
+                Cache::forget($key);
+                Log::error('OTP : échec envoi email : ' . $e->getMessage());
+                return back()
+                    ->with('error', 'Impossible d\'envoyer le code par email. Veuillez réessayer.')
+                    ->withInput();
+            }
 
             return back()
                 ->with('otp_sent', true)
-                ->with('info', "Code OTP envoyé à {$login}");
+                ->with('info', "Un code de vérification a été envoyé à votre adresse email.");
         }
 
         // Vérifier le code OTP
@@ -146,27 +163,30 @@ class LoginController extends Controller
         $attempts = Cache::get($otpAttemptsKey, 0);
 
         if ($attempts >= 3) {
-            $request->session()->forget(['otp_code', 'otp_login', 'otp_user_id']);
+            $request->session()->forget(['otp_login', 'otp_user_id', 'otp_attempts']);
+            Cache::forget('otp_parent_' . $user->id);
             Cache::forget($otpAttemptsKey);
             return back()
                 ->with('error', 'Trop de tentatives. Veuillez recommencer.')
                 ->withInput();
         }
 
-        $storedOtp = $request->session()->get('otp_code');
+        $hashedOtp = Cache::get('otp_parent_' . $user->id);
 
-        if ((int) $request->otp_code !== (int) $storedOtp) {
+        if (! $hashedOtp || ! Hash::check($request->otp_code, $hashedOtp)) {
             Cache::put($otpAttemptsKey, $attempts + 1, now()->addMinutes(10));
             return back()
-                ->with('error', 'Code OTP invalide.')
+                ->with('error', 'Code OTP invalide ou expiré.')
                 ->withInput();
         }
 
         Cache::forget($otpAttemptsKey);
+        Cache::forget('otp_parent_' . $user->id);
 
         // Vérifier que le compte n'est pas suspendu avant d'authentifier
         if ($user->suspendu) {
-            $request->session()->forget(['otp_code', 'otp_login', 'otp_user_id', 'otp_attempts']);
+            $request->session()->forget(['otp_login', 'otp_user_id', 'otp_attempts']);
+            Cache::forget('otp_parent_' . $user->id);
             return back()
                 ->with('error', 'Votre compte a été suspendu. Contactez le support EduPay pour plus d\'informations.')
                 ->withInput();
@@ -175,7 +195,7 @@ class LoginController extends Controller
         // Code correct : authentifier l'utilisateur
         Auth::login($user, true);
         $request->session()->regenerate();
-        $request->session()->forget(['otp_code', 'otp_login', 'otp_user_id']);
+        $request->session()->forget(['otp_login', 'otp_user_id']);
 
         return redirect()->intended($this->redirectionParRole($user));
     }
