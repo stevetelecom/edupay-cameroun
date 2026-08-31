@@ -92,6 +92,9 @@ function mReinitEtab() {
     // Revenir à l'étape 1
     document.getElementById('m-step1').style.display = 'block';
     document.getElementById('m-step2').style.display = 'none';
+    // Réafficher la liste des établissements (le clic global peut l'avoir masquée)
+    var listeEtabs = document.getElementById('m-etab-liste');
+    if (listeEtabs) listeEtabs.style.display = 'block';
     var sectionAnnuaire2 = document.getElementById('m-section-annuaire');
     if (sectionAnnuaire2) sectionAnnuaire2.style.display = 'none';
     mReinitApprenant();
@@ -134,11 +137,13 @@ document.addEventListener('click', function(e) {
     var search = document.getElementById('m-etab-search');
     var villeInp = document.getElementById('m-etab-ville');
     var codeInp  = document.getElementById('m-etab-code');
+    var changerBtn = document.getElementById('m-btn-changer-etab');
     if (!liste) return;
-    // Ne pas masquer si le clic vient d'un des filtres ou de la liste elle-même
-    var cibleFiltre = (search && search.contains(e.target))
-                   || (villeInp && villeInp.contains(e.target))
-                   || (codeInp && codeInp.contains(e.target))
+    // Ne pas masquer si le clic vient d'un des filtres, de la liste, ou du bouton « Changer d'établissement »
+    var cibleFiltre = (search    && search.contains(e.target))
+                   || (villeInp  && villeInp.contains(e.target))
+                   || (codeInp   && codeInp.contains(e.target))
+                   || (changerBtn && changerBtn.contains(e.target))
                    || liste.contains(e.target);
     if (!cibleFiltre) {
         liste.style.display = 'none';

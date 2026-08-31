@@ -4,11 +4,6 @@
 
 @section('content')
 
-<script>
-    window.EP_LANG = window.EP_LANG || {};
-    window.EP_LANG.confirm_relance_sms = {!! json_encode(__('etablissement.confirm_relance_sms')) !!};
-</script>
-
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
     <div>
         <div style="font-size:17px;font-weight:700;">{{ __('etablissement.dossiers_impayes') }}</div>
@@ -16,13 +11,12 @@
             {{ __('etablissement.dossiers_attente', ['count' => $fraisImpayes->total()]) }}
         </div>
     </div>
-    <form method="POST" action="{{ route('etablissement.impayes.relancer') }}">
-        @csrf
-        <button type="submit" class="btn-p" style="width:auto;"
-                onclick="return confirm(window.EP_LANG.confirm_relance_sms)">
-            📱 {{ __('etablissement.relancer_tous_sms') }}
+    <button type="button" class="btn-p" style="width:auto;display:inline-flex;align-items:center;gap:6px;"
+            onclick="epModal.open('modal-relancer-tous')">
+            <span class="material-symbols-outlined" style="font-size:16px;color:#fff;">sms</span>
+            {{ __('etablissement.relancer_tous_sms') }}
         </button>
-    </form>
+
 </div>
 
 {{-- KPIs --}}
@@ -38,7 +32,7 @@
         <div class="klbl">{{ __('etablissement.dossiers_concernes') }}</div>
     </div>
     <div class="kpi">
-        <div class="kval" style="color:var(--ep-gold);">{{ $tauxRecouvrement ?? 0 }}%</div>
+        <div class="kval" style="color:var(--ep-gold);">{{ number_format($tauxRecouvrementDecimal ?? 0, 2, ',', '') }}%</div>
         <div class="klbl">{{ __('etablissement.taux_recouvrement') }}</div>
     </div>
 </div>
@@ -134,9 +128,9 @@
                             <button type="submit"
                                     style="font-size:11px;color:#888;background:none;
                                            border:1px solid #ddd;padding:3px 10px;
-                                           border-radius:20px;cursor:pointer;"
+                                           border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"
                                     title="{{ __('etablissement.sms_relance_title') }}">
-                                📱 SMS
+                                <span class="material-symbols-outlined" style="font-size:13px;color:#888;">sms</span> SMS
                             </button>
                         </form>
                     </div>
@@ -158,3 +152,41 @@
 @endif
 
 @endsection
+
+@push('modals')
+<div id="modal-relancer-tous" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm">
+    <div class="ep-modal-head">
+      <h3><span class="material-symbols-outlined" style="font-size:18px;vertical-align:-4px;">sms</span> {{ __('etablissement.relancer_tous_sms') }}</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-relancer-tous')">×</button>
+    </div>
+    <div class="ep-modal-body" style="padding:16px 20px;">
+      <div style="font-size:13px;color:#555;line-height:1.5;margin-bottom:14px;">
+        {{ __('etablissement.relance_tous_desc') }}
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;background:var(--ep-teal-lt);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:16px;">
+        <div style="flex:1;">
+          <div style="font-size:20px;font-weight:700;color:#085041;">{{ $fraisImpayes->total() }}</div>
+          <div style="font-size:11px;color:#0F6E56;">{{ __('etablissement.dossiers_concernes') }}</div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:20px;font-weight:700;color:var(--ep-red);">{{ number_format($totalImpaye ?? 0, 0, ',', ' ') }}</div>
+          <div style="font-size:11px;color:#9B2C2C;">{{ __('etablissement.fcfa_total_impaye') }}</div>
+        </div>
+      </div>
+      <form method="POST" action="{{ route('etablissement.impayes.relancer') }}">
+        @csrf
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button type="button" class="btn-o" onclick="epModal.close('modal-relancer-tous')">
+            {{ __('etablissement.annuler') }}
+          </button>
+          <button type="submit" class="btn-p" style="display:inline-flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:16px;color:#fff;">send</span>
+            {{ __('etablissement.confirmer_envoyer') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+@endpush

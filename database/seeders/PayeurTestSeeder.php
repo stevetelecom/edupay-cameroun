@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Apprenant;
 use App\Models\CategoriesFrais;
+use App\Models\Echeancier;
 use App\Models\Etablissement;
 use App\Models\FraisApprenant;
 use App\Models\Paiement;
@@ -73,6 +74,12 @@ class PayeurTestSeeder extends Seeder
                 'actif'           => true,
             ]
         );
+
+        // ────────────────────────────────────────────
+        // 1b. ÉCHÉANCIERS — pour que la colonne "échéance" des impayés s'affiche
+        // ────────────────────────────────────────────
+        $this->creerEcheanciers($scolarite, 2, 95000);
+        $this->creerEcheanciers($cantine, 3, 35000);
 
         // ────────────────────────────────────────────
         // 2. APPRENANT 1 — FONO Brice (3ème) — Partiellement payé
@@ -234,5 +241,34 @@ class PayeurTestSeeder extends Seeder
             ]
         );
         $this->command->warn('Connectez-vous avec parent@test.cm / password puis allez sur /espace/tableau-de-bord');
+    }
+
+    /**
+     * Crée les échéances (tranches) d'une catégorie de frais, étalées sur
+     * les mois à venir, pour alimenter la colonne "échéance" des impayés.
+     *
+     * @param \App\Models\CategoriesFrais $categorie
+     * @param int $nbTranches
+     * @param float $montantTotal
+     */
+    private function creerEcheanciers($categorie, int $nbTranches, float $montantTotal): void
+    {
+        if ($categorie->echeanciers()->exists()) {
+            return;
+        }
+        $montantTranche = round($montantTotal / max($nbTranches, 1), 0);
+        for ($t = 1; $t <= $nbTranches; $t++) {
+            Echeancier::updateOrCreate(
+                [
+                    'categorie_frais_id' => $categorie->id,
+                    'numero_tranche'     => $t,
+                ],
+                [
+                    'montant'       => $montantTranche,
+                    'date_echeance' => now()->addMonths($t)->format('Y-m-d'),
+                    'libelle'       => "Tranche $t",
+                ]
+            );
+        }
     }
 }

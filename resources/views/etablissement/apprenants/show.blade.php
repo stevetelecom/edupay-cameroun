@@ -182,15 +182,16 @@
                 </td>
                 <td>
                     @if($frais->paiements->isEmpty())
-                        <button type="button" class="btn-r" style="width:auto;font-size:11px;padding:5px 10px;"
+                        <button type="button" class="btn-r" style="width:auto;font-size:11px;padding:5px 12px;box-shadow:0 1px 2px rgba(0,0,0,.08);display:inline-flex;align-items:center;gap:4px;"
                                 data-desaffecter data-url="{{ route('etablissement.apprenants.desaffecter', [$apprenant, $frais]) }}"
                                 data-nom="{{ $frais->categorieFrais->nom ?? '' }}">
-                            {{ __('etablissement.desaffecter') }}
+                            <span class="material-symbols-outlined" style="font-size:13px;color:#fff;">logout</span>{{ __('etablissement.desaffecter') }}
                         </button>
                     @else
-                        <span style="font-size:11px;color:#999;" title="{{ __('etablissement.desaffecter_impossible_paiement') }}">
-                            {{ __('etablissement.desaffecter') }}
-                        </span>
+                        <button type="button" class="btn-r" style="width:auto;font-size:11px;padding:5px 12px;opacity:.45;cursor:not-allowed;filter:grayscale(1);display:inline-flex;align-items:center;gap:4px;"
+                                title="{{ __('etablissement.desaffecter_impossible_paiement') }}" disabled>
+                            <span class="material-symbols-outlined" style="font-size:13px;">lock</span>{{ __('etablissement.desaffecter') }}
+                        </button>
                     @endif
                 </td>
             </tr>

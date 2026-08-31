@@ -195,8 +195,51 @@ class FraisController extends Controller
             'actif'           => $request->boolean('actif', true),
         ]);
 
+        $this->synchroniserEcheanciers($frais);
+
         return redirect()->route('etablissement.frais.index')
             ->with('success', 'Catégorie mise à jour.');
+    }
+
+    /**
+     * Répartit montant_total sur nb_tranches_max échéances.
+     * Augmente/ réduit automatiquement le nombre de tranches pour coller à nb_tranches_max.
+     * 🔒 Ne touche pas aux FraisApprenant (déjà réglés) — seuls les montants échéanciers et
+     *   les échéances futures sont alignés.
+     */
+    private function synchroniserEcheanciers(CategoriesFrais $frais): void
+    {
+        $nb = max(1, (int) $frais->nb_tranches_max);
+        $montantTotal = (float) $frais->montant_total;
+
+        $tranches = $frais->echeanciers()->orderBy('numero_tranche')->get();
+
+        if ($nb == 1) {
+            $tranches->each->delete();
+            return;
+        }
+
+        $montantParTranche = round($montantTotal / $nb);
+
+        for ($i = 1; $i <= $nb; $i++) {
+            $existe = $tranches->firstWhere('numero_tranche', $i);
+
+            if ($existe) {
+                if ($existe->montant != $montantParTranche) {
+                    $existe->update(['montant' => $montantParTranche]);
+                }
+            } else {
+                Echeancier::create([
+                    'categorie_frais_id' => $frais->id,
+                    'numero_tranche'     => $i,
+                    'libelle'            => 'Tranche ' . $i,
+                    'montant'            => $montantParTranche,
+                    'date_echeance'      => now()->addMonths($i)->toDateString(),
+                ]);
+            }
+        }
+
+        $tranches->where('numero_tranche', '>', $nb)->each->delete();
     }
 
     public function destroy(CategoriesFrais $frais)

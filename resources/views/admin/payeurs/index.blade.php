@@ -145,7 +145,7 @@
 </div>
 
 {{-- KPIs --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
   <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
     <div class="w-9 h-9 bg-[#E0F5EE] rounded-lg flex items-center justify-center shrink-0">
       <svg class="w-4 h-4 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -182,6 +182,24 @@
       <div class="text-xs text-gray-400">{{ __('admin.parents') }}</div>
     </div>
   </div>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
+    <div class="w-9 h-9 bg-[#FEF3DC] rounded-lg flex items-center justify-center shrink-0">
+      <svg class="w-4 h-4 text-[#854F0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21v-2a4 4 0 0 0-3-3.87"/><path d="M17 22v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="15" cy="6" r="3"/></svg>
+    </div>
+    <div>
+      <div class="text-xl font-bold text-[#854F0B]">{{ $stats['eleves'] }}</div>
+      <div class="text-xs text-gray-400">{{ __('admin.eleves') }}</div>
+    </div>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
+    <div class="w-9 h-9 bg-[#E8F0FE] rounded-lg flex items-center justify-center shrink-0">
+      <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 9L12 4 2 9l10 5 10-5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v6"/></svg>
+    </div>
+    <div>
+      <div class="text-xl font-bold text-blue-700">{{ $stats['etudiants'] }}</div>
+      <div class="text-xs text-gray-400">{{ __('admin.etudiants') }}</div>
+    </div>
+  </div>
 </div>
 
 {{-- Filtres --}}
@@ -213,12 +231,36 @@
   </div>
 </div>
 
+{{-- Actions groupées --}}
+<div id="bulk-toolbar-payeurs" class="bg-white border border-gray-200 rounded-xl p-3 mb-4 hidden items-center gap-3 flex-wrap">
+  <span class="text-sm text-gray-600 font-medium">
+    <span id="nb-selection-payeur">0</span> {{ __('admin.element_selectionne') }}
+  </span>
+  <button id="btn-bulk-activation-payeur" class="bg-[#0D9E75] hover:bg-[#0A8562] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+    {{ __('admin.activer_selection') }}
+  </button>
+  <button id="btn-bulk-suspension-payeur" class="bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+    {{ __('admin.suspendre_selection') }}
+  </button>
+  <button id="btn-bulk-delete-payeur" class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+    {{ __('admin.supprimer_selection') }}
+  </button>
+</div>
+<form id="form-bulk-payeurs" method="POST" class="hidden">
+  @csrf
+  @method('PATCH')
+  <input type="hidden" name="ids" value="">
+</form>
+
 {{-- Table --}}
 <div class="bg-white border border-gray-200 rounded-xl">
   <div>
     <table id="dt-payeurs" class="ep-dt text-sm">
     <thead>
       <tr>
+        <th data-orderable="false" class="w-8">
+          <input type="checkbox" id="select-all-payeur" class="ep-checkbox">
+        </th>
         <th>{{ __('admin.payeur_col') }}</th>
         <th>{{ __('messages.contact') }}</th>
         <th>{{ __('admin.enfants') }}</th>
@@ -256,14 +298,15 @@ $(document).ready(function() {
             }
         },
         columns: [
-            { data: 0, orderable: true,  responsivePriority: 1 }, // Payeur
-            { data: 1, orderable: false, responsivePriority: 5 }, // Contact
-            { data: 2, orderable: true,  responsivePriority: 4 }, // Enfants
-            { data: 3, orderable: true,  responsivePriority: 3 }, // Statut
-            { data: 4, orderable: true,  responsivePriority: 6 }, // Inscrit le
-            { data: 5, orderable: false, responsivePriority: 2 }, // Actions
+            { data: 0, orderable: false, responsivePriority: 8 }, // Sélection
+            { data: 1, orderable: true,  responsivePriority: 1 }, // Payeur
+            { data: 2, orderable: false, responsivePriority: 5 }, // Contact
+            { data: 3, orderable: true,  responsivePriority: 4 }, // Enfants
+            { data: 4, orderable: true,  responsivePriority: 3 }, // Statut
+            { data: 5, orderable: true,  responsivePriority: 6 }, // Inscrit le
+            { data: 6, orderable: false, responsivePriority: 2 }, // Actions
         ],
-        order: [[0, 'asc']],
+        order: [[1, 'asc']],
     });
 
     var searchTimer;
@@ -356,6 +399,100 @@ document.getElementById('form-suspendre-payeur').addEventListener('submit', func
 document.getElementById('form-supprimer-payeur').addEventListener('submit', function(e) {
     e.preventDefault();
     epSubmitAjaxPayeur(this, 'modal-supprimer-payeur', 'button[type="submit"]');
+});
+
+// ── Sélection groupée de comptes payeurs ──
+var selectionPayeurs = {}; // id -> true
+
+function mettreAJourSelectionPayeur() {
+    var ids = Object.keys(selectionPayeurs).filter(function(k) { return selectionPayeurs[k]; });
+    document.getElementById('nb-selection-payeur').textContent = ids.length;
+    var toolbar = document.getElementById('bulk-toolbar-payeurs');
+    if (ids.length > 0) {
+        toolbar.classList.remove('hidden');
+        toolbar.classList.add('flex');
+    } else {
+        toolbar.classList.add('hidden');
+        toolbar.classList.remove('flex');
+    }
+}
+
+$(document).on('change', '#dt-payeurs tbody .payeur-check', function() {
+    selectionPayeurs[$(this).val()] = $(this).is(':checked');
+    mettreAJourSelectionPayeur();
+});
+
+$(document).on('change', '#select-all-payeur', function() {
+    var checked = $(this).is(':checked');
+    $('#dt-payeurs tbody .payeur-check').each(function() {
+        this.checked = checked;
+        selectionPayeurs[$(this).val()] = checked;
+    });
+    mettreAJourSelectionPayeur();
+});
+
+dtPayeurs.on('draw', function() {
+    var all = $('#dt-payeurs tbody .payeur-check');
+    var checked = 0;
+    all.each(function() {
+        this.checked = !!selectionPayeurs[$(this).val()];
+        if (this.checked) checked++;
+    });
+    $('#select-all-payeur').prop('checked', all.length > 0 && checked === all.length);
+});
+
+function epSubmitAjaxBulkPayeur(action, method, ids) {
+    var form = document.getElementById('form-bulk-payeurs');
+    form.querySelector('input[name="ids"]').value = ids.join(',');
+    form.method = 'POST';
+    form.querySelector('input[name="_method"]').value = method;
+    form.action = action;
+
+    const btn = null;
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: new FormData(form),
+    })
+    .then(r => r.json().then(data => ({ status: r.status, body: data })))
+    .then(({ status, body }) => {
+        if (status >= 200 && status < 300 && body.success) {
+            epToast(body.message || @json(__('admin.action_effectuee')), 'success');
+            dtPayeurs.ajax.reload(null, false);
+            selectionPayeurs = {};
+            mettreAJourSelectionPayeur();
+        } else {
+            epToast(body.message || @json(__('admin.une_erreur_survenue')), 'error');
+        }
+    })
+    .catch(() => {
+        epToast(@json(__('admin.erreur_reseau')), 'error');
+    });
+}
+
+document.getElementById('btn-bulk-activation-payeur').addEventListener('click', function() {
+    var ids = Object.keys(selectionPayeurs).filter(function(k) { return selectionPayeurs[k]; });
+    if (!ids.length) return epToast(@json(__('admin.aucun_selection')), 'error');
+    if (!window.confirm(ids.length + ' ' + @json(__('admin.confirm_activation_selection_payeur')))) return;
+    epSubmitAjaxBulkPayeur('/admin-ep2026/payeurs/bulk-activer', 'PATCH', ids);
+});
+
+document.getElementById('btn-bulk-suspension-payeur').addEventListener('click', function() {
+    var ids = Object.keys(selectionPayeurs).filter(function(k) { return selectionPayeurs[k]; });
+    if (!ids.length) return epToast(@json(__('admin.aucun_selection')), 'error');
+    if (!window.confirm(ids.length + ' ' + @json(__('admin.confirm_suspension_selection_payeur')))) return;
+    epSubmitAjaxBulkPayeur('/admin-ep2026/payeurs/bulk-suspendre', 'PATCH', ids);
+});
+
+document.getElementById('btn-bulk-delete-payeur').addEventListener('click', function() {
+    var ids = Object.keys(selectionPayeurs).filter(function(k) { return selectionPayeurs[k]; });
+    if (!ids.length) return epToast(@json(__('admin.aucun_selection')), 'error');
+    if (!window.confirm(ids.length + ' ' + @json(__('admin.confirm_suppression_selection_payeur')))) return;
+    epSubmitAjaxBulkPayeur('/admin-ep2026/payeurs/bulk-destroy', 'DELETE', ids);
 });
 </script>
 @endpush

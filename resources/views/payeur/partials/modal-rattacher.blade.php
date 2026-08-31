@@ -71,8 +71,8 @@
                 <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                   {{ $etab->nom }}
                 </div>
-                <div style="font-size:11px;color:#888;">
-                  📍 {{ $etab->ville ?? '—' }}
+                <div style="font-size:11px;color:#888;display:flex;align-items:center;gap:3px;">
+                  <span class="material-symbols-outlined" style="font-size:12px;color:#888;">place</span> {{ $etab->ville ?? '—' }}
                   @if($etab->type) · {{ ucfirst($etab->type) }} @endif
                   @if($etab->code_etablissement)
                     · <span style="color:var(--ep-teal);font-weight:500;">{{ $etab->code_etablissement }}</span>
@@ -98,8 +98,10 @@
           <div style="font-size:11px;font-weight:600;color:#0D9E75;text-transform:uppercase;letter-spacing:.05em;">
             {{ __('payeur.m_etape2_titre') }}
           </div>
-          <button type="button" onclick="mReinitEtab()"
-                  style="font-size:11px;color:#888;background:none;border:none;cursor:pointer;text-decoration:underline;">
+          <button type="button" id="m-btn-changer-etab" onclick="mReinitEtab()"
+                  class="btn-o"
+                  style="width:auto;padding:6px 12px;font-size:12px;display:inline-flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:15px;color:var(--ep-teal);">swap_horiz</span>
             {{ __('payeur.m_changer_etablissement') }}
           </button>
         </div>

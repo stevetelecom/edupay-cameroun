@@ -19,6 +19,11 @@ class DatabaseSeeder extends Seeder
             \Spatie\Permission\Models\Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
         }
 
+        // ────────────────────────────────────────────
+        // 2. COMPTE SUPER ADMIN (guard admin)
+        // ────────────────────────────────────────────
+        $this->call(AdminSeeder::class);
+
 
 
 

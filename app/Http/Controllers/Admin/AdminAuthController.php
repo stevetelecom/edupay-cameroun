@@ -106,7 +106,16 @@ class AdminAuthController extends Controller
             Log::channel('admin')->info('Code 2FA envoyé par email à ' . $admin->email);
         } catch (\Throwable $e) {
             Log::channel('admin')->error('Échec envoi email 2FA : ' . $e->getMessage());
-            Log::channel('admin')->info('Code 2FA (fallback log) pour ' . $admin->email . ' : ' . $otpCode);
+            $request->session()->forget('admin_2fa_id');
+            Cache::forget('2fa_admin_' . $admin->id);
+            Cache::forget($loginKey . '_attempts');
+
+            if (config('app.env') === 'local') {
+                Log::channel('admin')->info('Code 2FA (fallback local) pour ' . $admin->email . ' : ' . $otpCode);
+            }
+
+            return redirect()->route('admin.login')
+                ->withErrors(['email' => 'Impossible d\'envoyer le code de vérification. Vérifiez la configuration du serveur mail et réessayez.']);
         }
         AuditLog::enregistrer(
             $admin,
@@ -117,7 +126,7 @@ class AdminAuthController extends Controller
         );
 
         return redirect()->route('admin.login.2fa')
-            ->with('info', 'Un code à 6 chiffres a été envoyé sur votre téléphone.');
+            ->with('info', 'Un code à 6 chiffres a été envoyé à votre adresse email.');
     }
 
     /**
@@ -250,6 +259,11 @@ class AdminAuthController extends Controller
                 Log::channel('admin')->info('Code reset envoyé à ' . $admin->email);
             } catch (\Throwable $e) {
                 Log::channel('admin')->error('Échec envoi reset : ' . $e->getMessage());
+                $request->session()->forget('admin_reset_id');
+                Cache::forget('admin_reset_' . $admin->id);
+
+                return redirect()->route('admin.password.forgot')
+                    ->withErrors(['email' => 'Impossible d\'envoyer le code de réinitialisation. Vérifiez la configuration du serveur mail et réessayez.']);
             }
         }
 
@@ -343,13 +357,15 @@ class AdminAuthController extends Controller
 
         $admin   = Admin::findOrFail($adminId);
         $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        Cache::put('2fa_admin_' . $admin->id, Hash::make($otpCode), now()->addMinutes(5));
 
         try {
             Mail::to($admin->email)->send(new Admin2FAMail($admin, $otpCode));
+            // Cache le code APRÈS envoi réussi (écrase l'ancien code uniquement si envoi OK)
+            Cache::put('2fa_admin_' . $admin->id, Hash::make($otpCode), now()->addMinutes(5));
             Log::channel('admin')->info('Code 2FA renvoyé à ' . $admin->email);
         } catch (\Throwable $e) {
             Log::channel('admin')->error('Échec renvoi 2FA : ' . $e->getMessage());
+            return back()->withErrors(['code' => 'Impossible de renvoyer le code. Vérifiez votre connexion email et réessayez.']);
         }
 
         return redirect()->route('admin.login.2fa')

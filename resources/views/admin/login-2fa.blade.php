@@ -18,12 +18,12 @@
 
     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-8 w-full max-w-sm">
 
-        {{-- Icône téléphone --}}
+        {{-- Icône email --}}
         <div class="flex justify-center mb-5">
             <div class="w-14 h-14 bg-[#E0F5EE] rounded-full flex items-center justify-center">
                 <svg class="w-7 h-7 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-                    <line x1="12" y1="18" x2="12.01" y2="18"/>
+                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2"/>
+                    <polyline points="3,6 12,13 21,6"/>
                 </svg>
             </div>
         </div>

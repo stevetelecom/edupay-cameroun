@@ -49,12 +49,12 @@
     {{-- ── Header Super Admin ── --}}
     <header class="bg-[#0B2545] text-white px-6 py-3 flex items-center justify-between shadow-md">
         <div>
-            <span class="text-lg font-bold tracking-tight">
-                Edu<span class="text-[#5DCAA5]">Pay</span>
+            <span class="text-lg font-bold tracking-tight text-white/70">
+                Edu<span class="text-[#5DCAA5]/70">Pay</span>
             </span>
-            <span class="ml-2 text-sm text-white/50">·</span>
-            <span class="ml-2 text-sm font-semibold text-[#E8A020]">{{ __('messages.super_admin') }}</span>
-            <div class="text-xs text-white/40 mt-0.5">CDC-EDUPAY-CM-2026-001</div>
+            <span class="ml-2 text-sm font-semibold text-white/60">Cameroun</span>
+            <span class="ml-2 text-sm text-white/30">·</span>
+            <span class="ml-2 text-sm font-semibold text-white/50">{{ __('messages.super_admin') }}</span>
         </div>
         <div class="flex items-center gap-4">
             <span class="text-xs px-2.5 py-1 rounded-full bg-[#E8A020]/15 text-[#E8A020] border border-[#E8A020]/30 font-medium">

@@ -113,6 +113,11 @@
       <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:16px;">
         <p style="font-size:12px;color:#b91c1c;margin:0;">{{ __('admin.irreversible_archive') }}</p>
       </div>
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff7f7;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;margin-bottom:14px;cursor:pointer;">
+        <input type="checkbox" id="supprimer-etab-confirm" onchange="document.getElementById('btn-supprimer-etab-confirme').disabled = !this.checked;"
+               style="width:16px;height:16px;margin-top:1px;accent-color:#dc2626;flex-shrink:0;">
+        <span style="font-size:12px;color:#b91c1c;line-height:1.5;">{!! __('admin.confirm_suppression_check', [':nom' => '<strong id="supprimer-etab-check-nom"></strong>']) !!}</span>
+      </label>
       <form id="form-supprimer-etab" method="POST">
         @csrf @method('DELETE')
         <div style="display:flex;justify-content:flex-end;gap:10px;">
@@ -120,8 +125,8 @@
                   style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
             {{ __('messages.annuler') }}
           </button>
-          <button type="submit"
-                  style="padding:8px 20px;font-size:13px;font-weight:600;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">
+          <button type="submit" id="btn-supprimer-etab-confirme" disabled
+                  style="padding:8px 20px;font-size:13px;font-weight:600;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;opacity:.5;cursor:not-allowed;">
             {{ __('admin.supprimer') }}
           </button>
         </div>
@@ -327,6 +332,9 @@ function ouvrirSuspension(id, nom) {
 }
 function ouvrirSuppression(id, nom) {
     document.getElementById('supprimer-etab-nom').textContent = nom;
+    document.getElementById('supprimer-etab-check-nom').textContent = nom;
+    document.getElementById('supprimer-etab-confirm').checked = false;
+    document.getElementById('btn-supprimer-etab-confirme').disabled = true;
     document.getElementById('form-supprimer-etab').action = '/admin-ep2026/etablissements/' + id;
     epModal.open('modal-supprimer-etab');
 }

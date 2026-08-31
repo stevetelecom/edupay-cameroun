@@ -91,6 +91,8 @@ class FraisController extends Controller
             'annee_scolaire'  => $validated['annee_scolaire'],
         ]);
 
+        $this->synchroniserEcheanciers($frais);
+
         return response()->json([
             'message' => 'Catégorie mise à jour.',
             'data'    => $this->formaterCategorie($frais->fresh(['echeanciers'])),
@@ -267,6 +269,46 @@ class FraisController extends Controller
         $echeancier->delete();
 
         return response()->json(['message' => 'Échéance supprimée.']);
+    }
+
+    /**
+     * Répartit montant_total sur nb_tranches_max échéances : crée les tranches
+     * manquantes, met à jour les montants, supprime les excédentaires, purge
+     * tout l'échéancier si nb = 1. (miroir du contrôleur web)
+     */
+    private function synchroniserEcheanciers(CategoriesFrais $frais): void
+    {
+        $nb = max(1, (int) $frais->nb_tranches_max);
+        $montantTotal = (float) $frais->montant_total;
+
+        $tranches = $frais->echeanciers()->orderBy('numero_tranche')->get();
+
+        if ($nb == 1) {
+            $tranches->each->delete();
+            return;
+        }
+
+        $montantParTranche = round($montantTotal / $nb);
+
+        for ($i = 1; $i <= $nb; $i++) {
+            $existe = $tranches->firstWhere('numero_tranche', $i);
+
+            if ($existe) {
+                if ($existe->montant != $montantParTranche) {
+                    $existe->update(['montant' => $montantParTranche]);
+                }
+            } else {
+                Echeancier::create([
+                    'categorie_frais_id' => $frais->id,
+                    'numero_tranche'     => $i,
+                    'libelle'            => 'Tranche ' . $i,
+                    'montant'            => $montantParTranche,
+                    'date_echeance'      => now()->addMonths($i)->toDateString(),
+                ]);
+            }
+        }
+
+        $tranches->where('numero_tranche', '>', $nb)->each->delete();
     }
 
     private function formaterCategorie(CategoriesFrais $c): array

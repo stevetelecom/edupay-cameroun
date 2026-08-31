@@ -89,6 +89,9 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
     Route::prefix('payeurs')->name('payeurs.')->group(function () {
         Route::get('/',                   [PayeurAdminController::class, 'index'])->name('index');
         Route::get('/datatable',          [PayeurAdminController::class, 'datatable'])->name('datatable');
+        Route::patch('/bulk-suspendre',   [PayeurAdminController::class, 'bulkSuspendre'])->name('bulkSuspendre');
+        Route::patch('/bulk-activer',     [PayeurAdminController::class, 'bulkActiver'])->name('bulkActiver');
+        Route::delete('/bulk-destroy',    [PayeurAdminController::class, 'bulkDestroy'])->name('bulkDestroy');
         Route::get('/{payeur}',           [PayeurAdminController::class, 'show'])->name('show');
         Route::patch('/{payeur}/suspendre',[PayeurAdminController::class, 'suspendre'])->name('suspendre');
         Route::patch('/{payeur}/activer', [PayeurAdminController::class, 'activer'])->name('activer');

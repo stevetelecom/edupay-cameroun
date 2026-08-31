@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Apprenant;
 use App\Models\CategoriesFrais;
+use App\Models\Echeancier;
 use App\Models\Etablissement;
 use App\Models\FraisApprenant;
 use App\Models\Paiement;
@@ -75,6 +76,21 @@ class EtudiantSoloTestSeeder extends Seeder
                 'actif'           => true,
             ]
         );
+
+        // ────────────────────────────────────────────
+        // 3b. ÉCHÉANCIERS — Scolarité Université
+        // ────────────────────────────────────────────
+        if (! $scolariteUd->echeanciers()->exists()) {
+            $montantTranche = round(95000 / 2);
+            Echeancier::updateOrCreate(
+                ['categorie_frais_id' => $scolariteUd->id, 'numero_tranche' => 1],
+                ['montant' => $montantTranche, 'date_echeance' => now()->addMonth()->format('Y-m-d'), 'libelle' => 'Tranche 1']
+            );
+            Echeancier::updateOrCreate(
+                ['categorie_frais_id' => $scolariteUd->id, 'numero_tranche' => 2],
+                ['montant' => $montantTranche, 'date_echeance' => now()->addMonths(2)->format('Y-m-d'), 'libelle' => 'Tranche 2']
+            );
+        }
 
         // ────────────────────────────────────────────
         // 4. APPRENANT — Carine elle-même (lien soi-même)

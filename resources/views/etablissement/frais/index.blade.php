@@ -265,66 +265,10 @@
       <button class="ep-modal-close" onclick="epModal.close('modal-delete-tranche')">×</button>
     </div>
     <div class="ep-modal-body">
-      <p style="font-size:13px;color:#555;line-height:1.6;">{!! __('etablissement.confirm_suppr_tranche') !!}</p>
-    </div>
-    <div class="ep-modal-foot">
-      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-delete-tranche')">@lang('etablissement.annuler')</button>
-      <form id="delete-tranche-form" method="POST" style="display:inline;">
-        @csrf @method('DELETE')
-        <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">@lang('etablissement.dt_title_supprimer')</button>
-      </form>
-    </div>
-  </div>
-</div>
-
-{{-- ══ MODAL : Editer une tranche ══ --}}
-<div id="modal-edit-tranche" class="ep-modal-overlay">
-  <div class="ep-modal ep-modal-md">
-    <div class="ep-modal-head">
-      <h3>@lang('etablissement.modifier_tranche')</h3>
-      <button class="ep-modal-close" onclick="epModal.close('modal-edit-tranche')">×</button>
-    </div>
-    <form id="edit-tranche-form" method="POST">
-      @csrf @method('PUT')
-      <div class="ep-modal-body">
-        <div class="g2">
-          <div>
-            <div class="lbl">@lang('etablissement.ntranche')</div>
-            <input class="inp" type="number" name="numero_tranche" id="edit-tranche-num" min="1" required />
-          </div>
-          <div>
-            <div class="lbl">@lang('etablissement.montant_fcfa')</div>
-            <input class="inp" type="number" name="montant" id="edit-tranche-montant" required />
-          </div>
-        </div>
-        <div class="g2">
-          <div>
-            <div class="lbl">@lang('etablissement.date_echeance')</div>
-            <input class="inp" type="date" name="date_echeance" id="edit-tranche-date" required />
-          </div>
-          <div>
-            <div class="lbl">@lang('etablissement.libelle')</div>
-            <input class="inp" name="libelle" id="edit-tranche-libelle" />
-          </div>
-        </div>
-      </div>
-      <div class="ep-modal-foot">
-        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-edit-tranche')">@lang('etablissement.annuler')</button>
-        <button type="submit" class="btn-p" style="width:auto;padding:8px 20px;">{{ __('etablissement.enregistrer') }}</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-{{-- ══ MODAL : Supprimer une tranche ══ --}}
-<div id="modal-delete-tranche" class="ep-modal-overlay">
-  <div class="ep-modal ep-modal-sm ep-modal-danger">
-    <div class="ep-modal-head">
-      <h3>@lang('etablissement.supprimer_tranche')</h3>
-      <button class="ep-modal-close" onclick="epModal.close('modal-delete-tranche')">×</button>
-    </div>
-    <div class="ep-modal-body">
-      <p style="font-size:13px;color:#555;line-height:1.6;">{!! __('etablissement.confirm_suppr_tranche') !!}</p>
+      <p style="font-size:13px;color:#555;line-height:1.6;">
+        {!! __('etablissement.confirm_suppr_tranche') !!}
+        <strong id="delete-tranche-nom"></strong>
+      </p>
     </div>
     <div class="ep-modal-foot">
       <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-delete-tranche')">@lang('etablissement.annuler')</button>
@@ -364,12 +308,17 @@
       <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center;">
         <span class="pill pb">{{ $cat->annee_scolaire }}</span>
         <span class="pill {{ $cat->actif ? 'pg' : 'pr' }}">{{ $cat->actif ? __('etablissement.active') : __('etablissement.inactive') }}</span>
-        <span class="pill pa">{{ $cat->nb_tranches_max }} {{ $cat->nb_tranches_max > 1 ? __('etablissement.tranches_unit') : __('etablissement.tranche_unit') }}</span>
-        @if($cat->echeanciers->count())
-          <span class="pill" style="background:#EDE9FE;color:#5B21B6;cursor:pointer;"
-                onclick="voirEcheancier({{ $cat->id }}, '{{ addslashes($cat->nom) }}', {{ $cat->echeanciers->toJson() }})">
-            📅 {{ __('etablissement.echeance_compte', ['count' => $cat->echeanciers->count()]) }}
-          </span>
+        @if($cat->fractionnable)
+          <span class="pill pa">{{ $cat->nb_tranches_max }} {{ $cat->nb_tranches_max > 1 ? __('etablissement.tranches_unit') : __('etablissement.tranche_unit') }}</span>
+          @if($cat->echeanciers->count())
+            <span class="pill" style="background:#EDE9FE;color:#5B21B6;cursor:pointer;display:inline-flex;align-items:center;gap:4px;"
+                  onclick="voirEcheancier({{ $cat->id }}, '{{ addslashes($cat->nom) }}', {{ $cat->echeanciers->toJson() }})">
+              <span class="material-symbols-outlined" style="font-size:13px;color:#5B21B6;">calendar_month</span>
+              {{ __('etablissement.echeance_compte', ['count' => $cat->echeanciers->count()]) }}
+            </span>
+          @else
+            <span class="pill" style="background:#F3F4F6;color:#888;">@lang('etablissement.pas_echeancier')</span>
+          @endif
         @endif
       </div>
     </div>
@@ -381,23 +330,28 @@
               class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;">
         @lang('etablissement.affecter_btn')
       </button>
-      <button onclick="ajouterTranche({{ $cat->id }}, '{{ addslashes($cat->nom) }}', {{ $cat->echeanciers->count() + 1 }})"
-              class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;">
-        @lang('etablissement.ajouter_tranche_btn')
-      </button>
+      @if($cat->fractionnable)
+        <button onclick="ajouterTranche({{ $cat->id }}, '{{ addslashes($cat->nom) }}', {{ $cat->echeanciers->count() + 1 }})"
+                class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;">
+          @lang('etablissement.ajouter_tranche_btn')
+        </button>
+      @endif
       <button onclick="modifierFrais({{ $cat->id }}, '{{ addslashes($cat->nom) }}', '{{ addslashes($cat->description ?? '') }}', {{ $cat->montant_total }}, {{ $cat->nb_tranches_max }}, {{ $cat->fractionnable ? 'true' : 'false' }}, {{ $cat->actif ? 'true' : 'false' }}, '{{ $cat->annee_scolaire }}')"
               class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;">
         @lang('etablissement.modifier_btn')
       </button>
       <button onclick="supprimerFrais({{ $cat->id }}, '{{ addslashes($cat->nom) }}')"
-              style="width:auto;padding:6px 12px;font-size:12px;background:transparent;color:var(--ep-red);border:2px solid var(--ep-red);border-radius:var(--radius-md);cursor:pointer;">
-        🗑
+              title="@lang('etablissement.supprimer_categorie')"
+              style="width:auto;padding:6px 12px;font-size:12px;background:transparent;color:var(--ep-red);border:2px solid var(--ep-red);border-radius:var(--radius-md);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;">
+        <span class="material-symbols-outlined" style="font-size:16px;color:var(--ep-red);">delete</span>
       </button>
     </div>
   </div>
   @empty
   <div style="padding:40px;text-align:center;color:#aaa;">
-    <div style="font-size:32px;margin-bottom:8px;">📋</div>
+    <div style="width:48px;height:48px;background:#f0f0f0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+      <span class="material-symbols-outlined" style="font-size:24px;color:#aaa;">receipt_long</span>
+    </div>
     @lang('etablissement.aucune_categorie_frais')
     <button onclick="epModal.open('modal-create-frais')" style="color:var(--ep-teal);background:none;border:none;cursor:pointer;font-size:13px;">
       @lang('etablissement.creer_premiere')
@@ -470,8 +424,8 @@ function voirEcheancier(id, nom, echeances) {
       + '<td style="font-weight:600;">' + Number(e.montant).toLocaleString('fr-FR') + ' FCFA</td>'
       + '<td>' + (e.date_echeance ? new Date(e.date_echeance).toLocaleDateString('fr-FR') : '—') + '</td>'
       + '<td style="white-space:nowrap;">'
-      + '<button class="btn-o" style="padding:6px 10px;margin-right:6px;font-size:12px;" onclick="editTranche(' + id + ',' + e.id + ',' + e.numero_tranche + ', \'' + (e.libelle ? addslashes(e.libelle) : '') + '\',' + e.montant + ', \'' + (e.date_echeance ? e.date_echeance : '') + '\')">✎</button>'
-      + '<button class="btn-r" style="padding:6px 10px;font-size:12px;" onclick="deleteTranche(' + id + ',' + e.id + ', \'' + (e.libelle ? addslashes(e.libelle) : '') + '\')">🗑</button>'
+      + '<button class="btn-o" style="padding:6px 10px;margin-right:6px;font-size:12px;display:inline-flex;align-items:center;" onclick="editTranche(' + id + ',' + e.id + ',' + e.numero_tranche + ', \'' + (e.libelle ? addslashes(e.libelle) : '') + '\',' + e.montant + ', \'' + (e.date_echeance ? e.date_echeance : '') + '\')"><span class="material-symbols-outlined" style="font-size:14px;color:var(--ep-teal);">edit</span></button>'
+      + '<button class="btn-r" style="padding:6px 10px;font-size:12px;display:inline-flex;align-items:center;" onclick="deleteTranche(' + id + ',' + e.id + ', \'' + (e.libelle ? addslashes(e.libelle) : '') + '\')"><span class="material-symbols-outlined" style="font-size:14px;color:#fff;">delete</span></button>'
       + '</td>'
       + '</tr>';
   });

@@ -39,18 +39,23 @@
 <div class="g2">
     @forelse($apprenants as $apprenant)
         @php
-            $totalC = $apprenant->frais->sum('montant_total');
-            $payeC  = $apprenant->frais->sum('montant_paye');
+            $aFrais = $apprenant->frais->isNotEmpty();
+            $anneeC = $aFrais ? ($apprenant->frais->first()->annee_scolaire ?? '') : '';
+            $fraisC = $aFrais && $anneeC ? $apprenant->frais->where('annee_scolaire', $anneeC) : collect();
+            $totalC = $fraisC->sum('montant_total');
+            $payeC  = $fraisC->sum('montant_paye');
             $resteC = $totalC - $payeC;
             $pourcentageC = $totalC > 0 ? round(($payeC / $totalC) * 100) : 0;
-            $aJour = $resteC <= 0;
+            $aJour = $aFrais && $resteC <= 0;
         @endphp
-        <div class="epcard" style="border-left:3px solid {{ $aJour ? 'var(--ep-gold)' : '#ccc' }};{{ $aJour ? '' : 'opacity:.6;' }}">
+        <div class="epcard" style="border-left:3px solid {{ $aJour ? 'var(--ep-gold)' : '#ccc' }};{{ $aFrais && $aJour ? '' : 'opacity:.6;' }}">
             <div style="font-size:13px;font-weight:700;margin-bottom:4px;">
                 {{ $apprenant->prenom }} {{ $apprenant->nom }} — {{ $apprenant->etablissement->nom ?? '—' }}
             </div>
             <div style="font-size:11px;color:#888;margin-bottom:10px;">
-                @if($aJour)
+                @if(!$aFrais)
+                    {{ __('payeur.recu_aucun_frais') }}
+                @elseif($aJour)
                     {{ __('payeur.recu_attestation_a_jour', ['pct' => $pourcentageC]) }}
                 @else
                     {{ __('payeur.recu_indisponible_impaye', ['montant' => number_format($resteC, 0, ',', ' ')]) }}
@@ -60,6 +65,8 @@
                 <a href="{{ route('payeur.recus.certificat', $apprenant) }}" class="btn-o" style="font-size:12px;display:inline-block;text-decoration:none;">
                     {{ __('payeur.recu_generer_certificat') }}
                 </a>
+            @elseif(!$aFrais)
+                <button class="btn-o" style="font-size:12px;" disabled>{{ __('payeur.recu_aucun_frais') }}</button>
             @else
                 <button class="btn-o" style="font-size:12px;" disabled>{{ __('payeur.recu_regulariser') }}</button>
             @endif

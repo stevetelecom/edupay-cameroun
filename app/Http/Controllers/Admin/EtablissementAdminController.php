@@ -92,7 +92,7 @@ class EtablissementAdminController extends Controller
         }
         $etablissements = $query->skip($start)->take($length)->get();
 
-        $rows = $etablissements->map(function ($e) {
+        $rows = $etablissements->map(function ($e) use ($selectedIds) {
             $statutBadge = match($e->statut) {
                 'actif'      => '<span class="ep-badge ep-badge-green">Actif</span>',
                 'en_attente' => '<span class="ep-badge ep-badge-yellow">En attente</span>',
@@ -264,17 +264,13 @@ class EtablissementAdminController extends Controller
      */
     public function bulkActiver(Request $request)
     {
-        $validated = $request->validate([
-            'ids'   => ['required', 'array'],
-            'ids.*' => ['integer'],
-        ]);
+        $ids = $this->normaliserIds($request);
 
-        $ids = array_unique(array_map('intval', $validated['ids']));
-        $etablissements = Etablissement::whereIn('id', $ids)->get();
-
-        if ($etablissements->isEmpty()) {
+        if (empty($ids)) {
             return back()->with('error', 'Aucun établissement sélectionné à activer.');
         }
+
+        $etablissements = Etablissement::whereIn('id', $ids)->get();
 
         foreach ($etablissements as $etablissement) {
             $avant = $etablissement->statut;
@@ -315,17 +311,13 @@ class EtablissementAdminController extends Controller
      */
     public function bulkDestroy(Request $request)
     {
-        $validated = $request->validate([
-            'ids'   => ['required', 'array'],
-            'ids.*' => ['integer'],
-        ]);
+        $ids = $this->normaliserIds($request);
 
-        $ids = array_unique(array_map('intval', $validated['ids']));
-        $etablissements = Etablissement::whereIn('id', $ids)->get();
-
-        if ($etablissements->isEmpty()) {
+        if (empty($ids)) {
             return back()->with('error', 'Aucun établissement sélectionné à supprimer.');
         }
+
+        $etablissements = Etablissement::whereIn('id', $ids)->get();
 
         $noms = $etablissements->pluck('nom')->implode(', ');
 
@@ -357,5 +349,24 @@ class EtablissementAdminController extends Controller
             return response()->json(['success' => true, 'message' => $message]);
         }
         return back()->with('success', $message);
+    }
+
+    /**
+     * Normalise l'entrée "ids" : accepte un tableau JSON OU une chaîne CSV
+     * (le form groupé envoie "3,4" via le champ caché name="ids").
+     */
+    private function normaliserIds(Request $request): array
+    {
+        $raw = $request->input('ids', []);
+
+        if (is_array($raw)) {
+            $ids = $raw;
+        } elseif (is_string($raw) && trim($raw) !== '') {
+            $ids = explode(',', $raw);
+        } else {
+            $ids = [];
+        }
+
+        return array_values(array_unique(array_filter(array_map('intval', $ids), fn ($id) => $id > 0)));
     }
 }

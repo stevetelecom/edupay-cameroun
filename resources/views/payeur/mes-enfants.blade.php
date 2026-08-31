@@ -26,7 +26,9 @@
 {{-- ── F13 : Mes enfants (multi-enfants) ── --}}
 @if($apprenants->isEmpty())
   <div class="epcard" style="text-align:center;color:#999;padding:40px 0;margin-bottom:18px;">
-    <div style="font-size:32px;margin-bottom:12px;">👨‍👧‍👦</div>
+    <div style="width:48px;height:48px;background:#f0f0f0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+      <span class="material-symbols-outlined" style="font-size:24px;color:#aaa;">group</span>
+    </div>
     <div style="font-size:14px;font-weight:600;margin-bottom:6px;">{{ __('payeur.aucun_enfant_rattache_compte') }}</div>
     <div style="font-size:12px;color:#aaa;margin-bottom:16px;">{{ __('payeur.rattachez_premier_enfant') }}</div>
     <button onclick="epModal.open('modal-rattacher')" class="btn-p" style="width:auto;">
@@ -77,6 +79,10 @@
             <div class="pfill" style="width:{{ $pctA }}%;"></div>
           </div>
           <div style="font-size:10px;color:#888;margin-bottom:10px;">{{ __('payeur.pct_regle', ['pct' => $pctA]) }}</div>
+        @elseif($statutA === 'aucun')
+          <div style="font-size:12px;color:#999;font-weight:600;margin-top:10px;margin-bottom:10px;">
+            {{ __('payeur.aucun_frais') }}
+          </div>
         @else
           <div style="font-size:12px;color:var(--ep-teal);font-weight:600;margin-top:10px;margin-bottom:10px;">
             ✓ {{ __('payeur.tous_frais_regles') }}

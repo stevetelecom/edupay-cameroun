@@ -50,14 +50,20 @@ class DocumentPayeurController extends Controller
 
         $apprenant->load(['etablissement', 'frais.categorieFrais']);
 
-        $montantTotal = $apprenant->frais->sum('montant_total');
-        $montantPaye  = $apprenant->frais->sum('montant_paye');
+        // Aucun frais assigné → pas d'attestation possible
+        abort_if($apprenant->frais->isEmpty(), 422, 'Aucun frais n\'est assigné à cet apprenant. L\'attestation est impossible.');
+
+        $anneeScolaire = $apprenant->frais->first()->annee_scolaire ?? (now()->year . '-' . (now()->year + 1));
+
+        // On se limite à l'année scolaire du dossier courant pour la cohérence de l'attestation
+        $fraisAnnee = $apprenant->frais->where('annee_scolaire', $anneeScolaire);
+        $montantTotal = $fraisAnnee->sum('montant_total');
+        $montantPaye  = $fraisAnnee->sum('montant_paye');
         $reste        = $montantTotal - $montantPaye;
 
         abort_if($reste > 0, 422, 'Impossible de générer le certificat : solde impayé sur cet apprenant.');
 
-        $pourcentage   = $montantTotal > 0 ? round(($montantPaye / $montantTotal) * 100) : 100;
-        $anneeScolaire = $apprenant->frais->first()->annee_scolaire ?? (now()->year . '-' . (now()->year + 1));
+        $pourcentage = $montantTotal > 0 ? round(($montantPaye / $montantTotal) * 100) : 100;
 
         $pdf = Pdf::loadView('pdf.certificat', [
             'apprenant'     => $apprenant,
