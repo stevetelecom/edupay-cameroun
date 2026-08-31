@@ -45,6 +45,7 @@ class SuperAdminMiddleware
             'admin.admins.*',
             'admin.parametres.*',
             'admin.etablissements.destroy',
+            'admin.etablissements.bulkDestroy',
         ];
 
         foreach ($routesSupAdminSeulement as $pattern) {

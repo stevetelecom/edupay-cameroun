@@ -37,6 +37,39 @@
     </form>
   </div>
 </div>
+
+{{-- Modal de confirmation du détachement (avec saisie de confirmation) --}}
+<div id="modal-detacher-apprenant" class="ep-modal-overlay">
+  <div class="ep-modal">
+    <div class="ep-modal-head">
+      <h3 style="color:var(--ep-red);">{{ __('payeur.detacher_titre') }}</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-detacher-apprenant')">×</button>
+    </div>
+    <form method="POST" action="{{ route('payeur.apprenant.detach', $apprenant) }}" id="form-detacher">
+      @csrf @method('DELETE')
+      <div class="ep-modal-body">
+        <div style="text-align:center;font-size:32px;margin-bottom:10px;">⚠️</div>
+        <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:14px;">
+          {{ __('payeur.detacher_confirm_texte', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]) }}
+        </p>
+        <div style="background:#fdf3f3;border:1px solid #f5c6c6;border-radius:8px;padding:10px 12px;font-size:12px;color:#b13a3a;margin-bottom:14px;">
+          {{ __('payeur.detacher_avertissement') }}
+        </div>
+        <div class="lbl">{{ __('payeur.detacher_saisir_confirm') }}</div>
+        <input type="text" id="detacher-confirm" class="inp"
+               placeholder="{{ __('payeur.detacher_placeholder') }}" autocomplete="off" />
+      </div>
+      <div class="ep-modal-foot">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
+                onclick="epModal.close('modal-detacher-apprenant')">{{ __('messages.annuler') }}</button>
+        <button type="submit" class="btn-r" id="btn-detacher-confirm"
+                data-attendu="{{ mb_strtolower($apprenant->prenom) }}" disabled style="width:auto;padding:8px 20px;">
+          {{ __('payeur.detacher') }} →
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 @endpush
 
 @section('content')
@@ -57,10 +90,28 @@
                     @if($apprenant->matricule) · Mat. {{ $apprenant->matricule }} @endif
                 </div>
             </div>
-            <button type="button" onclick="epModal.open('modal-modifier-apprenant')"
-                    class="btn-o" style="width:auto;font-size:12px;padding:8px 14px;">
-                ✎ {{ __('payeur.modifier') }}
-            </button>
+            <div style="display:flex;gap:8px;align-items:center;">
+                {{-- 🔒 Le détachement est interdit si des frais/paiements existent --}}
+                @php
+                    $peutDetacher = $apprenant->frais->isEmpty();
+                @endphp
+                @if($peutDetacher)
+                    <button type="button" onclick="epModal.open('modal-detacher-apprenant')"
+                            class="btn-r" style="width:auto;font-size:12px;padding:8px 14px;">
+                        {{ __('payeur.detacher') }}
+                    </button>
+                @else
+                    <button type="button" title="{{ __('payeur.detacher_impossible_frais') }}"
+                            class="btn-r" style="width:auto;font-size:12px;padding:8px 14px;opacity:.45;cursor:not-allowed;"
+                            disabled>
+                        {{ __('payeur.detacher') }}
+                    </button>
+                @endif
+                <button type="button" onclick="epModal.open('modal-modifier-apprenant')"
+                        class="btn-o" style="width:auto;font-size:12px;padding:8px 14px;">
+                    ✎ {{ __('payeur.modifier') }}
+                </button>
+            </div>
         </div>
     </div>
 
@@ -185,3 +236,29 @@
     @endforelse
 
 @endsection
+
+@push('scripts')
+<script>
+(function(){
+  var confirmer  = function(evt){
+    evt.preventDefault();
+    var btn  = document.getElementById('btn-detacher-confirm');
+    btn.disabled = true;
+    btn.textContent = '...';
+    document.getElementById('form-detacher').submit();
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var frm = document.getElementById('form-detacher');
+    if (!frm) return;
+    var saisie = document.getElementById('detacher-confirm');
+    var btn    = document.getElementById('btn-detacher-confirm');
+    var attendu = (btn.dataset.attendu || '').toLowerCase();
+    btn.addEventListener('click', confirmer);
+    saisie.addEventListener('input', function(){
+      btn.disabled = saisie.value.trim().toLowerCase() !== attendu;
+    });
+  });
+})();
+</script>
+@endpush

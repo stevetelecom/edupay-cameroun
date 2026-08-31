@@ -119,10 +119,13 @@ class ApprenantController extends Controller
             return response()->json(['message' => 'Cet apprenant ne vous est pas rattaché.'], 403);
         }
 
-        if ($apprenant->paiements()->exists()) {
+        // 🔒 Permission : impossible de détacher un enfant à qui des frais de
+        // scolarité ont déjà été affectés (même sans paiement) — cohérent web/API.
+        if ($apprenant->frais()->exists() || $apprenant->paiements()->exists()) {
             return response()->json([
                 'message' => 'Impossible de retirer ' . $apprenant->prenom
-                    . ' : des paiements sont enregistrés. Contactez votre établissement.',
+                    . ' : des frais de scolarité ou des paiements sont déjà enregistrés pour cet apprenant. '
+                    . 'Veuillez le détacher avant la prochaine affectation de frais.',
             ], 422);
         }
 

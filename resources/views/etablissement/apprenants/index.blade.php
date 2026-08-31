@@ -113,6 +113,7 @@
     <div class="ep-modal-body">
       <p style="font-size:13px;color:#555;margin-bottom:8px;">
         {!! __('etablissement.confirm_delete_1') !!}
+        <strong id="delete-apprenant-nom"></strong>
         {!! __('etablissement.confirm_delete_2') !!}
       </p>
     </div>
@@ -125,6 +126,34 @@
     </div>
   </div>
 </div>
+
+{{-- ══ MODAL : Suppression multiple ══ --}}
+<div id="modal-delete-multiple" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm ep-modal-danger">
+    <div class="ep-modal-head">
+      <h3>{{ __('etablissement.supprimer_selection') }}</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-delete-multiple')">×</button>
+    </div>
+    <form id="delete-multiple-form" method="POST" action="{{ route('etablissement.apprenants.bulkDestroy') }}">
+      @csrf @method('DELETE')
+      <div class="ep-modal-body">
+        <p style="font-size:13px;color:#555;line-height:1.6;">
+          {!! __('etablissement.confirm_suppr_multiple') !!}
+        </p>
+        <div style="background:#fdf3f3;border:1px solid #f5c6c6;border-radius:8px;padding:10px 12px;font-size:12px;color:#b13a3a;margin-top:10px;">
+          {{ __('etablissement.suppr_multiple_avertissement') }}
+        </div>
+        <div id="bulk-selection-ids"></div>
+      </div>
+      <div class="ep-modal-foot">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
+                onclick="epModal.close('modal-delete-multiple')">{{ __('etablissement.annuler') }}</button>
+        <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">{{ __('etablissement.supprimer_definitivement') }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 
 {{-- ══ MODAL : Valider le rattachement ══ --}}
@@ -307,6 +336,10 @@
   </div>
   <button type="button" onclick="dtApprenants.ajax.reload()" class="btn-p" style="width:auto;padding:10px 20px;">{{ __('etablissement.filtrer') }}</button>
   <button type="button" onclick="reinitialiserFiltresApprenants()" class="btn-o" style="width:auto;padding:10px 16px;">{{ __('etablissement.reinitialiser') }}</button>
+  <button type="button" id="btn-suppression-selection" onclick="ouvrirSuppressionSelection()"
+          class="btn-r" disabled style="width:auto;padding:10px 16px;opacity:.5;cursor:not-allowed;">
+    {{ __('etablissement.supprimer_selection') }} (<span id="nb-selection">0</span>)
+  </button>
 </div>
 
 {{-- Tableau --}}
@@ -314,6 +347,7 @@
   <table id="dt-apprenants" class="ep-dt text-sm">
     <thead>
       <tr>
+        <th style="width:30px;"><input type="checkbox" id="select-all-apprenants" title="{{ __('etablissement.tout_selectionner') }}"></th>
         <th>{{ __('etablissement.matricule') }}</th><th>{{ __('etablissement.nom_complet') }}</th><th>{{ __('etablissement.classe') }}</th><th>{{ __('etablissement.sexe') }}</th>
         <th>{{ __('etablissement.statut_paiement') }}</th><th>{{ __('etablissement.actif') }}</th><th>{{ __('etablissement.origine') }}</th><th data-orderable="false">{{ __('etablissement.actions') }}</th>
       </tr>
@@ -396,6 +430,7 @@ function supprimerApprenant(id, nom) {
 
 // ── Catégorie de frais dans le modal create ──
 var dtApprenants;
+var btnSuppr, nbSpan, selectAll;
 
 $(document).ready(function() {
     if ($.fn.DataTable.isDataTable('#dt-apprenants')) {
@@ -425,16 +460,17 @@ $(document).ready(function() {
             }
         },
         columns: [
-            { data: 0, orderable: true,  responsivePriority: 4 },
-            { data: 1, orderable: true,  responsivePriority: 1 },
-            { data: 2, orderable: true,  responsivePriority: 5 },
-            { data: 3, orderable: true,  responsivePriority: 6 },
-            { data: 4, orderable: true,  responsivePriority: 3 },
-            { data: 5, orderable: true,  responsivePriority: 7 },
-            { data: 6, orderable: false, responsivePriority: 8 },
-            { data: 7, orderable: false, responsivePriority: 2 },
+            { data: 0, orderable: false, responsivePriority: 9, className: 'dt-select', width: '30px' },
+            { data: 1, orderable: true,  responsivePriority: 4 },
+            { data: 2, orderable: true,  responsivePriority: 1 },
+            { data: 3, orderable: true,  responsivePriority: 5 },
+            { data: 4, orderable: true,  responsivePriority: 6 },
+            { data: 5, orderable: true,  responsivePriority: 3 },
+            { data: 6, orderable: true,  responsivePriority: 7 },
+            { data: 7, orderable: false, responsivePriority: 8 },
+            { data: 8, orderable: false, responsivePriority: 2 },
         ],
-        order: [[1, 'asc']],
+        order: [[2, 'asc']],
     });
 
     var searchTimer;
@@ -448,7 +484,68 @@ $(document).ready(function() {
     $('#f-classe, #f-statut').on('change', function() {
         dtApprenants.ajax.reload();
     });
+
+    // ── Sélection multiple / suppression groupée ──
+    btnSuppr  = document.getElementById('btn-suppression-selection');
+    nbSpan    = document.getElementById('nb-selection');
+    selectAll = document.getElementById('select-all-apprenants');
+
+    function mettreAJourSelection() {
+        var cbs = document.querySelectorAll('#dt-apprenants tbody .select-apprenant:checked');
+        var n = cbs.length;
+        if (nbSpan) nbSpan.textContent = n;
+        if (btnSuppr) {
+            btnSuppr.disabled = n === 0;
+            btnSuppr.style.opacity = n === 0 ? '.5' : '1';
+            btnSuppr.style.cursor  = n === 0 ? 'not-allowed' : 'pointer';
+        }
+    }
+
+    $('#dt-apprenants tbody').on('change', '.select-apprenant', function() {
+        mettreAJourSelection();
+    });
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            var checked = this.checked;
+            document.querySelectorAll('#dt-apprenants tbody .select-apprenant').forEach(function(cb) {
+                cb.checked = checked;
+            });
+            mettreAJourSelection();
+        });
+    }
+
+    dtApprenants.on('draw', mettreAJourSelection);
+    mettreAJourSelection();
 });
+
+function ouvrirSuppressionSelection() {
+    var cbs = document.querySelectorAll('#dt-apprenants tbody .select-apprenant:checked');
+    var ids = Array.from(cbs).map(function(cb) { return cb.value; });
+    if (ids.length === 0) return;
+
+    var holder = document.getElementById('bulk-selection-ids');
+    holder.innerHTML = '';
+    var total = document.getElementById('nb-selection');
+    ids.forEach(function(id) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = id;
+        holder.appendChild(input);
+    });
+
+    if (document.getElementById('select-all-apprenants') &&
+        document.getElementById('select-all-apprenants').checked && nbSpan && nbSpan.textContent) {
+        var all = document.createElement('input');
+        all.type = 'hidden';
+        all.name = 'supprimer_toutes_les_pages';
+        all.value = '1';
+        holder.appendChild(all);
+    }
+
+    epModal.open('modal-delete-multiple');
+}
 
 function reinitialiserFiltresApprenants() {
     $('#f-search').val('');

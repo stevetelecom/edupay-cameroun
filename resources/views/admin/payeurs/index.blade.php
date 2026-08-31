@@ -200,6 +200,12 @@
       <option value="eleve">{{ __('admin.eleve') }}</option>
       <option value="etudiant">{{ __('admin.etudiant') }}</option>
     </select>
+    <select name="etablissement_id" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" onchange="dtPayeurs.ajax.reload()">
+      <option value="">{{ __('admin.tous_etablissements') }}</option>
+      @foreach($etablissements as $etab)
+        <option value="{{ $etab->id }}" {{ request('etablissement_id') == $etab->id ? 'selected' : '' }}>{{ $etab->nom }}</option>
+      @endforeach
+    </select>
     <button type="button" onclick="dtPayeurs.ajax.reload()" class="bg-[#0D9E75] hover:bg-[#0A8562] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
       Filtrer
     </button>
@@ -246,6 +252,7 @@ $(document).ready(function() {
             data: function(d) {
                 d.statut = $('select[name="statut"]').val();
                 d.profil = $('select[name="profil"]').val();
+                d.etablissement_id = $('select[name="etablissement_id"]').val();
             }
         },
         columns: [
@@ -276,6 +283,7 @@ function reinitialiserFiltresPayeurs() {
     $('input[name="search"]').val('');
     $('select[name="statut"]').val('');
     $('select[name="profil"]').val('');
+    $('select[name="etablissement_id"]').val('');
     dtPayeurs.ajax.reload();
 }
 

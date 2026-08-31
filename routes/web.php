@@ -137,6 +137,7 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnemen
     Route::get('/abonnement/requis', [\App\Http\Controllers\Etablissement\AbonnementController::class, 'requis'])->name('abonnement.requis');
     Route::get('/tableau-de-bord', [\App\Http\Controllers\Etablissement\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/apprenants/datatable', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'datatable'])->name('apprenants.datatable');
+    Route::delete('/apprenants/bulk-destroy', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'bulkDestroy'])->name('apprenants.bulkDestroy');
     Route::resource('apprenants', \App\Http\Controllers\Etablissement\ApprenantController::class);
     Route::patch('/apprenants/{apprenant}/valider', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'valider'])->name('apprenants.valider');
     Route::delete('/apprenants/{apprenant}/rejeter', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'rejeter'])->name('apprenants.rejeter');
@@ -152,6 +153,7 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnemen
     Route::put('/frais/{frais}/echeancier/{echeancier}', [\App\Http\Controllers\Etablissement\FraisController::class, 'updateEcheancier'])->name('frais.echeancier.update');
     Route::delete('/frais/{frais}/echeancier/{echeancier}', [\App\Http\Controllers\Etablissement\FraisController::class, 'destroyEcheancier'])->name('frais.echeancier.destroy');
     Route::delete('/frais/{frais}',     [\App\Http\Controllers\Etablissement\FraisController::class, 'destroy'])->name('frais.destroy');
+    Route::delete('/apprenants/{apprenant}/frais/{fraisApprenant}', [\App\Http\Controllers\Etablissement\FraisController::class, 'desaffecter'])->name('apprenants.desaffecter');
 
     Route::get('/apprenants/import/template', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'importTemplate'])
          ->name('apprenants.import.template');

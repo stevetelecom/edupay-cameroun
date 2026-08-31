@@ -283,6 +283,15 @@ return [
     'enregistrer_modifications' => 'Save changes',
     'modifier_titre' => 'Edit — :prenom :nom',
 
+    // ── Detach an apprenant ──
+    'detacher'               => 'Detach',
+    'detacher_impossible_frais' => 'Cannot detach: school fees or payments are already recorded for this apprenant.',
+    'detacher_titre'         => 'Detach this apprenant',
+    'detacher_confirm_texte' => 'You are about to remove <strong>:prenom :nom</strong> from your account. They will no longer be visible in your payer space.',
+    'detacher_avertissement' => 'After detaching, this apprenant will no longer be linked to your account. If you want to follow them again, you will need to re-attach them.',
+    'detacher_saisir_confirm' => 'To confirm, type the apprenant\'s first name:',
+    'detacher_placeholder'   => 'Type the first name to confirm…',
+
     // ── Payer emails ──
     'em_parent_fallback' => 'Parent',
     'em_utilisateur_fallback' => 'User',

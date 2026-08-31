@@ -282,6 +282,15 @@ return [
     'enregistrer_modifications' => 'Enregistrer les modifications',
     'modifier_titre' => 'Modifier — :prenom :nom',
 
+    // ── Détacher un apprenant ──
+    'detacher'               => 'Détacher',
+    'detacher_impossible_frais' => 'Détachement impossible : des frais de scolarité ou des paiements sont enregistrés pour cet apprenant.',
+    'detacher_titre'         => 'Détacher cet apprenant',
+    'detacher_confirm_texte' => 'Vous allez retirer <strong>:prenom :nom</strong> de votre compte. Il ne sera plus visible dans votre espace payeur.',
+    'detacher_avertissement' => 'Après le détachement, cet apprenant ne sera plus rattaché à votre compte. Si vous souhaitez le suivre à nouveau, vous devrez refaire un rattachement.',
+    'detacher_saisir_confirm' => 'Pour confirmer, saisissez le prénom de l\'apprenant :',
+    'detacher_placeholder'   => 'Saisissez le prénom pour confirmer…',
+
     // ── E-mails payeur ──
     'em_parent_fallback' => 'Parent',
     'em_utilisateur_fallback' => 'Utilisateur',

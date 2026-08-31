@@ -120,6 +120,7 @@
     <div class="ep-modal-body">
       <p style="font-size:13px;color:#555;line-height:1.6;">
         {!! __('etablissement.confirm_suppr_categorie') !!}
+        <strong id="delete-frais-nom"></strong>
       </p>
     </div>
     <div class="ep-modal-foot">

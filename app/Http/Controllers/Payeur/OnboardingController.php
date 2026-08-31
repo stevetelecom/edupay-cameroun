@@ -184,14 +184,21 @@ class OnboardingController extends Controller
             ->with('success', 'Informations de ' . $apprenant->prenom . ' mises à jour.');
     }
 
-    // ── F04 : DELETE — Détacher un apprenant (sans supprimer si paiements) ──
+    // ── F04 : DELETE — Détacher un apprenant (sans supprimer si frais/paiements) ──
     public function detachApprenant(Apprenant $apprenant): RedirectResponse
     {
         $this->autoriserAccesApprenant($apprenant);
 
-        if ($apprenant->paiements()->exists()) {
-            return back()->with('error',
-                'Impossible de retirer ' . $apprenant->prenom . ' : des paiements sont enregistrés. Contactez votre établissement.');
+        // 🔒 Permission : on ne peut PAS détacher un enfant à qui des frais de
+        // scolarité ont déjà été affectés (même sans paiement) — le détachement
+        // casserait la structure de frais/paiements de l'ancien établissement
+        // et permettrait un contournement du règlement.
+        if ($apprenant->frais()->exists() || $apprenant->paiements()->exists()) {
+            return redirect()->route('payeur.frais.apprenant', $apprenant)->with('error',
+                'Impossible de retirer ' . $apprenant->prenom
+                . ' : des frais de scolarité ou des paiements sont déjà enregistrés pour cet apprenant. '
+                . 'Veuillez le détacher avant la prochaine affectation de frais.'
+            );
         }
 
         Auth::user()->apprenants()->detach($apprenant->id);

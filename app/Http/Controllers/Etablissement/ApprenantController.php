@@ -121,8 +121,8 @@ class ApprenantController extends Controller
         $classe = $request->input('classe', '');
         $statutPaiement = $request->input('statut_paiement', '');
 
-        $cols = ['matricule', 'nom', 'classe', 'sexe', 'statut_paiement', 'actif'];
-        $orderCol = $request->input('order.0.column', 1);
+        $cols = [null, 'matricule', 'nom', 'classe', 'sexe', 'statut_paiement', 'actif'];
+        $orderCol = $request->input('order.0.column', 2);
         $orderDir = $request->input('order.0.dir', 'asc');
 
         $query = Apprenant::where('etablissement_id', $etablissementId);
@@ -202,6 +202,7 @@ class ApprenantController extends Controller
             </div>';
 
             return [
+                '<input type="checkbox" class="select-apprenant" value="'.$a->id.'" data-nom="'.e($a->prenom.' '.$a->nom).'">',
                 '<div class="ep-dt-sub">'.e($a->matricule ?? '\u2014').'</div>',
                 '<div class="ep-dt-name">'.e($a->nom).' '.e($a->prenom).'</div>',
                 '<div>'.e($a->classe).'</div>',
@@ -338,7 +339,7 @@ class ApprenantController extends Controller
     {
         $this->autoriserAcces($apprenant);
 
-        $apprenant->load(['frais.categorieFrais', 'parents']);
+        $apprenant->load(['frais.categorieFrais', 'frais.paiements', 'parents']);
 
         return view('etablissement.apprenants.show', compact('apprenant'));
     }
@@ -382,6 +383,51 @@ class ApprenantController extends Controller
         return redirect()
             ->route('etablissement.apprenants.index')
             ->with('success', 'Apprenant supprimé avec succès.');
+    }
+
+    /**
+     * Suppression groupée d'apprenants (depuis le tableau back-office).
+     * 🔒 Sécurité :
+     *  - Seuls les apprenants de CET établissement sont supprimés (jamais ceux
+     *    d'un autre établissement, même si un id extérieur est envoyé).
+     *  - Si la case "supprimer_toutes_les_pages" est cochée, on applique aussi
+     *    les filtres de classe / statut pour tout supprimer d'un coup.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $etablissementId = Auth::user()->etablissement_id;
+
+        $ids = (array) $request->input('ids', []);
+        $ids = array_filter(array_map('intval', $ids));
+
+        // Base : apprenants de l'établissement sélectionnés
+        $query = Apprenant::where('etablissement_id', $etablissementId)->whereIn('id', $ids);
+
+        // Si "tout supprimer" est demandé, on étend aux filtres courants
+        if ($request->boolean('supprimer_toutes_les_pages')) {
+            if ($classe = $request->input('classe')) {
+                $query->where('classe', $classe);
+            }
+            if ($statut = $request->input('statut_paiement')) {
+                $query->where('statut_paiement', $statut);
+            }
+        }
+
+        $count = $query->count();
+
+        if ($count === 0) {
+            return redirect()->route('etablissement.apprenants.index')
+                ->with('error', 'Aucun apprenant à supprimer.');
+        }
+
+        $query->get()->each(function (Apprenant $apprenant) {
+            // Détacher les parents avant suppression (cohérent avec l'API)
+            $apprenant->parents()->detach();
+            $apprenant->delete();
+        });
+
+        return redirect()->route('etablissement.apprenants.index')
+            ->with('success', $count . ' apprenant(s) supprimé(s) avec succès.');
     }
 
     /**

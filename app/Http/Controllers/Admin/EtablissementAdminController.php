@@ -61,10 +61,11 @@ class EtablissementAdminController extends Controller
         $search = $request->input('search.value', '');
         $statut = $request->input('statut', '');
         $type   = $request->input('type', '');
-        $orderCol = $request->input('order.0.column', 0);
-        $orderDir = $request->input('order.0.dir', 'desc');
+        $orderCol = $request->input('order.0.column', 1);
+        $orderDir = $request->input('order.0.dir', 'asc');
+        $selectedIds = $request->input('ids', []);
 
-        $cols = ['nom', 'type', 'telephone', 'apprenants_count', 'statut', 'created_at'];
+        $cols = [null, 'nom', 'type', 'telephone', 'apprenants_count', 'statut', 'created_at'];
 
         $query = Etablissement::withCount('apprenants');
 
@@ -99,6 +100,8 @@ class EtablissementAdminController extends Controller
                 default      => '<span class="ep-badge ep-badge-gray">'.ucfirst($e->statut).'</span>',
             };
 
+            $checked = in_array($e->id, $selectedIds) ? ' checked' : '';
+
             $actions = '
             <div class="ep-actions">
                 <button onclick="ouvrirDetail('.$e->id.')" class="ep-btn-icon ep-btn-teal" title="Détail">
@@ -124,6 +127,7 @@ class EtablissementAdminController extends Controller
             </div>';
 
             return [
+                '<input type="checkbox" class="select-etablissement" value="'.$e->id.'"'.$checked.'>',
                 '<div><div class="ep-dt-name">'.e($e->nom).'</div><div class="ep-dt-sub">'.e($e->code_etablissement).'</div></div>',
                 '<div>'.e(ucfirst($e->type ?? '—')).'</div><div class="ep-dt-sub">'.e($e->ville).', '.e($e->region).'</div>',
                 '<div>'.e($e->telephone).'</div><div class="ep-dt-sub ep-link">'.e($e->email).'</div>',
@@ -248,6 +252,107 @@ class EtablissementAdminController extends Controller
         }
 
         $message = "L'etablissement « {$nom} » a ete supprime. Le responsable a ete notifie.";
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Activation groupée d'établissements (sélection multiple).
+     * Body : { "ids": [1,2,3] }
+     */
+    public function bulkActiver(Request $request)
+    {
+        $validated = $request->validate([
+            'ids'   => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $ids = array_unique(array_map('intval', $validated['ids']));
+        $etablissements = Etablissement::whereIn('id', $ids)->get();
+
+        if ($etablissements->isEmpty()) {
+            return back()->with('error', 'Aucun établissement sélectionné à activer.');
+        }
+
+        foreach ($etablissements as $etablissement) {
+            $avant = $etablissement->statut;
+            $etablissement->update(['statut' => 'actif']);
+
+            AuditLog::enregistrer(
+                Auth::guard('admin')->user(),
+                'ETABLISSEMENT_ACTIVE',
+                "Etablissement #{$etablissement->id} — {$etablissement->nom} active (etait : {$avant}) [groupé]",
+                $request, 'INFO',
+                ['statut' => $avant],
+                ['statut' => 'actif']
+            );
+
+            $responsable = \App\Models\User::where('etablissement_id', $etablissement->id)
+                ->whereHas('roles', fn($q) => $q->where('name', 'directeur'))
+                ->first();
+            if ($responsable) {
+                try {
+                    Mail::to($responsable->email)
+                        ->send(new EtablissementActiveMail($etablissement, $responsable));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('Échec email activation (groupée) : ' . $e->getMessage());
+                }
+            }
+        }
+
+        $message = $etablissements->count() . ' établissement(s) activé(s) avec succès.';
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Suppression groupée d'établissements (sélection multiple).
+     * Body : { "ids": [1,2,3] }
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'ids'   => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $ids = array_unique(array_map('intval', $validated['ids']));
+        $etablissements = Etablissement::whereIn('id', $ids)->get();
+
+        if ($etablissements->isEmpty()) {
+            return back()->with('error', 'Aucun établissement sélectionné à supprimer.');
+        }
+
+        $noms = $etablissements->pluck('nom')->implode(', ');
+
+        foreach ($etablissements as $etablissement) {
+            AuditLog::enregistrer(
+                Auth::guard('admin')->user(),
+                'ETABLISSEMENT_SUPPRIME',
+                "Etablissement #{$etablissement->id} — {$etablissement->nom} supprime (soft delete) [groupé]",
+                $request, 'CRITICAL'
+            );
+
+            $responsable = \App\Models\User::where('etablissement_id', $etablissement->id)
+                ->whereHas('roles', fn($q) => $q->where('name', 'directeur'))
+                ->first();
+            if ($responsable) {
+                try {
+                    Mail::to($responsable->email)
+                        ->send(new EtablissementSupprimeMail($etablissement->nom, $responsable));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::error('Échec email suppression (groupée) : ' . $e->getMessage());
+                }
+            }
+
+            $etablissement->delete();
+        }
+
+        $message = $etablissements->count() . ' établissement(s) supprimé(s) : ' . $noms;
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => $message]);
         }

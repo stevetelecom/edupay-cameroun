@@ -238,6 +238,84 @@ class ApprenantController extends Controller
     }
 
     /**
+     * Suppression groupée d'apprenants (miroir web bulkDestroy).
+     * 🔒 Seuls les apprenants de CET établissement sont supprimés.
+     *
+     * Body attendu : { "ids": [1,2,3] } (requis)
+     */
+    public function bulkDestroy(Request $request): JsonResponse
+    {
+        $etablissementId = $this->autoriser();
+
+        $validated = $request->validate([
+            'ids'      => 'required|array',
+            'ids.*'    => 'integer',
+            'classe'   => 'nullable|string|max:50',
+            'statut_paiement' => 'nullable|string|max:20',
+            'supprimer_toutes_les_pages' => 'nullable|boolean',
+        ]);
+
+        $ids = array_unique(array_map('intval', $validated['ids']));
+
+        $query = Apprenant::where('etablissement_id', $etablissementId)->whereIn('id', $ids);
+
+        if (! empty($validated['supprimer_toutes_les_pages'])) {
+            if (! empty($validated['classe'])) {
+                $query->where('classe', $validated['classe']);
+            }
+            if (! empty($validated['statut_paiement'])) {
+                $query->where('statut_paiement', $validated['statut_paiement']);
+            }
+        }
+
+        $count = (clone $query)->count();
+
+        $query->get()->each(function (Apprenant $apprenant) {
+            $apprenant->parents()->detach();
+            $apprenant->delete();
+        });
+
+        return response()->json([
+            'message' => $count . ' apprenant(s) supprimé(s) avec succès.',
+            'supprimés' => $count,
+        ]);
+    }
+
+    /**
+     * Désaffecte une catégorie de frais d'un apprenant (miroir web desaffecter).
+     * 🔒 Permission identique au web : refus si des paiements sont enregistrés.
+     */
+    public function desaffecter(Request $request, Apprenant $apprenant, FraisApprenant $fraisApprenant): JsonResponse
+    {
+        $etablissementId = $this->autoriser();
+
+        if ($apprenant->etablissement_id !== $etablissementId) {
+            return response()->json(['message' => 'Accès non autorisé à cet apprenant.'], 403);
+        }
+
+        if ($fraisApprenant->apprenant_id !== $apprenant->id) {
+            return response()->json(['message' => 'Cette affectation ne correspond pas à cet apprenant.'], 422);
+        }
+
+        if (! $fraisApprenant->categorieFrais || $fraisApprenant->categorieFrais->etablissement_id !== $etablissementId) {
+            return response()->json(['message' => 'Catégorie de frais non autorisée.'], 403);
+        }
+
+        if ($fraisApprenant->paiements()->exists()) {
+            return response()->json([
+                'message' => 'Impossible de désaffecter : des paiements sont déjà enregistrés pour cette catégorie.',
+            ], 422);
+        }
+
+        $nom = $fraisApprenant->categorieFrais->nom ?? 'la catégorie';
+        $fraisApprenant->delete();
+
+        return response()->json([
+            'message' => 'Catégorie « ' . $nom . ' » désaffectée avec succès.',
+        ]);
+    }
+
+    /**
      * Télécharge le modèle d'import CSV (équivalent web importTemplate).
      */
     public function importTemplate(Request $request): \Symfony\Component\HttpFoundation\BinaryFileResponse

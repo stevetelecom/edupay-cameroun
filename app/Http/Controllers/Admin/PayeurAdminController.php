@@ -23,7 +23,9 @@ class PayeurAdminController extends Controller
             'parents'   => User::where('profil', 'parent')->count(),
         ];
 
-        return view('admin.payeurs.index', compact('stats'));
+        $etablissements = \App\Models\Etablissement::orderBy('nom')->get(['id', 'nom']);
+
+        return view('admin.payeurs.index', compact('stats', 'etablissements'));
     }
 
     /**
@@ -37,6 +39,7 @@ class PayeurAdminController extends Controller
         $search = $request->input('search.value', '');
         $statut = $request->input('statut', '');
         $profil = $request->input('profil', '');
+        $etablissementId = $request->integer('etablissement_id', 0);
         $orderCol = $request->input('order.0.column', 0);
         $orderDir = $request->input('order.0.dir', 'desc');
 
@@ -56,6 +59,12 @@ class PayeurAdminController extends Controller
         if ($statut === 'actif')    $query->where('suspendu', false);
         if ($statut === 'suspendu') $query->where('suspendu', true);
         if ($profil)                 $query->where('profil', $profil);
+
+        if ($etablissementId > 0) {
+            $query->whereHas('apprenants', function ($q) use ($etablissementId) {
+                $q->where('apprenants.etablissement_id', $etablissementId);
+            });
+        }
 
         $total    = User::whereIn('profil', $this->profils)->count();
         $filtered = $query->count();

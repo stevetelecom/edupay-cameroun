@@ -77,6 +77,8 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
     Route::prefix('etablissements')->name('etablissements.')->group(function () {
         Route::get('/',                           [EtablissementAdminController::class, 'index'])->name('index');
         Route::get('/datatable',                  [EtablissementAdminController::class, 'datatable'])->name('datatable');
+        Route::delete('/bulk-destroy',            [EtablissementAdminController::class, 'bulkDestroy'])->name('bulkDestroy');
+        Route::patch('/bulk-activer',             [EtablissementAdminController::class, 'bulkActiver'])->name('bulkActiver');
         Route::get('/{etablissement}',            [EtablissementAdminController::class, 'show'])->name('show');
         Route::patch('/{etablissement}/activer',  [EtablissementAdminController::class, 'activer'])->name('activer');
         Route::patch('/{etablissement}/suspendre',[EtablissementAdminController::class, 'suspendre'])->name('suspendre');

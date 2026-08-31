@@ -210,12 +210,33 @@
   </form>
 </div>
 
+{{-- Actions groupées --}}
+<div id="bulk-toolbar-etabs" class="bg-white border border-gray-200 rounded-xl p-3 mb-4 hidden items-center gap-3 flex-wrap">
+  <span class="text-sm text-gray-600 font-medium">
+    <span id="nb-selection-etab">0</span> {{ __('admin.element_selectionne') }}
+  </span>
+  <button id="btn-bulk-activation-etab" class="bg-[#0D9E75] hover:bg-[#0A8562] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+    {{ __('admin.activer_selection') }}
+  </button>
+  <button id="btn-bulk-delete-etab" class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+    {{ __('admin.supprimer_selection') }}
+  </button>
+</div>
+<form id="form-bulk-etabs" method="POST" class="hidden">
+  @csrf
+  @method('PATCH')
+  <input type="hidden" name="ids" value="">
+</form>
+
 {{-- Table --}}
 <div class="bg-white border border-gray-200 rounded-xl">
   <div>
     <table id="dt-etablissements" class="ep-dt text-sm">
     <thead>
       <tr>
+        <th data-orderable="false" class="w-8">
+          <input type="checkbox" id="select-all-etablissement" class="ep-checkbox">
+        </th>
         <th>{{ __('messages.etablissement') }}</th>
         <th>{{ __('admin.type_region') }}</th>
         <th>{{ __('messages.contact') }}</th>
@@ -253,15 +274,16 @@ $(document).ready(function() {
             }
         },
         columns: [
-            { data: 0, orderable: true,  responsivePriority: 1 }, // Etablissement
-            { data: 1, orderable: true,  responsivePriority: 5 }, // Type / Région
-            { data: 2, orderable: false, responsivePriority: 6 }, // Contact
-            { data: 3, orderable: true,  responsivePriority: 4 }, // Apprenants
-            { data: 4, orderable: true,  responsivePriority: 3 }, // Statut
-            { data: 5, orderable: true,  responsivePriority: 7 }, // Inscrit le
-            { data: 6, orderable: false, responsivePriority: 2 }, // Actions
+            { data: 0, orderable: false, responsivePriority: 8 }, // Sélection
+            { data: 1, orderable: true,  responsivePriority: 1 }, // Etablissement
+            { data: 2, orderable: true,  responsivePriority: 5 }, // Type / Région
+            { data: 3, orderable: false, responsivePriority: 6 }, // Contact
+            { data: 4, orderable: true,  responsivePriority: 4 }, // Apprenants
+            { data: 5, orderable: true,  responsivePriority: 3 }, // Statut
+            { data: 6, orderable: true,  responsivePriority: 7 }, // Inscrit le
+            { data: 7, orderable: false, responsivePriority: 2 }, // Actions
         ],
-        order: [[0, 'asc']],
+        order: [[1, 'asc']],
     });
 
     // Le formulaire de filtres déclenche un reload AJAX au lieu d'un GET classique
@@ -328,8 +350,10 @@ function epSubmitAjax(form, modalId, btnSelector) {
     .then(({ status, body }) => {
         if (status >= 200 && status < 300 && body.success) {
             epToast(body.message || @json(__('admin.action_effectuee')), 'success');
-            epModal.close(modalId);
+            if (modalId) epModal.close(modalId);
             dtEtab.ajax.reload(null, false);
+            selectionEtablissements = {};
+            mettreAJourSelectionEtab();
         } else {
             epToast(body.message || @json(__('admin.une_erreur_survenue')), 'error');
         }
@@ -353,6 +377,72 @@ document.getElementById('form-suspendre-etab').addEventListener('submit', functi
 document.getElementById('form-supprimer-etab').addEventListener('submit', function(e) {
     e.preventDefault();
     epSubmitAjax(this, 'modal-supprimer-etab', 'button[type="submit"]');
+});
+
+// ── Sélection groupée d'établissements ──
+var selectionEtablissements = {}; // id -> true
+
+function mettreAJourSelectionEtab() {
+    var ids = Object.keys(selectionEtablissements).filter(function(k) { return selectionEtablissements[k]; });
+    document.getElementById('nb-selection-etab').textContent = ids.length;
+    var toolbar = document.getElementById('bulk-toolbar-etabs');
+    if (ids.length > 0) {
+        toolbar.classList.remove('hidden');
+        toolbar.classList.add('flex');
+    } else {
+        toolbar.classList.add('hidden');
+        toolbar.classList.remove('flex');
+    }
+}
+
+$(document).on('change', '#dt-etablissements tbody .select-etablissement', function() {
+    selectionEtablissements[$(this).val()] = $(this).is(':checked');
+    mettreAJourSelectionEtab();
+});
+
+$(document).on('change', '#select-all-etablissement', function() {
+    var checked = $(this).is(':checked');
+    $('#dt-etablissements tbody .select-etablissement').each(function() {
+        this.checked = checked;
+        selectionEtablissements[$(this).val()] = checked;
+    });
+    mettreAJourSelectionEtab();
+});
+
+dtEtab.on('draw', function() {
+    var all = $('#dt-etablissements tbody .select-etablissement');
+    var checked = 0;
+    all.each(function() {
+        this.checked = !!selectionEtablissements[$(this).val()];
+        if (this.checked) checked++;
+    });
+    $('#select-all-etablissement').prop('checked', all.length > 0 && checked === all.length);
+});
+
+document.getElementById('btn-bulk-activation-etab').addEventListener('click', function() {
+    var ids = Object.keys(selectionEtablissements).filter(function(k) { return selectionEtablissements[k]; });
+    if (!ids.length) return epToast(@json(__('admin.aucun_selection')), 'error');
+    var count = ids.length;
+    if (!window.confirm(count + ' ' + @json(__('admin.confirm_activation_selection')))) return;
+    var form = document.getElementById('form-bulk-etabs');
+    form.method = 'POST';
+    form.querySelector('input[name="ids"]').value = ids.join(',');
+    form.querySelector('input[name="_method"]').value = 'PATCH';
+    form.action = '/admin-ep2026/etablissements/bulk-activer';
+    epSubmitAjax(form, null, null);
+});
+
+document.getElementById('btn-bulk-delete-etab').addEventListener('click', function() {
+    var ids = Object.keys(selectionEtablissements).filter(function(k) { return selectionEtablissements[k]; });
+    if (!ids.length) return epToast(@json(__('admin.aucun_selection')), 'error');
+    var count = ids.length;
+    if (!window.confirm(count + ' ' + @json(__('admin.confirm_suppression_selection')))) return;
+    var form = document.getElementById('form-bulk-etabs');
+    form.method = 'POST';
+    form.querySelector('input[name="ids"]').value = ids.join(',');
+    form.querySelector('input[name="_method"]').value = 'DELETE';
+    form.action = '/admin-ep2026/etablissements/bulk-destroy';
+    epSubmitAjax(form, null, null);
 });
 </script>
 @endpush

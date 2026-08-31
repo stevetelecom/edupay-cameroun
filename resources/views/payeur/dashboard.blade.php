@@ -45,6 +45,41 @@
   </div>
 </div>
 
+{{-- ══ MODAL : Détacher mon dossier (élève/étudiant, vue solo) ══ --}}
+@if($monDossier)
+<div id="modal-detacher-apprenant" class="ep-modal-overlay">
+  <div class="ep-modal">
+    <div class="ep-modal-head">
+      <h3 style="color:var(--ep-red);">{{ __('payeur.detacher_titre') }}</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-detacher-apprenant')">×</button>
+    </div>
+    <form method="POST" action="{{ route('payeur.apprenant.detach', $monDossier) }}" id="form-detacher">
+      @csrf @method('DELETE')
+      <div class="ep-modal-body">
+        <div style="text-align:center;font-size:32px;margin-bottom:10px;">⚠️</div>
+        <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:14px;">
+          {{ __('payeur.detacher_confirm_texte', ['prenom' => $monDossier->prenom, 'nom' => $monDossier->nom]) }}
+        </p>
+        <div style="background:#fdf3f3;border:1px solid #f5c6c6;border-radius:8px;padding:10px 12px;font-size:12px;color:#b13a3a;margin-bottom:14px;">
+          {{ __('payeur.detacher_avertissement') }}
+        </div>
+        <div class="lbl">{{ __('payeur.detacher_saisir_confirm') }}</div>
+        <input type="text" id="detacher-confirm" class="inp"
+               placeholder="{{ __('payeur.detacher_placeholder') }}" autocomplete="off" />
+      </div>
+      <div class="ep-modal-foot">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
+                onclick="epModal.close('modal-detacher-apprenant')">{{ __('messages.annuler') }}</button>
+        <button type="submit" class="btn-r" id="btn-detacher-confirm"
+                data-attendu="{{ mb_strtolower($monDossier->prenom) }}" disabled style="width:auto;padding:8px 20px;">
+          {{ __('payeur.detacher') }} →
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+@endif
+
 @endpush
 
 @section('content')
@@ -170,7 +205,7 @@
       <div style="font-size:10px;color:#888;margin-bottom:14px;">
         {{ $pctSolo }}% {{ __('payeur.regle') }} — {{ number_format($payeSolo,0,',',' ') }} / {{ number_format($totalSolo,0,',',' ') }} {{ __('payeur.fcfa_short') }}
       </div>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <a href="{{ route('payeur.frais.apprenant', $monDossier) }}" class="btn-o" style="font-size:12px;padding:8px 14px;width:auto;">
           {{ __('payeur.voir_tous_mes_frais') }} →
         </a>
@@ -178,6 +213,18 @@
                 class="btn-o" style="width:auto;font-size:12px;padding:8px 14px;">
           ✎ {{ __('payeur.modifier') }}
         </button>
+        @php $peutDetacherSolo = $monDossier->frais->isEmpty(); @endphp
+        @if($peutDetacherSolo)
+          <button type="button" onclick="epModal.open('modal-detacher-apprenant')"
+                  class="btn-r" style="width:auto;font-size:12px;padding:8px 14px;">
+            {{ __('payeur.detacher') }}
+          </button>
+        @else
+          <button type="button" title="{{ __('payeur.detacher_impossible_frais') }}"
+                  class="btn-r" style="width:auto;font-size:12px;padding:8px 14px;opacity:.45;cursor:not-allowed;" disabled>
+            {{ __('payeur.detacher') }}
+          </button>
+        @endif
       </div>
     </div>
 
@@ -428,4 +475,16 @@
 
 @push('scripts')
 @include('payeur.partials.modal-rattacher-scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var frm = document.getElementById('form-detacher');
+    if (!frm) return;
+    var saisie = document.getElementById('detacher-confirm');
+    var btn    = document.getElementById('btn-detacher-confirm');
+    var attendu = (btn.dataset.attendu || '').toLowerCase();
+    saisie.addEventListener('input', function(){
+        btn.disabled = saisie.value.trim().toLowerCase() !== attendu;
+    });
+});
+</script>
 @endpush

@@ -66,6 +66,33 @@
     </form>
   </div>
 </div>
+
+{{-- ══ MODAL : Désaffecter une catégorie de frais ══ --}}
+<div id="modal-desaffecter" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm ep-modal-danger">
+    <div class="ep-modal-head">
+      <h3>{{ __('etablissement.desaffecter_titre') }}</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-desaffecter')">×</button>
+    </div>
+    <div class="ep-modal-body">
+      <p style="font-size:13px;color:#555;line-height:1.6;">
+        {!! __('etablissement.desaffecter_confirm', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]) !!}
+        <strong id="desaffecter-categorie-nom"></strong>
+      </p>
+      <div style="background:#fdf3f3;border:1px solid #f5c6c6;border-radius:8px;padding:10px 12px;font-size:12px;color:#b13a3a;margin-top:10px;">
+        {{ __('etablissement.desaffecter_avertissement') }}
+      </div>
+    </div>
+    <div class="ep-modal-foot">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
+              onclick="epModal.close('modal-desaffecter')">{{ __('etablissement.annuler') }}</button>
+      <form id="desaffecter-form" method="POST" style="display:inline;">
+        @csrf @method('DELETE')
+        <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">{{ __('etablissement.desaffecter') }}</button>
+      </form>
+    </div>
+  </div>
+</div>
 @endpush
 
 @section('content')
@@ -132,6 +159,7 @@
             <tr>
                 <th>{{ __('etablissement.categorie') }}</th><th>{{ __('etablissement.montant_total') }}</th>
                 <th>{{ __('etablissement.montant_paye') }}</th><th>{{ __('etablissement.reste') }}</th><th>{{ __('etablissement.statut') }}</th>
+                <th>{{ __('etablissement.actions') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -152,9 +180,22 @@
                         } }}
                     </span>
                 </td>
+                <td>
+                    @if($frais->paiements->isEmpty())
+                        <button type="button" class="btn-r" style="width:auto;font-size:11px;padding:5px 10px;"
+                                data-desaffecter data-url="{{ route('etablissement.apprenants.desaffecter', [$apprenant, $frais]) }}"
+                                data-nom="{{ $frais->categorieFrais->nom ?? '' }}">
+                            {{ __('etablissement.desaffecter') }}
+                        </button>
+                    @else
+                        <span style="font-size:11px;color:#999;" title="{{ __('etablissement.desaffecter_impossible_paiement') }}">
+                            {{ __('etablissement.desaffecter') }}
+                        </span>
+                    @endif
+                </td>
             </tr>
             @empty
-            <tr><td colspan="5" style="text-align:center;color:#999;padding:20px 0;">{{ __('etablissement.aucun_frais') }}</td></tr>
+            <tr><td colspan="6" style="text-align:center;color:#999;padding:20px 0;">{{ __('etablissement.aucun_frais') }}</td></tr>
             @endforelse
         </tbody>
     </table>
@@ -214,5 +255,17 @@ document.addEventListener('DOMContentLoaded', function() {
     epModal.open('modal-modifier-apprenant');
 });
 @endif
+document.addEventListener('DOMContentLoaded', function() {
+    var form   = document.getElementById('desaffecter-form');
+    var nomEl  = document.getElementById('desaffecter-categorie-nom');
+    if (!form) return;
+    document.querySelectorAll('[data-desaffecter]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            form.action = btn.getAttribute('data-url');
+            nomEl.textContent = btn.getAttribute('data-nom') || '';
+            epModal.open('modal-desaffecter');
+        });
+    });
+});
 </script>
 @endpush

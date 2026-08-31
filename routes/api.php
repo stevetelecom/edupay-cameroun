@@ -90,9 +90,11 @@ Route::prefix('v1')->group(function () {
         Route::post('/apprenants',             [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'store'])->name('api.v1.etablissement.apprenants.store');
         Route::get('/apprenants/import/model',  [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'importTemplate'])->name('api.v1.etablissement.apprenants.importModel');
         Route::post('/apprenants/import',       [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'import'])->name('api.v1.etablissement.apprenants.import');
+        Route::post('/apprenants/bulk-destroy', [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'bulkDestroy'])->name('api.v1.etablissement.apprenants.bulkDestroy');
         Route::get('/apprenants/{apprenant}',  [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'show'])->name('api.v1.etablissement.apprenants.show');
         Route::put('/apprenants/{apprenant}',  [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'update'])->name('api.v1.etablissement.apprenants.update');
         Route::delete('/apprenants/{apprenant}', [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'destroy'])->name('api.v1.etablissement.apprenants.destroy');
+        Route::delete('/apprenants/{apprenant}/frais/{fraisApprenant}', [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'desaffecter'])->name('api.v1.etablissement.apprenants.desaffecter');
         Route::post('/apprenants/{apprenant}/valider', [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'valider'])->name('api.v1.etablissement.apprenants.valider');
         Route::post('/apprenants/{apprenant}/rejeter', [\App\Http\Controllers\Api\Etablissement\ApprenantController::class, 'rejeter'])->name('api.v1.etablissement.apprenants.rejeter');
 

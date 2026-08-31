@@ -80,6 +80,41 @@ class FraisController extends Controller
             ->with('success', $message);
     }
 
+    /**
+     * Désaffecte une catégorie de frais d'un apprenant (retire le FraisApprenant).
+     * 🔒 Permission : on ne peut désaffecter que si AUCUN paiement n'est enregistré
+     * pour cette catégorie — sinon on briserait l'historique de règlement.
+     */
+    public function desaffecter(Apprenant $apprenant, FraisApprenant $fraisApprenant)
+    {
+        $this->autoriser($fraisApprenant->categorieFrais);
+        $this->autoriserApprenant($apprenant);
+
+        if ($fraisApprenant->apprenant_id !== $apprenant->id) {
+            return redirect()->route('etablissement.apprenants.show', $apprenant)
+                ->with('error', 'Cette affectation ne correspond pas à cet apprenant.');
+        }
+
+        if ($fraisApprenant->paiements()->exists()) {
+            return redirect()->route('etablissement.apprenants.show', $apprenant)
+                ->with('error', 'Impossible de désaffecter « ' . ($fraisApprenant->categorieFrais->nom ?? '')
+                    . ' » : des paiements sont déjà enregistrés. Contactez le support pour un remboursement.');
+        }
+
+        $nom = $fraisApprenant->categorieFrais->nom ?? 'la catégorie';
+        $fraisApprenant->delete();
+
+        return redirect()->route('etablissement.apprenants.show', $apprenant)
+            ->with('success', 'Catégorie « ' . $nom . ' » désaffectée de ' . $apprenant->prenom . ' ' . $apprenant->nom . '.');
+    }
+
+    private function autoriserApprenant(Apprenant $apprenant): void
+    {
+        if ($apprenant->etablissement_id !== (Auth::user()->etablissement->id ?? null)) {
+            abort(403, 'Accès non autorisé à cet apprenant.');
+        }
+    }
+
     public function create()
     {
         return view('etablissement.frais.create');
