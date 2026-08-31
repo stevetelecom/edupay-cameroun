@@ -100,6 +100,7 @@ class DashboardController extends Controller
         // Autres données
         // ────────────────────────────────────────────
         $etablissementsActifs = Etablissement::where('statut', 'actif')->count();
+        $payeursTotaux = \App\Models\User::whereIn('profil', ['parent', 'eleve', 'etudiant'])->count();
         $reclamationsMois = Reclamation::whereBetween('created_at', [$debut, $fin])->count();
 
         $derniersEtablissements = Etablissement::orderByDesc('created_at')
@@ -116,6 +117,7 @@ class DashboardController extends Controller
             'volumeMois'                 => $volumeMois,
             'commissionsMois'            => $commissionsMois,
             'etablissementsActifs'       => $etablissementsActifs,
+            'payeursTotaux'              => $payeursTotaux,
             'transactionsMois'           => $transactionsMois,
             'repartitionMoyens'          => $repartitionMoyens,
             'tauxRecouvrementGlobal'     => $tauxRecouvrementGlobal,

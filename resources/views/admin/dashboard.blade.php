@@ -18,7 +18,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-2 xl:grid-cols-6 gap-4 mb-6">
 
         {{-- Volume de transactions --}}
         <div class="bg-white border border-gray-200 rounded-xl p-4">
@@ -67,6 +67,23 @@
             </div>
             <div class="text-2xl font-bold text-gray-900">{{ $etablissementsActifs }}</div>
             <div class="text-xs text-gray-500 mt-1">{{ __('admin.actifs_sur_plateforme') }}</div>
+        </div>
+
+        {{-- Payeurs --}}
+        <div class="bg-white border border-gray-200 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('admin.payeurs') }}</span>
+                <div class="w-8 h-8 bg-[#E0F5EE] rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="text-2xl font-bold text-gray-900">{{ number_format($payeursTotaux, 0, ',', ' ') }}</div>
+            <div class="text-xs text-gray-500 mt-1">{{ __('admin.payeurs_inscrits_plateforme') }}</div>
         </div>
 
         {{-- Transactions --}}

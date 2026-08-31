@@ -187,6 +187,8 @@ return [
     'msg_reactivation' => 'Ce compte pourra de nouveau se connecter et effectuer des paiements.',
     'msg_suspension' => 'Le compte sera immédiatement déconnecté et ne pourra plus se reconnecter.',
     'comptes_payeurs' => 'Comptes payeurs',
+    'payeurs' => 'Payeurs',
+    'payeurs_inscrits_plateforme' => 'payeurs inscrits sur la plateforme',
     'parents_eleves_etudiants' => 'Parents, élèves et étudiants inscrits sur la plateforme',
     'parents' => 'Parents',
     'eleves' => 'Élèves',
