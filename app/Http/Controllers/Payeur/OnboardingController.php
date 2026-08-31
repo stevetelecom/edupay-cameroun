@@ -210,34 +210,39 @@ class OnboardingController extends Controller
             return response()->json([]);
         }
 
-        // 🔒 Sécurité (E-01) : plus de recherche libre qui expose tout l'annuaire.
-        // Le parent doit connaître au moins 3 caractères ET (matricule exact
-        // OU nom+prénom précis) — sinon aucun résultat. Empêche la fouille
-        // de données personnelles de mineurs par simple frappe au clavier.
-        if (mb_strlen($search) < 3) {
-            return response()->json([]);
-        }
+        $query = \App\Models\Apprenant::where('etablissement_id', $etablissementId)
+            ->where('actif', true);
 
-        $apprenants = \App\Models\Apprenant::where('etablissement_id', $etablissementId)
-            ->where('actif', true)
-            ->where(function ($query) use ($search) {
+        // Affiche l'annuaire : quand rien n'est saisi, on liste TOUS les apprenants
+        // actifs de l'établissement (comme pour la liste des établissements).
+        if ($search !== '') {
+            // 🔒 Sécurité (E-01) : pas de recherche libre qui expose tout l'annuaire
+            // dès la première frappe. Le parent doit saisir au moins 3 caractères
+            // (matricule exact, ou nom / prénom seul, ou nom+prénom) — sinon aucun
+            // résultat. Empêche la fouille de données personnelles de mineurs.
+            if (mb_strlen($search) < 3) {
+                return response()->json([]);
+            }
+
+            $query->where(function ($query) use ($search) {
                 $query->where('matricule', $search)
                     ->orWhere(function ($sub) use ($search) {
-                        // nom+prénom doivent être présents ensemble dans la requête
+                        // Correspond à tout mot saisi sur le nom OU le prénom :
+                        // - 1 mot (ex : « MEkontso ») → nom OU prénom contenant ce mot
+                        // - plusieurs mots (ex : « MEkontso samuel ») → Tous les mots
+                        //   doivent matcher sur le nom OU le prénom (nom+prénom précis).
                         $mots = preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY);
-                        if (count($mots) >= 2) {
-                            foreach ($mots as $mot) {
-                                $sub->where(function ($s) use ($mot) {
-                                    $s->where('nom', 'like', "%{$mot}%")
-                                      ->orWhere('prenom', 'like', "%{$mot}%");
-                                });
-                            }
-                        } else {
-                            // Un seul mot : jamais de correspondance nom/prénom seul
-                            $sub->whereRaw('1 = 0');
+                        foreach ($mots as $mot) {
+                            $sub->where(function ($s) use ($mot) {
+                                $s->where('nom', 'like', "%{$mot}%")
+                                  ->orWhere('prenom', 'like', "%{$mot}%");
+                            });
                         }
                     });
-            })
+            });
+        }
+
+        $apprenants = $query
             ->orderBy('nom')
             ->limit(10)
             ->get(['id', 'nom', 'prenom', 'classe', 'matricule']);
