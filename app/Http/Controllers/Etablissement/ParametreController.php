@@ -35,7 +35,7 @@ class ParametreController extends Controller
 
         $validated = $request->validate([
             'nom'                    => ['required', 'string', 'max:150'],
-            'type'                   => ['required', Rule::in(['maternelle','primaire','secondaire','universitaire','formation'])],
+            'type'                   => ['required', Rule::in(['maternelle','primaire','college','lycee_general','lycee_technique','universite','institut_prive','groupe_scolaire','secondaire','universitaire','formation'])],
             'statut_juridique'       => ['nullable', 'string', 'max:100'],
             'numero_agrement'        => ['nullable', 'string', 'max:100'],
             'nb_eleves'              => ['nullable', 'in:moins_100,100_300,300_500,500_1000,plus_1000'],
@@ -48,8 +48,9 @@ class ParametreController extends Controller
             'email'                  => ['required', 'email', 'max:150'],
             'site_web'               => ['nullable', 'url', 'max:200'],
             'description'            => ['nullable', 'string', 'max:1000'],
-            'mobile_money_principal'      => ['required', Rule::in(['mtn', 'orange'])],
-            'numero_momo_reversement'     => ['required', 'regex:/^6\d{8}$/'],
+            'mobile_money_principal'      => ['required', Rule::in(['mtn', 'orange', 'les_deux'])],
+            'numero_momo_reversement'     => ['nullable', 'regex:/^6\d{8}$/'],
+            'operateur_momo_reversement'  => ['nullable', Rule::in(['mtn', 'orange'])],
             'logo'                   => ['nullable', 'file', 'mimes:png,jpg,jpeg,svg', 'max:2048'],
             'document_agrement'      => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ], [

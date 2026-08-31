@@ -42,9 +42,15 @@
                 <div class="inp-row">
                     <div>
                         <div class="lbl">{{ __('etablissement.type_etab') }}</div>
-                        <select name="type" class="select">
+                        <select name="type" class="select" required>
                             <option value="maternelle"    @selected(old('type', $etab->type ?? '') === 'maternelle')>{{ __('etablissement.type_maternelle') }}</option>
                             <option value="primaire"      @selected(old('type', $etab->type ?? '') === 'primaire')>{{ __('etablissement.type_primaire') }}</option>
+                            <option value="lycee_general" @selected(old('type', $etab->type ?? '') === 'lycee_general')>{{ __('etablissement.type_lycee_general') ?? 'Lycée général' }}</option>
+                            <option value="college"       @selected(old('type', $etab->type ?? '') === 'college')>Collège</option>
+                            <option value="lycee_technique" @selected(old('type', $etab->type ?? '') === 'lycee_technique')>Lycée technique</option>
+                            <option value="universite"    @selected(old('type', $etab->type ?? '') === 'universite')>Université</option>
+                            <option value="institut_prive" @selected(old('type', $etab->type ?? '') === 'institut_prive')>Institut privé</option>
+                            <option value="groupe_scolaire" @selected(old('type', $etab->type ?? '') === 'groupe_scolaire')>Groupe scolaire</option>
                             <option value="secondaire"    @selected(old('type', $etab->type ?? '') === 'secondaire')>{{ __('etablissement.type_secondaire') }}</option>
                             <option value="universitaire" @selected(old('type', $etab->type ?? '') === 'universitaire')>{{ __('etablissement.type_universitaire') }}</option>
                             <option value="formation"     @selected(old('type', $etab->type ?? '') === 'formation')>{{ __('etablissement.type_formation') }}</option>
@@ -106,8 +112,8 @@
                     <div>
                         <div class="lbl">{{ __('etablissement.region') }}</div>
                         <select name="region" class="select">
-                            @foreach(['Centre','Littoral','Ouest','Nord-Ouest','Sud-Ouest','Est','Adamaoua','Nord','Extrême-Nord','Sud'] as $reg)
-                            <option value="{{ $reg }}" @selected(old('region', $etab->region ?? '') === $reg)>{{ $reg }}</option>
+                            @foreach(['centre','littoral','ouest','nord_ouest','sud_ouest','est','adamaoua','nord','extreme_nord','sud'] as $reg)
+                            <option value="{{ $reg }}" @selected(old('region', $etab->region ?? '') === $reg)>{{ ucfirst(str_replace('_','-',$reg)) }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -130,12 +136,13 @@
                 <select name="mobile_money_principal" class="select" required>
                     <option value="mtn"      @selected(($etab->mobile_money_principal ?? '') === 'mtn')>{{ __('etablissement.mt_mtn') }}</option>
                     <option value="orange"   @selected(($etab->mobile_money_principal ?? '') === 'orange')>{{ __('etablissement.mt_orange') }}</option>
+                    <option value="les_deux" @selected(($etab->mobile_money_principal ?? '') === 'les_deux')>MTN Orange (les deux)</option>
                 </select>
 
                 <div class="lbl">{{ __('etablissement.numero_momo') }}</div>
                 <input type="text" name="numero_momo_reversement"
                        value="{{ old('numero_momo_reversement', $etab->numero_momo_reversement ?? '') }}"
-                       class="inp" placeholder="{{ __('etablissement.numero_momo_ph') }}" required>
+                       class="inp" placeholder="{{ __('etablissement.numero_momo_ph') }}">
                 <div style="font-size:11px;color:#888;margin-top:-8px;margin-bottom:8px;">
                     {{ __('etablissement.numero_momo_hint') }}
                 </div>
