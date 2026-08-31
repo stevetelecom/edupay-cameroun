@@ -42,16 +42,39 @@ class ReverserEtablissementJob implements ShouldQueue
 
         $etablissement = $commission->etablissement;
 
-        if (! $etablissement || ! $etablissement->numero_momo_reversement) {
-            Log::warning('ReverserEtablissementJob : établissement sans numéro de reversement', [
+        if (! $etablissement) {
+            Log::critical('ReverserEtablissementJob : établissement introuvable, reversement annulé', [
                 'commission_id' => $commission->id,
             ]);
             return;
         }
 
+        if (! $etablissement->numero_momo_reversement) {
+            Log::critical('ReverserEtablissementJob : établissement sans numéro de reversement, reversement ANNULE — configurer numero_momo_reversement', [
+                'commission_id'     => $commission->id,
+                'etablissement_id'  => $etablissement->id,
+                'paiement_id'       => $commission->paiement_id,
+                'montant_bloque'    => $commission->montant_net_etablissement,
+            ]);
+            return;
+        }
+
+        $numeroReversement = $etablissement->numero_momo_reversement;
+        $operateurRevers   = $etablissement->operateur_momo_reversement ?? 'mtn';
+
+        // Garde de sécurité : on ne reverse jamais vers un numéro invalide.
+        if (! preg_match('/^6\d{8}$/', preg_replace('/\D/', '', $numeroReversement))) {
+            Log::critical('ReverserEtablissementJob : numéro de reversement invalide, reversement ANNULE', [
+                'commission_id'    => $commission->id,
+                'etablissement_id' => $etablissement->id,
+                'numero_configure' => $numeroReversement,
+            ]);
+            return;
+        }
+
         $resultat = $aangaraa->reverserEtablissement(
-            telephone:   $etablissement->numero_momo_reversement,
-            operateur:   $etablissement->operateur_momo_reversement ?? 'mtn',
+            telephone:   $numeroReversement,
+            operateur:   $operateurRevers,
             montant:     $commission->montant_net_etablissement,
             description: 'Reversement EduPay — paiement #' . $commission->paiement_id
         );
