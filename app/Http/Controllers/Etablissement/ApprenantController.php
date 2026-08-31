@@ -279,40 +279,54 @@ class ApprenantController extends Controller
                 ? strtoupper(explode('-', $etablissement->code_etablissement)[0])
                 : strtoupper(substr(preg_replace('/[^A-Z]/i', '', $etablissement->nom), 0, 3));
 
-            // Numéro séquentiel : dernier matricule de cet établissement + 1
-            $dernierMatricule = \App\Models\Apprenant::where('etablissement_id', $etablissementId)
+            // Numéro séquentiel : dernier matricule de cet établissement + 1.
+            // Boucle de retry pour garantir l'unicité (contrainte UNIQUE en base),
+            // même en cas de soft-delete ou de saisie simultanée — évite le 500
+            // sur violation de contrainte d'unicité.
+            $dernierMatricule = \App\Models\Apprenant::withTrashed()
+                ->where('etablissement_id', $etablissementId)
                 ->whereNotNull('matricule')
                 ->orderByDesc('id')
                 ->value('matricule');
 
             $numero = 1;
             if ($dernierMatricule) {
-                // Extraire le numéro à la fin du matricule
                 preg_match('/(\d+)$/', $dernierMatricule, $matches);
-                $numero = isset($matches[1]) ? (int)$matches[1] + 1 : 1;
+                $numero = (isset($matches[1]) ? (int)$matches[1] : 0) + 1;
             }
 
-            $validated['matricule'] = $prefix . '-' . date('Y') . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+            do {
+                $matriculeGenere = $prefix . '-' . date('Y') . '-' . str_pad($numero, 3, '0', STR_PAD_LEFT);
+                $libre = ! \App\Models\Apprenant::withTrashed()->where('matricule', $matriculeGenere)->exists();
+                $numero++;
+            } while (! $libre);
+
+            $validated['matricule'] = $matriculeGenere;
         }
 
-    // Récupérer categorie_frais_id sans la passer à create()
-    $categorieFraisId = $validated['categorie_frais_id'] ?? null;
-    unset($validated['categorie_frais_id']);
+        $categorieFraisId = $validated['categorie_frais_id'] ?? null;
+        unset($validated['categorie_frais_id']);
 
-        $apprenant = Apprenant::create($validated);
-        // Si une catégorie de frais est sélectionnée, créer FraisApprenant
-        if ($categorieFraisId) {
-            $categorieFrais = CategoriesFrais::findOrFail($categorieFraisId);
-            FraisApprenant::create([
-                'apprenant_id'        => $apprenant->id,
-                'categorie_frais_id'  => $categorieFraisId,
-                'montant_total'       => $categorieFrais->montant_total,
-                'montant_paye'        => 0,
-                'statut'              => 'impaye',
-                'annee_scolaire'      => $categorieFrais->annee_scolaire ?? '2025-2026',
-            ]);
+        try {
+            $apprenant = Apprenant::create($validated);
+
+            // Si une catégorie de frais est sélectionnée, créer un FraisApprenant
+            if ($categorieFraisId) {
+                $categorieFrais = CategoriesFrais::findOrFail($categorieFraisId);
+                FraisApprenant::create([
+                    'apprenant_id'        => $apprenant->id,
+                    'categorie_frais_id'  => $categorieFraisId,
+                    'montant_total'       => $categorieFrais->montant_total,
+                    'montant_paye'        => 0,
+                    'statut'              => 'impaye',
+                    'annee_scolaire'      => $categorieFrais->annee_scolaire ?? '2025-2026',
+                ]);
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur enregistrement apprenant (etab ' . $etablissementId . ') : ' . $e->getMessage());
+            return back()->withInput()->with('error',
+                'Impossible d\'enregistrer cet apprenant. Vérifiez que le matricule n\'est pas déjà utilisé, puis réessayez.');
         }
-
 
         return redirect()
             ->route('etablissement.apprenants.show', $apprenant)
