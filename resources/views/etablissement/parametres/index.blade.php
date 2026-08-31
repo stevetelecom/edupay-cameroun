@@ -45,12 +45,12 @@
                         <select name="type" class="select" required>
                             <option value="maternelle"    @selected(old('type', $etab->type ?? '') === 'maternelle')>{{ __('etablissement.type_maternelle') }}</option>
                             <option value="primaire"      @selected(old('type', $etab->type ?? '') === 'primaire')>{{ __('etablissement.type_primaire') }}</option>
-                            <option value="lycee_general" @selected(old('type', $etab->type ?? '') === 'lycee_general')>{{ __('etablissement.type_lycee_general') ?? 'Lycée général' }}</option>
-                            <option value="college"       @selected(old('type', $etab->type ?? '') === 'college')>Collège</option>
-                            <option value="lycee_technique" @selected(old('type', $etab->type ?? '') === 'lycee_technique')>Lycée technique</option>
-                            <option value="universite"    @selected(old('type', $etab->type ?? '') === 'universite')>Université</option>
-                            <option value="institut_prive" @selected(old('type', $etab->type ?? '') === 'institut_prive')>Institut privé</option>
-                            <option value="groupe_scolaire" @selected(old('type', $etab->type ?? '') === 'groupe_scolaire')>Groupe scolaire</option>
+                            <option value="lycee_general" @selected(old('type', $etab->type ?? '') === 'lycee_general')>{{ __('etablissement.type_lycee_general') }}</option>
+                            <option value="college"       @selected(old('type', $etab->type ?? '') === 'college')>{{ __('etablissement.type_college') }}</option>
+                            <option value="lycee_technique" @selected(old('type', $etab->type ?? '') === 'lycee_technique')>{{ __('etablissement.type_lycee_technique') }}</option>
+                            <option value="universite"    @selected(old('type', $etab->type ?? '') === 'universite')>{{ __('etablissement.type_universite') }}</option>
+                            <option value="institut_prive" @selected(old('type', $etab->type ?? '') === 'institut_prive')>{{ __('etablissement.type_institut_prive') }}</option>
+                            <option value="groupe_scolaire" @selected(old('type', $etab->type ?? '') === 'groupe_scolaire')>{{ __('etablissement.type_groupe_scolaire') }}</option>
                             <option value="secondaire"    @selected(old('type', $etab->type ?? '') === 'secondaire')>{{ __('etablissement.type_secondaire') }}</option>
                             <option value="universitaire" @selected(old('type', $etab->type ?? '') === 'universitaire')>{{ __('etablissement.type_universitaire') }}</option>
                             <option value="formation"     @selected(old('type', $etab->type ?? '') === 'formation')>{{ __('etablissement.type_formation') }}</option>
