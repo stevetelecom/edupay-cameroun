@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
@@ -206,6 +207,134 @@ class AuthController extends Controller
     {
         return response()->json([
             'user' => new UserResource($request->user()),
+        ]);
+    }
+
+    /**
+     * OTP par email — envoi du code de vérification.
+     *
+     * POST /api/v1/auth/otp { login: "email ou telephone" }
+     */
+    public function sendOtp(Request $request): JsonResponse
+    {
+        $request->validate(['login' => 'required|string']);
+
+        $login = $request->login;
+
+        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            $user = User::where('email', $login)->first();
+        } else {
+            $telephone = preg_replace('/[\s\-\+]/', '', $login);
+            if (strlen($telephone) > 9) {
+                $telephone = substr($telephone, -9);
+            }
+            $user = User::where('telephone', $telephone)->first();
+        }
+
+        if (! $user) {
+            return response()->json([
+                'message' => 'Aucun compte trouvé.',
+            ], 404);
+        }
+
+        if ($user->suspendu) {
+            return response()->json([
+                'message' => 'Votre compte a été suspendu. Contactez le support.',
+            ], 403);
+        }
+
+        if (! $user->email) {
+            return response()->json([
+                'message' => 'Aucune adresse email associée à ce compte. Utilisez la connexion par mot de passe.',
+            ], 422);
+        }
+
+        $otp = (string) random_int(100000, 999999);
+        $key = 'otp_api_' . $user->id;
+        Cache::put($key, Hash::make($otp), now()->addMinutes(5));
+
+        try {
+            Mail::to($user->email)->send(new \App\Mail\ParentOtpMail($user, $otp));
+            Log::info("OTP API envoyé par email à {$login}");
+        } catch (\Throwable $e) {
+            Cache::forget($key);
+            Log::error('API OTP : échec envoi email : ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Impossible d\'envoyer le code par email. Veuillez réessayer.',
+            ], 500);
+        }
+
+        return response()->json([
+            'message' => "Un code de vérification a été envoyé à votre adresse email.",
+            'email_masked' => substr($user->email, 0, 2) . str_repeat('*', max(0, strlen($user->email) - 6)) . substr($user->email, -4),
+        ]);
+    }
+
+    /**
+     * OTP par email — vérification du code et connexion.
+     *
+     * POST /api/v1/auth/otp/verify { login: "email ou telephone", otp_code: "123456" }
+     */
+    public function verifyOtp(Request $request): JsonResponse
+    {
+        $request->validate([
+            'login'     => 'required|string',
+            'otp_code'  => 'required|string|digits:6',
+        ]);
+
+        $login = $request->login;
+
+        if (filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            $user = User::where('email', $login)->first();
+        } else {
+            $telephone = preg_replace('/[\s\-\+]/', '', $login);
+            if (strlen($telephone) > 9) {
+                $telephone = substr($telephone, -9);
+            }
+            $user = User::where('telephone', $telephone)->first();
+        }
+
+        if (! $user) {
+            return response()->json([
+                'message' => 'Code invalide ou expiré.',
+            ], 401);
+        }
+
+        $otpAttemptsKey = 'otp_api_attempts_' . $request->ip() . '_' . $user->id;
+        $attempts = Cache::get($otpAttemptsKey, 0);
+
+        if ($attempts >= 5) {
+            Cache::forget('otp_api_' . $user->id);
+            Cache::forget($otpAttemptsKey);
+            return response()->json([
+                'message' => 'Trop de tentatives. Veuillez demander un nouveau code.',
+            ], 429);
+        }
+
+        $hashedOtp = Cache::get('otp_api_' . $user->id);
+
+        if (! $hashedOtp || ! Hash::check($request->otp_code, $hashedOtp)) {
+            Cache::put($otpAttemptsKey, $attempts + 1, now()->addMinutes(10));
+            return response()->json([
+                'message' => 'Code invalide ou expiré.',
+            ], 401);
+        }
+
+        Cache::forget('otp_api_' . $user->id);
+        Cache::forget($otpAttemptsKey);
+
+        if ($user->suspendu) {
+            return response()->json([
+                'message' => 'Votre compte a été suspendu. Contactez le support.',
+            ], 403);
+        }
+
+        $token = $user->createToken('mobile-otp')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Connexion réussie.',
+            'token'   => $token,
+            'user'    => new UserResource($user),
         ]);
     }
 }

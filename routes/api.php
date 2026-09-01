@@ -20,6 +20,10 @@ Route::prefix('v1')->group(function () {
         Route::post('/forgot-password',     [\App\Http\Controllers\Api\AuthController::class, 'forgotPassword'])->name('api.v1.auth.forgot');
         Route::post('/reset-password',      [\App\Http\Controllers\Api\AuthController::class, 'resetPassword'])->name('api.v1.auth.reset');
 
+        // OTP par email (connexion sans mot de passe)
+        Route::post('/otp',            [\App\Http\Controllers\Api\AuthController::class, 'sendOtp'])->middleware('throttle:10,1')->name('api.v1.auth.otp');
+        Route::post('/otp/verify',     [\App\Http\Controllers\Api\AuthController::class, 'verifyOtp'])->middleware('throttle:15,1')->name('api.v1.auth.otp.verify');
+
         // Authentifié
         Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout'])
             ->middleware('auth:sanctum')
