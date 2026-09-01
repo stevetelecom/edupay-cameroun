@@ -76,6 +76,7 @@ return [
     'localisation'              => 'Localisation',
     'login_etab_note'           => 'Accès réservé aux directeurs et administrateurs',
     'login_otp'                 => 'Connexion par code OTP (sans mot de passe)',
+    'continue_avec_google'      => 'Continuer avec Google',
     'login_placeholder'         => 'Téléphone ou email',
     'login_sub'                 => 'Connectez-vous à votre compte EduPay',
     'login_title'               => 'Connexion',

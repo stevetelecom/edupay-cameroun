@@ -76,6 +76,7 @@ return [
     'localisation'              => 'Location',
     'login_etab_note'           => 'Access reserved for directors and administrators',
     'login_otp'                 => 'Login with OTP code (passwordless)',
+    'continue_avec_google'      => 'Continue with Google',
     'login_placeholder'         => 'Phone or email',
     'login_sub'                 => 'Sign in to your EduPay account',
     'login_title'               => 'Login',

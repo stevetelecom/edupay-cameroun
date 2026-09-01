@@ -33,6 +33,11 @@ return [
         'api_key'   => env('AT_API_KEY', ''),
         'sender_id' => env('AT_SENDER_ID', ''),
     ],
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID', ''),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET', ''),
+        'redirect'      => env('GOOGLE_REDIRECT_URI', rtrim(env('APP_URL', 'http://localhost'), '/') . '/auth/google/callback'),
+    ],
     'aangaraa' => [
         'api_url'     => env('AANGARAA_API_URL', 'https://api-production.aangaraa-pay.com/api/v1'),
         'app_key'     => env('AANGARAA_APP_KEY', ''),

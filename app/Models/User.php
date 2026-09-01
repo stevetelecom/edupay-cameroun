@@ -32,6 +32,7 @@ class User extends Authenticatable
         'notif_email',
         'notif_rappel_echeance',
         'password',
+        'google_id',
         'etablissement_id',
         'suspendu',
         'suspendu_raison',

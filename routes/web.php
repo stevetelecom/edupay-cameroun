@@ -34,6 +34,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/connexion/otp',      [LoginController::class, 'showOtpForm'])->name('login.otp');
     Route::post('/connexion/otp',     [LoginController::class, 'verifyOtp'])->middleware('throttle:10,1')->name('login.otp.verify');
 
+    // Connexion Google (Socialite)
+    Route::get('/auth/google',        [\App\Http\Controllers\Auth\GoogleController::class, 'redirectToGoogle'])->name('login.google');
+    Route::get('/auth/google/callback', [\App\Http\Controllers\Auth\GoogleController::class, 'handleGoogleCallback'])->name('login.google.callback');
+
     // Mot de passe oublié / Réinitialisation
     Route::get('/mot-de-passe-oublie',               [PasswordResetController::class, 'showForgotForm'])->name('password.forgot');
     Route::post('/mot-de-passe-oublie',              [PasswordResetController::class, 'sendResetCode'])->middleware('throttle:5,1')->name('password.send.code');
