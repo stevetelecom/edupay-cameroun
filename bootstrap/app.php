@@ -31,6 +31,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
         ]);
 
+        // Securite (M-02 audit) : headers appliques a TOUTE reponse (web + api),
+        // pas seulement l'espace admin comme auparavant.
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
 
