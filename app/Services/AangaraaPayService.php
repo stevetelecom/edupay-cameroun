@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Support\LogMasking;
 
 class AangaraaPayService
 {
@@ -72,9 +73,9 @@ class AangaraaPayService
             $data = $response->json();
 
             Log::info('AangaraaPay withdrawal', [
-                'telephone' => $numero,
+                'telephone' => LogMasking::telephone($numero),
                 'montant'   => $montant,
-                'response'  => $data,
+                'response'  => LogMasking::payloadReduit($data),
             ]);
 
             return [
@@ -192,10 +193,10 @@ class AangaraaPayService
 
             Log::info('AangaraaPay initier', [
                 'transaction_id' => $transactionId,
-                'telephone'      => $numero,
+                'telephone'      => LogMasking::telephone($numero),
                 'operateur'      => $operateur,
                 'notify_url'     => $notifyUrl,
-                'response'       => $data,
+                'response'       => LogMasking::payloadReduit($data),
             ]);
 
             $succes = $response->status() === 201
@@ -237,7 +238,7 @@ class AangaraaPayService
 
             Log::info('AangaraaPay check_status', [
                 'pay_token' => $payToken,
-                'response'  => $data,
+                'response'  => LogMasking::payloadReduit($data),
             ]);
 
             $reason  = $data['details']['reason'] ?? null;

@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Support\LogMasking;
 use Illuminate\View\View;
 
 class LandingController extends Controller
@@ -108,13 +109,13 @@ class LandingController extends Controller
         ]);
 
         // 📝 Logging: Message reçu
-        Log::info('📧 NOUVEAU MESSAGE DE CONTACT', [
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-            'subject' => $data['subject'],
+        Log::info('Nouveau message de contact', [
+            'name'           => $data['name'],
+            'email'          => LogMasking::email($data['email']),
+            'phone'          => LogMasking::telephone($data['phone']),
+            'subject'        => $data['subject'],
             'message_length' => strlen($data['message']),
-            'timestamp' => now()->toDateTimeString(),
+            'timestamp'      => now()->toDateTimeString(),
         ]);
 
         try {

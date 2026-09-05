@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Support\LogMasking;
 use Illuminate\Validation\Rule;
 use App\Jobs\SendConfirmationPaiement;
 use App\Jobs\SendNotificationEchecPaiement;
@@ -324,7 +325,7 @@ class PaiementController extends Controller
     {
         $payload = $request->all();
 
-        Log::info('AangaraaPay webhook reçu (non fiable, à revérifier)', $payload);
+        Log::info('AangaraaPay webhook reçu (non fiable, à revérifier)', LogMasking::payloadReduit($payload));
 
         // AangaraaPay envoie deux types de webhooks avec des champs différents :
         // - webhook synchrone immédiat : transaction_id = NOTRE référence (EP2026-XXXXX)
