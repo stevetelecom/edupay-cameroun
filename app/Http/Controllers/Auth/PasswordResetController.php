@@ -63,7 +63,7 @@ class PasswordResetController extends Controller
 
         return redirect()->route('password.reset.form', [
             'email' => $request->email,
-            'token' => $resetRecord->id,
+            'token' => $resetRecord->reset_token,
         ])->with('success', 'Code vérifié avec succès.');
     }
 
@@ -76,9 +76,9 @@ class PasswordResetController extends Controller
             return redirect()->route('password.forgot');
         }
 
-        $resetRecord = PasswordReset::find($token);
+        $resetRecord = PasswordReset::trouverParToken($token);
 
-        if (! $resetRecord || $resetRecord->email !== $email || !$resetRecord->is_verified) {
+        if (! $resetRecord || $resetRecord->email !== $email) {
             return redirect()->route('password.forgot')->withErrors([
                 'error' => 'Lien invalide ou expiré.',
             ]);
@@ -91,14 +91,14 @@ class PasswordResetController extends Controller
     {
         $request->validate([
             'email'    => 'required|email',
-            'token'    => 'required|numeric',
+            'token'    => 'required|string|size:64',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
         $email = $request->email;
-        $resetRecord = PasswordReset::find($request->token);
+        $resetRecord = PasswordReset::trouverParToken($request->token);
 
-        if (! $resetRecord || $resetRecord->email !== $email || !$resetRecord->is_verified) {
+        if (! $resetRecord || $resetRecord->email !== $email) {
             return back()->withErrors(['error' => 'Lien invalide ou expiré.']);
         }
 

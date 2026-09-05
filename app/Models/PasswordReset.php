@@ -14,6 +14,7 @@ class PasswordReset extends Model
         'tentatives',
         'is_verified',
         'verified_at',
+        'reset_token',
     ];
 
     protected $casts = [
@@ -91,9 +92,25 @@ class PasswordReset extends Model
 
     public function markAsVerified(): void
     {
+        // Securite (M-01 audit) : genere un token aleatoire imprevisible (64 hex),
+        // utilise a la place de l'ID auto-incremente dans le lien envoye au client.
         $this->update([
             'is_verified' => true,
             'verified_at' => now(),
+            'reset_token' => bin2hex(random_bytes(32)),
         ]);
+    }
+
+    /**
+     * Retrouve un enregistrement verifie et non expire a partir de son token public.
+     * Remplace PasswordReset::find($id) — l'ID n'est plus utilisable comme identifiant
+     * externe. Expire 15 minutes apres verification (verified_at), pas apres creation.
+     */
+    public static function trouverParToken(string $token): ?self
+    {
+        return self::where('reset_token', $token)
+            ->where('is_verified', true)
+            ->where('verified_at', '>', now()->subMinutes(15))
+            ->first();
     }
 }

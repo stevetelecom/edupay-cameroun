@@ -41,7 +41,7 @@ class PaiementController extends Controller
         try {
             return $this->executerInitierPaiement($request, $fraisApprenant);
         } catch (\Throwable $e) {
-            Log::error('[debug-ee0550] Paiement initier exception', [
+            Log::error('Paiement initier exception', [
                 'message' => $e->getMessage(),
                 'file'    => $e->getFile() . ':' . $e->getLine(),
                 'user_id' => Auth::id(),
@@ -128,7 +128,7 @@ class PaiementController extends Controller
             ?: route('payeur.paiement.webhook');
 
         if (str_contains($notifyUrl, 'localhost') || str_contains($notifyUrl, '127.0.0.1')) {
-            Log::warning('[debug-ee0550] notify_url pointe vers localhost — AangaraaPay refusera probablement le paiement', [
+            Log::warning('notify_url pointe vers localhost — AangaraaPay refusera probablement le paiement', [
                 'notify_url' => $notifyUrl,
                 'app_url'    => config('app.url'),
             ]);
@@ -140,20 +140,6 @@ class PaiementController extends Controller
             'orange_money' => 'Orange_Cameroon',
             default        => null,
         };
-
-        // #region agent log
-        Log::info('[debug-ee0550] Formulaire paiement recu', [
-            'hypothesisId'           => 'A,B,E,D',
-            'telephone_saisi'        => $telephone,
-            'telephone_normalise'    => $telephoneNormalise,
-            'mode_paiement'          => $validated['mode_paiement'],
-            'operateur_choisi'       => $operateur,
-            'profil_user_telephone'  => Auth::user()->telephone,
-            'notify_url'             => $notifyUrl,
-            'app_url'                => config('app.url'),
-            'reference'              => $paiement->reference,
-        ]);
-        // #endregion
 
         $resultat = $this->aangaraa->initierPaiement(
             telephone:      $telephoneNormalise,
