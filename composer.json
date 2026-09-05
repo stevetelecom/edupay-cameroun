@@ -12,6 +12,8 @@
         "php": "^8.3",
         "africastalking/africastalking": "^3.0",
         "barryvdh/laravel-dompdf": "^3.1",
+        "dompdf/dompdf": "^3.1.6",
+        "guzzlehttp/guzzle": "^7.15.2",
         "laravel/framework": "^13.7",
         "laravel/sanctum": "^4.3",
         "laravel/socialite": "^5.30",
