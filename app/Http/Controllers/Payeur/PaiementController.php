@@ -378,7 +378,7 @@ class PaiementController extends Controller
 
             // Alerte email au Super Admin — discordance entre webhook et vérification API
             try {
-                \Illuminate\Support\Facades\Mail::to('moffosteve2@gmail.com')
+                \Illuminate\Support\Facades\Mail::to(config('services.admin_alert_email'))
                     ->send(new \App\Mail\AlerteWebhookSuspectMail(
                         reference:      $reference,
                         statutAnnonce:  $payload['status'] ?? null,

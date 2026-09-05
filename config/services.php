@@ -45,6 +45,10 @@ return [
         'notify_url'  => env('AANGARAA_NOTIFY_URL'),
     ],
 
+    // Securite (M-05 audit) : adresse d'alerte pour incidents critiques
+    // (webhook suspect, etc.) — plus d'email personnel code en dur.
+    'admin_alert_email' => env('ADMIN_ALERT_EMAIL', 'admin@edupay.cm'),
+
     /*
     |--------------------------------------------------------------------------
     | EduPay — Parametres systeme (S07 CDC)
