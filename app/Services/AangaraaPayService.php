@@ -308,10 +308,18 @@ class AangaraaPayService
 
         } catch (\Throwable $e) {
             Log::error('AangaraaPay check_status exception', ['error' => $e->getMessage()]);
+
+            // Securite (E-03 audit) : une exception ici (timeout reseau, DNS,
+            // JSON malforme...) ne signifie PAS que l'operateur a refuse le
+            // paiement — on ne sait simplement pas. Retourner 'FAILED' faisait
+            // marquer le paiement echoue a tort alors que l'argent pouvait avoir
+            // ete debite cote MTN/Orange. On retourne 'INCONNU' : le code appelant
+            // ne doit JAMAIS marquer echoue sur ce statut, seulement reessayer.
             return [
-                'statut'  => 'FAILED',
+                'statut'  => 'INCONNU',
                 'succes'  => false,
-                'message' => $e->getMessage(),
+                'message' => 'Vérification impossible pour le moment — nouvelle tentative automatique.',
+                'reason'  => 'ERREUR_TECHNIQUE',
                 'raw'     => [],
             ];
         }
