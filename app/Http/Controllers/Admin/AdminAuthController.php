@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Admin2FAMail;
@@ -46,17 +47,25 @@ class AdminAuthController extends Controller
             'password.required' => 'Le mot de passe est obligatoire.',
         ]);
 
-        // Limitation des tentatives : 5 max par tranche de 15 minutes
-        $loginKey = 'admin_login_' . $request->ip() . '_' . $request->email;
-        if (Cache::has($loginKey . '_blocked')) {
+        // Securite (M-07 audit) : RateLimiter natif Laravel au lieu d'un
+        // systeme Cache::has/put manuel — plus robuste, gere correctement
+        // les cas limites (concurrence, expiration) et reste fiable meme
+        // si $request->ip() varie legerement (proxy) car la cle combine
+        // IP + email, pas l'IP seule.
+        $loginKey = Str::lower('admin_login|' . $request->ip() . '|' . $request->email);
+
+        if (RateLimiter::tooManyAttempts($loginKey, 5)) {
+            $secondes = RateLimiter::availableIn($loginKey);
+
             AuditLog::enregistrerSansUser(
                 'LOGIN_BLOQUE',
                 'IP bloquée après 5 tentatives : ' . $request->ip(),
                 $request,
                 'CRITICAL'
             );
+
             throw ValidationException::withMessages([
-                'email' => 'Trop de tentatives. Réessayez dans 15 minutes.',
+                'email' => 'Trop de tentatives. Réessayez dans ' . ceil($secondes / 60) . ' minute(s).',
             ]);
         }
 
@@ -69,11 +78,7 @@ class AdminAuthController extends Controller
         }
 
         if (! Hash::check($request->password, $admin->password)) {
-            $attempts = Cache::increment($loginKey . '_attempts');
-            if ($attempts >= 5) {
-                Cache::put($loginKey . '_blocked', true, now()->addMinutes(15));
-                Cache::forget($loginKey . '_attempts');
-            }
+            RateLimiter::hit($loginKey, 900); // 15 minutes
 
             AuditLog::enregistrerSansUser(
                 'LOGIN_ECHEC',
@@ -87,7 +92,7 @@ class AdminAuthController extends Controller
             ]);
         }
 
-        Cache::forget($loginKey . '_attempts');
+        RateLimiter::clear($loginKey);
 
         // Génération du code OTP 2FA (6 chiffres, valable 5 minutes)
         $otpCode = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
@@ -108,7 +113,7 @@ class AdminAuthController extends Controller
             Log::channel('admin')->error('Échec envoi email 2FA : ' . $e->getMessage());
             $request->session()->forget('admin_2fa_id');
             Cache::forget('2fa_admin_' . $admin->id);
-            Cache::forget($loginKey . '_attempts');
+            RateLimiter::clear($loginKey);
 
             if (config('app.env') === 'local') {
                 Log::channel('admin')->info('Code 2FA (fallback local) pour ' . $admin->email . ' : ' . $otpCode);
