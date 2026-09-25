@@ -237,23 +237,7 @@
   </div>
   <div class="footer-bottom">
     <div class="footer-legal">{{ __('public.footer_legal') }}</div>
-    <div class="footer-socials">
-      <a href="#" target="_blank" rel="noopener" class="social-btn" aria-label="LinkedIn" title="LinkedIn" style="background:#0A66C2;border-color:#0A66C2;color:#fff;">
-    <i class="fa-brands fa-linkedin-in"></i>
-  </a>
-  <a href="#" target="_blank" rel="noopener" class="social-btn" aria-label="X (Twitter)" title="X" style="background:#000;border-color:#000;color:#fff;">
-    <i class="fa-brands fa-x-twitter"></i>
-  </a>
-  <a href="#" target="_blank" rel="noopener" class="social-btn" aria-label="WhatsApp" title="WhatsApp" style="background:#25D366;border-color:#25D366;color:#fff;">
-    <i class="fa-brands fa-whatsapp"></i>
-  </a>
-  <a href="#" target="_blank" rel="noopener" class="social-btn" aria-label="Facebook" title="Facebook" style="background:#1877F2;border-color:#1877F2;color:#fff;">
-    <i class="fa-brands fa-facebook-f"></i>
-  </a>
-  <a href="#" target="_blank" rel="noopener" class="social-btn" aria-label="Instagram" title="Instagram" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;color:#fff;">
-    <i class="fa-brands fa-instagram"></i>
-  </a>
-    </div>
+    @include('partials.footer-socials')
   </div>
 </div>
 

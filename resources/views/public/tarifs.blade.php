@@ -88,10 +88,7 @@
   </div>
   <div class="footer-bottom">
     <div class="footer-legal">{{ __('public.footer_legal_brief') }}</div>
-    <div class="footer-socials">
-      <div class="social-btn">in</div><div class="social-btn">X</div>
-      <div class="social-btn">W</div><div class="social-btn">f</div>
-    </div>
+    @include('partials.footer-socials')
   </div>
 </div>
 
