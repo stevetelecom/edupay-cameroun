@@ -69,7 +69,7 @@ return [
     'infos_etab_sub'            => "Renseignez les informations de base de votre établissement",
     'infos_personnelles'        => 'Informations personnelles',
     'infos_supplementaires'     => 'Informations supplémentaires',
-    'inscription_pour'          => 'Inscription pour',
+    'inscription_pour'          => 'Inscription pour :nom (:ville)',
     'inscrire_etablissement'    => 'Inscrire mon établissement',
     'je_paye_pour_enfants'      => 'Je paie pour mes enfants / étudiants',
     'je_paye_propres_frais'     => 'Je paie mes propres frais',
@@ -224,7 +224,7 @@ return [
     'ville_autre'               => 'Autre ville',
     'ville_placeholder'         => 'Ex : Yaoundé',
     'ville_residence'           => 'Ville de résidence',
-    'votre_code_etab'           => "Code de l'établissement",
+    'votre_code_etab'           => "Code de l\'établissement : :code",
     'vous_etes'                 => 'Vous êtes :',
 
     // ── E-mail code de réinitialisation ──

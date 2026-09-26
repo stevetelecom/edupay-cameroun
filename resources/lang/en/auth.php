@@ -69,7 +69,7 @@ return [
     'infos_etab_sub'            => 'Enter basic information about your school',
     'infos_personnelles'        => 'Personal information',
     'infos_supplementaires'     => 'Additional information',
-    'inscription_pour'          => 'Registration for',
+    'inscription_pour'          => 'Registration for :nom (:ville)',
     'inscrire_etablissement'    => 'Register my school',
     'je_paye_pour_enfants'      => 'I pay for my children / students',
     'je_paye_propres_frais'     => 'I pay my own fees',
@@ -224,7 +224,7 @@ return [
     'ville_autre'               => 'Other city',
     'ville_placeholder'         => 'e.g. Yaoundé',
     'ville_residence'           => 'City of residence',
-    'votre_code_etab'           => 'School code',
+    'votre_code_etab'           => 'School code: :code',
     'vous_etes'                 => 'You are:',
 
     // ── Password reset email ──

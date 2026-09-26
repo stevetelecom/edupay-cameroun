@@ -34,7 +34,7 @@ return [
     'mon_espace'            => 'Mon espace',
     'multi_sites'           => 'Multi-sites',
     'nom'                   => 'Nom',
-    'objectif_pourcent'     => 'Objectif : :pct%',
+    'objectif_pourcent'     => 'Objectif de recouvrement',
     'paiements'             => 'Paiements',
     'parametres'            => 'Paramètres',
     'params_sys'            => 'Paramètres système',

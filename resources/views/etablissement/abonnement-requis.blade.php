@@ -37,7 +37,7 @@
             </div>
           @elseif($abonnement->statut === 'grace_period')
             <div class="form-sub" style="max-width:480px;margin:6px auto 0;color:#B45309;">
-              {!! __('etablissement.abon_grace', ['plan' => ucfirst($abonnement->plan), 'date1' => $abonnement->date_fin->format('d/m/Y'), 'date2' => $abonnement->grace_period_fin->format('d/m/Y')]) !!}
+              {!! __('etablissement.abon_grace', ['plan' => ucfirst($abonnement->plan), 'date2' => $abonnement->grace_period_fin->format('d/m/Y')]) !!}
             </div>
           @else
             <div class="form-sub" style="max-width:480px;margin:6px auto 0;color:#B91C1C;">

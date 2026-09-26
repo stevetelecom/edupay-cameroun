@@ -107,7 +107,7 @@
   @endif
 
   {{-- ── Rejoindre cet établissement — 3 profils ── --}}
-  <div class="seclbl">{{ __('public.etab_rejoindre') }} {{ $etablissement->nom }}</div>
+  <div class="seclbl">{{ __('public.etab_rejoindre', ['nom' => $etablissement->nom]) }}</div>
   <div style="font-size:13px;color:#666;margin-bottom:16px;">
     {{ __('public.etab_rejoindre_desc') }}
   </div>

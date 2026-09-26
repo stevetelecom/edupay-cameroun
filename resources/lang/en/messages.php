@@ -34,7 +34,7 @@ return [
     'mon_espace'            => 'My space',
     'multi_sites'           => 'Multi-sites',
     'nom'                   => 'Last name',
-    'objectif_pourcent'     => 'Target: :pct%',
+    'objectif_pourcent'     => 'Collection target',
     'paiements'             => 'Payments',
     'parametres'            => 'Settings',
     'params_sys'            => 'System settings',

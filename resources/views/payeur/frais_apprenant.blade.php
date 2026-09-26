@@ -178,7 +178,7 @@
             <div class="prog" style="margin-bottom:4px;">
                 <div class="pfill" style="width:{{ $pourcentage }}%;background:{{ $frais->statut === 'impaye' ? 'var(--ep-red)' : 'var(--ep-teal)' }};"></div>
             </div>
-            <div style="font-size:10px;color:#888;margin-bottom:12px;">{{ $pourcentage }}% {{ __('payeur.pct_regle') }}</div>
+            <div style="font-size:10px;color:#888;margin-bottom:12px;">{{ __('payeur.pct_regle', ['pct' => $pourcentage]) }}</div>
 
             {{-- Échéancier --}}
             @if($frais->categorieFrais->echeanciers->count())

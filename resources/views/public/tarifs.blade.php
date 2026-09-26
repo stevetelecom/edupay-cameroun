@@ -32,11 +32,11 @@
         <div style="font-size:13px;color:#555;line-height:2.2;">
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="material-symbols-outlined" style="font-size:17px;color:#9CA3AF;">group</span>
-            {{ $plan['max_apprenants'] === -1 ? __('public.apprenants_illimites') : $plan['max_apprenants'].' '.__('public.apprenants_max') }}
+            {{ $plan['max_apprenants'] === -1 ? __('public.apprenants_illimites') : __('public.apprenants_max', ['max' => $plan['max_apprenants']]) }}
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="material-symbols-outlined" style="font-size:17px;color:#9CA3AF;">sms</span>
-            {{ $plan['sms_mensuel'] === -1 ? __('public.sms_illimites') : $plan['sms_mensuel'].' '.__('public.sms_par_mois') }}
+            {{ $plan['sms_mensuel'] === -1 ? __('public.sms_illimites') : __('public.sms_par_mois', ['nb' => $plan['sms_mensuel']]) }}
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="material-symbols-outlined" style="font-size:17px;color:{{ $plan['multi_sites'] ? '#0D9E75' : '#D1D5DB' }};">apartment</span>
