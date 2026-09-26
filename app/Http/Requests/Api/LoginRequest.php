@@ -16,18 +16,24 @@ class LoginRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        $login = (string) $this->input('login');
+        // Le contrat documenté envoie `identifiant` ; l'API historique
+        // attendait `login`. Les deux sont acceptés pour ne pas casser
+        // les versions mobiles déjà déployées.
+        $login = (string) ($this->input('login') ?: $this->input('identifiant'));
+
         // Un email valide n'est jamais normalisé ; sinon on normalise le téléphone
         // en 9 chiffres (accepte +237, espaces, tirets en saisie).
-        if ($this->filled('login') && ! filter_var($login, FILTER_VALIDATE_EMAIL)) {
-            $this->merge(['login' => $this->normaliserTelephoneCm($login)]);
+        if ($login !== '' && ! filter_var($login, FILTER_VALIDATE_EMAIL)) {
+            $login = $this->normaliserTelephoneCm($login);
         }
+
+        $this->merge(['login' => $login]);
     }
 
     public function rules(): array
     {
         return [
-            // login = email OU téléphone (9 chiffres 6XXXXXXXX)
+            // login = identifiant = email OU téléphone (9 chiffres 6XXXXXXXX)
             'login'    => ['required', 'string'],
             'password' => ['required', 'string'],
         ];

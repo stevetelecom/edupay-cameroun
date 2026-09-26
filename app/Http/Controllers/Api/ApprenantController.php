@@ -35,20 +35,24 @@ class ApprenantController extends Controller
      */
     public function rattacher(RattacherApprenantRequest $request): JsonResponse
     {
-        $valid   = $request->validated();
-        $user    = $request->user();
-        $mode    = $valid['mode'] ?? 'matricule';
+        $valid = $request->validated();
+        $user  = $request->user();
 
-        if (! empty($valid['code_etablissement']) && ! empty($valid['matricule'])) {
-            $etablissement = Etablissement::where('code_etablissement', $valid['code_etablissement'])->first();
+        // T : un seul point de resolution de l'etablissement, accepte au
+        // contrat (`etablissement_id`) comme au formulaire mobile
+        // (`code_etablissement`). Les deux branches du rattachement sont
+        // bornees a cet etablissement.
+        $etablissement = $this->resoudreEtablissement($valid);
 
-            if (! $etablissement) {
-                return response()->json([
-                    'message' => 'Établissement introuvable pour ce code.',
-                    'errors'  => ['code_etablissement' => ['Code d\'établissement inconnu.']],
-                ], 422);
-            }
+        if ($etablissement->statut !== 'actif') {
+            return response()->json([
+                'message' => 'Cet établissement n\'accepte pas de nouveau rattachement pour le moment.',
+                'errors'  => ['etablissement_id' => ['Établissement non actif.']],
+            ], 422);
+        }
 
+        // Identification exacte : matricule.
+        if (! empty($valid['matricule'])) {
             $apprenant = $etablissement->apprenants()
                 ->where('matricule', $valid['matricule'])
                 ->first();
@@ -63,31 +67,14 @@ class ApprenantController extends Controller
             return $this->rattacherEtRetourner($user, $apprenant, $valid);
         }
 
-        // Mode "recherche" : nom + prénom + (option élève/étudiant)
-        $query = Apprenant::query();
-
-        if (! empty($valid['code_etablissement'])) {
-            $etablissement = Etablissement::where('code_etablissement', $valid['code_etablissement'])->first();
-            if (! $etablissement) {
-                return response()->json([
-                    'message' => 'Établissement introuvable pour ce code.',
-                    'errors'  => ['code_etablissement' => ['Code d\'établissement inconnu.']],
-                ], 422);
-            }
-            $query->where('etablissement_id', $etablissement->id);
-        }
-
-        if (! empty($valid['nom'])) {
-            $query->where('nom', 'like', '%' . $valid['nom'] . '%');
-        }
-        if (! empty($valid['prenom'])) {
-            $query->where('prenom', 'like', '%' . $valid['prenom'] . '%');
-        }
-        if (! empty($valid['classe'])) {
-            $query->where('classe', 'like', '%' . $valid['classe'] . '%');
-        }
-
-        $apprenants = $query->limit(20)->get();
+        // Recherche dans CET établissement uniquement (jamais de recherche
+        // plateforme : elle exposait les eleves des autres ecoles).
+        $apprenants = Apprenant::where('etablissement_id', $etablissement->id)
+            ->where('nom', 'like', '%' . $valid['nom'] . '%')
+            ->when($valid['prenom'] ?? null, fn ($q, $prenom) => $q->where('prenom', 'like', '%' . $prenom . '%'))
+            ->when($valid['classe'] ?? null, fn ($q, $classe) => $q->where('classe', 'like', '%' . $classe . '%'))
+            ->limit(20)
+            ->get();
 
         if ($apprenants->isEmpty()) {
             return response()->json([
@@ -107,6 +94,19 @@ class ApprenantController extends Controller
     }
 
     /**
+     * Resout l'etablissement cible du rattachement, depuis l'identifiant ou
+     * le code. Les deux parametres sont deja valides par la FormRequest.
+     */
+    private function resoudreEtablissement(array $valid): Etablissement
+    {
+        if (! empty($valid['etablissement_id'])) {
+            return Etablissement::findOrFail($valid['etablissement_id']);
+        }
+
+        return Etablissement::where('code_etablissement', $valid['code_etablissement'])->firstOrFail();
+    }
+
+/**
      * Détache un apprenant de l'utilisateur connecté.
      */
     public function detacher(Request $request, Apprenant $apprenant): JsonResponse
@@ -313,9 +313,24 @@ class ApprenantController extends Controller
             ]);
         });
 
+        $apprenant->load(['etablissement', 'frais.categorieFrais.echeanciers']);
+
         return response()->json([
+            'success' => true,
             'message' => 'Apprenant rattaché avec succès. Si l\'établissement exige une validation, vous en serez notifié.',
-            'data'    => new ApprenantResource($apprenant->load(['etablissement', 'frais.categorieFrais.echeanciers'])),
+            // T : le contrat documente lit `apprenant_id`, `nom_complet` et
+            // `etablissement` (nom de l'ecole). On les expose explicitement,
+            // la ressource complete reste disponible pour le reste.
+            'data'    => array_merge(
+                (new ApprenantResource($apprenant))->resolve(request()),
+                [
+                    'apprenant_id'    => $apprenant->id,
+                    'nom_complet'     => trim($apprenant->prenom . ' ' . $apprenant->nom),
+                    'etablissement'    => $apprenant->etablissement?->nom,
+                    'classe'          => $apprenant->classe,
+                    'statut_paiement' => $apprenant->statut_paiement,
+                ]
+            ),
         ], 201);
     }
 }

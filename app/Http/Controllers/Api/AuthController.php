@@ -101,21 +101,60 @@ class AuthController extends Controller
 
         $token = $user->createToken('mobile')->plainTextToken;
 
+        // Contrat documenté : { success, data: { token, user } }. Les clés
+        // racines historiques (token/user) sont conservées pour les
+        // versions mobiles déjà déployées.
         return response()->json([
             'message' => 'Connexion réussie.',
+            'success' => true,
             'token'   => $token,
             'user'    => new UserResource($user),
+            'data'    => [
+                'token' => $token,
+                'user'  => new UserResource($user),
+            ],
         ]);
     }
 
     /**
-     * Déconnexion — révoque le token courant.
+     * Déconnexion.
+     *
+     * Par défaut : révoque le token courant. `tous_appareils: true` (ou
+     * `?tous_appareils=1`) révoque TOUTES les sessions du compte, utile quand
+     * l'utilisateur suspects une session volee.
+     *
+     * S : l'ancien code appelait `delete()` sans vérifier la nature du token.
+     * Sur une authentification par cookie, `currentAccessToken()` renvoie un
+     * `TransientToken` qui n'a pas de `delete()` : la deconnexion renvoyait
+     * une erreur 500 au lieu de laisser partir l'utilisateur.
      */
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $user      = $request->user();
+        $tous      = $request->boolean('tous_appareils') || $request->boolean('all');
+        $revokes   = 0;
+        $token     = $user->currentAccessToken();
 
-        return response()->json(['message' => 'Déconnexion réussie.']);
+        if ($tous) {
+            $revokes = $user->tokens()->delete();
+        } elseif ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
+            $token->delete();
+            $revokes = 1;
+        }
+
+        // Session web eventuelle (cookie) : on invalide aussi le formulaire.
+        if (auth()->guard('web')->check()) {
+            auth()->guard('web')->logout();
+            $request->session()?->invalidate();
+            $request->session()?->regenerateToken();
+        }
+
+        return response()->json([
+            'message'    => $tous
+                ? 'Toutes les sessions ont été révoquées.'
+                : 'Déconnexion réussie.',
+            'revoques'   => $revokes,
+        ]);
     }
 
     /**

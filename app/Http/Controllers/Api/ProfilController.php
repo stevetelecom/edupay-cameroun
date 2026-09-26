@@ -98,8 +98,17 @@ class ProfilController extends Controller
 
         $user->update(['password' => Hash::make($validated['password'])]);
 
+        // S : le mot de passe change, les sessions ouvertes sur les autres
+        // appareils doivent tomber. Sans cette revocation, un token vole
+        // (telephone perdu, session ouverte sur un poste partage) restait
+        // valable indefiniment apres le changement de mot de passe. Le
+        // client doit se reconnecter : le drapeau ci-dessous le lui dit.
+        $nbSessionsRevoquees = $user->tokens()->delete();
+
         return response()->json([
-            'message' => 'Votre mot de passe a été modifié avec succès.',
+            'message'               => 'Votre mot de passe a été modifié avec succès. Reconnectez-vous sur vos autres appareils.',
+            'reconnexion_requise'   => true,
+            'sessions_revoquees'    => $nbSessionsRevoquees,
         ]);
     }
 }

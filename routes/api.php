@@ -25,6 +25,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/otp/verify',     [\App\Http\Controllers\Api\AuthController::class, 'verifyOtp'])->middleware('throttle:15,1')->name('api.v1.auth.otp.verify');
 
         // Authentifié
+        // La deconnexion n'est PAS soumise a CompteSuspendu : un compte
+        // suspendu doit pouvoir tout de même fermer sa session.
         Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout'])
             ->middleware('auth:sanctum')
             ->name('api.v1.auth.logout');
@@ -41,7 +43,7 @@ Route::prefix('v1')->group(function () {
         ->name('api.v1.etablissements.show');
 
     // ── Routes protégées (token Sanctum) ───────────────────────
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', \App\Http\Middleware\CompteSuspendu::class])->group(function () {
 
         // Profil
         Route::get('/me',     [\App\Http\Controllers\Api\AuthController::class, 'me'])->name('api.v1.me');
@@ -86,7 +88,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // ── Back-office Établissement (directeur / comptable / caissier) ──
-    Route::prefix('etablissement')->middleware('auth:sanctum')->group(function () {
+    Route::prefix('etablissement')->middleware(['auth:sanctum', \App\Http\Middleware\CompteSuspendu::class])->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\Etablissement\DashboardController::class, 'index'])->name('api.v1.etablissement.dashboard');
 
         // Apprenants
