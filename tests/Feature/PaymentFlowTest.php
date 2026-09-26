@@ -391,10 +391,26 @@ class PaymentFlowTest extends TestCase
 
         $user->apprenants()->attach($apprenant->id, ['lien' => 'parent']);
 
+        $categorie = CategoriesFrais::create([
+            'etablissement_id' => $etab->id,
+            'nom' => 'Frais Scolarite 4',
+            'montant_total' => 10000,
+            'fractionnable' => true,
+            'nb_tranches_max' => 2,
+        ]);
+
+        $frais = FraisApprenant::create([
+            'apprenant_id' => $apprenant->id,
+            'categorie_frais_id' => $categorie->id,
+            'montant_total' => 10000,
+            'montant_paye' => 0,
+            'statut' => 'impaye',
+        ]);
+
         $paiement = Paiement::create([
             'user_id' => $user->id,
             'apprenant_id' => $apprenant->id,
-            'frais_apprenant_id' => null,
+            'frais_apprenant_id' => $frais->id,
             'montant' => 5000,
             'frais_service' => 200,
             'montant_total_paye' => 5200,
