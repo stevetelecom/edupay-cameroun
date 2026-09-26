@@ -7,6 +7,7 @@ use App\Http\Requests\Api\ReclamationRequest;
 use App\Http\Resources\ReclamationResource;
 use App\Models\Paiement;
 use App\Models\Reclamation;
+use App\Support\TexteLibre;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -50,9 +51,12 @@ class ReclamationController extends Controller
         $reclamation = Reclamation::create([
             'user_id'     => $request->user()->id,
             'paiement_id' => $valid['paiement_id'] ?? null,
-            'sujet'       => $valid['sujet'],
-            'description' => $valid['description'],
-            'statut'      => 'ouverte',
+            // M/N : l'API ecrivait 'ouverte', valeur absente de l'enum
+            // (ouvert, en_cours, resolu, rejete) -> erreur SQL en MySQL,
+            // la reclamation du payeur n'etait jamais enregistree.
+            'statut'      => 'ouvert',
+            'sujet'       => TexteLibre::normaliser($valid['sujet']),
+            'description' => TexteLibre::normaliser($valid['description'], multiligne: true),
         ]);
 
         return response()->json([

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Etablissement;
 use App\Http\Controllers\Controller;
 use App\Models\Paiement;
 use App\Models\Remboursement;
+use App\Support\TexteLibre;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -29,19 +30,42 @@ class RemboursementController extends Controller
         return response()->json([
             'data' => $remboursements->map(fn ($r) => [
                 'id'                => $r->id,
+                'reference'         => $r->reference,
                 'paiement'          => [
                     'id'        => $r->paiement->id,
                     'reference' => $r->paiement->reference,
                     'montant'   => (float) $r->paiement->montant,
+                    // O : `categorieFrais` est la cle canonique lue par le
+                    // mobile ; `frais` (texte) reste pour les anciens clients.
+                    'categorieFrais' => $r->paiement->fraisApprenant?->categorieFrais ? [
+                        'id'            => $r->paiement->fraisApprenant->categorieFrais->id,
+                        'nom'           => $r->paiement->fraisApprenant->categorieFrais->nom,
+                        'annee_scolaire' => $r->paiement->fraisApprenant->categorieFrais->annee_scolaire,
+                    ] : null,
                     'frais'     => $r->paiement->fraisApprenant?->categorieFrais?->nom,
-                    'apprenant' => $r->paiement->apprenant
-                        ? ($r->paiement->apprenant->prenom . ' ' . $r->paiement->apprenant->nom)
+                    // L : l'apprenant etait serialise en texte ("Nom Prenom"),
+                    // le mobile ne pouvait ni l'afficher proprement ni ouvrir
+                    // sa fiche. On expose l'objet, plus `apprenant_nom` pour
+                    // les clients qui affichaient la chaine.
+                    'apprenant' => $r->paiement->apprenant ? [
+                        'id'         => $r->paiement->apprenant->id,
+                        'matricule'  => $r->paiement->apprenant->matricule,
+                        'nom'        => $r->paiement->apprenant->nom,
+                        'prenom'     => $r->paiement->apprenant->prenom,
+                        'nom_complet' => trim($r->paiement->apprenant->prenom . ' ' . $r->paiement->apprenant->nom),
+                        'classe'     => $r->paiement->apprenant->classe,
+                    ] : null,
+                    'apprenant_nom' => $r->paiement->apprenant
+                        ? trim($r->paiement->apprenant->prenom . ' ' . $r->paiement->apprenant->nom)
                         : null,
                 ],
                 'montant'           => (float) $r->montant,
                 'motif'             => $r->motif,
                 'statut'            => $r->statut,
                 'motif_refus'       => $r->motif_refus,
+                // N : alias `reponse_admin`, le nom utilise par l'ecran de
+                // validation cote mobile pour la raison d'un rejet.
+                'reponse_admin'     => $r->motif_refus,
                 'initie_par'        => $r->initiateur ? ($r->initiateur->prenom . ' ' . $r->initiateur->nom) : null,
                 'traite_par'        => $r->traiteur ? ($r->traiteur->prenom . ' ' . $r->traiteur->nom) : null,
                 'traite_le'         => $r->traite_le?->toISOString(),
@@ -126,9 +150,10 @@ class RemboursementController extends Controller
     /**
      * Approuve une demande de remboursement (directeur / comptable).
      */
-    public function approuver(Request $request, Remboursement $remboursement): JsonResponse
+    public function approuver(Request $request, $remboursement): JsonResponse
     {
         $this->autoriser();
+        $remboursement = $this->resoudre($remboursement);
         $this->autoriserTraitement();
         $this->autoriserAcces($remboursement);
 
@@ -161,9 +186,10 @@ class RemboursementController extends Controller
     /**
      * Refuse une demande de remboursement.
      */
-    public function refuser(Request $request, Remboursement $remboursement): JsonResponse
+    public function refuser(Request $request, $remboursement): JsonResponse
     {
         $this->autoriser();
+        $remboursement = $this->resoudre($remboursement);
         $this->autoriserTraitement();
         $this->autoriserAcces($remboursement);
 
@@ -173,15 +199,31 @@ class RemboursementController extends Controller
             ], 422);
         }
 
+        // N : un refus sans motif n'est pas opposable au payeur. Le champ
+        // etait `nullable`, la raison etait donc perdue. `reponse_admin` est
+        // accepte comme alias (nom du formulaire mobile).
         $validated = $request->validate([
-            'motif_refus' => ['nullable', 'string', 'max:500'],
+            'motif_refus'   => ['required_without:reponse_admin', 'nullable', 'string', 'max:500'],
+            'reponse_admin' => ['required_without:motif_refus', 'nullable', 'string', 'max:500'],
+        ], [
+            'motif_refus.required_without'   => 'Veuillez indiquer le motif du refus.',
+            'reponse_admin.required_without' => 'Veuillez indiquer le motif du refus.',
         ]);
+
+        $motif = TexteLibre::normaliser($validated['motif_refus'] ?? $validated['reponse_admin'] ?? null);
+
+        if ($motif === null) {
+            return response()->json([
+                'message' => 'Veuillez indiquer le motif du refus.',
+                'errors'  => ['motif_refus' => ['Veuillez indiquer le motif du refus.']],
+            ], 422);
+        }
 
         $remboursement->update([
             'statut'      => 'refuse',
             'traite_par'  => auth()->id(),
             'traite_le'   => now(),
-            'motif_refus' => $validated['motif_refus'] ?? null,
+            'motif_refus' => $motif,
         ]);
 
         return response()->json([
@@ -191,6 +233,22 @@ class RemboursementController extends Controller
                 'statut' => 'refuse',
             ],
         ]);
+    }
+
+    /**
+     * Resout la demande visee par la route.
+     *
+     * La route est declaree avec `{remboursement}` mais le contrat
+     * (docs/DOCUMENTATION_API.md) expose
+     * `POST /remboursements/{paiement_id}/approuver` : le mobile envoie
+     * l'identifiant du PAIEMENT. On accepte les deux, en&idotent sur le
+     * remboursement d'abord, puis sur son paiement.
+     */
+    private function resoudre(int|string $identifiant): Remboursement
+    {
+        return Remboursement::where('id', $identifiant)
+            ->orWhereHas('paiement', fn ($q) => $q->where('paiements.id', $identifiant))
+            ->firstOrFail();
     }
 
     private function autoriser(): int

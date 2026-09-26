@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Reclamation;
 use App\Models\AuditLog;
+use App\Support\TexteLibre;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -63,7 +64,10 @@ class ReclamationAdminController extends Controller
         $avant = $reclamation->statut;
 
         $reclamation->update([
-            'reponse_admin' => $request->reponse_admin,
+            // M/N : texte libre normalise (espaces, controles, lignes vides)
+            // avant stockage : la reponse est relue par le payeur dans son
+            // application et dans les e-mails.
+            'reponse_admin' => TexteLibre::normaliser($request->reponse_admin, multiligne: true),
             'statut'        => $request->statut,
             'resolu_le'     => in_array($request->statut, ['resolu', 'rejete']) ? now() : null,
         ]);

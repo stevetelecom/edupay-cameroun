@@ -14,6 +14,13 @@ class FraisResource extends JsonResource
         return [
             'id'              => $this->id,
             'apprenant_id'    => $this->apprenant_id,
+            // O : cle canonique exposee partout ; `categorie` reste pour
+            // les clients existants.
+            'categorieFrais'  => $this->categorieFrais ? [
+                'id'          => $this->categorieFrais->id,
+                'nom'         => $this->categorieFrais->nom,
+                'annee_scolaire' => $this->categorieFrais->annee_scolaire,
+            ] : null,
             'categorie'       => $this->categorieFrais ? [
                 'id'          => $this->categorieFrais->id,
                 'nom'         => $this->categorieFrais->nom,

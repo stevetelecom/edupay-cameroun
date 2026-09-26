@@ -280,6 +280,13 @@ class ApprenantController extends Controller
 
         return [
             'id'             => $frais->id,
+            // O : `categorieFrais` est la cle canonique attendue par le
+            // mobile (le nom seul ne permet ni le tri ni le filtre).
+            'categorieFrais' => $frais->categorieFrais ? [
+                'id'            => $frais->categorieFrais->id,
+                'nom'           => $frais->categorieFrais->nom,
+                'annee_scolaire' => $frais->categorieFrais->annee_scolaire,
+            ] : null,
             'categorie'      => $frais->categorieFrais?->nom,
             'montant_total'  => (float) $frais->montant_total,
             'montant_paye'   => (float) $frais->montant_paye,

@@ -78,6 +78,14 @@ class FraisController extends Controller
                         'ville' => $fraisApprenant->apprenant?->etablissement?->ville,
                     ],
                 ],
+                // O : cle canonique exposee partout ; `categorie` reste pour
+                // les clients existants.
+                'categorieFrais' => $fraisApprenant->categorieFrais ? [
+                    'id'            => $fraisApprenant->categorieFrais->id,
+                    'nom'           => $fraisApprenant->categorieFrais->nom,
+                    'montant_total' => (float) $fraisApprenant->categorieFrais->montant_total,
+                    'annee_scolaire' => $fraisApprenant->categorieFrais->annee_scolaire,
+                ] : null,
                 'categorie'      => $fraisApprenant->categorieFrais ? [
                     'id'            => $fraisApprenant->categorieFrais->id,
                     'nom'           => $fraisApprenant->categorieFrais->nom,
