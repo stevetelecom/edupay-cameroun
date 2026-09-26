@@ -42,8 +42,8 @@ class CompteSuspendu
 
         return response()->json([
             'message' => $user->suspendu_raison
-                ? 'Ce compte est suspendu : ' . $user->suspendu_raison
-                : 'Ce compte est suspendu. Contactez le support EduPay.',
+                ? __('api.compte_suspendu_raison', ['raison' => $user->suspendu_raison])
+                : __('api.compte_suspendu'),
             'code'    => 'compte_suspendu',
         ], 403);
     }

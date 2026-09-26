@@ -180,7 +180,7 @@ class ImpayeController extends Controller
         // dernieres heures. `force=true` permet de repasser outre.
         if ($nbEnvoyes === 0 && $nbIgnores > 0) {
             return response()->json([
-                'message' => 'Une relance a déjà été envoyée à ces parents dans les ' . RelanceImpaye::DELAI_ANTI_SPAM_H . ' dernières heures. Utilisez force=true pour la renvoyer quand même.',
+                'message' => __('api.relance_anti_spam', ['heures' => RelanceImpaye::DELAI_ANTI_SPAM_H]) . ' ' . __('api.relance_force'),
                 'envoi'   => [
                     'envoyes' => 0,
                     'echecs'  => $nbEchecs,
@@ -222,7 +222,7 @@ class ImpayeController extends Controller
 
         if ($nbEnvoyes === 0 && $nbIgnores > 0) {
             return response()->json([
-                'message' => 'Ce parent a déjà reçu une relance dans les ' . RelanceImpaye::DELAI_ANTI_SPAM_H . ' dernières heures. Utilisez force=true pour la renvoyer quand même.',
+                'message' => __('api.relance_anti_spam', ['heures' => RelanceImpaye::DELAI_ANTI_SPAM_H]) . ' ' . __('api.relance_force'),
                 'envoi'   => [
                     'envoyes' => 0,
                     'echecs'  => $nbEchecs,
@@ -336,7 +336,7 @@ class ImpayeController extends Controller
         $user = auth()->user();
 
         if (! $user->hasAnyRole(self::ROLES_ETABLISSEMENT) || ! $user->etablissement_id) {
-            abort(403, 'Ce compte n\'a pas accès au back-office établissement.');
+            abort(403, __('api.acces_etablissement'));
         }
 
         return $user->etablissement_id;

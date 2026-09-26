@@ -26,7 +26,7 @@ class DashboardController extends Controller
 
         if (! $user->hasAnyRole(self::ROLES_ETABLISSEMENT) || ! $user->etablissement_id) {
             return response()->json([
-                'message' => 'Ce compte n\'a pas accès au back-office établissement.',
+                'message' => __('api.acces_etablissement'),
             ], 403);
         }
 
@@ -205,7 +205,7 @@ class DashboardController extends Controller
         $user = auth()->user();
 
         if (! $user->hasAnyRole(self::ROLES_ETABLISSEMENT) || ! $user->etablissement_id) {
-            abort(403, 'Ce compte n\'a pas accès au back-office établissement.');
+            abort(403, __('api.acces_etablissement'));
         }
     }
 }

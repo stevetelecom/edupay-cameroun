@@ -474,7 +474,7 @@ class ApprenantController extends Controller
         $user = auth()->user();
 
         if (! $user->hasAnyRole(self::ROLES_ETABLISSEMENT) || ! $user->etablissement_id) {
-            abort(403, 'Ce compte n\'a pas accès au back-office établissement.');
+            abort(403, __('api.acces_etablissement'));
         }
 
         return $user->etablissement_id;

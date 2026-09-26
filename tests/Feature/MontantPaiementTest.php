@@ -349,7 +349,10 @@ class MontantPaiementTest extends TestCase
         $this->mockerAangaraaPay();
         [$user, $apprenant] = $this->dossierAvecTranches();
 
-        $reponse = $this->actingAs($user, 'sanctum')->postJson(route('api.v1.paiements.initier'), [
+        // Audit P : l'API respecte la langue demandee. Le message etant en
+        // francais, la langue est demandee explicitement, sans quoi un client
+        // envoyant Accept-Language: en recevrait la traduction anglaise.
+        $reponse = $this->actingAs($user, 'sanctum')->postJson(route('api.v1.paiements.initier') . '?lang=fr', [
             'apprenant_id'  => $apprenant->id,
             'montant'       => 10000,
             'mode_paiement' => 'mtn_momo',
