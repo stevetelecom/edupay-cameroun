@@ -67,6 +67,26 @@ class DashboardController extends Controller
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
             ->count();
 
+        // Encaissements du jour (contrat mobile data.encaissements_jour)
+        $totalEncaisseJour = Paiement::where('statut', 'valide')
+            ->whereDate('date_paiement', now()->toDateString())
+            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('fraisApprenant', fn ($q) => $q->where('annee_scolaire', $anneeScolaire))
+            ->sum('montant');
+
+        // Repartition des apprenants par statut de paiement (contrat mobile
+        // payants / partiels / impayes). Les compteurs portent sur des
+        // apprenants, comme `total_apprenants` : ils doivent s'additionner.
+        $repartitionStatuts = Apprenant::where('etablissement_id', $etablissementId)
+            ->where('actif', true)
+            ->selectRaw('statut_paiement, COUNT(*) as total')
+            ->groupBy('statut_paiement')
+            ->pluck('total', 'statut_paiement');
+
+        $nbPayants  = (int) ($repartitionStatuts['regle'] ?? 0);
+        $nbPartiels = (int) ($repartitionStatuts['partiel'] ?? 0);
+        $nbImpayes  = (int) ($repartitionStatuts['impaye'] ?? 0);
+
         // Taux de recouvrement global
         $totalAttendu = FraisApprenant::where('annee_scolaire', $anneeScolaire)
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
@@ -94,7 +114,22 @@ class DashboardController extends Controller
             ->first();
 
         return response()->json([
+            // Audit G : le contrat mobile (docs/DOCUMENTATION_API.md) lit les
+            // compteurs a plat dans `data`. Ils etaient uniquement imbriques
+            // sous `data.kpis`, donc l'ecran affichait 0 et un titre vide.
+            // Les deux presentations sont exposees : l'plate pour le mobile,
+            // `kpis` pour le back-office web et les anciens clients.
+            'success' => true,
             'data' => [
+                'encaissements_jour'     => (int) $totalEncaisseJour,
+                'encaissements_mois'     => (int) $totalEncaisseMois,
+                'taux_recouvrement'      => $tauxRecouvrementDecimal,
+                'total_apprenants'       => (int) $nbApprenants,
+                'payants'                => $nbPayants,
+                'partiels'               => $nbPartiels,
+                'impayes'                => $nbImpayes,
+                'transactions_recentes'  => PaiementResource::collection($derniersPaiements),
+
                 'etablissement'         => new EtablissementResource($etablissement),
                 'annee_scolaire'        => $anneeScolaire,
                 'nb_frais_annee'        => (int) $nbFraisAnnee,

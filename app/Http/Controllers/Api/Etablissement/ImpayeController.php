@@ -7,6 +7,7 @@ use App\Http\Resources\FraisResource;
 use App\Mail\RelanceImpayeMail;
 use App\Models\Apprenant;
 use App\Models\FraisApprenant;
+use App\Models\Paiement;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -25,52 +26,106 @@ class ImpayeController extends Controller
         $etablissementId = $this->autoriser();
         $anneeScolaire   = AnneeScolaire::active();
 
-        $fraisImpayes = FraisApprenant::with(['apprenant', 'categorieFrais'])
-            ->where('annee_scolaire', $anneeScolaire)
-            ->where('statut', '!=', 'regle')
-            ->whereHas('apprenant', function ($q) use ($etablissementId, $request) {
-                $q->where('etablissement_id', $etablissementId);
-                if ($request->filled('classe')) {
-                    $q->where('classe', $request->classe);
+        // Audit H : le contrat mobile (docs/DOCUMENTATION_API.md) attend
+        // `data` = tableau plat, UNE LIGNE PAR APPRENANT (montant_du =
+        // somme de ses restes dus). La reponse renvoyait
+        // `data.frais_impayes` (une collection de ressource, elle-meme
+        // imbriquee) + `data.synthese` : le mobile lisait un objet la ou il
+        // attendait un tableau, donc liste vide.
+        $apprenants = Apprenant::with(['parents'])
+            ->where('etablissement_id', $etablissementId)
+            ->whereHas('frais', function ($q) use ($anneeScolaire, $request) {
+                $q->where('annee_scolaire', $anneeScolaire)
+                    ->where('statut', '!=', 'regle');
+
+                if ($request->filled('categorie_id')) {
+                    $q->where('categorie_frais_id', $request->categorie_id);
                 }
             })
-            ->orderByDesc('montant_total')
+            ->when($request->filled('classe'), fn ($q) => $q->where('classe', $request->classe))
+            ->orderBy('nom')
             ->paginate($request->integer('per_page', 20));
 
-        $totalImpaye = FraisApprenant::where('annee_scolaire', $anneeScolaire)
+        // Restes dus et dernier paiement, calcules en 2 requetes pour la page
+        // courante (pas de N+1).
+        $apprenantIds = $apprenants->pluck('id')->all();
+
+        $restesDus = FraisApprenant::whereIn('apprenant_id', $apprenantIds)
+            ->where('annee_scolaire', $anneeScolaire)
             ->where('statut', '!=', 'regle')
-            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->when($request->filled('categorie_id'), fn ($q) => $q->where('categorie_frais_id', $request->categorie_id))
+            ->get(['apprenant_id', 'montant_total', 'montant_paye'])
+            ->groupBy('apprenant_id')
+            ->map(fn ($lignes) => (int) $lignes->sum(fn ($f) => $f->montant_total - $f->montant_paye));
+
+        $derniersPaiements = Paiement::whereIn('apprenant_id', $apprenantIds)
+            ->where('statut', 'valide')
+            ->orderByDesc('date_paiement')
+            ->get(['apprenant_id', 'montant', 'date_paiement'])
+            ->groupBy('apprenant_id')
+            ->map(fn ($paiements) => $paiements->first());
+
+        // Synthese sur le meme perimetre que la liste (annee active +
+        // etablissement + categorie eventuellement demandee), sinon les
+        // totaux affiches ne correspondent pas aux lignes listees.
+        $baseSynthese = fn (bool $uniquementImpayes = false) => FraisApprenant::query()
+            ->where('annee_scolaire', $anneeScolaire)
+            ->when($uniquementImpayes, fn ($q) => $q->where('statut', '!=', 'regle'))
+            ->when($request->filled('categorie_id'), fn ($q) => $q->where('categorie_frais_id', $request->categorie_id))
+            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId));
+
+        $totalImpaye = $baseSynthese(true)
             ->get()
             ->sum(fn ($f) => $f->montant_total - $f->montant_paye);
 
-        $totalAttendu = FraisApprenant::where('annee_scolaire', $anneeScolaire)
-            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
-            ->sum('montant_total');
+        $totalAttendu = $baseSynthese()->sum('montant_total');
 
-        $totalPaye = FraisApprenant::where('annee_scolaire', $anneeScolaire)
-            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
-            ->sum('montant_paye');
+        $totalPaye = $baseSynthese()->sum('montant_paye');
 
         $tauxRecouvrement = $totalAttendu > 0 ? round(($totalPaye / $totalAttendu) * 100) : 0;
 
+        $lignes = $apprenants->getCollection()->map(fn (Apprenant $apprenant) => [
+            'apprenant_id'     => $apprenant->id,
+            'nom'              => trim($apprenant->prenom . ' ' . $apprenant->nom),
+            'classe'           => $apprenant->classe,
+            'montant_du'       => (int) ($restesDus[$apprenant->id] ?? 0),
+            'dernier_paiement' => isset($derniersPaiements[$apprenant->id]) ? [
+                'montant' => (int) $derniersPaiements[$apprenant->id]->montant,
+                'date'    => $derniersPaiements[$apprenant->id]->date_paiement?->toIso8601String(),
+            ] : null,
+            // Aucune table ne trace les relances envoyees (elles partent par
+            // SMS via SmsService) : on expose null plutot qu'une fausse date.
+            'derniere_relance' => null,
+            'telephone_parent' => $apprenant->parents->first()?->telephone,
+        ])->values();
+
         return response()->json([
-            'data' => [
-                'synthese' => [
-                    'total_impaye'      => (int) $totalImpaye,
-                    'total_attendu'     => (int) $totalAttendu,
-                    'total_paye'        => (int) $totalPaye,
-                    'taux_recouvrement' => (int) $tauxRecouvrement,
-                ],
-                'frais_impayes' => FraisResource::collection($fraisImpayes),
-                'pagination'    => [
-                    'current_page' => $fraisImpayes->currentPage(),
-                    'last_page'    => $fraisImpayes->lastPage(),
-                    'total'        => $fraisImpayes->total(),
-                    'per_page'     => $fraisImpayes->perPage(),
-                ],
-                'classes' => Apprenant::where('etablissement_id', $etablissementId)
-                    ->distinct()->orderBy('classe')->pluck('classe'),
+            'success' => true,
+            'data'    => $lignes,
+            'synthese' => [
+                'total_impaye'      => (int) $totalImpaye,
+                'total_attendu'     => (int) $totalAttendu,
+                'total_paye'        => (int) $totalPaye,
+                'taux_recouvrement' => (int) $tauxRecouvrement,
             ],
+            'pagination' => [
+                'current_page' => $apprenants->currentPage(),
+                'last_page'    => $apprenants->lastPage(),
+                'total'        => $apprenants->total(),
+                'per_page'     => $apprenants->perPage(),
+            ],
+            // Rappel : l'ancienne forme etait data.synthese +
+            // data.frais_impayes + data.pagination. `frais_impayes` reste
+            // disponible a la racine pour les clients qui l'utilisaient.
+            'frais_impayes' => FraisResource::collection(
+                FraisApprenant::whereIn('apprenant_id', $apprenantIds)
+                    ->where('annee_scolaire', $anneeScolaire)
+                    ->where('statut', '!=', 'regle')
+                    ->with('categorieFrais')
+                    ->get()
+            ),
+            'classes'       => Apprenant::where('etablissement_id', $etablissementId)
+                ->distinct()->orderBy('classe')->pluck('classe'),
         ]);
     }
 
