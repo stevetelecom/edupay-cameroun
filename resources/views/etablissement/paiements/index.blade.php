@@ -24,6 +24,7 @@
                 <option value="valide" @selected(request('statut') === 'valide')>{{ __('etablissement.st_valide') }}</option>
                 <option value="en_attente" @selected(request('statut') === 'en_attente')>{{ __('etablissement.st_en_attente') }}</option>
                 <option value="echoue" @selected(request('statut') === 'echoue')>{{ __('etablissement.st_echoue') }}</option>
+                <option value="annule" @selected(request('statut') === 'annule')>{{ __('etablissement.st_annule') }}</option>
                 <option value="rembourse" @selected(request('statut') === 'rembourse')>{{ __('etablissement.st_rembourse') }}</option>
             </select>
         </div>
@@ -88,10 +89,10 @@
                         <td>{{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y H:i') : '—' }}</td>
                         <td>
                             <span class="pill {{ match($paiement->statut) {
-                                'valide' => 'pg', 'en_attente' => 'pa', 'echoue' => 'pr', 'rembourse' => 'pb', default => 'pa',
+                                'valide' => 'pg', 'en_attente' => 'pa', 'echoue' => 'pr', 'rembourse' => 'pb', 'annule' => 'pb', default => 'pa',
                             } }}">
                                 {{ match($paiement->statut) {
-                                    'valide' => __('etablissement.st_valide'), 'en_attente' => __('etablissement.st_en_attente'), 'echoue' => __('etablissement.st_echoue'), 'rembourse' => __('etablissement.st_rembourse'), default => $paiement->statut,
+                                    'valide' => __('etablissement.st_valide'), 'en_attente' => __('etablissement.st_en_attente'), 'echoue' => __('etablissement.st_echoue'), 'rembourse' => __('etablissement.st_rembourse'), 'annule' => __('etablissement.st_annule'), default => $paiement->statut,
                                 } }}
                             </span>
                         </td>

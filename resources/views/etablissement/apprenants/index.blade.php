@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (categorie) {
                 var html = '<div style="margin-bottom:8px;">'
                     + '<strong>' + categorie.nom + '</strong><br>'
-                    + '<span style="color:#888;">' + (categorie.annee_scolaire || '2025-2026') + '</span>'
+                    + '<span style="color:#888;">' + (categorie.annee_scolaire || @json(\App\Support\AnneeScolaire::active())) + '</span>'
                     + '</div>';
 
                 if (categorie.echeanciers && categorie.echeanciers.length > 0) {

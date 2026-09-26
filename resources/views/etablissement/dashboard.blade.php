@@ -107,9 +107,19 @@
     </div>
     @endif
 
+    @if(($nbApprenants ?? 0) > 0 && ($nbFraisAnnee ?? 0) === 0)
+    <div style="background:var(--ep-gold-lt);border:1.5px solid #F0C97A;border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span class="material-symbols-outlined" style="font-size:20px;color:#B8791A;">event_busy</span>
+        <div style="font-size:12px;color:#8B5E10;flex:1;">
+            {{ __('etablissement.aucun_frais_annee', ['annee' => $anneeScolaire ?? \App\Support\AnneeScolaire::active($etablissement ?? null)]) }}
+        </div>
+        <a href="{{ route('etablissement.frais.index') }}" class="btn-o" style="width:auto;padding:7px 14px;">{{ __('etablissement.gerer_frais') }}</a>
+    </div>
+    @endif
+
     <div style="font-size:17px;font-weight:700;margin-bottom:4px;">{{ __('etablissement.tdb_financier') }}</div>
     <div style="font-size:12px;color:#888;margin-bottom:16px;">
-        {{ __('etablissement.annee_scolaire', ['annee' => $anneeScolaire ?? '2025-2026']) }} · {{ \Carbon\Carbon::now()->locale(app()->getLocale())->isoFormat('MMMM YYYY') }}
+        {{ __('etablissement.annee_scolaire_valeur', ['annee' => $anneeScolaire ?? \App\Support\AnneeScolaire::active($etablissement ?? null)]) }} · {{ \Carbon\Carbon::now()->locale(app()->getLocale())->isoFormat('MMMM YYYY') }}
     </div>
 
     {{-- ── KPIs ── --}}
@@ -141,7 +151,7 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
             <div>
                 <div style="font-size:14px;font-weight:600;color:#333;margin-bottom:2px;">
-                    {{ __('etablissement.taux_recouvrement_titre', ['annee' => $anneeScolaire ?? '2025-2026']) }}
+                    {{ __('etablissement.taux_recouvrement_titre', ['annee' => $anneeScolaire ?? \App\Support\AnneeScolaire::active($etablissement ?? null)]) }}
                 </div>
                 <div style="font-size:12px;color:#888;">
                     {{ __('etablissement.taux_recouvrement_legend', ['payes' => number_format($totalPaye ?? 0, 0, ',', ' '), 'attendu' => number_format($totalAttendu ?? 0, 0, ',', ' ')]) }}
@@ -197,6 +207,7 @@
                             'en_attente' => __('etablissement.st_en_attente'),
                             'echoue' => __('etablissement.st_echoue'),
                             'rembourse' => __('etablissement.st_rembourse'),
+                            'annule' => __('etablissement.st_annule'),
                             default => $paiement->statut,
                         } }}
                     </span>

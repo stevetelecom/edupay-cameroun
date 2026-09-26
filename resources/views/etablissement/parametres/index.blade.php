@@ -64,9 +64,23 @@
 
                 <div class="inp-row">
                     <div>
+                        <div class="lbl">{{ __('etablissement.annee_scolaire_active') }}</div>
+                        <select name="annee_scolaire_active" class="select">
+                            <option value="">{{ __('etablissement.annee_scolaire_auto') }}</option>
+                            @foreach(\App\Support\AnneeScolaire::liste($etab->annee_scolaire_active) as $annee)
+                                <option value="{{ $annee }}" @selected(old('annee_scolaire_active', $etab->annee_scolaire_active ?? '') === $annee)>{{ $annee }}</option>
+                            @endforeach
+                        </select>
+                        <div style="font-size:11px;color:#888;margin-top:6px;">{{ __('etablissement.annee_scolaire_active_hint', ['annee' => \App\Support\AnneeScolaire::active($etab)]) }}</div>
+                        @error('annee_scolaire_active')<div style="color:var(--ep-red);font-size:11px;margin-top:6px;">{{ $message }}</div>@enderror
+                    </div>
+                    <div>
                         <div class="lbl">{{ __('etablissement.numero_agrement') }}</div>
                         <input type="text" name="numero_agrement" value="{{ old('numero_agrement', $etab->numero_agrement ?? '') }}" class="inp" placeholder="{{ __('etablissement.numero_agrement_ph') }}">
                     </div>
+                </div>
+
+                <div class="inp-row">
                     <div>
                         <div class="lbl">{{ __('etablissement.nb_eleves') }}</div>
                         <select name="nb_eleves" class="inp" style="padding:10px 12px;">

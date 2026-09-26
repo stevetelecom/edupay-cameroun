@@ -55,6 +55,7 @@
                 'en_attente' => __('payeur.statut_en_attente'),
                 'echoue'     => __('payeur.statut_echoue'),
                 'rembourse'  => __('payeur.statut_rembourse'),
+                'annule'     => __('payeur.statut_annule'),
                 default      => $p->statut,
             };
             $moyenLabel = match($p->mode_paiement) {

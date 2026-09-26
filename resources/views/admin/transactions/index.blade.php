@@ -100,6 +100,7 @@
           <option value="valide"     {{ request('statut')==='valide'     ? 'selected' : '' }}>{{ __('admin.valide') }}</option>
           <option value="en_attente" {{ request('statut')==='en_attente' ? 'selected' : '' }}>{{ __('admin.en_attente') }}</option>
           <option value="echoue"     {{ request('statut')==='echoue'     ? 'selected' : '' }}>{{ __('admin.echoue') }}</option>
+          <option value="annule"     {{ request('statut')==='annule'     ? 'selected' : '' }}>{{ __('admin.annule') }}</option>
         </select>
         <button type="submit" style="padding:6px 14px;font-size:12px;background:#0D9E75;color:#fff;border:none;border-radius:8px;cursor:pointer;">
           Filtrer
@@ -117,12 +118,16 @@
         'valide'     => 'color:#16a34a;background:#dcfce7;',
         'en_attente' => 'color:#ca8a04;background:#fef9c3;',
         'echoue'     => 'color:#dc2626;background:#fee2e2;',
+        'rembourse'  => 'color:#1d4ed8;background:#dbeafe;',
+        'annule'     => 'color:#6b7280;background:#f3f4f6;',
         default      => 'color:#555;background:#f3f4f6;',
       };
       $label = match($p->statut) {
         'valide'     => __('admin.valide'),
         'en_attente' => __('admin.en_attente'),
         'echoue'     => __('admin.echoue'),
+        'rembourse'  => __('admin.rembourse'),
+        'annule'     => __('admin.annule'),
         default      => ucfirst($p->statut),
       };
       $opColor = str_contains($p->operateur ?? '', 'MTN') ? '#FFCC00' : '#FF6600';

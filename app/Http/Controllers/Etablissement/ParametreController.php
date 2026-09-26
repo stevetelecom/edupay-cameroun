@@ -32,9 +32,11 @@ class ParametreController extends Controller
             $request->merge([
                 'telephone'               => $normaliserTelephoneCm((string) $request->input('telephone', '')),
                 'numero_momo_reversement' => $normaliserTelephoneCm((string) $request->input('numero_momo_reversement', '')),
+                'annee_scolaire_active'   => $request->input('annee_scolaire_active') ?: null,
             ]);
 
             $validated = $request->validate([
+                'annee_scolaire_active'   => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/'],
                 'nom'                    => ['required', 'string', 'max:150'],
                 'type'                   => ['required', Rule::in(['maternelle','primaire','college','lycee_general','lycee_technique','universite','institut_prive','groupe_scolaire','secondaire','universitaire','formation'])],
                 'statut_juridique'       => ['nullable', 'string', 'max:100'],

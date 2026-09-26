@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Etablissement;
 use App\Http\Controllers\Controller;
 use App\Mail\InvitationUtilisateurMail;
 use App\Models\User;
+use App\Traits\TelephoneCamerounais;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,8 @@ use Illuminate\View\View;
 
 class UtilisateurController extends Controller
 {
+    use TelephoneCamerounais;
+
     private const ROLES_INTERNES = ['directeur', 'comptable', 'caissier'];
 
     private const ROLE_LABELS = [
@@ -55,11 +58,21 @@ class UtilisateurController extends Controller
     {
         $this->autoriserGestion();
 
+        // Le téléphone est OPTIONNEL : le formulaire web ne le proposait pas, mais
+        // la validation l'exigeait => aucune invitation n'aboutissait (audit B).
+        // On normalise AVANT de valider : sans cela, `unique` comparerait la
+        // saisie brute (« +237 6 99 … ») à la valeur stockée (9 chiffres) et
+        // laisserait passer un doublon au format différent. Une saisie vide
+        // devient null (et non « »), sinon le 2e compte sans téléphone
+        // echouerait sur unique.
+        $telephone = $this->normaliserTelephoneCm((string) $request->input('telephone'));
+        $request->merge(['telephone' => $telephone === '' ? null : $telephone]);
+
         $validated = $request->validate([
             'prenom'    => 'required|string|max:100',
             'nom'       => 'required|string|max:100',
             'email'     => 'required|email|max:150|unique:users,email',
-            'telephone' => 'required|string|max:20|unique:users,telephone',
+            'telephone' => 'nullable|string|max:20|unique:users,telephone',
             'role'      => ['required', Rule::in(self::ROLES_INTERNES)],
         ], [
             'email.unique'     => 'Cette adresse email est déjà utilisée.',
@@ -72,7 +85,7 @@ class UtilisateurController extends Controller
             'prenom'           => $validated['prenom'],
             'nom'              => $validated['nom'],
             'email'            => $validated['email'],
-            'telephone'        => $validated['telephone'],
+            'telephone'        => $validated['telephone'] ?? null,
             'password'         => Hash::make($motDePasseTemporaire),
             'etablissement_id' => Auth::user()->etablissement_id,
         ]);

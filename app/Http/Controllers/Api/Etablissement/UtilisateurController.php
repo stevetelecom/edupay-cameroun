@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Etablissement\UtilisateurStoreRequest;
 use App\Mail\InvitationUtilisateurMail;
 use App\Models\User;
+use App\Traits\TelephoneCamerounais;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,6 +17,8 @@ use Illuminate\Validation\Rule;
 
 class UtilisateurController extends Controller
 {
+    use TelephoneCamerounais;
+
     private const ROLES_ETABLISSEMENT = ['directeur', 'comptable', 'caissier'];
 
     private const ROLE_LABELS = [
@@ -63,11 +66,15 @@ class UtilisateurController extends Controller
         $validated    = $request->validated();
         $motDePasse   = Str::password(10);
 
+        // Déjà normalisé par UtilisateurStoreRequest::prepareForValidation()
+        // (+237 / espaces / tirets -> 9 chiffres, vide = aucun telephone).
+        $telephone = $validated['telephone'] ?? null;
+
         $utilisateur = User::create([
             'prenom'           => $validated['prenom'],
             'nom'              => $validated['nom'],
             'email'            => $validated['email'],
-            'telephone'        => $validated['telephone'],
+            'telephone'        => $telephone,
             'password'         => Hash::make($motDePasse),
             'etablissement_id' => auth()->user()->etablissement_id,
         ]);
@@ -156,6 +163,10 @@ class UtilisateurController extends Controller
         ]);
     }
 
+    /**
+     * Normalise un numéro camerounais : +237 / espaces / tirets -> 9 chiffres.
+     * Retourne null si la saisie est vide.
+     */
     private function autoriser(): int
     {
         $user = auth()->user();

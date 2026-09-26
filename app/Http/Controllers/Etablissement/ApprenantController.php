@@ -10,6 +10,7 @@ use App\Models\FraisApprenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use App\Support\AnneeScolaire;
 
 class ApprenantController extends Controller
 {
@@ -321,7 +322,7 @@ class ApprenantController extends Controller
                     'montant_total'       => $categorieFrais->montant_total,
                     'montant_paye'        => 0,
                     'statut'              => 'impaye',
-                    'annee_scolaire'      => $categorieFrais->annee_scolaire ?? '2025-2026',
+                    'annee_scolaire'      => $categorieFrais->annee_scolaire ?? AnneeScolaire::active(),
                 ]);
             }
         } catch (\Illuminate\Database\QueryException $e) {

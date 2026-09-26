@@ -242,4 +242,188 @@ class PaymentFlowTest extends TestCase
         $this->assertEquals('prelevee', $commission->statut);
         $this->assertEquals('REVHOOK123', $commission->reference_reversement);
     }
+
+    /**
+     * Audit C : l'annulation doit etre REELLE. Un paiement annule ne peut plus
+     * etre encaisse, meme si l'operateur confirme tardivement (webhook ou polling).
+     */
+    public function test_annulation_est_definitive_et_bloque_un_webhook_tardif()
+    {
+        $user = User::factory()->create();
+        Role::firstOrCreate(['name' => 'parent']);
+        $user->assignRole('parent');
+
+        $etab = Etablissement::create([
+            'code_etablissement' => 'ETAB789',
+            'nom' => 'Ecole Test 3',
+            'type' => 'lycee_general',
+            'statut_juridique' => 'prive_laic',
+            'region' => 'centre',
+            'ville' => 'Yaounde',
+            'telephone' => '650000002',
+            'email' => 'admin3@ecole.test',
+            'taux_commission' => 0.05,
+            'numero_momo_reversement' => '650000002',
+            'operateur_momo_reversement' => 'mtn',
+            'statut' => 'actif',
+        ]);
+
+        $apprenant = Apprenant::create([
+            'etablissement_id' => $etab->id,
+            'nom' => 'Eleve3',
+            'prenom' => 'Test3',
+            'classe' => '3eme',
+            'statut_paiement' => 'impaye',
+            'actif' => true,
+        ]);
+
+        $user->apprenants()->attach($apprenant->id, ['lien' => 'parent']);
+
+        $categorie = CategoriesFrais::create([
+            'etablissement_id' => $etab->id,
+            'nom' => 'Frais Scolarite 3',
+            'montant_total' => 20000,
+            'fractionnable' => true,
+            'nb_tranches_max' => 2,
+        ]);
+
+        $frais = FraisApprenant::create([
+            'apprenant_id' => $apprenant->id,
+            'categorie_frais_id' => $categorie->id,
+            'montant_total' => 20000,
+            'montant_paye' => 0,
+            'statut' => 'impaye',
+        ]);
+
+        $paiement = Paiement::create([
+            'user_id' => $user->id,
+            'apprenant_id' => $apprenant->id,
+            'frais_apprenant_id' => $frais->id,
+            'montant' => 10000,
+            'frais_service' => 200,
+            'montant_total_paye' => 10200,
+            'frais_aangaraa' => 200,
+            'marge_edupay' => 0,
+            'mode_paiement' => 'mtn_momo',
+            'type_paiement' => 'integral',
+            'statut' => 'en_attente',
+            'telephone_paiement' => '650000002',
+            'pay_token' => 'ANNUL_TOKEN_123',
+            'reference' => 'ANNULREF123',
+            'operateur' => 'MTN_Cameroon',
+            'date_paiement' => now(),
+        ]);
+
+        // 1. L'annulation passe le paiement en 'annule' (et plus seulement un drapeau)
+        $this->actingAs($user)
+            ->post(route('payeur.paiement.annuler', $paiement))
+            ->assertRedirect();
+
+        $paiement->refresh();
+        $this->assertEquals('annule', $paiement->statut);
+        $this->assertTrue($paiement->annule_manuellement);
+        $this->assertNull($paiement->date_validation);
+
+        // 2. Une re-annulation est refusee
+        $this->actingAs($user)
+            ->post(route('payeur.paiement.annuler', $paiement))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        // 3. L'operateur confirme tardivement : aucun encaissement
+        $mock = Mockery::mock(AangaraaPayService::class);
+        $mock->shouldReceive('verifierStatut')->with('ANNUL_TOKEN_123')->andReturn([
+            'statut' => 'SUCCESSFUL',
+            'succes' => true,
+            'message' => 'OK',
+        ]);
+        $mock->shouldNotReceive('reverserEtablissement');
+        $this->app->instance(AangaraaPayService::class, $mock);
+
+        $this->postJson('/webhook/aangaraapay', [
+            'paytoken' => 'ANNUL_TOKEN_123',
+            'status' => 'SUCCESSFUL',
+            'amount' => 10200,
+        ])->assertOk();
+
+        $paiement->refresh();
+        $this->assertEquals('annule', $paiement->statut);
+        $this->assertNull($paiement->date_validation);
+        $this->assertEquals(0, (int) $frais->fresh()->montant_paye);
+        $this->assertEquals('impaye', $apprenant->fresh()->statut_paiement);
+        $this->assertNull(Commission::where('paiement_id', $paiement->id)->first());
+
+        // 4. Le polling renvoie 'annule' sans revalider aupres de l'operateur
+        $this->actingAs($user)
+            ->get(route('payeur.paiement.statut', $paiement))
+            ->assertJson(['statut' => 'annule']);
+    }
+
+    public function test_annulation_api_met_le_statut_a_annule()
+    {
+        $user = User::factory()->create();
+        Role::firstOrCreate(['name' => 'parent']);
+        $user->assignRole('parent');
+
+        $etab = Etablissement::create([
+            'code_etablissement' => 'ETAB790',
+            'nom' => 'Ecole Test 4',
+            'type' => 'lycee_general',
+            'statut_juridique' => 'prive_laic',
+            'region' => 'centre',
+            'ville' => 'Yaounde',
+            'telephone' => '650000003',
+            'email' => 'admin4@ecole.test',
+            'taux_commission' => 0.05,
+            'numero_momo_reversement' => '650000003',
+            'operateur_momo_reversement' => 'mtn',
+            'statut' => 'actif',
+        ]);
+
+        $apprenant = Apprenant::create([
+            'etablissement_id' => $etab->id,
+            'nom' => 'Eleve4',
+            'prenom' => 'Test4',
+            'classe' => '4eme',
+            'statut_paiement' => 'impaye',
+            'actif' => true,
+        ]);
+
+        $user->apprenants()->attach($apprenant->id, ['lien' => 'parent']);
+
+        $paiement = Paiement::create([
+            'user_id' => $user->id,
+            'apprenant_id' => $apprenant->id,
+            'frais_apprenant_id' => null,
+            'montant' => 5000,
+            'frais_service' => 200,
+            'montant_total_paye' => 5200,
+            'frais_aangaraa' => 100,
+            'marge_edupay' => 100,
+            'mode_paiement' => 'orange_money',
+            'type_paiement' => 'tranche',
+            'statut' => 'en_attente',
+            'telephone_paiement' => '650000003',
+            'pay_token' => 'ANNUL_API_TOKEN',
+            'reference' => 'ANNULAPI123',
+            'operateur' => 'Orange_Cameroon',
+            'date_paiement' => now(),
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson(route('api.v1.paiements.annuler', $paiement))
+            ->assertOk()
+            ->assertJson([
+                'statut' => 'annule',
+                'annule_manuellement' => true,
+            ]);
+
+        $paiement->refresh();
+        $this->assertEquals('annule', $paiement->statut);
+
+        // Idempotence : 422 sur une seconde annulation
+        $this->actingAs($user, 'sanctum')
+            ->postJson(route('api.v1.paiements.annuler', $paiement))
+            ->assertStatus(422);
+    }
 }

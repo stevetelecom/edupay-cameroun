@@ -22,10 +22,13 @@
           <option value="comptable" {{ old('role')=='comptable'?'selected':'' }}>{{ __('etablissement.role_comptable') }}</option>
           <option value="caissier"  {{ old('role')=='caissier' ?'selected':'' }}>{{ __('etablissement.role_caissier') }}</option>
         </select>
-        <div class="lbl">{{ __('etablissement.prenom') }}</div>
-        <input class="inp" name="prenom" value="{{ old('prenom') }}" placeholder="Jean" />
-        <div class="lbl">{{ __('etablissement.nom') }}</div>
-        <input class="inp" name="nom" value="{{ old('nom') }}" placeholder="MVONDO" />
+        <div class="lbl">{{ __('etablissement.prenom') }} *</div>
+        <input class="inp" name="prenom" value="{{ old('prenom') }}" placeholder="Jean" required />
+        <div class="lbl">{{ __('etablissement.nom') }} *</div>
+        <input class="inp" name="nom" value="{{ old('nom') }}" placeholder="MVONDO" required />
+        <div class="lbl">{{ __('etablissement.telephone') }} <span style="color:#999;">({{ __('etablissement.optionnel') }})</span></div>
+        <input class="inp tel-cm-input" type="tel" name="telephone" value="{{ old('telephone') }}" placeholder="6XXXXXXXX" inputmode="tel" />
+        @error('telephone')<div style="color:var(--ep-red);font-size:11px;margin-top:-8px;margin-bottom:8px;">{{ $message }}</div>@enderror
         <div class="lbl">Mot de passe *</div>
         <input class="inp" type="password" name="password" placeholder="{{ __('etablissement.mdp_min_10_ph') }}" autocomplete="new-password" required />
         <div class="lbl">{{ __('etablissement.confirmer_mdp') }}</div>
@@ -160,8 +163,11 @@
 
 @endsection
 
+@include('partials.telephone-cm-script')
+
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function() { initTelephoneCm('.tel-cm-input'); });
 function changerRole(id, nom, roleActuel) {
     document.getElementById('role-user-nom').textContent = nom;
     document.getElementById('role-form').action = "{{ url('etablissement/utilisateurs') }}/" + id + "/role";

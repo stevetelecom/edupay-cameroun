@@ -5,7 +5,7 @@
 @section('content')
 
     <div style="font-size:17px;font-weight:700;margin-bottom:4px;">{{ __('etablissement.rapports_financiers') }}</div>
-    <div style="font-size:12px;color:#888;margin-bottom:18px;">{{ __('etablissement.rapports_sous_titre', ['annee' => $anneeScolaire ?? '2025-2026']) }}</div>
+    <div style="font-size:12px;color:#888;margin-bottom:18px;">{{ __('etablissement.rapports_sous_titre', ['annee' => $anneeScolaire ?? \App\Support\AnneeScolaire::active()]) }}</div>
 
     {{-- ── KPIs annuels ── --}}
     <div class="g4" style="margin-bottom:18px;">

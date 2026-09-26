@@ -20,7 +20,7 @@
           </div>
           <div>
             <div class="lbl">@lang('etablissement.annee_scolaire')</div>
-            <input class="inp" name="annee_scolaire" value="{{ old('annee_scolaire', $etablissement->annee_scolaire_active ?? '2025-2026') }}" required />
+            <input class="inp" name="annee_scolaire" value="{{ old('annee_scolaire', \App\Support\AnneeScolaire::active($etablissement)) }}" required />
           </div>
         </div>
         <div>
@@ -287,7 +287,7 @@
 
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
   <div>
-    <div style="font-size:17px;font-weight:700;">{{ __('etablissement.categories_titre', ['annee' => $etablissement->annee_scolaire_active ?? '2025-2026']) }}</div>
+    <div style="font-size:17px;font-weight:700;">{{ __('etablissement.categories_titre', ['annee' => \App\Support\AnneeScolaire::active($etablissement)]) }}</div>
     <div style="font-size:12px;color:#888;">{{ __('etablissement.nb_categories', ['count' => $categories->count()]) }}</div>
   </div>
   <button onclick="epModal.open('modal-create-frais')" class="btn-p" style="width:auto;">

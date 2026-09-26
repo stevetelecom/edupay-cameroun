@@ -5,6 +5,7 @@ namespace App\View\Composers;
 use App\Models\FraisApprenant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Support\AnneeScolaire;
 
 /**
  * Fournit les indicateurs globaux du back-office établissement à la sidebar
@@ -29,7 +30,7 @@ class EtablissementSidebarComposer
 
         if ($etablissementId) {
             // Même année scolaire que DashboardController / ImpayeController.
-            $anneeScolaire = '2025-2026';
+            $anneeScolaire = AnneeScolaire::active($user->etablissement);
 
             $totalAttendu = FraisApprenant::where('annee_scolaire', $anneeScolaire)
                 ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))

@@ -7,6 +7,15 @@ use Illuminate\Support\Str;
 
 class Paiement extends Model
 {
+    /** Statut d'attente : le payeur peut encore annuler. */
+    public const STATUT_EN_ATTENTE = 'en_attente';
+
+    /** Annulation definitive par le payeur : plus rien ne peut l'encaisser. */
+    public const STATUT_ANNULE = 'annule';
+
+    /** Statuts terminaux : plus aucune transition automatique. */
+    public const STATUTS_TERMINAUX = ['valide', 'echoue', 'rembourse', 'annule'];
+
     protected $fillable = [
         'reference', 'user_id', 'apprenant_id', 'frais_apprenant_id',
         'echeancier_id', 'montant', 'frais_service', 'montant_total_paye',
@@ -49,5 +58,17 @@ class Paiement extends Model
     public function transaction() { return $this->hasOne(Transaction::class); }
     public function commission() { return $this->hasOne(Commission::class); }
     public function remboursements() { return $this->hasMany(Remboursement::class); }
+
+    /** Le paiement a-t-il ete annule (statut ou drapeau) ? */
+    public function estAnnule(): bool
+    {
+        return $this->statut === self::STATUT_ANNULE || (bool) $this->annule_manuellement;
+    }
+
+    /** Aucune transition automatique possible vers un autre statut. */
+    public function estTerminal(): bool
+    {
+        return in_array($this->statut, self::STATUTS_TERMINAUX, true);
+    }
 }
 

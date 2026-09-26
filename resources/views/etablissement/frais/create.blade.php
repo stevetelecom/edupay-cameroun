@@ -56,8 +56,8 @@
 
     <div class="lbl">{{ __('etablissement.annee_scolaire') }}</div>
     <select class="select" name="annee_scolaire">
-        @foreach(['2024-2025','2025-2026','2026-2027'] as $y)
-        <option value="{{ $y }}" {{ old('annee_scolaire','2025-2026')==$y?'selected':'' }}>{{ $y }}</option>
+        @foreach(\App\Support\AnneeScolaire::liste() as $y)
+        <option value="{{ $y }}" {{ old('annee_scolaire', \App\Support\AnneeScolaire::parDefaut())==$y?'selected':'' }}>{{ $y }}</option>
         @endforeach
     </select>
 

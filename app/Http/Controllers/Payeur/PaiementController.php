@@ -219,7 +219,7 @@ class PaiementController extends Controller
         }
 
         // Si déjà validé ou échoué, retourner directement (avant même de verrouiller)
-        if (in_array($paiement->statut, ['valide', 'echoue', 'rembourse'])) {
+        if (in_array($paiement->statut, Paiement::STATUTS_TERMINAUX, true)) {
             return response()->json(['statut' => $paiement->statut]);
         }
 
@@ -264,6 +264,18 @@ class PaiementController extends Controller
 
             if (! $paiement || $paiement->statut === 'valide') {
                 // Déjà traité par un autre process (webhook ou polling) → on ne refait rien
+                return false;
+            }
+
+            // 🔒 Annulation définitive (audit C) : un paiement annulé ne peut
+            // JAMAIS encaisser, même si l'opérateur renvoie SUCCESSFUL en retard.
+            if ($paiement->estAnnule()) {
+                \Illuminate\Support\Facades\Log::warning('Paiement annulé confirmé par l\'opérateur — aucun encaissement (action manuelle requise)', [
+                    'paiement_id' => $paiement->id,
+                    'reference'   => $paiement->reference,
+                    'montant'     => $paiement->montant,
+                ]);
+
                 return false;
             }
 
@@ -354,7 +366,9 @@ class PaiementController extends Controller
         }
 
         // Idempotence : déjà traité, ne rien refaire
-        if (in_array($paiement->statut, ['valide', 'echoue', 'rembourse'])) {
+        // 'annule' est volontairement exclu : on veut revérifier auprès de l'opérateur
+        // pour tracer le cas "annulé mais réellement débité" (support / régularisation manuelle).
+        if (in_array($paiement->statut, ['valide', 'echoue', 'rembourse'], true)) {
             return response()->json(['ok' => true, 'deja_traite' => true]);
         }
 
@@ -435,7 +449,7 @@ class PaiementController extends Controller
      */
     public function reconcilierPaiement(Paiement $paiement): void
     {
-        if (! $paiement->pay_token || in_array($paiement->statut, ['valide', 'echoue', 'rembourse'])) {
+        if (! $paiement->pay_token || $paiement->estTerminal()) {
             return;
         }
 
@@ -477,12 +491,10 @@ class PaiementController extends Controller
     }
 
     /**
-     * Annulation manuelle par le payeur d'un paiement en_attente.
-     * Ne modifie JAMAIS le statut reel (reste en_attente) afin qu'une
-     * confirmation tardive et legitime de l'operateur (webhook ou
-     * reconciliation) puisse toujours regulariser le paiement plus tard
-     * si l'argent a en realite ete debite. Sert uniquement a debloquer
-     * un nouvel essai immediat sans attendre les 5 minutes.
+     * Annulation definitive par le payeur d'un paiement en_attente.
+     * Le statut passe a 'annule' (audit C) : le paiement ne peut plus etre
+     * encaisse. traiterPaiementValide() refuse dorenavant de valider un
+     * paiement annule, quel que soit le canal (polling, webhook, reconciliation).
      */
     public function annuler(Paiement $paiement)
     {
@@ -490,14 +502,17 @@ class PaiementController extends Controller
             abort(403);
         }
 
-        if ($paiement->statut !== 'en_attente') {
+        if ($paiement->statut !== Paiement::STATUT_EN_ATTENTE || $paiement->estAnnule()) {
             return back()->with('error', 'Ce paiement ne peut plus être annulé.');
         }
 
-        $paiement->update(['annule_manuellement' => true]);
+        $paiement->update([
+            'statut'              => Paiement::STATUT_ANNULE,
+            'annule_manuellement' => true,
+        ]);
 
         return back()->with('info',
-            'Paiement marqué comme annulé. S\'il a tout de même été débité sur votre compte, il sera automatiquement régularisé dès confirmation de l\'opérateur.'
+            'Paiement annulé. Si votre opérateur a malgré tout débité votre compte, contactez notre support avec la référence ' . $paiement->reference . '.'
         );
     }
 

@@ -10,6 +10,7 @@ use App\Models\Apprenant;
 use App\Models\FraisApprenant;
 use App\Models\Paiement;
 use Illuminate\Http\JsonResponse;
+use App\Support\AnneeScolaire;
 
 class DashboardController extends Controller
 {
@@ -31,7 +32,7 @@ class DashboardController extends Controller
 
         $etablissementId = $user->etablissement_id;
         $etablissement   = $user->etablissement;
-        $anneeScolaire   = '2025-2026';
+        $anneeScolaire   = AnneeScolaire::active($etablissement);
 
         // Total encaissé ce mois (paiements validés, apprenants de l'établissement)
         $totalEncaisseMois = Paiement::where('statut', 'valide')
@@ -50,6 +51,11 @@ class DashboardController extends Controller
         // Nombre d'apprenants actifs
         $nbApprenants = Apprenant::where('etablissement_id', $etablissementId)
             ->where('actif', true)
+            ->count();
+
+        // Dossiers de frais ouverts sur l'année active (0 => indicateurs vides)
+        $nbFraisAnnee = FraisApprenant::where('annee_scolaire', $anneeScolaire)
+            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
             ->count();
 
         // Nombre de dossiers de frais impayés
@@ -88,6 +94,7 @@ class DashboardController extends Controller
             'data' => [
                 'etablissement'         => new EtablissementResource($etablissement),
                 'annee_scolaire'        => $anneeScolaire,
+                'nb_frais_annee'        => (int) $nbFraisAnnee,
                 'abonnement'            => $abonnement ? [
                     'statut'       => $abonnement->statut,
                     'plan'         => $abonnement->plan,

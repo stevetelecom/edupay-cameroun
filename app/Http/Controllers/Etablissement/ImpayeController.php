@@ -10,13 +10,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use App\Support\AnneeScolaire;
 
 class ImpayeController extends Controller
 {
     public function index(Request $request)
     {
         $etablissementId = Auth::user()->etablissement_id;
-        $anneeScolaire   = '2025-2026';
+        $anneeScolaire   = AnneeScolaire::active();
 
         $fraisImpayes = FraisApprenant::with(['apprenant', 'categorieFrais'])
             ->where('annee_scolaire', $anneeScolaire)
@@ -60,7 +61,7 @@ class ImpayeController extends Controller
     public function relancerSms(Request $request)
     {
         $etablissementId = Auth::user()->etablissement_id;
-        $anneeScolaire   = '2025-2026';
+        $anneeScolaire   = AnneeScolaire::active();
 
         $fraisImpayes = FraisApprenant::with('apprenant.parents')
             ->where('annee_scolaire', $anneeScolaire)
@@ -88,7 +89,7 @@ class ImpayeController extends Controller
 
         $fraisImpayes = FraisApprenant::with('apprenant.parents')
             ->where('apprenant_id', $apprenant->id)
-            ->where('annee_scolaire', '2025-2026')
+            ->where('annee_scolaire', AnneeScolaire::active($apprenant->etablissement))
             ->where('statut', '!=', 'regle')
             ->get();
 

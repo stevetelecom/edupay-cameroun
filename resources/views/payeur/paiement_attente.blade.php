@@ -30,6 +30,13 @@
                 cancel
             </span>
         </div>
+        <div id="icone-annule" style="margin-bottom:16px;display:none;justify-content:center;">
+            <span class="material-symbols-outlined"
+                  style="font-size:56px;color:#6B7280;
+                         font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 48;">
+                block
+            </span>
+        </div>
 
         @php
             $operateurAffiche = match($paiement->operateur ?? null) {
@@ -77,6 +84,17 @@
             <div style="font-size:17px;font-weight:700;color:#085041;margin-bottom:8px;">{{ __('payeur.pa_valide_titre') }}</div>
             <div style="font-size:13px;color:#888;margin-bottom:20px;">
                 {!! __('payeur.pa_valide_confirme', ['montant' => number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' ')]) !!}
+            </div>
+            <a href="{{ route('payeur.dashboard') }}" class="btn-p" style="width:auto;padding:10px 24px;">
+                {{ __('payeur.pa_retour_dashboard') }}
+            </a>
+        </div>
+
+        <div id="msg-annule" style="display:none;">
+            <div style="font-size:17px;font-weight:700;color:#4B5563;margin-bottom:8px;">{{ __('payeur.pa_annule_titre') }}</div>
+            <div style="font-size:13px;color:#888;margin-bottom:8px;">{{ __('payeur.pa_annule_detail') }}</div>
+            <div style="font-size:12px;color:#888;margin-bottom:20px;">
+                {{ __('payeur.pa_ref') }} : <code>{{ $paiement->reference }}</code>
             </div>
             <a href="{{ route('payeur.dashboard') }}" class="btn-p" style="width:auto;padding:10px 24px;">
                 {{ __('payeur.pa_retour_dashboard') }}
@@ -135,9 +153,11 @@ function afficher(etat) {
     document.getElementById('icone-attente').style.display = etat === 'attente' ? 'flex' : 'none';
     document.getElementById('icone-valide').style.display  = etat === 'valide'  ? 'flex' : 'none';
     document.getElementById('icone-echec').style.display   = etat === 'echec'   ? 'flex' : 'none';
+    document.getElementById('icone-annule').style.display  = etat === 'annule'  ? 'flex' : 'none';
     document.getElementById('msg-attente').style.display   = etat === 'attente' ? '' : 'none';
     document.getElementById('msg-valide').style.display    = etat === 'valide'  ? '' : 'none';
     document.getElementById('msg-echec').style.display     = etat === 'echec'   ? '' : 'none';
+    document.getElementById('msg-annule').style.display    = etat === 'annule'  ? '' : 'none';
 }
 
 function passerEnPhase2() {
@@ -162,6 +182,12 @@ async function verifier() {
 
     if (data && data.statut === 'valide') {
         afficher('valide');
+        return;
+    }
+
+    // Annulé entre-temps (autre onglet / API mobile) : état définitif, on arrête.
+    if (data && data.statut === 'annule') {
+        afficher('annule');
         return;
     }
 
@@ -208,6 +234,8 @@ async function verifierMaintenant() {
 
     if (data && data.statut === 'valide') {
         afficher('valide');
+    } else if (data && data.statut === 'annule') {
+        afficher('annule');
     } else if (data && data.statut === 'echoue') {
         const detail = document.getElementById('msg-echec-detail');
         if (detail && data.message) detail.textContent = data.message;
@@ -219,6 +247,11 @@ async function verifierMaintenant() {
     }
 }
 
-setTimeout(verifier, 5000);
+// Un paiement deja annule est un etat definitif : aucun polling.
+if (@json($paiement->estAnnule())) {
+    afficher('annule');
+} else {
+    setTimeout(verifier, 5000);
+}
 </script>
 @endpush

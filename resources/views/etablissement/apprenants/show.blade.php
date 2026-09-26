@@ -151,7 +151,7 @@
 
 {{-- ── Frais ── --}}
 <div class="seclbl" style="margin-top:0;">
-    {{ __('etablissement.frais_scolaires', ['annee' => $apprenant->frais->first()->annee_scolaire ?? '2025-2026']) }}
+    {{ __('etablissement.frais_scolaires', ['annee' => $apprenant->frais->first()->annee_scolaire ?? \App\Support\AnneeScolaire::active()]) }}
 </div>
 <div class="epcard" style="padding:0;overflow:hidden;margin-bottom:18px;">
     <table class="ep-table">
@@ -226,11 +226,11 @@
                 <td>
                     <span class="pill {{ match($paiement->statut) {
                         'valide' => 'pg', 'en_attente' => 'pa',
-                        'echoue' => 'pr', 'rembourse' => 'pb', default => 'pa',
+                        'echoue' => 'pr', 'rembourse' => 'pb', 'annule' => 'pb', default => 'pa',
                     } }}">
                         {{ match($paiement->statut) {
                             'valide' => __('etablissement.st_valide'), 'en_attente' => __('etablissement.st_en_attente'),
-                            'echoue' => __('etablissement.st_echoue'), 'rembourse' => __('etablissement.st_rembourse'),
+                            'echoue' => __('etablissement.st_echoue'), 'rembourse' => __('etablissement.st_rembourse'), 'annule' => __('etablissement.st_annule'),
                             default => $paiement->statut,
                         } }}
                     </span>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Etablissement;
 
 use App\Http\Controllers\Controller;
 use App\Models\CategoriesFrais;
+use App\Support\AnneeScolaire;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -28,6 +29,9 @@ class ParametreController extends Controller
             'data' => [
                 'etablissement' => $this->formaterEtablissement($etablissement),
                 'nb_categories_frais' => $categoriesFrais->count(),
+                'annee_scolaire_active'    => $etablissement->annee_scolaire_active,
+                'annee_scolaire_effective' => AnneeScolaire::active($etablissement),
+                'annees_scolaires'         => AnneeScolaire::liste($etablissement->annee_scolaire_active),
             ],
         ]);
     }
@@ -48,9 +52,11 @@ class ParametreController extends Controller
         $request->merge([
             'telephone'               => $normaliserTelephoneCm((string) $request->input('telephone', '')),
             'numero_momo_reversement' => $normaliserTelephoneCm((string) $request->input('numero_momo_reversement', '')),
+            'annee_scolaire_active'   => $request->input('annee_scolaire_active') ?: null,
         ]);
 
         $validated = $request->validate([
+            'annee_scolaire_active'   => ['nullable', 'string', 'regex:/^\d{4}-\d{4}$/'],
             'nom'                    => ['required', 'string', 'max:150'],
             'type'                   => ['required', Rule::in(['maternelle','primaire','college','lycee_general','lycee_technique','universite','institut_prive','groupe_scolaire','secondaire','universitaire','formation'])],
             'statut_juridique'       => ['nullable', 'string', 'max:100'],
@@ -105,6 +111,8 @@ class ParametreController extends Controller
         return [
             'id'                       => $etablissement->id,
             'nom'                      => $etablissement->nom,
+            'annee_scolaire_active'    => $etablissement->annee_scolaire_active,
+            'annee_scolaire_effective' => AnneeScolaire::active($etablissement),
             'type'                     => $etablissement->type,
             'statut_juridique'         => $etablissement->statut_juridique,
             'numero_agrement'          => $etablissement->numero_agrement,

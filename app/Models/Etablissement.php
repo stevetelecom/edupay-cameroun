@@ -13,7 +13,7 @@ class Etablissement extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'code_etablissement', 'nom', 'logo', 'type', 'statut_juridique',
+        'code_etablissement', 'annee_scolaire_active', 'nom', 'logo', 'type', 'statut_juridique',
         'numero_agrement', 'nb_eleves', 'region', 'ville', 'quartier',
         'boite_postale', 'telephone', 'email', 'site_web',
         'mobile_money_principal', 'document_agrement', 'description',

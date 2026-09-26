@@ -69,17 +69,13 @@
                         } }}</td>
                         <td>{{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y H:i') : '—' }}</td>
                         <td>
-                            @if($paiement->statut === 'en_attente' && $paiement->annule_manuellement)
-                                <span class="pill pb">{{ __('payeur.hist_annule_verif') }}</span>
-                            @else
-                                <span class="pill {{ match($paiement->statut) {
-                                    'valide' => 'pg', 'en_attente' => 'pa', 'echoue' => 'pr', 'rembourse' => 'pb', default => 'pa',
-                                } }}">
-                                    {{ match($paiement->statut) {
-                                        'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), 'rembourse' => __('payeur.statut_rembourse'), default => $paiement->statut,
-                                    } }}
-                                </span>
-                            @endif
+                            <span class="pill {{ match($paiement->statut) {
+                                'valide' => 'pg', 'en_attente' => 'pa', 'echoue' => 'pr', 'rembourse' => 'pb', 'annule' => 'pb', default => 'pa',
+                            } }}">
+                                {{ match($paiement->statut) {
+                                    'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), 'rembourse' => __('payeur.statut_rembourse'), 'annule' => __('payeur.statut_annule'), default => $paiement->statut,
+                                } }}
+                            </span>
                             @if($paiement->statut !== 'rembourse' && $paiement->remboursements->isNotEmpty())
                                 @php $totalRembourse = $paiement->remboursements->sum('montant'); @endphp
                                 <div style="font-size:10px;color:#1A4F8A;margin-top:3px;">
@@ -101,13 +97,13 @@
                                         data-operateur="{{ $paiement->operateur ?? '—' }}"
                                         data-telephone="{{ $paiement->telephone_paiement ?? '—' }}"
                                         data-date="{{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y H:i') : '—' }}"
-                                        data-statut-badge="{{ match($paiement->statut) { 'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), 'rembourse' => __('payeur.statut_rembourse'), default => $paiement->statut } }}"
+                                        data-statut-badge="{{ match($paiement->statut) { 'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), 'rembourse' => __('payeur.statut_rembourse'), 'annule' => __('payeur.statut_annule'), default => $paiement->statut } }}"
                                         style="font-size:11px;color:#1A4F8A;background:var(--ep-blue-lt);border:none;padding:5px 10px;border-radius:20px;cursor:pointer;"
                                         title="{{ __('payeur.hist_voir_detail') }}">
                                     {{ __('payeur.hist_detail') }}
                                 </button>
 
-                                @if($paiement->statut === 'en_attente' && ! $paiement->annule_manuellement)
+                                @if($paiement->statut === 'en_attente' && ! $paiement->estAnnule())
                                     <form method="POST" action="{{ route('payeur.paiement.annuler', $paiement) }}"
                                           onsubmit="return confirm('{{ __('payeur.hist_confirm_annuler') }}')">
                                         @csrf

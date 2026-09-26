@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use App\Support\AnneeScolaire;
 
 class RapportController extends Controller
 {
@@ -94,7 +95,7 @@ class RapportController extends Controller
     private function genererDonneesRapport(): array
     {
         $etablissementId = auth()->user()->etablissement_id;
-        $anneeScolaire   = '2025-2026';
+        $anneeScolaire   = AnneeScolaire::active();
 
         $totalEncaisseAnnee = Paiement::where('statut', 'valide')
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))

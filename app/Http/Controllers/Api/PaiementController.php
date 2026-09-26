@@ -178,7 +178,7 @@ class PaiementController extends Controller
             return response()->json(['statut' => $paiement->statut]);
         }
 
-        if (in_array($paiement->statut, ['valide', 'echoue', 'rembourse'])) {
+        if (in_array($paiement->statut, Paiement::STATUTS_TERMINAUX, true)) {
             return response()->json(['statut' => $paiement->statut]);
         }
 
@@ -206,9 +206,10 @@ class PaiementController extends Controller
     }
 
     /**
-     * Annule (manuellement) un paiement encore en attente : débloque un nouvel
-     * essai sans toucher au statut réel, cohérent avec la logique web (ne
-     * bloque jamais une confirmation tardive et légitime de l'opérateur).
+     * Annule définitivement un paiement encore en attente (audit C).
+     * Le statut passe a 'annule' : le client peut l'afficher tel quel et le
+     * paiement ne peut plus etre encaisse (traitement du webhook/polling
+     * refuse tout paiement annule).
      */
     public function annuler(Paiement $paiement): JsonResponse
     {
@@ -218,17 +219,21 @@ class PaiementController extends Controller
             return response()->json(['message' => 'Accès non autorisé à ce paiement.'], 403);
         }
 
-        if ($paiement->statut !== 'en_attente') {
+        if ($paiement->statut !== Paiement::STATUT_EN_ATTENTE || $paiement->estAnnule()) {
             return response()->json([
                 'message' => 'Ce paiement ne peut plus être annulé.',
             ], 422);
         }
 
-        $paiement->update(['annule_manuellement' => true]);
+        $paiement->update([
+            'statut'              => Paiement::STATUT_ANNULE,
+            'annule_manuellement' => true,
+        ]);
 
         return response()->json([
-            'message' => 'Paiement marqué comme annulé. S\'il a tout de même été débité sur votre compte, il sera automatiquement régularisé dès confirmation de l\'opérateur.',
-            'statut'  => $paiement->statut,
+            'message' => 'Paiement annulé. Si votre opérateur a malgré tout débité votre compte, contactez notre support avec la référence ' . $paiement->reference . '.',
+            'reference'           => $paiement->reference,
+            'statut'              => Paiement::STATUT_ANNULE,
             'annule_manuellement' => true,
         ]);
     }
@@ -265,6 +270,18 @@ class PaiementController extends Controller
             $paiement = Paiement::whereKey($paiementId)->lockForUpdate()->first();
 
             if (! $paiement || $paiement->statut === 'valide') {
+                return false;
+            }
+
+            // 🔒 Annulation définitive (audit C) : un paiement annulé ne peut
+            // JAMAIS encaisser, même si l'opérateur renvoie SUCCESSFUL en retard.
+            if ($paiement->estAnnule()) {
+                Log::warning('Paiement annulé confirmé par l\'opérateur — aucun encaissement (action manuelle requise)', [
+                    'paiement_id' => $paiement->id,
+                    'reference'   => $paiement->reference,
+                    'montant'     => $paiement->montant,
+                ]);
+
                 return false;
             }
 

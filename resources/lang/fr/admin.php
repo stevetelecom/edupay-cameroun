@@ -103,6 +103,7 @@ return [
     'type' => 'Type',
     'token_aangaraa' => 'Token AangaraaPay',
     'rembourse' => 'Remboursé',
+    'annule' => 'Annulé',
     'detail_etablissement' => "Détail de l'établissement",
     'activer_etablissement' => "Activer l'établissement",
     'suspendre_etablissement' => "Suspendre l'établissement",
