@@ -8,6 +8,7 @@ use App\Mail\RelanceImpayeMail;
 use App\Models\Apprenant;
 use App\Models\FraisApprenant;
 use App\Models\Paiement;
+use App\Models\RelanceImpaye;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -99,6 +100,16 @@ class ImpayeController extends Controller
 
         $tauxRecouvrement = $totalAttendu > 0 ? round(($totalPaye / $totalAttendu) * 100) : 0;
 
+        // U : la colonne valait null en permanence faute de trace des
+        // relances. On lit la derniere relance REUSSIE par apprenant.
+        $dernieresRelances = RelanceImpaye::query()
+            ->whereIn('apprenant_id', $apprenantIds)
+            ->where('etablissement_id', $etablissementId)
+            ->envoyees()
+            ->get(['apprenant_id', 'created_at', 'canal'])
+            ->groupBy('apprenant_id')
+            ->map(fn ($lignes) => $lignes->sortByDesc('created_at')->first());
+
         $lignes = $apprenants->getCollection()->map(fn (Apprenant $apprenant) => [
             'apprenant_id'     => $apprenant->id,
             'nom'              => trim($apprenant->prenom . ' ' . $apprenant->nom),
@@ -108,9 +119,10 @@ class ImpayeController extends Controller
                 'montant' => (int) $derniersPaiements[$apprenant->id]->montant,
                 'date'    => $derniersPaiements[$apprenant->id]->date_paiement?->toIso8601String(),
             ] : null,
-            // Aucune table ne trace les relances envoyees (elles partent par
-            // SMS via SmsService) : on expose null plutot qu'une fausse date.
-            'derniere_relance' => null,
+            'derniere_relance' => isset($dernieresRelances[$apprenant->id]) ? [
+                'date'  => $dernieresRelances[$apprenant->id]->created_at?->toIso8601String(),
+                'canal' => $dernieresRelances[$apprenant->id]->canal,
+            ] : null,
             'telephone_parent' => $apprenant->parents->first()?->telephone,
         ])->values();
 
@@ -160,17 +172,31 @@ class ImpayeController extends Controller
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
             ->get();
 
-        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes);
+        [$nbEnvoyes, $nbEchecs, $nbIgnores] = $this->envoyerRelancesGroupe($fraisImpayes, $etablissementId, $request->boolean('force'));
 
-        Log::channel('admin')->info("E07 relance groupée — Étab #{$etablissementId} (API) : {$nbEnvoyes} emails envoyés, {$nbEchecs} échecs.");
+        Log::channel('admin')->info("E07 relance groupée — Étab #{$etablissementId} (API) : {$nbEnvoyes} emails envoyés, {$nbEchecs} échecs, {$nbIgnores} ignorés (anti-spam).");
+
+        // 429 : une relance a deja ete envoyee aux memes parents dans les
+        // dernieres heures. `force=true` permet de repasser outre.
+        if ($nbEnvoyes === 0 && $nbIgnores > 0) {
+            return response()->json([
+                'message' => 'Une relance a déjà été envoyée à ces parents dans les ' . RelanceImpaye::DELAI_ANTI_SPAM_H . ' dernières heures. Utilisez force=true pour la renvoyer quand même.',
+                'envoi'   => [
+                    'envoyes' => 0,
+                    'echecs'  => $nbEchecs,
+                    'ignores' => $nbIgnores,
+                ],
+            ], 429);
+        }
 
         return response()->json([
             'message'   => $nbEnvoyes > 0
-                ? "{$nbEnvoyes} relance(s) envoyée(s) par email." . ($nbEchecs > 0 ? " ({$nbEchecs} échec(s))" : '')
+                ? "{$nbEnvoyes} relance(s) envoyée(s) par email." . ($nbEchecs > 0 ? " ({$nbEchecs} échec(s))" : '') . ($nbIgnores > 0 ? " ({$nbIgnores} déjà relancés recently)." : '')
                 : 'Aucun email envoyé. Vérifiez les adresses email et les préférences de notification.',
             'envoi'     => [
                 'envoyes' => $nbEnvoyes,
                 'echecs'  => $nbEchecs,
+                'ignores' => $nbIgnores,
             ],
         ], $nbEnvoyes > 0 ? 200 : 422);
     }
@@ -192,7 +218,18 @@ class ImpayeController extends Controller
             ->where('statut', '!=', 'regle')
             ->get();
 
-        [$nbEnvoyes, $nbEchecs] = $this->envoyerRelancesGroupe($fraisImpayes);
+        [$nbEnvoyes, $nbEchecs, $nbIgnores] = $this->envoyerRelancesGroupe($fraisImpayes, $etablissementId, $request->boolean('force'));
+
+        if ($nbEnvoyes === 0 && $nbIgnores > 0) {
+            return response()->json([
+                'message' => 'Ce parent a déjà reçu une relance dans les ' . RelanceImpaye::DELAI_ANTI_SPAM_H . ' dernières heures. Utilisez force=true pour la renvoyer quand même.',
+                'envoi'   => [
+                    'envoyes' => 0,
+                    'echecs'  => $nbEchecs,
+                    'ignores' => $nbIgnores,
+                ],
+            ], 429);
+        }
 
         return response()->json([
             'message' => $nbEnvoyes > 0
@@ -201,14 +238,27 @@ class ImpayeController extends Controller
             'envoi'   => [
                 'envoyes' => $nbEnvoyes,
                 'echecs'  => $nbEchecs,
+                'ignores' => $nbIgnores,
             ],
         ], $nbEnvoyes > 0 ? 200 : 422);
     }
 
-    private function envoyerRelancesGroupe($fraisCollection): array
+    /**
+     * Envoie les relances et trace chaque tentative.
+     *
+     * U : avant, l'endpoint pouvait etre appele en boucle et le meme parent
+     * recevait la meme relance autant de fois que vouloit (aucune trace, aucun
+     * delai). Chaque envoi est maintenant enregistre dans `relances_impayes`,
+     * et un couple (ligne de frais, parent) n'est pas recontacte avant
+     * `RelanceImpaye::DELAI_ANTI_SPAM_H` heures, sauf `force=true`.
+     *
+     * @return array{0:int,1:int,2:int} [envoyes, echecs, ignores]
+     */
+    private function envoyerRelancesGroupe($fraisCollection, int $etablissementId, bool $force = false): array
     {
-        $nbEnvoyes = 0;
-        $nbEchecs  = 0;
+        $nbEnvoyes  = 0;
+        $nbEchecs   = 0;
+        $nbIgnores  = 0;
 
         foreach ($fraisCollection as $frais) {
             $reste = $frais->montant_total - $frais->montant_paye;
@@ -217,8 +267,33 @@ class ImpayeController extends Controller
             }
 
             foreach ($frais->apprenant->parents as $parent) {
+                if (! $force && RelanceImpaye::envoyeeRecently($frais->id, $parent->id)) {
+                    $nbIgnores++;
+                    RelanceImpaye::create([
+                        'frais_apprenant_id' => $frais->id,
+                        'apprenant_id'       => $frais->apprenant_id,
+                        'etablissement_id'   => $etablissementId,
+                        'user_id'            => $parent->id,
+                        'canal'              => 'email',
+                        'statut'             => 'ignore',
+                        'erreur'             => 'Delai anti-spam : relance deja envoyee dans les ' . RelanceImpaye::DELAI_ANTI_SPAM_H . ' dernieres heures.',
+                    ]);
+                    continue;
+                }
+
                 if (! $parent->email || ! $parent->notif_email) {
                     $nbEchecs++;
+                    RelanceImpaye::create([
+                        'frais_apprenant_id' => $frais->id,
+                        'apprenant_id'       => $frais->apprenant_id,
+                        'etablissement_id'   => $etablissementId,
+                        'user_id'            => $parent->id,
+                        'canal'              => 'email',
+                        'statut'             => 'echec',
+                        'erreur'             => $parent->email
+                            ? 'Notifications email desactivees par le parent.'
+                            : 'Aucune adresse email renseignee.',
+                    ]);
                     continue;
                 }
 
@@ -229,14 +304,31 @@ class ImpayeController extends Controller
                         (float) $reste,
                     ));
                     $nbEnvoyes++;
+                    RelanceImpaye::create([
+                        'frais_apprenant_id' => $frais->id,
+                        'apprenant_id'       => $frais->apprenant_id,
+                        'etablissement_id'   => $etablissementId,
+                        'user_id'            => $parent->id,
+                        'canal'              => 'email',
+                        'statut'             => 'envoye',
+                    ]);
                 } catch (\Throwable $e) {
                     $nbEchecs++;
+                    RelanceImpaye::create([
+                        'frais_apprenant_id' => $frais->id,
+                        'apprenant_id'       => $frais->apprenant_id,
+                        'etablissement_id'   => $etablissementId,
+                        'user_id'            => $parent->id,
+                        'canal'              => 'email',
+                        'statut'             => 'echec',
+                        'erreur'             => mb_substr($e->getMessage(), 0, 500),
+                    ]);
                     Log::channel('admin')->error('E07 échec envoi relance email à ' . $parent->email . ' : ' . $e->getMessage());
                 }
             }
         }
 
-        return [$nbEnvoyes, $nbEchecs];
+        return [$nbEnvoyes, $nbEchecs, $nbIgnores];
     }
 
     private function autoriser(): int
