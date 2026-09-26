@@ -119,9 +119,16 @@ class RapportController extends Controller
             ->groupBy('classe')
             ->orderBy('classe')
             ->get()
-            ->map(function ($row) use ($anneeScolaire) {
+            ->map(function ($row) use ($anneeScolaire, $etablissementId) {
+                // R : le filtre portait sur la CLASSE SEULE. Deux etablissements
+                // partageant le meme nom de classe (CM2, 6eme...) voyaient leurs
+                // frais additionnes : le taux de recouvrement de ma classe
+                // includait les encaissements des autres ecoles, et les
+                // montants d'autrui etaient lisibles par soustraction.
                 $frais = FraisApprenant::where('annee_scolaire', $anneeScolaire)
-                    ->whereHas('apprenant', fn ($q) => $q->where('classe', $row->classe))
+                    ->whereHas('apprenant', fn ($q) => $q
+                        ->where('classe', $row->classe)
+                        ->where('etablissement_id', $etablissementId))
                     ->get();
 
                 $attendu = $frais->sum('montant_total');

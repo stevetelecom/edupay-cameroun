@@ -10,6 +10,7 @@ use App\Models\FraisApprenant;
 use App\Models\Paiement;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Support\AnneeScolaire;
@@ -32,6 +33,20 @@ class ImpayeController extends Controller
         // `data.frais_impayes` (une collection de ressource, elle-meme
         // imbriquee) + `data.synthese` : le mobile lisait un objet la ou il
         // attendait un tableau, donc liste vide.
+        // Q : `categorie_id` est un identifiant fourni par le client.
+        // Sans ce controle, un etablissement pouvait filtrer sur la
+        // categorie d'un autre etablissement (son nom, son montant et le
+        // nombre d'affectations devenaient lisibles par difference).
+        $request->validate([
+            'categorie_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('categories_frais', 'id')->where('etablissement_id', $etablissementId),
+            ],
+        ], [
+            'categorie_id.exists' => 'Catégorie de frais invalide pour cet établissement.',
+        ]);
+
         $apprenants = Apprenant::with(['parents'])
             ->where('etablissement_id', $etablissementId)
             ->whereHas('frais', function ($q) use ($anneeScolaire, $request) {
@@ -137,7 +152,9 @@ class ImpayeController extends Controller
         $etablissementId = $this->autoriser();
         $anneeScolaire   = AnneeScolaire::active();
 
-        $fraisImpayes = FraisApprenant::with('apprenant.parents')
+        // `categorieFrais` est lu dans l'envoi des relances : sans eager
+        // loading, une requete par ligne d'impaye.
+        $fraisImpayes = FraisApprenant::with(['apprenant.parents', 'categorieFrais'])
             ->where('annee_scolaire', $anneeScolaire)
             ->where('statut', '!=', 'regle')
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
@@ -169,7 +186,7 @@ class ImpayeController extends Controller
             return response()->json(['message' => 'Accès non autorisé à cet apprenant.'], 403);
         }
 
-        $fraisImpayes = FraisApprenant::with('apprenant.parents')
+        $fraisImpayes = FraisApprenant::with(['apprenant.parents', 'categorieFrais'])
             ->where('apprenant_id', $apprenant->id)
             ->where('annee_scolaire', AnneeScolaire::active($apprenant->etablissement))
             ->where('statut', '!=', 'regle')
