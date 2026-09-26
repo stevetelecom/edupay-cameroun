@@ -24,11 +24,17 @@ class InitierPaiementRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // Soit un frais_apprenant (paiement intégral ou tranche), soit un paiement direct
-            'frais_apprenant_id' => ['nullable', 'integer', 'exists:frais_apprenant,id'],
+            // Audit D : toute somme debitee doit etre rattachee a une ligne de
+            // frais. `paiements.frais_apprenant_id` est NOT NULL en base : le
+            // « paiement direct » renvoyait une erreur 500 en production et
+            // aurait casse les rapports financiers (pas de categorie, pas
+            // d'annee scolaire). Le CDC ne prevoit pas de paiement libre.
+            'frais_apprenant_id' => ['required', 'integer', 'exists:frais_apprenant,id'],
             'apprenant_id'       => ['nullable', 'integer', 'exists:apprenants,id'],
             'echeancier_id'      => ['nullable', 'integer', 'exists:echeanciers,id'],
-            'montant'            => ['required_if:frais_apprenant_id,', 'nullable', 'integer', 'min:50'],
+            // Le montant est informative : il ne determine jamais le debit
+            // (voir App\Support\MontantPaiement).
+            'montant'            => ['nullable', 'integer', 'min:50'],
             'type_paiement'      => ['nullable', 'in:integral,tranche'],
             'telephone'          => ['required', 'regex:/^6\d{8}$/'],
             'mode_paiement'      => ['required', 'in:mtn_momo,orange_money,carte'],
@@ -42,7 +48,9 @@ class InitierPaiementRequest extends FormRequest
             'telephone.regex'        => 'Numéro invalide. Format attendu : 6XXXXXXXX.',
             'mode_paiement.required' => 'Le mode de paiement est obligatoire.',
             'mode_paiement.in'       => 'Mode de paiement invalide.',
-            'frais_apprenant_id.exists' => 'Le frais sélectionné n\'existe pas.',
+            'frais_apprenant_id.required' => 'Veuillez choisir les frais a regler.',
+            'frais_apprenant_id.exists'   => 'Le frais selectionne est introuvable.',
+            'echeancier_id.exists'        => 'L\'echeance demandee est introuvable.',
         ];
     }
 }

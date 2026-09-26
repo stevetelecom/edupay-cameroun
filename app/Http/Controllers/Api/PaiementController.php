@@ -7,9 +7,11 @@ use App\Http\Requests\Api\InitierPaiementRequest;
 use App\Http\Resources\PaiementResource;
 use App\Jobs\SendConfirmationPaiement;
 use App\Jobs\SendNotificationEchecPaiement;
+use App\Models\Echeancier;
 use App\Models\FraisApprenant;
 use App\Models\Paiement;
 use App\Services\AangaraaPayService;
+use App\Support\MontantPaiement;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +19,10 @@ use Illuminate\Support\Facades\Log;
 
 class PaiementController extends Controller
 {
-    public function __construct(private AangaraaPayService $aangaraa) {}
+    public function __construct(
+        private AangaraaPayService $aangaraa,
+        private MontantPaiement $montantPaiement,
+    ) {}
 
     /**
      * Historique des paiements de l'utilisateur connecté.
@@ -40,26 +45,14 @@ class PaiementController extends Controller
         $user    = $request->user();
         $valid   = $request->validated();
 
-        // Le paiement doit porter sur un frais d'un apprenant rattaché et validé.
-        if (! empty($valid['frais_apprenant_id'])) {
-            $frais = FraisApprenant::with(['categorieFrais', 'apprenant.etablissement'])
-                ->findOrFail($valid['frais_apprenant_id']);
+        // Le paiement porte toujours sur une ligne de frais d'un apprenant
+        // rattache a l'utilisateur ET valide par l'etablissement.
+        $frais = FraisApprenant::with(['categorieFrais', 'apprenant.etablissement'])
+            ->findOrFail($valid['frais_apprenant_id']);
 
-            $lien = $this->autoriserAccesFrais($user, $frais);
-            if ($lien instanceof JsonResponse) {
-                return $lien;
-            }
-        } elseif (! empty($valid['apprenant_id'])) {
-            $rattache = $user->apprenants()
-                ->where('apprenants.id', $valid['apprenant_id'])
-                ->first();
-
-            if (! $rattache) {
-                return response()->json(['message' => 'Cet apprenant ne vous est pas rattaché.'], 403);
-            }
-            if (! $rattache->valide_par_etablissement) {
-                return response()->json(['message' => 'Rattachement en attente de validation par l\'établissement.'], 403);
-            }
+        $lien = $this->autoriserAccesFrais($user, $frais);
+        if ($lien instanceof JsonResponse) {
+            return $lien;
         }
 
         $telephoneNormalise = $this->aangaraa->normaliserNumero($valid['telephone']);
@@ -72,44 +65,55 @@ class PaiementController extends Controller
             ], 422);
         }
 
-        // Déterminer le montant + frais selon la cible du paiement
-        if (! empty($valid['frais_apprenant_id'])) {
-            $resteAPayer = $frais->montant_total - $frais->montant_paye;
-            $type        = $valid['type_paiement'] ?? 'integral';
+        // Audit D : le montant debite est decide par le serveur
+        // (App\Support\MontantPaiement). Le `montant` et le `type_paiement`
+        // envoyes par le mobile ne determinent plus la somme : le mobile
+        // affichait une tranche de 25 000 FCFA lue dans le calendrier de
+        // l'etablissement, le serveur debitait le reste du (100 000 FCFA).
+        $echeance = null;
 
-            $montant = $type === 'tranche'
-                ? (int) round($resteAPayer / ($frais->categorieFrais->nb_tranches_max ?? 2))
-                : (int) $resteAPayer;
+        if (! empty($valid['echeancier_id'])) {
+            $echeance = Echeancier::find($valid['echeancier_id']);
 
-            $apprenantId   = $frais->apprenant_id;
-            $fraisId       = $frais->id;
-            $description   = 'EduPay — ' . $frais->categorieFrais->nom . ' — ' . ($frais->apprenant->nom ?? '');
-        } else {
-            $montant     = (int) ($valid['montant'] ?? 0);
-            $apprenantId = $valid['apprenant_id'] ?? null;
-            $fraisId     = $valid['frais_apprenant_id'] ?? null;
-            $type        = 'integral';
-            $description = 'EduPay — Paiement direct';
+            if (! $echeance) {
+                return $this->erreurMontant(MontantPaiement::ERREUR_ECHEANCE_INTROUVABLE);
+            }
         }
 
-        if ($montant < 50) {
-            return response()->json([
-                'message' => 'Montant invalide.',
-                'errors'  => ['montant' => ['Le montant doit être d\'au moins 50 FCFA.']],
-            ], 422);
+        $calcul = $this->montantPaiement->calculer(
+            $frais,
+            $valid['type_paiement'] ?? 'integral',
+            $echeance
+        );
+
+        if ($calcul['erreur'] !== null) {
+            return $this->erreurMontant($calcul['erreur']);
         }
 
-        $frais = $this->aangaraa->calculerFrais($montant);
+        $montant       = $calcul['montant'];
+        $type          = $calcul['type'];
+        $echeancierId  = $calcul['echeancier_id'];
+        $numeroTranche = $calcul['numero_tranche'];
+
+        $apprenantId   = $frais->apprenant_id;
+        $fraisId       = $frais->id;
+        $description   = 'EduPay — ' . $frais->categorieFrais->nom . ' — ' . ($frais->apprenant->nom ?? '');
+
+        // renamed: le detail des frais de service ne doit pas ecraser la
+        // variable $frais qui contient le modele FraisApprenant.
+        $detailFrais = $this->aangaraa->calculerFrais($montant);
 
         $paiement = Paiement::create([
             'user_id'            => $user->id,
             'apprenant_id'       => $apprenantId,
             'frais_apprenant_id' => $fraisId,
+            'echeancier_id'      => $echeancierId,
+            'numero_tranche'     => $numeroTranche,
             'montant'            => $montant,
-            'frais_service'      => $frais['frais_service'],
-            'montant_total_paye' => $frais['montant_total_paye'],
-            'frais_aangaraa'     => $frais['frais_aangaraa'],
-            'marge_edupay'       => $frais['marge_edupay'],
+            'frais_service'      => $detailFrais['frais_service'],
+            'montant_total_paye' => $detailFrais['montant_total_paye'],
+            'frais_aangaraa'     => $detailFrais['frais_aangaraa'],
+            'marge_edupay'       => $detailFrais['marge_edupay'],
             'mode_paiement'      => $valid['mode_paiement'],
             'type_paiement'      => $type,
             'statut'             => 'en_attente',
@@ -161,6 +165,21 @@ class PaiementController extends Controller
             'paiement_id' => $paiement->id,
             'paiement'    => new PaiementResource($paiement->load(['apprenant', 'fraisApprenant.categorieFrais'])),
         ], 201);
+    }
+
+    /**
+     * Erreur métier de calcul du montant. Le client mobile n'affiche que le
+     * champ `message` : il doit donc être en français (ou dans la locale de
+     * l'API), et la réponse rester un 422 lisible.
+     */
+    private function erreurMontant(string $codeErreur): JsonResponse
+    {
+        $message = $this->montantPaiement->message($codeErreur);
+
+        return response()->json([
+            'message' => $message,
+            'errors'  => ['montant' => [$message]],
+        ], 422);
     }
 
     /**

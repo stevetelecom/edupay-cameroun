@@ -374,4 +374,12 @@ return [
     'em_relance_reste' => 'Balance due',
     'em_relance_btn' => 'Settle now',
     'em_relance_aide' => 'You can pay via Mobile Money (MTN, Orange) or bank card directly on the EduPay Cameroon app.',
+
+    // Audit D: messages from the single source of truth for the amount
+    // (App\Support\MontantPaiement). The mobile app only reads `message`.
+    'montant_deja_solde'          => 'These fees are already fully paid.',
+    'montant_echeance_hors_perimetre' => 'The selected instalment does not belong to this fee schedule.',
+    'montant_echeance_deja_payee' => 'This instalment has already been paid.',
+    'montant_echeance_introuvable' => 'The requested instalment was not found.',
+    'montant_invalide'            => 'The amount must be between 50 FCFA and the outstanding balance.',
 ];

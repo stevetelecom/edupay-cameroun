@@ -3,9 +3,14 @@
 @section('title', __('payeur.pay_titre'))
 
 @php
-    $resteAPayer    = $fraisApprenant->montant_total - $fraisApprenant->montant_paye;
+    // Audit D : les montants affiches viennent du controleur, qui les calcule
+    // via App\Support\MontantPaiement — exactement la meme source de verite que
+    // celle utilisee pour debiter. Avant, la vue divisait le reste du par
+    // nb_tranches_max : l'ecran annoncait une tranche que le serveur ne
+    // prenait pas en compte (et inversement sur le mobile).
+    $resteAPayer    = $montants['reste_du'];
     $nbTranches     = $fraisApprenant->categorieFrais->nb_tranches_max ?? 2;
-    $montantTranche = (int) round($resteAPayer / $nbTranches);
+    $montantTranche = $montants['tranche'];
     $fractionnable  = $fraisApprenant->categorieFrais->fractionnable ?? false;
 
     // Calcul frais de service selon barème dégressif

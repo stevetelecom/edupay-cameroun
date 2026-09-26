@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FraisApprenant;
 use App\Models\Paiement;
 use App\Services\AangaraaPayService;
+use App\Support\MontantPaiement;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,10 @@ use App\Jobs\SendNotificationEchecPaiement;
 
 class PaiementController extends Controller
 {
-    public function __construct(private AangaraaPayService $aangaraa) {}
+    public function __construct(
+        private AangaraaPayService $aangaraa,
+        private MontantPaiement $montantPaiement,
+    ) {}
 
     // ─────────────────────────────────────────────
     // Page paiement
@@ -31,7 +35,14 @@ class PaiementController extends Controller
             ? $this->aangaraa->normaliserNumero(Auth::user()->telephone)
             : '';
 
-        return view('payeur.paiement', compact('fraisApprenant', 'telephonePrefill'));
+        // Montants affiches = montants relement debites (source de verite unique).
+        $montants = [
+            'reste_du'   => $this->montantPaiement->resteDu($fraisApprenant),
+            'integral'   => $this->montantPaiement->calculer($fraisApprenant, 'integral')['montant'],
+            'tranche'    => $this->montantPaiement->calculer($fraisApprenant, 'tranche')['montant'],
+        ];
+
+        return view('payeur.paiement', compact('fraisApprenant', 'telephonePrefill', 'montants'));
     }
 
     // ─────────────────────────────────────────────
@@ -97,25 +108,37 @@ class PaiementController extends Controller
             ]);
         }
 
-        $resteAPayer = $fraisApprenant->montant_total - $fraisApprenant->montant_paye;
+        // Audit D : le montant debite est decide par le serveur
+        // (App\Support\MontantPaiement, source de verite unique partagee avec
+        // l'API mobile). Le tunnel web divisait le reste du par nb_tranches_max
+        // au lieu de lire le calendrier de tranches de l'etablissement (CDC F09).
+        $calcul = $this->montantPaiement->calculer($fraisApprenant, $validated['type_paiement']);
 
-        $montant = $validated['type_paiement'] === 'tranche'
-            ? (int) round($resteAPayer / ($fraisApprenant->categorieFrais->nb_tranches_max ?? 2))
-            : (int) $resteAPayer;
+        if ($calcul['erreur'] !== null) {
+            return back()->withInput()->withErrors([
+                'type_paiement' => $this->montantPaiement->message($calcul['erreur']),
+            ]);
+        }
+
+        $montant = $calcul['montant'];
 
         // Calculer les frais de service (visibles payeur = EduPay + AangaraaPay fusionnés)
-        $frais = $this->aangaraa->calculerFrais($montant);
+        // renamed: le detail des frais de service ne doit pas ecraser la
+        // variable $frais qui contient le modele FraisApprenant.
+        $detailFrais = $this->aangaraa->calculerFrais($montant);
 
         // Créer le paiement en base avec statut en_attente
         $paiement = Paiement::create([
             'user_id'            => Auth::id(),
             'apprenant_id'       => $fraisApprenant->apprenant_id,
             'frais_apprenant_id' => $fraisApprenant->id,
+            'echeancier_id'      => $calcul['echeancier_id'],
+            'numero_tranche'     => $calcul['numero_tranche'],
             'montant'            => $montant,
-            'frais_service'      => $frais['frais_service'],
-            'montant_total_paye' => $frais['montant_total_paye'],
-            'frais_aangaraa'     => $frais['frais_aangaraa'],
-            'marge_edupay'       => $frais['marge_edupay'],
+            'frais_service'      => $detailFrais['frais_service'],
+            'montant_total_paye' => $detailFrais['montant_total_paye'],
+            'frais_aangaraa'     => $detailFrais['frais_aangaraa'],
+            'marge_edupay'       => $detailFrais['marge_edupay'],
             'mode_paiement'      => $validated['mode_paiement'],
             'type_paiement'      => $validated['type_paiement'],
             'statut'             => 'en_attente',
