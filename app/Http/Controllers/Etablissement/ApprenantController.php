@@ -340,9 +340,14 @@ class ApprenantController extends Controller
     {
         $this->autoriserAcces($apprenant);
 
-        $apprenant->load(['frais.categorieFrais', 'frais.paiements', 'parents']);
+        $anneeActive = \App\Support\AnneeScolaire::active($apprenant->etablissement);
 
-        return view('etablissement.apprenants.show', compact('apprenant'));
+        $apprenant->load([
+            'frais' => fn ($q) => $q->where('annee_scolaire', $anneeActive)->with('categorieFrais', 'paiements'),
+            'parents',
+        ]);
+
+        return view('etablissement.apprenants.show', compact('apprenant', 'anneeActive'));
     }
 
     public function edit(Apprenant $apprenant)

@@ -97,8 +97,10 @@ class RapportController extends Controller
         $etablissementId = auth()->user()->etablissement_id;
         $anneeScolaire   = AnneeScolaire::active();
 
+        // Filtré sur l'année scolaire ACTIVE — jamais un cumul toutes-années.
         $totalEncaisseAnnee = Paiement::where('statut', 'valide')
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('fraisApprenant', fn ($q) => $q->where('annee_scolaire', $anneeScolaire))
             ->sum('montant');
 
         $totalImpayeAnnee = FraisApprenant::where('annee_scolaire', $anneeScolaire)
@@ -114,12 +116,16 @@ class RapportController extends Controller
             ? round((($totalAttendu - $totalImpayeAnnee) / $totalAttendu) * 100)
             : 0;
 
-        $nbApprenants = Apprenant::where('etablissement_id', $etablissementId)->count();
+        // Apprenants ayant un dossier de frais sur l'année active uniquement
+        $nbApprenants = Apprenant::where('etablissement_id', $etablissementId)
+            ->whereHas('frais', fn ($q) => $q->where('annee_scolaire', $anneeScolaire))
+            ->count();
 
         $totalValideTous = $totalEncaisseAnnee;
 
         $repartitionMoyens = Paiement::where('statut', 'valide')
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('fraisApprenant', fn ($q) => $q->where('annee_scolaire', $anneeScolaire))
             ->selectRaw('mode_paiement, SUM(montant) as total')
             ->groupBy('mode_paiement')
             ->get()

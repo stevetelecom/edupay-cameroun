@@ -16,11 +16,14 @@ class DashboardController extends Controller
         $etablissement   = Auth::user()->etablissement;
         $anneeScolaire   = AnneeScolaire::active($etablissement);
 
-        // Total encaissé ce mois (paiements validés, apprenants de l'établissement)
+        // Total encaissé ce mois — filtré sur l'année scolaire ACTIVE via
+        // frais_apprenant.annee_scolaire (pas juste le mois calendaire) pour ne
+        // jamais mélanger avec des paiements liés à une année passée conservée.
         $totalEncaisseMois = Paiement::where('statut', 'valide')
             ->whereMonth('date_paiement', now()->month)
             ->whereYear('date_paiement', now()->year)
             ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('fraisApprenant', fn ($q) => $q->where('annee_scolaire', $anneeScolaire))
             ->sum('montant');
 
         // Total impayé (reste à payer sur les frais non réglés)

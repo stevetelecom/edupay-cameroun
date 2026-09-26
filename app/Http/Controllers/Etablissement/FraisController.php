@@ -246,11 +246,74 @@ class FraisController extends Controller
     {
         $this->autoriser($frais);
         $nom = $frais->nom;
-        $frais->echeanciers()->delete();
-        $frais->delete();
+
+        $anneeActive = \App\Support\AnneeScolaire::active($frais->etablissement);
+        $estAnneeActive = $frais->annee_scolaire === $anneeActive;
+
+        $aDesPaiements = \App\Models\Paiement::whereHas(
+            'fraisApprenant',
+            fn ($q) => $q->where('categorie_frais_id', $frais->id)
+        )->exists();
+
+        // 🔒 Pour l'année ACTIVE uniquement : on protège les paiements réels en cours.
+        // Pour une année PASSÉE, on autorise la suppression cascade complète — les
+        // seeders/tests d'une ancienne rentrée n'ont plus besoin d'être conservés,
+        // et garder chaque année indéfiniment saturerait la base pour rien.
+        if ($aDesPaiements && $estAnneeActive) {
+            return redirect()->route('etablissement.frais.index')
+                ->with('error', 'Impossible de supprimer « ' . $nom . ' » : des paiements sont déjà enregistrés pour cette catégorie active. Vous pouvez la désactiver à la place.');
+        }
+
+        $this->supprimerCascade($frais);
 
         return redirect()->route('etablissement.frais.index')
             ->with('success', 'Catégorie « ' . $nom . ' » supprimée.');
+    }
+
+    /**
+     * Supprime en cascade : paiements liés -> frais_apprenant -> échéanciers -> catégorie.
+     * Utilisé pour la suppression forcée d'une catégorie d'année passée.
+     */
+    private function supprimerCascade(CategoriesFrais $frais): void
+    {
+        $fraisApprenantIds = $frais->fraisApprenants()->pluck('id');
+
+        if ($fraisApprenantIds->isNotEmpty()) {
+            \App\Models\Paiement::whereIn('frais_apprenant_id', $fraisApprenantIds)->delete();
+        }
+
+        $frais->fraisApprenants()->delete();
+        $frais->echeanciers()->delete();
+        $frais->delete();
+    }
+
+    /**
+     * Purge TOUTES les catégories de frais (+ échéanciers, affectations et
+     * paiements) des années scolaires différentes de l'année active de
+     * l'établissement. Ne touche jamais à l'année en cours.
+     */
+    public function purgerAnneesPassees()
+    {
+        $etablissement = Auth::user()->etablissement;
+        $anneeActive   = \App\Support\AnneeScolaire::active($etablissement);
+
+        $categoriesAnciennes = CategoriesFrais::where('etablissement_id', $etablissement->id)
+            ->where('annee_scolaire', '!=', $anneeActive)
+            ->get();
+
+        if ($categoriesAnciennes->isEmpty()) {
+            return redirect()->route('etablissement.frais.index')
+                ->with('info', __('etablissement.purge_aucune'));
+        }
+
+        $count = $categoriesAnciennes->count();
+
+        foreach ($categoriesAnciennes as $ancienneCategorie) {
+            $this->supprimerCascade($ancienneCategorie);
+        }
+
+        return redirect()->route('etablissement.frais.index')
+            ->with('success', __('etablissement.purge_reussie', ['count' => $count]));
     }
 
     public function storeEcheancier(Request $request, CategoriesFrais $frais)
@@ -314,6 +377,59 @@ class FraisController extends Controller
 
         return redirect()->route('etablissement.frais.index')
             ->with('success', 'Tranche supprimée.');
+    }
+
+    /**
+     * Duplique une catégorie de frais (+ ses échéances) vers une nouvelle année scolaire.
+     * Ne copie PAS les FraisApprenant (chaque année repart avec des montants_paye à 0
+     * et devra être ré-affectée aux apprenants via affecter()).
+     */
+    public function dupliquer(Request $request, CategoriesFrais $frais)
+    {
+        $this->autoriser($frais);
+
+        $validated = $request->validate([
+            'nouvelle_annee_scolaire' => 'required|string|max:20',
+        ]);
+
+        $nouvelleAnnee = $validated['nouvelle_annee_scolaire'];
+
+        $dejaExistante = CategoriesFrais::where('etablissement_id', $frais->etablissement_id)
+            ->where('nom', $frais->nom)
+            ->where('annee_scolaire', $nouvelleAnnee)
+            ->exists();
+
+        if ($dejaExistante) {
+            return redirect()->route('etablissement.frais.index')
+                ->with('error', 'Une catégorie « ' . $frais->nom . ' » existe déjà pour l\'année ' . $nouvelleAnnee . '.');
+        }
+
+        $nouvelleCategorie = CategoriesFrais::create([
+            'etablissement_id' => $frais->etablissement_id,
+            'nom'              => $frais->nom,
+            'description'      => $frais->description,
+            'montant_total'    => $frais->montant_total,
+            'nb_tranches_max'  => $frais->nb_tranches_max,
+            'fractionnable'    => $frais->fractionnable,
+            'annee_scolaire'   => $nouvelleAnnee,
+            'actif'            => true,
+        ]);
+
+        foreach ($frais->echeanciers()->orderBy('numero_tranche')->get() as $echeance) {
+            // Décale les dates d'échéance d'un an par rapport à l'originale
+            $nouvelleDate = \Carbon\Carbon::parse($echeance->date_echeance)->addYear();
+
+            Echeancier::create([
+                'categorie_frais_id' => $nouvelleCategorie->id,
+                'numero_tranche'     => $echeance->numero_tranche,
+                'libelle'            => $echeance->libelle,
+                'montant'            => $echeance->montant,
+                'date_echeance'      => $nouvelleDate,
+            ]);
+        }
+
+        return redirect()->route('etablissement.frais.index')
+            ->with('success', 'Catégorie « ' . $frais->nom . ' » dupliquée vers l\'année ' . $nouvelleAnnee . '. Pensez à l\'affecter aux apprenants.');
     }
 
     private function autoriser(CategoriesFrais $frais)

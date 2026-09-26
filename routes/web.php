@@ -157,6 +157,8 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnemen
     Route::put('/frais/{frais}/echeancier/{echeancier}', [\App\Http\Controllers\Etablissement\FraisController::class, 'updateEcheancier'])->name('frais.echeancier.update');
     Route::delete('/frais/{frais}/echeancier/{echeancier}', [\App\Http\Controllers\Etablissement\FraisController::class, 'destroyEcheancier'])->name('frais.echeancier.destroy');
     Route::delete('/frais/{frais}',     [\App\Http\Controllers\Etablissement\FraisController::class, 'destroy'])->name('frais.destroy');
+    Route::post('/frais/{frais}/dupliquer', [\App\Http\Controllers\Etablissement\FraisController::class, 'dupliquer'])->name('frais.dupliquer');
+    Route::post('/frais/purger-annees-passees', [\App\Http\Controllers\Etablissement\FraisController::class, 'purgerAnneesPassees'])->name('frais.purger');
     Route::delete('/apprenants/{apprenant}/frais/{fraisApprenant}', [\App\Http\Controllers\Etablissement\FraisController::class, 'desaffecter'])->name('apprenants.desaffecter');
 
     Route::get('/apprenants/import/template', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'importTemplate'])

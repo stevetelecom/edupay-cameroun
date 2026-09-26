@@ -161,7 +161,7 @@
 
 @if(!($multiSitesAutorise ?? true))
 <div style="background:#FEF3DC;border:1.5px solid #E8A020;border-radius:10px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-    <div style="font-size:20px;flex-shrink:0;">🔒</div>
+    <div style="flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;">lock</span></div>
     <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:2px;">
             {{ __('etablissement.fonctionnalite_indispo', ['plan' => ucfirst($planActuel ?? 'Basique')]) }}
@@ -175,7 +175,7 @@
 
 @if(session('success'))
 <div class="epcard" style="background:#d1fae5;border-left:4px solid #059669;color:#065f46;margin-bottom:16px;padding:12px 16px;">
-  ✓ {{ session('success') }}
+  <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">check_circle</span> {{ session('success') }}
 </div>
 @endif
 @if(session('error'))
@@ -237,9 +237,9 @@
         </span>
       </div>
       <div style="font-size:12px;color:#888;">
-        📍 {{ $site->ville }}@if($site->quartier), {{ $site->quartier }}@endif
-        &nbsp;·&nbsp; 📞 {{ $site->telephone }}
-        &nbsp;·&nbsp; ✉ {{ $site->email }}
+        <span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;">location_on</span> {{ $site->ville }}@if($site->quartier), {{ $site->quartier }}@endif
+        &nbsp;·&nbsp; <span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;">call</span> {{ $site->telephone }}
+        &nbsp;·&nbsp; <span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;">mail</span> {{ $site->email }}
       </div>
     </div>
 

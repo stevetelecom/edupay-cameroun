@@ -122,6 +122,8 @@ Route::prefix('v1')->group(function () {
         Route::post('/frais/{frais}/echeanciers',          [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'storeEcheancier'])->name('api.v1.etablissement.frais.echeanciers.store');
         Route::put('/frais/{frais}/echeanciers/{echeancier}', [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'updateEcheancier'])->name('api.v1.etablissement.frais.echeanciers.update');
         Route::delete('/frais/{frais}/echeanciers/{echeancier}', [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'destroyEcheancier'])->name('api.v1.etablissement.frais.echeanciers.destroy');
+        Route::post('/frais/{frais}/dupliquer',            [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'dupliquer'])->name('api.v1.etablissement.frais.dupliquer');
+        Route::post('/frais/purger-annees-passees',        [\App\Http\Controllers\Api\Etablissement\FraisController::class, 'purgerAnneesPassees'])->name('api.v1.etablissement.frais.purger');
 
         // Historique des paiements
         Route::get('/paiements', [\App\Http\Controllers\Api\Etablissement\PaiementController::class, 'index'])->name('api.v1.etablissement.paiements.index');

@@ -173,6 +173,36 @@
 </div>
 
 {{-- ══ MODAL : Affecter aux apprenants ══ --}}
+<div id="modal-dupliquer-frais" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm">
+    <div class="ep-modal-head">
+      <h3 class="ep-modal-title">@lang('etablissement.dupliquer_vers_nouvelle_annee')</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-dupliquer-frais')">×</button>
+    </div>
+    <form id="form-dupliquer-frais" method="POST" action="">
+      @csrf
+      <div class="ep-modal-body">
+        <p style="margin-bottom:12px;color:#555;font-size:14px;">
+          @lang('etablissement.dupliquer_frais_explication')
+        </p>
+        <label style="display:block;margin-bottom:6px;font-weight:600;">
+          @lang('etablissement.nouvelle_annee_scolaire')
+        </label>
+        <input type="text" name="nouvelle_annee_scolaire" id="input-nouvelle-annee"
+               class="ep-input" placeholder="Ex: 2026-2027" required
+               style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;">
+        <p style="margin-top:8px;font-size:12px;color:#888;">
+          @lang('etablissement.dupliquer_note_affectation')
+        </p>
+      </div>
+      <div class="ep-modal-foot">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-dupliquer-frais')">@lang('etablissement.annuler')</button>
+        <button type="submit" class="btn-p" style="width:auto;padding:8px 16px;">@lang('etablissement.dupliquer')</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div id="modal-affecter" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
@@ -257,6 +287,31 @@
   </div>
 </div>
 
+{{-- ══ MODAL : Purger les années passées ══ --}}
+<div id="modal-purger-annees" class="ep-modal-overlay">
+  <div class="ep-modal ep-modal-sm ep-modal-danger">
+    <div class="ep-modal-head">
+      <h3>@lang('etablissement.purger_annees_passees')</h3>
+      <button class="ep-modal-close" onclick="epModal.close('modal-purger-annees')">×</button>
+    </div>
+    <div class="ep-modal-body">
+      <p style="font-size:13px;color:#555;line-height:1.6;">
+        {{ __('etablissement.purger_confirm') }}<strong>{{ \App\Support\AnneeScolaire::active($etablissement) }}</strong>.
+      </p>
+      <p style="font-size:12px;color:#9B2C2C;background:#FBEAEA;padding:10px 12px;border-radius:8px;margin-top:10px;">
+        <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">warning</span> {{ __('etablissement.purger_avertissement') }}
+      </p>
+    </div>
+    <div class="ep-modal-foot">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="epModal.close('modal-purger-annees')">@lang('etablissement.annuler')</button>
+      <form method="POST" action="{{ route('etablissement.frais.purger') }}" style="display:inline;">
+        @csrf
+        <button type="submit" class="btn-r" style="width:auto;padding:8px 18px;">@lang('etablissement.purger_bouton')</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 {{-- ══ MODAL : Supprimer une tranche ══ --}}
 <div id="modal-delete-tranche" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm ep-modal-danger">
@@ -290,9 +345,22 @@
     <div style="font-size:17px;font-weight:700;">{{ __('etablissement.categories_titre', ['annee' => \App\Support\AnneeScolaire::active($etablissement)]) }}</div>
     <div style="font-size:12px;color:#888;">{{ __('etablissement.nb_categories', ['count' => $categories->count()]) }}</div>
   </div>
-  <button onclick="epModal.open('modal-create-frais')" class="btn-p" style="width:auto;">
-    @lang('etablissement.nouvelle_categorie_btn')
-  </button>
+  <div style="display:flex;gap:8px;">
+    @php
+        $anneeActiveVue = \App\Support\AnneeScolaire::active($etablissement);
+        $aDesAnneesPassees = $categories->contains(fn($c) => $c->annee_scolaire !== $anneeActiveVue);
+    @endphp
+    @if($aDesAnneesPassees)
+      <button onclick="epModal.open('modal-purger-annees')"
+              style="width:auto;padding:10px 16px;background:transparent;color:var(--ep-red);border:2px solid var(--ep-red);border-radius:var(--radius-md);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;">
+        <span class="material-symbols-outlined" style="font-size:16px;">delete_sweep</span>
+        @lang('etablissement.purger_annees_passees')
+      </button>
+    @endif
+    <button onclick="epModal.open('modal-create-frais')" class="btn-p" style="width:auto;">
+      @lang('etablissement.nouvelle_categorie_btn')
+    </button>
+  </div>
 </div>
 
 <div class="epcard" style="padding:0;overflow:hidden;">
@@ -336,6 +404,11 @@
           @lang('etablissement.ajouter_tranche_btn')
         </button>
       @endif
+      <button onclick="dupliquerFrais({{ $cat->id }}, '{{ addslashes($cat->nom) }}')"
+              class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;" title="@lang('etablissement.dupliquer_vers_nouvelle_annee')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        @lang('etablissement.dupliquer')
+      </button>
       <button onclick="modifierFrais({{ $cat->id }}, '{{ addslashes($cat->nom) }}', '{{ addslashes($cat->description ?? '') }}', {{ $cat->montant_total }}, {{ $cat->nb_tranches_max }}, {{ $cat->fractionnable ? 'true' : 'false' }}, {{ $cat->actif ? 'true' : 'false' }}, '{{ $cat->annee_scolaire }}')"
               class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;">
         @lang('etablissement.modifier_btn')
@@ -358,10 +431,6 @@
     </button>
   </div>
   @endforelse
-</div>
-
-<div style="margin-top:14px;background:var(--ep-gold-lt);border-radius:var(--radius-md);padding:12px 16px;font-size:12px;color:#854F0B;border-left:3px solid var(--ep-gold);">
-  {!! __('etablissement.cdc_note') !!}
 </div>
 
 @endsection
@@ -393,6 +462,12 @@ function modifierFrais(id, nom, desc, montant, tranches, frac, actif, annee) {
     document.getElementById('edit-frais-frac').checked  = frac;
     document.getElementById('edit-frais-actif').checked = actif;
     epModal.open('modal-edit-frais');
+}
+
+function dupliquerFrais(id, nom) {
+    document.getElementById('form-dupliquer-frais').action = `/etablissement/frais/${id}/dupliquer`;
+    document.getElementById('input-nouvelle-annee').value = '@php echo \App\Support\AnneeScolaire::active(); @endphp';
+    epModal.open('modal-dupliquer-frais');
 }
 
 function supprimerFrais(id, nom) {

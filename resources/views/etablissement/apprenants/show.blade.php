@@ -104,7 +104,7 @@
 
 @if(session('success'))
 <div class="epcard" style="background:#d1fae5;border-left:4px solid #059669;color:#065f46;margin-bottom:16px;padding:12px 16px;">
-    ✓ {{ session('success') }}
+    <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">check_circle</span> {{ session('success') }}
 </div>
 @endif
 
@@ -151,7 +151,7 @@
 
 {{-- ── Frais ── --}}
 <div class="seclbl" style="margin-top:0;">
-    {{ __('etablissement.frais_scolaires', ['annee' => $apprenant->frais->first()->annee_scolaire ?? \App\Support\AnneeScolaire::active()]) }}
+    {{ __('etablissement.frais_scolaires', ['annee' => $anneeActive]) }}
 </div>
 <div class="epcard" style="padding:0;overflow:hidden;margin-bottom:18px;">
     <table class="ep-table">

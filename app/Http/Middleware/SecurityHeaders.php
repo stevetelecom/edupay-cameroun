@@ -26,13 +26,21 @@ class SecurityHeaders
         // CSP : autorise les CDN deja utilises par les vues (Google Fonts,
         // Material Symbols) + auto-hebergement. A resserrer si de nouvelles
         // sources externes sont ajoutees plus tard.
+        // En local (Vite dev server sur 5173), on autorise aussi le HMR websocket + le
+        // chargement des scripts/styles depuis 127.0.0.1:5173.
+        $viteDevServer = app()->environment('local')
+            ? " http://127.0.0.1:5173 ws://127.0.0.1:5173"
+            : "";
+
         $response->headers->set('Content-Security-Policy',
             "default-src 'self'; "
-            . "script-src 'self' 'unsafe-inline'; "
-            . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            . "script-src 'self' 'unsafe-inline' https://code.jquery.com https://cdn.datatables.net"
+                . $viteDevServer . "; "
+            . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.datatables.net"
+                . $viteDevServer . "; "
             . "font-src 'self' https://fonts.gstatic.com; "
             . "img-src 'self' data: https:; "
-            . "connect-src 'self'; "
+            . "connect-src 'self'" . $viteDevServer . "; "
             . "frame-ancestors 'none';"
         );
 

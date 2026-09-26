@@ -136,7 +136,7 @@
 
 @if(session('success'))
 <div class="epcard" style="background:#d1fae5;border-left:4px solid #059669;color:#065f46;margin-bottom:16px;padding:12px 16px;">
-  ✓ {{ session('success') }}
+  <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">check_circle</span> {{ session('success') }}
 </div>
 @endif
 @if(session('error'))
