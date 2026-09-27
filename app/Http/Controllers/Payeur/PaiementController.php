@@ -406,7 +406,7 @@ class PaiementController extends Controller
             return response()->json(['ok' => false], 422);
         }
 
-        // 🔒 SÉCURITÉ CRITIQUE : on ne fait JAMAIS confiance au statut envoyé dans le webhook.
+        // SÉCURITÉ CRITIQUE : on ne fait JAMAIS confiance au statut envoyé dans le webhook.
         // On revérifie systématiquement via un appel serveur-à-serveur authentifié par notre app_key.
         // Ainsi, un webhook forgé (POST direct sans vraie transaction) ne peut jamais valider un paiement.
         $verification = $this->aangaraa->verifierStatut($paiement->pay_token);
