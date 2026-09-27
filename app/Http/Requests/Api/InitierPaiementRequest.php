@@ -32,9 +32,10 @@ class InitierPaiementRequest extends FormRequest
             'frais_apprenant_id' => ['required', 'integer', 'exists:frais_apprenant,id'],
             'apprenant_id'       => ['nullable', 'integer', 'exists:apprenants,id'],
             'echeancier_id'      => ['nullable', 'integer', 'exists:echeanciers,id'],
-            // Le montant est informative : il ne determine jamais le debit
-            // (voir App\Support\MontantPaiement).
-            'montant'            => ['nullable', 'integer', 'min:50'],
+            // Le montant est informatif : il ne determine jamais le debit
+            // (voir App\Support\MontantPaiement). Le vrai garde-fou est cote
+            // serveur sur le montant calcule, non sur une valeur client.
+            'montant'            => ['nullable', 'integer'],
             'type_paiement'      => ['nullable', 'in:integral,tranche'],
             'telephone'          => ['required', 'regex:/^6\d{8}$/'],
             'mode_paiement'      => ['required', 'in:mtn_momo,orange_money,carte'],

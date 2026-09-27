@@ -379,5 +379,5 @@ return [
     'montant_echeance_hors_perimetre' => "L'echeance selectionnee n'appartient pas a ce bareme de frais.",
     'montant_echeance_deja_payee' => 'Cette tranche a deja ete payee.',
     'montant_echeance_introuvable' => "L'echeance demandee est introuvable.",
-    'montant_invalide'            => 'Le montant doit etre compris entre 50 FCFA et le reste du du.',
+    'montant_invalide'            => 'Le montant doit etre compris entre 50 FCFA et le reste du.',
 ];

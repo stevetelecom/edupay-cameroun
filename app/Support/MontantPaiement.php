@@ -45,7 +45,19 @@ final class MontantPaiement
     public const ERREUR_ECHEANCE_INTROUVABLE  = 'echeance_introuvable';
     public const ERREUR_MONTANT_INVALIDE      = 'montant_invalide';
 
-    /** Montant minimum accepte par l'operateur (FCFA). */
+    /**
+     * Montant minimum accepte par l'operateur (FCFA).
+     *
+     * Cette constante etait declaree mais JAMAIS utilisee : le seul controle
+     * existant etait un `min:50` cote client sur un champ que le serveur
+     * IGNORE (regle « le montant vient toujours du serveur »). Consequence :
+     * un reste du de 10 FCFA — ou une tranche de 10 FCFA issue d'un
+     * calendrier mal configure — partaient en paiement AangaraaPay et se
+     * faisaient refuser / ou transitaient pour quelques FCFA.
+     * Le garde-fou est donc applique ici, sur le montant calcule, au seul
+     * endroit ou il compte : tous les chemins (integral, tranche ciblee,
+     * prochaine echeance, fractionnement equitable) passent par reussi().
+     */
     public const MONTANT_MINIMUM = 50;
 
     /**
@@ -206,6 +218,13 @@ final class MontantPaiement
      */
     private function reussi(int $montant, ?int $numeroTranche, ?int $echeancierId, string $type): array
     {
+        // Aucun montant inferieur au minimum operateur ne part en paiement :
+        // le caller affiche desormais « montant invalide » au lieu d'initier
+        // un paiement que l'operateur refusera.
+        if ($montant < self::MONTANT_MINIMUM) {
+            return $this->echec(self::ERREUR_MONTANT_INVALIDE, $montant);
+        }
+
         return [
             'montant'          => $montant,
             'numero_tranche'   => $numeroTranche,

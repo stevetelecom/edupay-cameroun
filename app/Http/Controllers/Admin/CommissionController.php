@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Commission;
+use App\Jobs\ReverserEtablissementJob;
 use App\Models\Etablissement;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
@@ -39,8 +40,14 @@ class CommissionController extends Controller
         $stats = [
             'total_mois'   => Commission::whereMonth('created_at', now()->month)->sum('montant_commission'),
             'nb_mois'      => Commission::whereMonth('created_at', now()->month)->count(),
-            'calculees'    => Commission::where('statut', 'calculee')->count(),
-            'prelevees'    => Commission::where('statut', 'prelevee')->count(),
+            'calculees'    => Commission::where('statut', Commission::STATUT_CALCULEE)->count(),
+            'prelevees'    => Commission::where('statut', Commission::STATUT_PRELEVEE)->count(),
+
+            // Argent bloque jamais parti vers l'etablissement. Chiffre a suivre en
+            // priorite : avant ces stats, un reversement bloque etait invisible.
+            'a_traiter'    => Commission::whereIn('statut', Commission::STATUTS_A_TRAITER)->count(),
+            'montant_bloque' => Commission::whereIn('statut', Commission::STATUTS_A_TRAITER)
+                                    ->sum('montant_net_etablissement'),
         ];
 
         $etablissements = Etablissement::where('statut', 'actif')
@@ -88,15 +95,58 @@ class CommissionController extends Controller
 
     public function marquerPrelevee(Request $request, Commission $commission)
     {
-        $commission->update(['statut' => 'prelevee']);
+        if ($commission->statut === Commission::STATUT_PRELEVEE) {
+            return back()->with('error', 'Cette commission est deja marquee comme prelevee.');
+        }
+
+        $commission->update([
+            'statut'      => Commission::STATUT_PRELEVEE,
+            'reversed_at' => now(),
+        ]);
 
         AuditLog::enregistrer(
             Auth::guard('admin')->user(),
             'COMMISSION_PRELEVEE',
-            "Commission #{$commission->id} marquee comme prelevee",
-            $request, 'INFO'
+            "Commission #{$commission->id} ({$commission->statut} -> prelevee) validee manuellement",
+            $request, 'WARNING',
+            ['statut' => $commission->statut],
+            ['statut' => Commission::STATUT_PRELEVEE]
         );
 
         return back()->with('success', 'Commission marquee comme prelevee.');
+    }
+
+    /**
+     * Relance un reversement bloque depuis l'interface admin.
+     *
+     * Volontairement refuse pour l'etat « a verifier » : cet etat signifie
+     * que l'argent est peut-etre deja parti. Le seul moyen de forcer reste la
+     * commande artisan --inclure-a-verifier, tracee et explicite.
+     */
+    public function rejouerReversement(Request $request, Commission $commission)
+    {
+        if ($commission->statut === Commission::STATUT_A_VERIFIER) {
+            return back()->with(
+                'error',
+                "Commission #{$commission->id} en attente de verification : l'argent est peut-etre deja parti. "
+                .'Verifiez d\'abord la reference dans l\'historique AangaraaPay pour eviter un double paiement.'
+            );
+        }
+
+        if ($commission->statut === Commission::STATUT_PRELEVEE) {
+            return back()->with('error', 'Cette commission a deja ete reversee.');
+        }
+
+        ReverserEtablissementJob::dispatch($commission->id);
+
+        AuditLog::enregistrer(
+            Auth::guard('admin')->user(),
+            'COMMISSION_REVERSEMENT_REJOUE',
+            "Relance manuelle du reversement de la commission #{$commission->id} (etat {$commission->statut})",
+            $request, 'WARNING',
+            ['statut' => $commission->statut]
+        );
+
+        return back()->with('success', "Relance du reversement #{$commission->id} mise en file.");
     }
 }

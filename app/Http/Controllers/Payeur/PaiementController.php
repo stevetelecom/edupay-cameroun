@@ -35,11 +35,17 @@ class PaiementController extends Controller
             ? $this->aangaraa->normaliserNumero(Auth::user()->telephone)
             : '';
 
-        // Montants affiches = montants relement debites (source de verite unique).
+        // Montants affiches = montants reellement debites (source de verite unique).
+        $calculTranche = $this->montantPaiement->calculer($fraisApprenant, 'tranche');
+
         $montants = [
             'reste_du'   => $this->montantPaiement->resteDu($fraisApprenant),
             'integral'   => $this->montantPaiement->calculer($fraisApprenant, 'integral')['montant'],
-            'tranche'    => $this->montantPaiement->calculer($fraisApprenant, 'tranche')['montant'],
+            'tranche'    => $calculTranche['montant'],
+
+            // Le serveur refuse toute tranche sous le minimum operateur : on ne
+            // propose pas l'option plutot que d'annoncer un montant non payable.
+            'tranche_valide' => $calculTranche['erreur'] === null,
         ];
 
         return view('payeur.paiement', compact('fraisApprenant', 'telephonePrefill', 'montants'));

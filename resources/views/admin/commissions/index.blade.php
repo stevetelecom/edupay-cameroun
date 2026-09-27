@@ -129,7 +129,35 @@
       <div class="text-xs text-gray-400">{{ __('admin.prelevees') }}</div>
     </div>
   </div>
+  {{-- Argent bloque : reverse en echec OU dont le sort est inconnu. Ces
+       reversements partent de la carte ci-dessus, pas du chiffre « à prélever »
+       (qui ne compte que les 'calculee'), l'argent était donc invisible. --}}
+  <div class="border rounded-xl p-4 flex items-center gap-3 {{ $stats['a_traiter'] > 0 ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200' }}">
+    <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 {{ $stats['a_traiter'] > 0 ? 'bg-red-100' : 'bg-gray-50' }}">
+      <svg class="w-4 h-4 {{ $stats['a_traiter'] > 0 ? 'text-red-600' : 'text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div>
+      <div class="text-xl font-bold {{ $stats['a_traiter'] > 0 ? 'text-red-700' : 'text-gray-400' }}">{{ $stats['a_traiter'] }}</div>
+      <div class="text-xs {{ $stats['a_traiter'] > 0 ? 'text-red-600' : 'text-gray-400' }}">
+        {{ __('admin.a_traiter') }} —
+        <span class="font-semibold">{{ number_format($stats['montant_bloque'], 0, ',', ' ') }} FCFA</span>
+      </div>
+    </div>
+  </div>
 </div>
+
+@if($stats['a_traiter'] > 0)
+<div style="background:#FEE2E2;border-left:4px solid #DC2626;border-radius:10px;padding:14px 20px;margin-bottom:20px;">
+  <div style="font-size:13px;font-weight:700;color:#991B1B;">{{ __('admin.a_traiter_titre') }}</div>
+  <div style="font-size:12px;color:#991B1B;margin-top:4px;line-height:1.6;">{!! __('admin.a_traiter_texte') !!}</div>
+  @if($stats['a_traiter'] > 0)
+    <a href="{{ route('admin.commissions.index', ['statut' => 'echec']) }}"
+       style="display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:#991B1B;text-decoration:underline;">
+      {{ __('admin.voir_echecs') }} →
+    </a>
+  @endif
+</div>
+@endif
 
 {{-- Bandeau taux global --}}
 <div style="background:#FEF3DC;border-left:4px solid #E8A020;border-radius:10px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
@@ -162,7 +190,10 @@
     <select name="statut" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#E8A020]">
       <option value="">{{ __('admin.tous_statuts') }}</option>
       <option value="calculee" {{ request('statut')==='calculee' ? 'selected' : '' }}>{{ __('admin.a_prelever') }}</option>
-      <option value="prelevee" {{ request('statut')==='prelevee' ? 'selected' : '' }}>{{ __('admin.prelevee') }}</option>
+      <option value="en_cours" {{ request('statut')==='en_cours' ? 'selected' : '' }}>{{ __('admin.en_cours') }}</option>
+      <option value="prelevee" {{ request('statut')==='prelevee' ? 'selected' : '' }}>{{ __('admin.prelevees') }}</option>
+      <option value="a_verifier" {{ request('statut')==='a_verifier' ? 'selected' : '' }}>{{ __('admin.a_verifier') }}</option>
+      <option value="echec" {{ request('statut')==='echec' ? 'selected' : '' }}>{{ __('admin.echec') }}</option>
     </select>
     <button type="submit" class="bg-[#E8A020] hover:bg-[#cc8c1a] text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
       Filtrer
@@ -212,8 +243,22 @@
         <td class="px-4 py-3">
           @if($c->statut === 'prelevee')
           <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-green-100 text-green-800">{{ __('admin.prelevee') }}</span>
+          @elseif($c->statut === 'en_cours')
+          <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-blue-100 text-blue-800">{{ __('admin.en_cours') }}</span>
+          @elseif($c->statut === 'a_verifier')
+          <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-orange-100 text-orange-800" title="{{ $c->reversement_erreur }}">{{ __('admin.a_verifier') }}</span>
+          @elseif($c->statut === 'echec')
+          <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-red-100 text-red-800" title="{{ $c->reversement_erreur }}">{{ __('admin.echec') }}</span>
           @else
           <span class="text-xs px-2.5 py-1 rounded-full font-medium bg-yellow-100 text-yellow-800">{{ __('admin.a_prelever') }}</span>
+          @endif
+
+          @if($c->reversement_erreur && $c->statut !== 'prelevee')
+          <div class="text-[10px] text-gray-500 mt-1 leading-snug">{{ \Illuminate\Support\Str::limit($c->reversement_erreur, 90) }}</div>
+          @endif
+
+          @if($c->paiement && $c->paiement->statut === 'rembourse')
+          <div class="text-[10px] text-purple-700 bg-purple-50 rounded px-1.5 py-0.5 mt-1 inline-block">{{ __('admin.paiement_rembourse') }}</div>
           @endif
         </td>
         <td class="px-4 py-3">
@@ -229,6 +274,19 @@
                     class="w-7 h-7 flex items-center justify-center rounded-lg bg-green-50 hover:bg-green-100 text-green-600 transition-colors" title="{{ __('admin.marquer_prelevee_btn') }}">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </button>
+            @endif
+            {{-- Relancer le reversement. Volontairement absent en « a verifier » :
+                 l'argent est peut-etre deja parti, seul l'artisan peut forcer. --}}
+            @if(in_array($c->statut, ['echec', 'calculee'], true))
+            <form method="POST" action="{{ route('admin.commissions.rejouer', $c) }}"
+                  onsubmit="return confirm('{{ __('admin.confirmer_rejeu') }}');" class="inline">
+              @csrf
+              @method('PATCH')
+              <button type="submit"
+                      class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 transition-colors" title="{{ __('admin.rejouer_reversement') }}">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+              </button>
+            </form>
             @endif
           </div>
         </td>

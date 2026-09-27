@@ -8,6 +8,7 @@ use App\Models\Remboursement;
 use App\Support\TexteLibre;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class RemboursementController extends Controller
@@ -173,13 +174,42 @@ class RemboursementController extends Controller
             $remboursement->paiement->update(['statut' => 'rembourse']);
         }
 
+        // Avertissement claw-back : si l'argent a deja ete reverse a
+        // l'etablissement, rembourser le parent fait sortir de l'etablissement
+        // une somme qui lui a deja ete versee. Avant ce controle rien ne le
+        // signalait : le remboursement etait approuve en base sans trace.
+        $commission = $remboursement->paiement->commission()->first();
+
+        $dejaReverse = $commission?->reversementEffectue() === true;
+
+        if ($dejaReverse) {
+            Log::critical('Remboursement approuve alors que le reversement etait deja effectue', [
+                'remboursement_id'  => $remboursement->id,
+                'paiement_id'       => $remboursement->paiement_id,
+                'commission_id'     => $commission->id,
+                'montant_rembourse' => (float) $remboursement->montant,
+                'reference'         => $commission->reference_reversement,
+            ]);
+        }
+
+        $message = 'Remboursement de '
+            . number_format($remboursement->montant, 0, ',', ' ') . ' FCFA approuve.';
+
+        if ($dejaReverse) {
+            $message .= ' ATTENTION : cet argent a deja ete reverse a votre etablissement (reference '
+                . ($commission->reference_reversement ?? 'inconnue') . ') : l\'etablissement doit le '
+                . 'restituer avant que le parent ne soit rembourse, sinon EduPay paie deux fois.';
+        }
+
         return response()->json([
-            'message' => 'Remboursement de '
-                . number_format($remboursement->montant, 0, ',', ' ') . ' FCFA approuvé.',
-            'data'    => [
-                'id'     => $remboursement->id,
-                'statut' => 'approuve',
-            ],
+            'message' => $message,
+            'data'    => array_filter([
+                'id'                   => $remboursement->id,
+                'statut'               => 'approuve',
+                'alerte_reversement'   => $dejaReverse
+                    ? 'Le reversement AangaraaPay de ce paiement a deja ete effectue : une restitution par l\'etablissement est necessaire avant le remboursement du parent.'
+                    : null,
+            ]),
         ]);
     }
 

@@ -8,6 +8,30 @@ use App\Support\LogMasking;
 
 class AangaraaPayService
 {
+    /**
+     * Taux reellement preleve par AangaraaPay sur un reversement, mesure le
+     * 27/09/2026 sur l'API de production : reponse
+     * `{"commission_rate":2.2,"commission_amount":0.02,"total_required":1.02}`
+     * pour un virement de 1,00 — soit 2,2 % payes EN PLUS du montant livre.
+     *
+     * L'ancien code estimait 2 %, ce qui sous-estimait le cout reel et,
+     * combine avec max(0, ...), affichait une marge de 0 sur la plupart des
+     * montants (a 50 000 FCFA : 800 de frais visibles pour 1 100 preleves).
+     * Ce taux sert uniquement a la COMPTABILITE interne : le bareme visible
+     * reste fixe par le bareme ci-dessous, c'est une decision commerciale.
+     */
+    public const TAUX_AANGARAA = 0.022;
+
+    /** Bareme des frais visibles par le payeur (fusion EduPay + AangaraaPay). */
+    public const BAREME_FRAIS = [
+        10000  => 200,
+        25000  => 400,
+        50000  => 800,
+        100000 => 1500,
+    ];
+
+    public const FRAIS_PAR_DEFAUT = 2500;
+
     private string $apiUrl;
     private string $appKey;
 
@@ -18,31 +42,95 @@ class AangaraaPayService
     }
 
     /**
+     * Verifie que l'URL de notification AangaraaPay est exploitable.
+     *
+     * Le controle ne portait que sur `localhost` / `127.0.0.1` : une coquille
+     * de domaine (`gsi2026` ecrit `qsi2026`) passait le controle en silence,
+     * et TOUS les callbacks AangaraaPay etaient perdus. Les paiements
+     * restaient encaisse grace a la reconciliation, mais avec minutes de
+     * retard et sans trace de l'erreur.
+     *
+     * @return array{ok:bool, niveau:string, raison:?string}
+     */
+    public function verifierNotifyUrl(?string $notifyUrl): array
+    {
+        if (! $notifyUrl) {
+            return ['ok' => false, 'niveau' => 'erreur', 'raison' => 'notify_url vide'];
+        }
+
+        $hote = parse_url($notifyUrl, PHP_URL_HOST);
+
+        if (! $hote) {
+            return ['ok' => false, 'niveau' => 'erreur', 'raison' => 'notify_url illisible : '.$notifyUrl];
+        }
+
+        // localhost/127.0.0.1 : AangaraaPay n'a aucune chance de joindre ce
+        // serveur, et aucun callback ne parviendra jamais.
+        if (in_array(strtolower($hote), ['localhost', '127.0.0.1', '0.0.0.0'], true)) {
+            return ['ok' => false, 'niveau' => 'erreur', 'raison' => sprintf(
+                'notify_url (%s) pointe vers la machine locale : aucun callback AangaraaPay ne peut aboutir.',
+                $hote
+            )];
+        }
+
+        $hoteAttendu = parse_url((string) config('app.url'), PHP_URL_HOST);
+
+        // En developpement APP_URL vaut souvent http://localhost:8000 : on ne
+        // compare alors que notify_url est lui-meme public, sinon le controle
+        // hurlerait a tort sur un poste local.
+        $attenduEstPublic = $hoteAttendu
+            && ! in_array(strtolower($hoteAttendu), ['localhost', '127.0.0.1', '0.0.0.0'], true);
+
+        if ($attenduEstPublic && strcasecmp($hote, $hoteAttendu) !== 0) {
+            return ['ok' => false, 'niveau' => 'erreur', 'raison' => sprintf(
+                'notify_url (%s) ne pointe pas vers APP_URL (%s) : tous les callbacks AangaraaPay seront perdus.',
+                $hote,
+                $hoteAttendu
+            )];
+        }
+
+        return ['ok' => true, 'niveau' => 'ok', 'raison' => null];
+    }
+
+    /**
      * Calcule les frais de service visibles par le payeur.
      * Barème dégressif — fusionné EduPay + AangaraaPay.
      * Le payeur ne voit qu'une seule ligne "Frais de service EduPay".
      */
     public function calculerFrais(int $montant): array
     {
-        // Frais visibles (fusionné EduPay + AangaraaPay)
-        $fraisVisibles = match(true) {
-            $montant <= 10000  => 200,
-            $montant <= 25000  => 400,
-            $montant <= 50000  => 800,
-            $montant <= 100000 => 1500,
-            default            => 2500,
-        };
+        // Frais visibles (fusion EduPay + AangaraaPay) : barème unique, declare
+        // en constante pour ne pas avoir deux définitions qui divergent.
+        $fraisVisibles = self::FRAIS_PAR_DEFAUT;
 
-        // Part AangaraaPay estimée à 2% (gérée en backend, invisible au payeur)
-        $fraisAangaraa = (int) round($montant * 0.02);
+        foreach (self::BAREME_FRAIS as $plafond => $frais) {
+            if ($montant <= $plafond) {
+                $fraisVisibles = $frais;
+                break;
+            }
+        }
 
-        // Marge EduPay = frais visibles - part AangaraaPay
+        // Cout reel du reversement, mesuré chez AangaraaPay (2,2 %).
+        $fraisAangaraa = (int) round($montant * self::TAUX_AANGARAA);
+
+        // Marge EduPay = frais visibles - part AangaraaPay. Le max(0, ...) est
+        // conserve : le bareme visible releve d'une decision commerciale, on ne
+        // le change pas ici. En revanche le deficit n'est plus silencieux.
         $margeEdupay = max(0, $fraisVisibles - $fraisAangaraa);
+
+        if ($fraisAangaraa > $fraisVisibles) {
+            Log::warning('Frais de service inferieurs au reversement AangaraaPay', [
+                'montant'          => $montant,
+                'frais_encaisses'  => $fraisVisibles,
+                'cout_reversement' => $fraisAangaraa,
+                'perte'            => $fraisAangaraa - $fraisVisibles,
+            ]);
+        }
 
         return [
             'montant_frais'       => $montant,          // Frais scolaires nets
             'frais_service'       => $fraisVisibles,    // Ce que voit le payeur
-            'frais_aangaraa'      => $fraisAangaraa,    // Backend uniquement
+            'frais_aangaraa'      => $fraisAangaraa,    // Cout reel du reversement
             'marge_edupay'        => $margeEdupay,      // Gain EduPay
             'montant_total_paye'  => $montant + $fraisVisibles, // Total débité
         ];
@@ -51,6 +139,14 @@ class AangaraaPayService
     /**
      * Reverser le net à l'établissement via API withdrawal AangaraaPay.
      * Appelé automatiquement après chaque paiement validé (webhook SUCCESSFUL).
+     *
+     * `outcome` distingue trois situations que l'ancien code confondait en un
+     * simple `succes: false`, avec des consquences opposees sur l'argent :
+     *   refuse       AangaraaPay a repondu « non » (solde insuffisant, cle
+     *                invalide...) : RIEN n'est parti, on peut reessayer.
+     *   indetermine  aucune reponse exploitable (timeout, 5xx) : l'argent est
+     *                PEUT-ETRE parti, on ne doit surtout pas renvoyer a l'aveugle.
+     *   succes       virement enregistre par AangaraaPay.
      */
     public function reverserEtablissement(
         string $telephone,
@@ -60,6 +156,7 @@ class AangaraaPayService
     ): array {
         try {
             $numero = $this->normaliserNumero($telephone);
+            $operateurApi = $operateur === 'orange' ? 'Orange_Cameroon' : 'MTN_Cameroon';
 
             $response = Http::timeout(30)
                 ->post($this->apiUrl . '/aangaraa-pay/withdrawal', [
@@ -67,28 +164,48 @@ class AangaraaPayService
                     'amount'       => (string) $montant,
                     'description'  => $description,
                     'app_key'      => $this->appKey,
-                    'operator'     => $operateur === 'orange' ? 'Orange_Cameroon' : 'MTN_Cameroon',
+                    'operator'     => $operateurApi,
                 ]);
 
             $data = $response->json();
+            $reference = $data['data']['transaction_id'] ?? null;
 
             Log::info('AangaraaPay withdrawal', [
-                'telephone' => LogMasking::telephone($numero),
-                'montant'   => $montant,
-                'response'  => LogMasking::payloadReduit($data),
+                'telephone'          => LogMasking::telephone($numero),
+                'montant'            => $montant,
+                'operateur_demande'  => $operateurApi,
+                'operateur_repondu'  => $data['data']['operator'] ?? null,
+                'http'               => $response->status(),
+                'reference'          => $reference,
+                'response'           => LogMasking::payloadReduit($data),
             ]);
 
+            // 5xx ou 2xx sans reference : AangaraaPay n'a pas tranche, l'argent
+            // peut avoir ete engage ou non. On ne suppose rien.
+            if ($response->serverError() || ($response->successful() && ! $reference)) {
+                return [
+                    'succes'    => false,
+                    'outcome'   => 'indetermine',
+                    'reference' => $reference,
+                    'message'   => $data['message'] ?? 'Réponse AangaraaPay inexploitable (HTTP '.$response->status().')',
+                    'raw'       => $data,
+                ];
+            }
+
             return [
-                'succes'    => $response->successful(),
-                'reference' => $data['data']['transaction_id'] ?? null,
+                'succes'    => $response->successful() && (bool) $reference,
+                'outcome'   => $response->successful() && $reference ? 'succes' : 'refuse',
+                'reference' => $reference,
                 'message'   => $data['message'] ?? 'Erreur inconnue',
                 'raw'       => $data,
             ];
 
         } catch (\Throwable $e) {
             Log::error('AangaraaPay withdrawal exception', ['error' => $e->getMessage()]);
+
             return [
                 'succes'    => false,
+                'outcome'   => 'indetermine',
                 'reference' => null,
                 'message'   => 'Erreur : ' . $e->getMessage(),
                 'raw'       => [],

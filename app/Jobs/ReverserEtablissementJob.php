@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Mail\AlerteReversementManquantMail;
 use App\Models\Commission;
 use App\Services\AangaraaPayService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -9,17 +10,32 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Reverse le net à l'établissement via AangaraaPay.
  *
- * Sécurité (E-02 audit) : cet appel HTTP (timeout 30s) était auparavant
+ * Sécurité (E-02 audit) : cet appel HTTP (timeout 30s) était précédemment
  * exécuté À L'INTÉRIEUR de la transaction DB verrouillée de
  * traiterPaiementValide(), ce qui pouvait maintenir un lockForUpdate()
  * sur la ligne paiement jusqu'à ~45s en cas de lenteur AangaraaPay —
  * risque de deadlock et saturation du pool de connexions sous charge
  * (CDC §6.4 exige 500 tx/min). Il est maintenant dispatché en job,
  * après le commit de la transaction, avec retry automatique.
+ *
+ * ── Ce qui a été corrigé le 27/09/2026 (l'argent pouvait rester bloqué
+ *    indefiniment, sans que personne ne le sache) ─────────────────────────
+ * 1. L'echec DEFINITIF ne leve aucune exception : sur la derniere tentative le
+ *    job sortait normalement, failed() n'etait donc jamais appele et le TODO
+ *    « alerter l'admin » n'a jamais existe. La commission restait 'calculee'
+ *    indefiniment, sans aucun moyen de la rejouer.
+ * 2. Un numero de reversement manquant ou mal forme faisait Log::critical +
+ *    return : aucun retry, aucune alerte, argent bloque.
+ * 3. AUCUNE protection contre le double virement : si AangaraaPay executait le
+ *    transfert puis que la reponse se perdait, le retry renvoyait l'argent une
+ *    seconde fois. L'etat 'en_cours' est pose AVANT l'appel : au retry, un
+ *    etat 'en_cours' orphelin passe en 'a_verifier' (verification humaine)
+ *    au lieu d'etre renvoye a l'aveugle.
  */
 class ReverserEtablissementJob implements ShouldQueue
 {
@@ -34,54 +50,86 @@ class ReverserEtablissementJob implements ShouldQueue
 
     public function handle(AangaraaPayService $aangaraa): void
     {
-        $commission = Commission::find($this->commissionId);
+        $commission = Commission::with(['etablissement', 'paiement'])->find($this->commissionId);
 
-        if (! $commission || $commission->statut === 'prelevee') {
+        if (! $commission || $commission->statut === Commission::STATUT_PRELEVEE) {
             return; // Déjà traité ou supprimé — idempotent
+        }
+
+        // Ces états demandent une intervention humaine : on ne rejoue jamais
+        // tout seul un virement dont on ignore le sort.
+        if (in_array($commission->statut, [Commission::STATUT_A_VERIFIER, Commission::STATUT_ECHEC], true)) {
+            Log::warning('ReverserEtablissementJob : etat terminal, aucun nouvel envoi', [
+                'commission_id' => $commission->id,
+                'statut'        => $commission->statut,
+            ]);
+            return;
+        }
+
+        // ── Double virement : un essai precedent a ete engage mais son sort
+        //    n'a jamais ete enregistre (crash, kill -9, redemarrage PHP).
+        if ($commission->statut === Commission::STATUT_EN_COURS) {
+            $this->mettreEnAttenteDeVerification(
+                $commission,
+                'Un reversement etait deja engage sans confirmation enregistree : '
+                .'il est peut-etre deja parti. Verification manuelle obligatoire avant tout nouvel envoi.'
+            );
+            return;
         }
 
         $etablissement = $commission->etablissement;
 
         if (! $etablissement) {
-            Log::critical('ReverserEtablissementJob : établissement introuvable, reversement annulé', [
-                'commission_id' => $commission->id,
-            ]);
-            return;
-        }
-
-        if (! $etablissement->numero_momo_reversement) {
-            Log::critical('ReverserEtablissementJob : établissement sans numéro de reversement, reversement ANNULE — configurer numero_momo_reversement', [
-                'commission_id'     => $commission->id,
-                'etablissement_id'  => $etablissement->id,
-                'paiement_id'       => $commission->paiement_id,
-                'montant_bloque'    => $commission->montant_net_etablissement,
-            ]);
+            $this->mettreEnEchec($commission, 'Etablissement introuvable (supprime ?) : reversement impossible.');
             return;
         }
 
         $numeroReversement = $etablissement->numero_momo_reversement;
-        $operateurRevers   = $etablissement->operateur_momo_reversement ?? 'mtn';
+
+        if (! $numeroReversement) {
+            $this->mettreEnEchec(
+                $commission,
+                'Etablissement sans numero_momo_reversement : renseigner ce numero dans ses parametres '
+                .'puis relancer la commande aangaraa:reversements.'
+            );
+            return;
+        }
+
+        $operateurRevers = $etablissement->operateur_momo_reversement ?? 'mtn';
 
         // Garde de sécurité : on ne reverse jamais vers un numéro invalide.
         if (! preg_match('/^6\d{8}$/', preg_replace('/\D/', '', $numeroReversement))) {
-            Log::critical('ReverserEtablissementJob : numéro de reversement invalide, reversement ANNULE', [
-                'commission_id'    => $commission->id,
-                'etablissement_id' => $etablissement->id,
-                'numero_configure' => $numeroReversement,
-            ]);
+            $this->mettreEnEchec($commission, sprintf(
+                'Numero de reversement invalide (%s) : le format attendu est 9 chiffres commencant par 6 (6XXXXXXXX).',
+                $numeroReversement
+            ));
             return;
         }
+
+        $montant = (int) $commission->montant_net_etablissement;
+
+        if ($montant <= 0) {
+            $this->mettreEnEchec($commission, 'Montant net nul ou negatif : rien a reverser, verifiez la commission.');
+            return;
+        }
+
+        // ── On pose 'en_cours' AVANT l'appel HTTP. C'est ce qui rend le double
+        //    virement détectable au tour suivant (voir le garde-fou en tête).
+        $commission->update([
+            'statut'                  => Commission::STATUT_EN_COURS,
+            'reversement_tente_le'    => now(),
+        ]);
 
         $resultat = $aangaraa->reverserEtablissement(
             telephone:   $numeroReversement,
             operateur:   $operateurRevers,
-            montant:     $commission->montant_net_etablissement,
+            montant:     $montant,
             description: 'Reversement EduPay — paiement #' . $commission->paiement_id
         );
 
         if ($resultat['succes']) {
             $commission->update([
-                'statut'                => 'prelevee',
+                'statut'                => Commission::STATUT_PRELEVEE,
                 'reference_reversement' => $resultat['reference'],
                 'reversed_at'           => now(),
             ]);
@@ -89,28 +137,135 @@ class ReverserEtablissementJob implements ShouldQueue
             Log::info('Reversement établissement réussi', [
                 'commission_id' => $commission->id,
                 'reference'     => $resultat['reference'],
+                'montant'       => $montant,
             ]);
-        } else {
-            Log::error('Échec reversement établissement', [
-                'commission_id' => $commission->id,
-                'message'       => $resultat['message'] ?? null,
-                'tentative'     => $this->attempts(),
-            ]);
-
-            // Laisse le job échouer pour déclencher le retry automatique
-            // (sauf à la dernière tentative où Laravel le marquera failed)
-            if ($this->attempts() < $this->tries) {
-                $this->release($this->backoff[$this->attempts() - 1] ?? 300);
-            }
+            return;
         }
+
+        // ── Réponse perdue / 5xx : l'argent est peut-être parti. Ne JAMAIS
+        //    renvoyer automatiquement, il faut vérifier.
+        if (($resultat['outcome'] ?? 'refuse') === 'indetermine') {
+            $this->mettreEnAttenteDeVerification(
+                $commission,
+                'Reponse AangaraaPay deeeu... (timeout ou erreur serveur) : le virement est peut-etre deja parti. '
+                .'Verification manuelle obligatoire avant tout nouvel envoi. Motif : ' . ($resultat['message'] ?? '?')
+            );
+            return;
+        }
+
+        // ── Refus net (« solde insuffisant », cle invalide...) : rien n'est parti,
+        //    on peut reessayer sans risque.
+        Log::error('Reversement établissement refusé', [
+            'commission_id' => $commission->id,
+            'message'       => $resultat['message'] ?? null,
+            'tentative'     => $this->attempts(),
+            'tries'         => $this->tries,
+        ]);
+
+        $this->mettreAJourEchecTemporaire($commission);
+
+        if ($this->attempts() < $this->tries) {
+            $this->release($this->backoff[$this->attempts() - 1] ?? 300);
+            return;
+        }
+
+        // Dernière tentative : on rend la main explicitement, sinon la commission
+        // reste 'calculee' sans trace et sans aucune alerte.
+        $this->mettreEnEchec($commission, sprintf(
+            'Echec definitif apres %d tentatives (refus AangaraaPay) : %s',
+            $this->tries,
+            $resultat['message'] ?? 'raison inconnue'
+        ));
     }
 
+    /**
+     * Le job n'leve jamais d'exception, donc failed() n'est pas_appele par
+     * Laravel : c'est ici qu'on s'assure que l'echec definitif est visible et
+     * notifie, y compris quand le job est abandonne par la queue.
+     */
     public function failed(\Throwable $exception): void
     {
-        Log::critical('ReverserEtablissementJob définitivement échoué après 3 tentatives', [
+        $commission = Commission::find($this->commissionId);
+
+        Log::critical('ReverserEtablissementJob définitivement échoué', [
             'commission_id' => $this->commissionId,
             'erreur'        => $exception->getMessage(),
         ]);
-        // TODO : alerter l'admin (email) pour reversement manuel
+
+        if ($commission && $commission->statut !== Commission::STATUT_PRELEVEE) {
+            $commission->update([
+                'statut'               => Commission::STATUT_ECHEC,
+                'reversement_erreur'   => mb_substr($exception->getMessage(), 0, 500),
+            ]);
+        }
+
+        $this->alerter($commission, 'Echec technique du reversement : '.$exception->getMessage());
+    }
+
+    /** Échec définitif : la commission sort de la file et l'admin est prévenu. */
+    private function mettreEnEchec(Commission $commission, string $raison): void
+    {
+        $commission->update([
+            'statut'             => Commission::STATUT_ECHEC,
+            'reversement_erreur' => mb_substr($raison, 0, 500),
+        ]);
+
+        Log::critical('Reversement établissement ANNULÉ — action manuelle requise', [
+            'commission_id'     => $commission->id,
+            'paiement_id'       => $commission->paiement_id,
+            'etablissement_id'  => $commission->etablissement_id,
+            'montant_bloque'    => (int) $commission->montant_net_etablissement,
+            'raison'            => $raison,
+        ]);
+
+        $this->alerter($commission, $raison);
+    }
+
+    /** Sort inconnue : l'argent est peut-être parti, vérification humaine. */
+    private function mettreEnAttenteDeVerification(Commission $commission, string $raison): void
+    {
+        $commission->update([
+            'statut'             => Commission::STATUT_A_VERIFIER,
+            'reversement_erreur' => mb_substr($raison, 0, 500),
+        ]);
+
+        Log::critical('Reversement établissement À VÉRIFIER — ne pas renvoyer', [
+            'commission_id'    => $commission->id,
+            'paiement_id'      => $commission->paiement_id,
+            'montant'          => (int) $commission->montant_net_etablissement,
+            'raison'           => $raison,
+        ]);
+
+        $this->alerter($commission, $raison);
+    }
+
+    /**
+     * Entre deux tentatives l'etat doit redevenir eligible au rejeu : on
+     * repasse en 'calculee' en gardant la trace de la tentative.
+     */
+    private function mettreAJourEchecTemporaire(Commission $commission): void
+    {
+        $commission->update([
+            'statut' => Commission::STATUT_CALCULEE,
+            'reversement_tente_le' => now(),
+        ]);
+    }
+
+    private function alerter(?Commission $commission, string $raison): void
+    {
+        try {
+            Mail::to(config('services.admin_alert_email'))
+                ->send(new AlerteReversementManquantMail(
+                    commissionId: $commission?->id,
+                    etablissement: $commission?->etablissement?->nom,
+                    numeroReversement: $commission?->etablissement?->numero_momo_reversement,
+                    montant: $commission ? (int) $commission->montant_net_etablissement : null,
+                    paiementId: $commission?->paiement_id,
+                    raison: $raison,
+                ));
+        } catch (\Throwable $e) {
+            // L'alerte ne doit jamais masquer l'échec métier : on le dit.
+            Log::error('Échec envoi alerte reversement manquant : '.$e->getMessage());
+        }
     }
 }

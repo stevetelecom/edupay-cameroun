@@ -110,6 +110,7 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
         Route::get('/{etablissement}/modifier',      [CommissionController::class, 'edit'])->name('edit');
         Route::patch('/{etablissement}/modifier',    [CommissionController::class, 'update'])->name('update');
         Route::patch('/{commission}/prelever',       [CommissionController::class, 'marquerPrelevee'])->name('prelever');
+        Route::patch('/{commission}/rejouer',        [CommissionController::class, 'rejouerReversement'])->name('rejouer');
     });
 
     // Reclamations

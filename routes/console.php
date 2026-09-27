@@ -22,6 +22,26 @@ Schedule::job(new SendAlerteImpayeJournaliere)
 // independamment du webhook (peu fiable) et du polling client (limite a ~20 min)
 Schedule::command('aangaraa:reconcilie')->everyTwoMinutes();
 
+// Filet de securite des reversements — rattrape les commissions restees
+// 'calculee' (queue perdue, job echoue avant de passer a 'echec'...).
+// Volontairement limite aux etats sur lesquels un rejeu automatique ne peut
+// pas payer deux fois : 'a_verifier' et 'echec' exigent un humain.
+Schedule::command('aangaraa:reversements:rejouer')
+    ->everyTenMinutes()
+    ->withoutOverlapping()
+    ->name('rejeu-reversements-aangaraa');
+
+// Diagnostic de la configuration AangaraaPay (notify_url joignable ou non).
+// Ecrit dans les logs : un .env errone reste invisible sinon.
+Schedule::call(function () {
+    $controle = app(App\Services\AangaraaPayService::class)
+        ->verifierNotifyUrl(config('services.aangaraa.notify_url'));
+
+    if (! $controle['ok']) {
+        Illuminate\Support\Facades\Log::critical('Configuration AangaraaPay : ' . $controle['raison']);
+    }
+})->hourly()->name('diagnostic-aangaraa');
+
 // Traitement de la file d'attente (QUEUE_CONNECTION=database) — sécurité E-02.
 // Sur hébergement mutualisé (o2switch), pas de worker permanent possible :
 // on traite les jobs en attente chaque minute via le scheduler déjà actif,

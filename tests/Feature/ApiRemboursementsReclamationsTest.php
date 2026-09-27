@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Apprenant;
 use App\Models\CategoriesFrais;
+use App\Models\Commission;
 use App\Models\Etablissement;
 use App\Models\FraisApprenant;
 use App\Models\Paiement;
@@ -182,6 +183,76 @@ class ApiRemboursementsReclamationsTest extends TestCase
             ->assertForbidden();
 
         $this->assertSame('en_attente', $demande->fresh()->statut);
+    }
+
+    // ─────────────────────────────────────────────
+    // P2 — remboursement apres reversement deja effectue
+    // ─────────────────────────────────────────────
+
+    public function test_remboursement_signale_le_claw_back_si_le_reversement_est_deja_parti()
+    {
+        $demande = $this->demande();
+
+        Commission::create([
+            'paiement_id'               => $demande->paiement_id,
+            'etablissement_id'          => $this->etablissement->id,
+            'montant_transaction'       => 100000,
+            'taux'                      => 0.05,
+            'montant_commission'        => 5000,
+            'statut'                    => Commission::STATUT_PRELEVEE,
+            'montant_net_etablissement' => 100000,
+            'frais_aangaraa'            => 2200,
+            'reference_reversement'     => 'REV-2026-77',
+            'reversed_at'               => now(),
+        ]);
+
+        $reponse = $this->actingAs($this->directeur, 'sanctum')
+            ->postJson(route('api.v1.etablissement.remboursements.approuver', $demande->id))
+            ->assertOk();
+
+        // L'argent est sorti de l'edupay ET deja verse a l'etablissement :
+        // sans cet avertissement, le remboursement etait approuve en silence
+        // et l'etablissement gardait une somme qui appartenait au parent.
+        $this->assertNotNull($reponse->json('data.alerte_reversement'));
+        $this->assertStringContainsString('deja ete effectue', $reponse->json('data.alerte_reversement'));
+        $this->assertStringContainsString('REV-2026-77', $reponse->json('message'));
+    }
+
+    public function test_remboursement_sans_reversement_ne_produit_pas_dalerte()
+    {
+        $demande = $this->demande();
+
+        $reponse = $this->actingAs($this->directeur, 'sanctum')
+            ->postJson(route('api.v1.etablissement.remboursements.approuver', $demande->id))
+            ->assertOk();
+
+        $this->assertNull($reponse->json('data.alerte_reversement'));
+        $this->assertSame('approuve', $demande->fresh()->statut);
+    }
+
+    public function test_remboursement_signale_le_claw_back_meme_si_le_reversement_echoue()
+    {
+        $demande = $this->demande();
+
+        // Reverse en echec : l'argent n'est pas parti, donc l'edupay detient
+        // toujours la somme — le remboursement au parent reste coherent, mais
+        // le reversement bloque doit etre traite dans la foulle.
+        Commission::create([
+            'paiement_id'               => $demande->paiement_id,
+            'etablissement_id'          => $this->etablissement->id,
+            'montant_transaction'       => 100000,
+            'taux'                      => 0.05,
+            'montant_commission'        => 5000,
+            'statut'                    => Commission::STATUT_ECHEC,
+            'montant_net_etablissement' => 100000,
+            'frais_aangaraa'            => 2200,
+        ]);
+
+        $reponse = $this->actingAs($this->directeur, 'sanctum')
+            ->postJson(route('api.v1.etablissement.remboursements.approuver', $demande->id))
+            ->assertOk();
+
+        $this->assertNull($reponse->json('data.alerte_reversement'));
     }
 
     // ─────────────────────────────────────────────

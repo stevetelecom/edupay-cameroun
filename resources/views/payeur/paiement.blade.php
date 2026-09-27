@@ -11,7 +11,10 @@
     $resteAPayer    = $montants['reste_du'];
     $nbTranches     = $fraisApprenant->categorieFrais->nb_tranches_max ?? 2;
     $montantTranche = $montants['tranche'];
-    $fractionnable  = $fraisApprenant->categorieFrais->fractionnable ?? false;
+
+    // Le serveur refuse toute tranche sous le minimum operateur : on masque
+    // l'option plutot que d'afficher un montant non payable.
+    $fractionnable  = ($fraisApprenant->categorieFrais->fractionnable ?? false) && ($montants['tranche_valide'] ?? true);
 
     // Calcul frais de service selon barème dégressif
     function calculerFraisService(int $montant): array {
