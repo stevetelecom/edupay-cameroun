@@ -499,6 +499,34 @@ Vérifier le statut d'un paiement en cours.
 
 ---
 
+#### `GET /api/v1/paiements/export`
+Télécharger l'historique des paiements du payeur authentifié au format **PDF**.
+
+C'est l'équivalent mobile de l'export web `GET /payeur/historique?export=pdf`,
+qui exigeait une session cookie : impossible à consommer depuis l'app.
+
+**Auth :** token `web` (le token d'un parent/élève payeur). Le PDF ne contient
+que les paiements rattachés au payeur authentifié.
+
+**Paramètres :** `du` et `au` (dates `YYYY-MM-DD`, optionnelles, `du <= au`)
+
+**Réponse 200 :** binaire `application/pdf` avec `Content-Disposition:
+attachment; filename="historique_paiements_2026-09-27.pdf"`.
+
+**Erreurs :** `401` sans token, `422` si `du`/`au` sont invalides ou dans le
+désordre.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+     "https://api.edupay.cm/api/v1/paiements/export?du=2026-09-01&au=2026-09-30" \
+     -o historique.pdf
+```
+
+> L'app mobile doit télécharger le binaire et le partager via le module de
+> partage natif ; l'endpoint ne renvoie pas de JSON.
+
+---
+
 ### Réclamations
 
 #### `GET /api/v1/payeur/reclamations`
@@ -625,28 +653,59 @@ Import CSV/Excel de la liste des apprenants.
 
 ### Frais & Échéanciers
 
-#### `GET /api/v1/etablissement/categories-frais`
-Lister toutes les catégories de frais.
+> Les catégories de frais sont des **modèles de frais** (`CategoriesFrais`) :
+> un directeur en définit plusieurs par année scolaire, puis les *affecte* aux
+> apprenants, ce qui crée une ligne `frais_apprenant` facturée.
 
-#### `POST /api/v1/etablissement/categories-frais`
+#### `GET /api/v1/etablissement/frais`
+Lister les catégories de frais de l'établissement.
+
+**Paramètres :** `annee_scolaire` (filtre optionnel)
+
+#### `POST /api/v1/etablissement/frais`
 Créer une catégorie de frais.
 
 **Body :**
 ```json
 {
-  "libelle": "Frais de scolarité",
-  "montant": 52500,
-  "annee_scolaire": "2025-2026",
-  "obligatoire": true,
-  "description": "Frais annuels de scolarité 3ème"
+  "nom": "Scolarite",
+  "montant_total": 525000,
+  "nb_tranches_max": 3,
+  "annee_scolaire": "2026-2027",
+  "actif": true,
+  "description": "Frais annuels de scolarite 3eme"
 }
 ```
 
-#### `PUT /api/v1/etablissement/categories-frais/{id}`
-Modifier une catégorie.
+| Champ | Type | Requis | Défaut | Rôle |
+|---|---|---|---|---|
+| `nom` | string | oui | — | Libellé affiché |
+| `montant_total` | integer | oui | — | Montant en FCFA |
+| `nb_tranches_max` | integer | non | 1 | Nb max d'échéances |
+| `annee_scolaire` | string | oui | — | Ex. `2026-2027` |
+| `actif` | boolean | non | `true` | `false` masque la catégorie sans la supprimer |
+| `description` | string | non | `null` | Texte libre |
 
-#### `DELETE /api/v1/etablissement/categories-frais/{id}`
-Supprimer une catégorie (si aucun paiement lié).
+#### `PUT /api/v1/etablissement/frais/{frais}`
+Modifier une catégorie de frais. Même body que `POST`, tous les champs sont
+optionnels.
+
+> `actif` est modifiable par l'API : c'est la seule façon de désactiver une
+> catégorie contenant des paiements, puisque `DELETE` renvoie 422 dès qu'un
+> paiement y est rattaché. Omettre `actif` conserve la valeur actuelle.
+
+#### `DELETE /api/v1/etablissement/frais/{frais}`
+Supprimer une catégorie. **422** si un paiement y est rattaché : désactiver
+avec `PUT { "actif": false }` dans ce cas.
+
+#### `POST /api/v1/etablissement/frais/{frais}/affecter`
+Affecter la catégorie à des apprenants (crée les lignes `frais_apprenant`).
+
+#### `POST /api/v1/etablissement/frais/{frais}/dupliquer`
+Dupliquer une catégorie (utile d'une année scolaire à l'autre).
+
+#### `POST /api/v1/etablissement/frais/purger-annees-passees`
+Supprimer les catégories des années scolaires antérieures.
 
 ---
 

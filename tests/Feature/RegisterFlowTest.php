@@ -3,31 +3,21 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class RegisterFlowTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->withoutMiddleware(VerifyCsrfToken::class);
 
-        // Utilise la base MySQL existante (pdo_sqlite non installé ici)
-        // et une session "array" pour ne pas persister sur disque.
+        // Base SQLite :memory: fournie par phpunit.xml, et une session "array"
+        // pour ne pas persister sur disque.
         config(['session.driver' => 'array']);
-        config([
-            'database.default' => 'mysql',
-            'database.connections.mysql' => array_merge(
-                config('database.connections.mysql'),
-                [
-                    'host'     => env('DB_HOST', '127.0.0.1'),
-                    'port'     => env('DB_PORT', '3306'),
-                    'database' => env('DB_DATABASE', 'edupay'),
-                    'username' => env('DB_USERNAME', 'olivier'),
-                    'password' => env('DB_PASSWORD', 'Rois@10720'),
-                ]
-            ),
-        ]);
     }
 
     public function test_retour_conserve_step2_et_redirige_version_step1(): void

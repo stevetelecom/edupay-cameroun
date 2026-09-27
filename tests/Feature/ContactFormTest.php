@@ -9,6 +9,8 @@ use Tests\TestCase;
 
 class ContactFormTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * Test: Afficher le formulaire de contact
      */

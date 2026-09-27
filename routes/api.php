@@ -83,6 +83,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/notifications/{notification}/lue', [\App\Http\Controllers\Api\DashboardController::class, 'marquerNotificationLue'])->name('api.v1.notifications.lue');
 
         // Documents PDF (reçus & certificats)
+        Route::get('/paiements/export',          [\App\Http\Controllers\Api\DocumentPayeurController::class, 'exporterHistorique'])->name('api.v1.paiements.export');
         Route::get('/paiements/{paiement}/recu',        [\App\Http\Controllers\Api\DocumentPayeurController::class, 'telechargerRecu'])->name('api.v1.paiements.recu');
         Route::get('/apprenants/{apprenant}/certificat', [\App\Http\Controllers\Api\DocumentPayeurController::class, 'genererCertificat'])->name('api.v1.apprenants.certificat');
     });

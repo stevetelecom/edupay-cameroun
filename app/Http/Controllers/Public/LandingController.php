@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\ContactMessageMail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Support\LogMasking;
@@ -13,43 +14,84 @@ use Illuminate\View\View;
 
 class LandingController extends Controller
 {
-    public function index(): View
+    /** Nombre d'établissements par page dans l'annuaire public. */
+    private const PAR_PAGE = 12;
+
+    /** Types d'établissement acceptés par le filtre de l'annuaire. */
+    private const TYPES = [
+        'maternelle'      => 'public.type_maternelle',
+        'primaire'        => 'public.type_primaire',
+        'college'         => 'public.type_college',
+        'lycee_general'   => 'public.type_lycee_general',
+        'lycee_technique' => 'public.type_lycee_technique',
+        'institut'        => 'public.type_institut',
+    ];
+
+    /** Colonnes exposées dans l'annuaire public (celles lues par la vue). */
+    private const COLONNES = [
+        'id', 'code_etablissement', 'nom', 'type', 'ville', 'logo',
+    ];
+
+    public function index(Request $request): View
     {
-        // Stats réelles pour la landing page
-        $stats = [
-            'nb_etablissements' => \App\Models\Etablissement::where('statut', 'actif')->count(),
-            'nb_apprenants'     => \App\Models\Apprenant::where('actif', true)->count(),
-            'nb_paiements'      => \App\Models\Paiement::where('statut', 'valide')->count(),
-            'montant_total'     => \App\Models\Paiement::where('statut', 'valide')->sum('montant'),
-        ];
+        $stats = $this->stats();
 
-        // Liste des établissements actifs avec logo
+        $q = trim((string) $request->query('q', ''));
+
+        $type = (string) $request->query('type', '');
+        if (! array_key_exists($type, self::TYPES)) {
+            $type = '';
+        }
+
         $etablissements = \App\Models\Etablissement::where('statut', 'actif')
-            ->orderBy('nom')
-            ->get(['id', 'nom', 'ville', 'type', 'logo', 'code_etablissement', 'region']);
+            // Filtrage serveur : le filtre JavaScript ne portait que sur les 12
+            // premières cartes, donc toute école au-delà était introuvable.
+            ->when($q !== '', function ($query) use ($q) {
+                $like = '%'.str_replace(['%', '_'], ['\%', '\_'], $q).'%';
 
-        return view('public.landing', compact('stats', 'etablissements'));
+                $query->where(function ($sous) use ($like) {
+                    $sous->where('nom', 'like', $like)
+                        ->orWhere('ville', 'like', $like)
+                        ->orWhere('code_etablissement', 'like', $like);
+                });
+            })
+            ->when($type !== '', fn ($query) => $query->where('type', $type))
+            ->orderBy('nom')
+            ->paginate(self::PAR_PAGE, self::COLONNES)
+            ->withQueryString();
+
+        $types = self::TYPES;
+
+        return view('public.landing', compact('stats', 'etablissements', 'q', 'type', 'types'));
+    }
+
+    /**
+     * Compteurs affiches sur les pages publiques. Agrégats volontairement
+     * mis en cache : ils sont lus sur chaque page et changent peu.
+     */
+    private function stats(): array
+    {
+        return Cache::remember('landing_stats', 600, function () {
+            return [
+                'nb_etablissements' => \App\Models\Etablissement::where('statut', 'actif')->count(),
+                'nb_apprenants'     => \App\Models\Apprenant::where('actif', true)->count(),
+                'nb_paiements'      => \App\Models\Paiement::where('statut', 'valide')->count(),
+                'montant_total'     => \App\Models\Paiement::where('statut', 'valide')->sum('montant'),
+            ];
+        });
     }
 
     public function about(): View
     {
-        $stats = [
-            'nb_etablissements' => \App\Models\Etablissement::where('statut', 'actif')->count(),
-            'nb_apprenants'     => \App\Models\Apprenant::where('actif', true)->count(),
-            'nb_paiements'      => \App\Models\Paiement::where('statut', 'valide')->count(),
-            'montant_total'     => \App\Models\Paiement::where('statut', 'valide')->sum('montant'),
-        ];
+        $stats = $this->stats();
+
         return view('public.about', compact('stats'));
     }
 
     public function temoignages(): View
     {
-        $stats = [
-            'nb_etablissements' => \App\Models\Etablissement::where('statut', 'actif')->count(),
-            'nb_apprenants'     => \App\Models\Apprenant::where('actif', true)->count(),
-            'nb_paiements'      => \App\Models\Paiement::where('statut', 'valide')->count(),
-            'montant_total'     => \App\Models\Paiement::where('statut', 'valide')->sum('montant'),
-        ];
+        $stats = $this->stats();
+
         return view('public.temoignages', compact('stats'));
     }
 

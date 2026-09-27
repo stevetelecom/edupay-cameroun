@@ -267,6 +267,7 @@ return [
     'nos_etablissements_partenaires'=> 'Nos établissements partenaires',
     'nos_valeurs'                   => 'Nos valeurs',
     'notre_mission'                 => 'Notre mission',
+    'page_sur'                     => 'Page :page sur :total',
     'paiements_valides'             => 'Paiements validés',
     'parents_etudiants'             => 'Parents & Étudiants',
     'pill_backoffice'               => 'Back-office',

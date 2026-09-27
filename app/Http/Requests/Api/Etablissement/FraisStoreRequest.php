@@ -18,6 +18,7 @@ class FraisStoreRequest extends FormRequest
             'montant_total'          => ['required', 'numeric', 'min:0'],
             'nb_tranches_max'        => ['required', 'integer', 'min:1', 'max:3'],
             'fractionnable'          => ['nullable', 'boolean'],
+            'actif'                  => ['nullable', 'boolean'],
             'description'            => ['nullable', 'string', 'max:500'],
             'annee_scolaire'         => ['required', 'string', 'max:20'],
             'echeances'              => ['sometimes', 'array'],

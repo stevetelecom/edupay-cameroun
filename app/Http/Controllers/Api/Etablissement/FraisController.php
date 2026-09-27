@@ -51,7 +51,7 @@ class FraisController extends Controller
             'fractionnable'    => $request->boolean('fractionnable', true),
             'description'      => $validated['description'] ?? null,
             'annee_scolaire'   => $validated['annee_scolaire'],
-            'actif'            => true,
+            'actif'            => $request->boolean('actif', true),
         ]);
 
         if (! empty($validated['echeances'])) {
@@ -87,6 +87,9 @@ class FraisController extends Controller
             'montant_total'   => $validated['montant_total'],
             'nb_tranches_max' => $validated['nb_tranches_max'],
             'fractionnable'   => $request->boolean('fractionnable', $frais->fractionnable),
+            // exposée en lecture par formaterCategorie() : sans cela le mobile
+            // ne pouvait pas appliquer le conseil de destroy() (« désactiver »)
+            'actif'           => $request->boolean('actif', $frais->actif),
             'description'     => $validated['description'] ?? $frais->description,
             'annee_scolaire'  => $validated['annee_scolaire'],
         ]);

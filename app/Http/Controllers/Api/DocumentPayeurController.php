@@ -7,6 +7,7 @@ use App\Models\Apprenant;
 use App\Models\Paiement;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -32,6 +33,45 @@ class DocumentPayeurController extends Controller
             ->setPaper('a4', 'portrait');
 
         return $this->reponsePdf($pdf->output(), 'Recu_' . $paiement->reference . '.pdf');
+    }
+
+    /**
+     * Historique complet des paiements du payeur au format PDF.
+     *
+     * Le web l'expose via `payeur.historique?export=pdf`, mais c'est une route
+     * web par cookie de session : inutilisable depuis l'app mobile, qui ne peut
+     * télécharger qu'avec un jeton. Même vue Blade, mêmes données.
+     *
+     * Filtres optionnels : `du` et `au` (YYYY-MM-DD).
+     */
+    public function exporterHistorique(Request $request): Response
+    {
+        $validated = $request->validate([
+            'du' => ['nullable', 'date_format:Y-m-d'],
+            'au' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:du'],
+        ]);
+
+        $user = auth()->user();
+
+        $paiements = Paiement::with([
+                'apprenant',
+                'fraisApprenant.categorieFrais',
+                'remboursements' => fn ($q) => $q->where('statut', 'valide'),
+            ])
+            ->where('user_id', $user->id)
+            ->when(isset($validated['du']), fn ($q) => $q->whereDate('date_paiement', '>=', $validated['du']))
+            ->when(isset($validated['au']), fn ($q) => $q->whereDate('date_paiement', '<=', $validated['au']))
+            ->latest('date_paiement')
+            ->get();
+
+        $pdf = Pdf::loadView('pdf.historique_paiements', compact('paiements', 'user'))
+            ->setPaper('a4', 'portrait');
+
+        $suffixe = isset($validated['du']) || isset($validated['au'])
+            ? '_'.($validated['du'] ?? 'debut').'_'.($validated['au'] ?? 'aujourdhui')
+            : '';
+
+        return $this->reponsePdf($pdf->output(), 'historique_edupay'.$suffixe.'_'.now()->format('Ymd').'.pdf');
     }
 
     /**

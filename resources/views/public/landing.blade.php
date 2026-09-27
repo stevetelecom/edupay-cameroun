@@ -77,37 +77,35 @@
       {{ __('public.etablissements_nous_f_confiance', ['count' => $stats['nb_etablissements']]) }}
     </div>
 
-    {{-- Filtre rapide --}}
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+    {{-- Filtre rapide — filtrage serveur + pagination : le filtre JavaScript
+         ne portait que sur les 12 premières cartes rendues, donc toute école
+         au-delà de la 12e était introuvable. --}}
+    <form method="GET" action="{{ route('landing') }}" id="etab-filtre-form"
+          style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
       <div style="position:relative;flex:1;min-width:250px;">
         <span class="material-symbols-outlined" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:#999;pointer-events:none;">search</span>
-        <input type="text" id="etab-filter"
+        <input type="text" id="etab-filter" name="q" value="{{ $q }}"
                placeholder="{{ __('public.rechercher_placeholder') }}"
-               onkeyup="filtrerEtabsPublic()"
-               onkeypress="if(event.key==='Enter'){filtrerEtabsPublic();}"
                style="width:100%;padding:11px 14px 11px 40px;border:1px solid #ddd;
                       border-radius:8px;font-size:13px;outline:none;
-                      transition:all 0.15s;" 
+                      transition:all 0.15s;"
                onfocus="this.style.borderColor='var(--ep-teal)';this.style.boxShadow='0 0 0 3px rgba(13,158,117,0.1)'"
                onblur="this.style.borderColor='#ddd';this.style.boxShadow='none'" />
       </div>
-      
-      <select id="type-filter" onchange="filtrerEtabsPublic()"
+
+      <select id="type-filter" name="type"
               style="padding:11px 14px;border:1px solid #ddd;border-radius:8px;
                      font-size:13px;background:#fff;outline:none;cursor:pointer;
                      transition:all 0.15s;min-width:160px;"
               onfocus="this.style.borderColor='var(--ep-teal)';this.style.boxShadow='0 0 0 3px rgba(13,158,117,0.1)'"
               onblur="this.style.borderColor='#ddd';this.style.boxShadow='none'">
         <option value="">{{ __('public.type_tous') }}</option>
-        <option value="maternelle">{{ __('public.type_maternelle') }}</option>
-        <option value="primaire">{{ __('public.type_primaire') }}</option>
-        <option value="college">{{ __('public.type_college') }}</option>
-        <option value="lycee_general">{{ __('public.type_lycee_general') }}</option>
-        <option value="lycee_technique">{{ __('public.type_lycee_technique') }}</option>
-        <option value="institut">{{ __('public.type_institut') }}</option>
+        @foreach($types as $type_valeur => $type_libelle)
+        <option value="{{ $type_valeur }}" @selected($type === $type_valeur)>{{ __($type_libelle) }}</option>
+        @endforeach
       </select>
-      
-      <button type="button" id="filter-btn" onclick="filtrerEtabsPublic()" 
+
+      <button type="submit" id="filter-btn"
               style="padding:11px 20px;border:none;border-radius:8px;
                      background:var(--ep-teal);font-size:13px;font-weight:600;
                      cursor:pointer;color:#fff;transition:all 0.15s;
@@ -118,23 +116,25 @@
         <span class="material-symbols-outlined" style="font-size:18px;">search</span>
         {{ __('public.btn_rechercher') }}
       </button>
-      
-      <button type="button" id="reset-filter-btn" onclick="resetFiltreEtabs()" 
-              style="padding:11px 18px;border:1px solid #ddd;border-radius:8px;
-                     background:#fff;font-size:13px;font-weight:500;cursor:pointer;
-                     color:#666;display:none;transition:all 0.15s;
-                     inline-flex;align-items:center;gap:6px;"
-              onmouseover="this.style.background='#f8f8f8';this.style.borderColor='#999'"
-              onmouseout="this.style.background='#fff';this.style.borderColor='#ddd'">
+
+      @if($q !== '' || $type !== '')
+      <a href="{{ route('landing') }}" id="reset-filter-btn"
+         style="padding:11px 18px;border:1px solid #ddd;border-radius:8px;
+                background:#fff;font-size:13px;font-weight:500;cursor:pointer;
+                color:#666;display:inline-flex;transition:all 0.15s;
+                align-items:center;gap:6px;text-decoration:none;"
+         onmouseover="this.style.background='#f8f8f8';this.style.borderColor='#999'"
+         onmouseout="this.style.background='#fff';this.style.borderColor='#ddd'">
         <span class="material-symbols-outlined" style="font-size:16px;color:#666;">close</span>
         {{ __('public.btn_reinitialiser') }}
-      </button>
-    </div>
-    
+      </a>
+      @endif
+    </form>
+
     {{-- Compteur de résultats --}}
-    <div id="results-counter" style="font-size:12px;color:#666;margin-bottom:12px;display:none;">
+    <div id="results-counter" style="font-size:12px;color:#666;margin-bottom:12px;{{ ($q === '' && $type === '') ? 'display:none;' : '' }}">
       <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;color:var(--ep-teal);">filter_alt</span>
-      <span id="results-count">0</span> {{ __('public.resultats_etabs') }}
+      <span id="results-count">{{ $etablissements->total() }}</span> {{ __('public.resultats_etabs') }}
     </div>
 
     {{-- Grille établissements --}}
@@ -181,26 +181,49 @@
       </a>
       @empty
       <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:40px 0;font-size:13px;">
-        {{ __('public.aucun_etab_partenaire') }}
-        <div style="margin-top:12px;">
-          <a href="{{ route('register.ecole.step1') }}" class="hbtn-main"
-             style="font-size:13px;padding:10px 20px;">
-            {{ __('public.cta_inscrire_maintenant') }}
-          </a>
-        </div>
+        @if($q !== '' || $type !== '')
+          {{ __('public.aucun_etab_trouve') }}
+          <div style="margin-top:12px;">
+            <a href="{{ route('landing') }}" class="hbtn-main"
+               style="font-size:13px;padding:10px 20px;">
+              {{ __('public.btn_reinitialiser') }}
+            </a>
+          </div>
+        @else
+          {{ __('public.aucun_etab_partenaire') }}
+          <div style="margin-top:12px;">
+            <a href="{{ route('register.ecole.step1') }}" class="hbtn-main"
+               style="font-size:13px;padding:10px 20px;">
+              {{ __('public.cta_inscrire_maintenant') }}
+            </a>
+          </div>
+        @endif
       </div>
       @endforelse
     </div>
 
-    {{-- Voir plus si beaucoup d'établissements --}}
-    @if($etablissements->count() > 12)
-    <div style="text-align:center;margin-top:16px;">
-      <button onclick="toggleTousEtabs(this)"
-              style="background:transparent;color:var(--ep-teal);border:2px solid var(--ep-teal);
-                     padding:10px 24px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;">
-        {{ __('public.voir_tous_etabs', ['count' => $etablissements->count()]) }}
-      </button>
-    </div>
+    {{-- Pagination : la liste est paginée côté serveur (12 par page) --}}
+    @if($etablissements->hasPages())
+    <nav style="display:flex;gap:8px;justify-content:center;align-items:center;margin-top:20px;flex-wrap:wrap;"
+         aria-label="{{ __('public.resultats_etabs') }}">
+      @if($etablissements->onFirstPage())
+        <span style="padding:9px 16px;border:1px solid #eee;border-radius:8px;color:#ccc;font-size:13px;">&larr;</span>
+      @else
+        <a href="{{ $etablissements->previousPageUrl() }}" rel="prev"
+           style="padding:9px 16px;border:1px solid #ddd;border-radius:8px;color:var(--ep-teal);font-size:13px;text-decoration:none;">&larr;</a>
+      @endif
+
+      <span style="font-size:13px;color:#666;">
+        {{ __('public.page_sur', ['page' => $etablissements->currentPage(), 'total' => $etablissements->lastPage()]) }}
+      </span>
+
+      @if($etablissements->hasMorePages())
+        <a href="{{ $etablissements->nextPageUrl() }}" rel="next"
+           style="padding:9px 16px;border:1px solid #ddd;border-radius:8px;color:var(--ep-teal);font-size:13px;text-decoration:none;">&rarr;</a>
+      @else
+        <span style="padding:9px 16px;border:1px solid #eee;border-radius:8px;color:#ccc;font-size:13px;">&rarr;</span>
+      @endif
+    </nav>
     @endif
   </div>
 
@@ -362,155 +385,40 @@
 
 @push('scripts')
 <script>
-// ── Traductions dynamiques ──
-var EP_LANG = {
-    aucun_trouve: @json(__('public.aucun_etab_trouve')),
-    essayez_autre: @json(__('public.essayez_autre_critere')),
-    reduire_liste: @json(__('public.reduire_liste')),
-    voir_tous: @json(__('public.voir_tous_etabs'))
-};
-
 // ── Filtre établissements publics ──
-var allCards = null;
-var etabsLimites = false;
-var totalCards = 0;
+// Le filtrage est fait par le serveur (formulaire GET + pagination) : le
+// filtre JavaScript ne voyait que les 12 premières cartes rendues, donc
+// toute école au-delà de la 12e était impossible à trouver. On garde la
+// saisie instantanée en soumettant le formulaire après un court délai.
+(function () {
+    var form = document.getElementById('etab-filtre-form');
+    var champ = document.getElementById('etab-filter');
+    var selecteur = document.getElementById('type-filter');
+    if (!form) return;
 
-function filtrerEtabsPublic() {
-    if (!allCards) {
-        allCards = document.querySelectorAll('.etab-card-pub');
-        totalCards = allCards.length;
-    }
-    
-    var searchInput = document.getElementById('etab-filter');
-    var typeSelect = document.getElementById('type-filter');
-    var resetBtn = document.getElementById('reset-filter-btn');
-    var resultsCounter = document.getElementById('results-counter');
-    var resultsCount = document.getElementById('results-count');
-    
-    var q    = (searchInput.value || '').toLowerCase().trim();
-    var type = (typeSelect.value || '').toLowerCase().trim();
-    
-    // Afficher/masquer le bouton reset et le compteur
-    if (q || type) {
-        resetBtn.style.display = '';
-        resultsCounter.style.display = '';
-    } else {
-        resetBtn.style.display = 'none';
-        resultsCounter.style.display = 'none';
-    }
-    
-    var visibleCount = 0;
-    
-    allCards.forEach(function(card, idx) {
-        var nom   = (card.getAttribute('data-nom') || '').toLowerCase();
-        var ville = (card.getAttribute('data-ville') || '').toLowerCase();
-        var t     = (card.getAttribute('data-type') || '').toLowerCase();
-        
-        // Recherche dans nom et ville
-        var matchQ = !q || nom.indexOf(q) !== -1 || ville.indexOf(q) !== -1;
-        
-        // Comparaison exacte du type
-        var matchType = !type || t === type;
-        
-        // Affichage basé sur le filtre ET la limite si activée
-        var shouldShow = matchQ && matchType;
-        
-        if (shouldShow) {
-            // Si limité et que c'est au-delà de 12, ne pas afficher
-            if (!etabsLimites && totalCards > 12 && idx >= 12) {
-                card.style.display = 'none';
-            } else {
-                card.style.display = '';
-                card.style.animation = 'fadeIn 0.3s ease-in';
-                visibleCount++;
-            }
-        } else {
-            card.style.display = 'none';
-        }
-    });
-    
-    // Mettre à jour le compteur
-    if (resultsCount) {
-        resultsCount.textContent = visibleCount;
-    }
-    
-    // Afficher un message si aucun résultat
-    var grid = document.getElementById('etabs-grid');
-    var noResultMsg = document.getElementById('no-result-message');
-    
-    if (visibleCount === 0 && (q || type)) {
-        if (!noResultMsg) {
-            noResultMsg = document.createElement('div');
-            noResultMsg.id = 'no-result-message';
-            noResultMsg.style.cssText = 'grid-column:1/-1;text-align:center;color:#aaa;padding:40px 0;font-size:14px;';
-            noResultMsg.innerHTML = '<div style="margin-bottom:16px;"><span class="material-symbols-outlined" style="font-size:64px;color:#ddd;">search_off</span></div>' +
-                                   '<div style="font-weight:600;color:#666;margin-bottom:8px;">' + EP_LANG.aucun_trouve + '</div>' +
-                                   '<div style="font-size:12px;">' + EP_LANG.essayez_autre + '</div>';
-            grid.appendChild(noResultMsg);
-        }
-        noResultMsg.style.display = '';
-    } else if (noResultMsg) {
-        noResultMsg.style.display = 'none';
-    }
-    
-    console.log('🔍 Filtre appliqué: ' + visibleCount + '/' + totalCards + ' établissement(s)');
-}
+    var minuteur = null;
+    var derniereValeur = champ ? champ.value : '';
 
-// ── Réinitialiser les filtres ──
-function resetFiltreEtabs() {
-    var searchInput = document.getElementById('etab-filter');
-    var typeSelect = document.getElementById('type-filter');
-    var resetBtn = document.getElementById('reset-filter-btn');
-    var resultsCounter = document.getElementById('results-counter');
-    
-    searchInput.value = '';
-    typeSelect.value = '';
-    resetBtn.style.display = 'none';
-    resultsCounter.style.display = 'none';
-    
-    filtrerEtabsPublic();
-    
-    console.log('🔄 Filtres réinitialisés');
-}
+    function soumettre() {
+        form.submit();
+    }
 
-// ── Afficher / masquer tous les établissements ──
-function toggleTousEtabs(btn) {
-    if (!allCards) allCards = document.querySelectorAll('.etab-card-pub');
-    
-    etabsLimites = !etabsLimites;
-    
-    // Réappliquer le filtre avec la nouvelle limite
-    filtrerEtabsPublic();
-    
-    btn.textContent = etabsLimites
-        ? EP_LANG.reduire_liste
-        : EP_LANG.voir_tous.replace(':count', totalCards);
-        
-    console.log('👁️ Affichage: ' + (etabsLimites ? 'tous' : '12 premiers'));
-}
-
-// ── Limiter à 12 au chargement si > 12 ──
-document.addEventListener('DOMContentLoaded', function() {
-    allCards = document.querySelectorAll('.etab-card-pub');
-    totalCards = allCards.length;
-    
-    if (totalCards > 12) {
-        allCards.forEach(function(card, idx) {
-            if (idx >= 12) {
-                card.style.display = 'none';
-            }
+    if (champ) {
+        champ.addEventListener('input', function () {
+            clearTimeout(minuteur);
+            minuteur = setTimeout(function () {
+                if (champ.value !== derniereValeur) {
+                    derniereValeur = champ.value;
+                    soumettre();
+                }
+            }, 600);
         });
     }
-    
-    console.log('✅ Page chargée: ' + totalCards + ' établissement(s) disponible(s)');
-    
-    // Permettre la recherche avec Enter
-    document.getElementById('etab-filter').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            filtrerEtabsPublic();
-        }
-    });
-});
+
+    if (selecteur) {
+        selecteur.addEventListener('change', soumettre);
+    }
+})();
 
 // Animation fadeIn
 var style = document.createElement('style');
