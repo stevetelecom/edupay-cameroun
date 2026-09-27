@@ -71,7 +71,7 @@
 
 
   {{-- ══ SECTION : Établissements partenaires ══ --}}
-  <div style="margin-bottom:32px;">
+  <div id="etablissements" style="margin-bottom:32px;scroll-margin-top:20px;">
     <div class="seclbl reveal-on-scroll">{{ __('public.nos_etablissements_partenaires') }}</div>
     <div style="font-size:13px;color:#888;margin-bottom:20px;text-align:center;">
       {{ __('public.etablissements_nous_f_confiance', ['count' => $stats['nb_etablissements']]) }}
@@ -80,7 +80,7 @@
     {{-- Filtre rapide — filtrage serveur + pagination : le filtre JavaScript
          ne portait que sur les 12 premières cartes rendues, donc toute école
          au-delà de la 12e était introuvable. --}}
-    <form method="GET" action="{{ route('landing') }}" id="etab-filtre-form"
+    <form method="GET" action="{{ route('landing') }}#etablissements" id="etab-filtre-form"
           style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
       <div style="position:relative;flex:1;min-width:250px;">
         <span class="material-symbols-outlined" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:#999;pointer-events:none;">search</span>

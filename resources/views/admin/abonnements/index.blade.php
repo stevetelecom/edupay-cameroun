@@ -5,14 +5,14 @@
 {{-- ══ MODAL : Nouvel abonnement ══ --}}
 <div id="modal-new-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-lg shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto">
+  <div class="bg-white rounded-xl w-full max-w-lg shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
       <h3 class="font-bold text-gray-900">{{ __('admin.activer_abonnement_btn') }}</h3>
       <button onclick="fermerModal('modal-new-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
     </div>
-    <form method="POST" action="{{ route('admin.abonnements.store') }}">
+    <form method="POST" action="{{ route('admin.abonnements.store') }}" class="flex flex-col flex-1 min-h-0">
       @csrf
-      <div class="p-6 space-y-4 overflow-y-auto flex-1">
+      <div class="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.etablissement') }} *</label>
           <select name="etablissement_id" required
@@ -90,14 +90,14 @@
 {{-- ══ MODAL : Renouveler ══ --}}
 <div id="modal-renew-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-md shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto">
+  <div class="bg-white rounded-xl w-full max-w-md shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
       <h3 class="font-bold text-gray-900">{{ __('admin.renouveler_abonnement') }}</h3>
       <button onclick="fermerModal('modal-renew-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
     </div>
-    <form id="form-renew" method="POST" action="">
+    <form id="form-renew" method="POST" action="" class="flex flex-col flex-1 min-h-0">
       @csrf @method('PATCH')
-      <div class="p-6 space-y-4 overflow-y-auto flex-1">
+      <div class="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
         <div class="bg-blue-50 rounded-lg p-3 text-sm text-blue-700">
           {{ __('admin.renouvellement_pour') }} <strong id="renew-nom"></strong><br/>
           {{ __('admin.plan_actuel_label') }} <strong id="renew-plan"></strong>
@@ -143,14 +143,14 @@
 {{-- ══ MODAL : Modifier le plan ══ --}}
 <div id="modal-edit-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-md shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto">
+  <div class="bg-white rounded-xl w-full max-w-md shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
       <h3 class="font-bold text-gray-900">{{ __('admin.modifier_plan') }}</h3>
       <button onclick="fermerModal('modal-edit-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
     </div>
-    <form id="form-edit-abo" method="POST" action="">
+    <form id="form-edit-abo" method="POST" action="" class="flex flex-col flex-1 min-h-0">
       @csrf @method('PATCH')
-      <div class="p-6 space-y-4 overflow-y-auto flex-1">
+      <div class="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
         <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
           {{ __('messages.etablissement') }} : <strong id="edit-abo-nom"></strong><br/>
           {{ __('admin.periode_actuelle') }} : <strong id="edit-abo-periode"></strong>

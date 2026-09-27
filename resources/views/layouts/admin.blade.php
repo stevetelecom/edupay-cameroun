@@ -10,6 +10,9 @@
     {{-- Tailwind CSS + config EduPay --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Material Symbols (icônes utilisées par les toasts et les actions du tableau) --}}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
+
     {{-- DataTables CSS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css"/>

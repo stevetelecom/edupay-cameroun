@@ -127,7 +127,7 @@ return [
     'disponibilite_val'             => '99,5% uptime garanti',
     'edupay_chiffres'               => 'EduPay en chiffres',
     'email_label'                   => 'Email',
-    'email_val'                     => 'contact@edupay.cm',
+    'email_val'                     => 'contact@edupay.gsi2026.com',
     'envoyer_message'               => 'Envoyer le message',
     'envoyer_un_message'            => 'Envoyer un message',
     'envoyez_message'               => 'Envoyez-nous un message',
