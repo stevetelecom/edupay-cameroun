@@ -3,16 +3,16 @@
 
 @push('modals')
 {{-- ══ MODAL : Nouvel abonnement ══ --}}
-<div id="modal-new-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+<div id="modal-new-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-lg mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b">
+  <div class="bg-white rounded-xl w-full max-w-lg shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto">
+    <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
       <h3 class="font-bold text-gray-900">{{ __('admin.activer_abonnement_btn') }}</h3>
       <button onclick="fermerModal('modal-new-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
     </div>
     <form method="POST" action="{{ route('admin.abonnements.store') }}">
       @csrf
-      <div class="p-6 space-y-4">
+      <div class="p-6 space-y-4 overflow-y-auto flex-1">
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.etablissement') }} *</label>
           <select name="etablissement_id" required
@@ -75,7 +75,7 @@
                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"></textarea>
         </div>
       </div>
-      <div class="flex justify-end gap-3 px-6 py-4 border-t">
+      <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
         <button type="button" onclick="fermerModal('modal-new-abo')"
                 class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('messages.annuler') }}</button>
         <button type="submit"
@@ -88,16 +88,16 @@
 </div>
 
 {{-- ══ MODAL : Renouveler ══ --}}
-<div id="modal-renew-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+<div id="modal-renew-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-md mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b">
+  <div class="bg-white rounded-xl w-full max-w-md shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto">
+    <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
       <h3 class="font-bold text-gray-900">{{ __('admin.renouveler_abonnement') }}</h3>
       <button onclick="fermerModal('modal-renew-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
     </div>
     <form id="form-renew" method="POST" action="">
       @csrf @method('PATCH')
-      <div class="p-6 space-y-4">
+      <div class="p-6 space-y-4 overflow-y-auto flex-1">
         <div class="bg-blue-50 rounded-lg p-3 text-sm text-blue-700">
           {{ __('admin.renouvellement_pour') }} <strong id="renew-nom"></strong><br/>
           {{ __('admin.plan_actuel_label') }} <strong id="renew-plan"></strong>
@@ -129,7 +129,7 @@
                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"></textarea>
         </div>
       </div>
-      <div class="flex justify-end gap-3 px-6 py-4 border-t">
+      <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
         <button type="button" onclick="fermerModal('modal-renew-abo')"
                 class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('messages.annuler') }}</button>
         <button type="submit"
@@ -141,16 +141,16 @@
   </div>
 </div>
 {{-- ══ MODAL : Modifier le plan ══ --}}
-<div id="modal-edit-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+<div id="modal-edit-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-md mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b">
+  <div class="bg-white rounded-xl w-full max-w-md shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto">
+    <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
       <h3 class="font-bold text-gray-900">{{ __('admin.modifier_plan') }}</h3>
       <button onclick="fermerModal('modal-edit-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
     </div>
     <form id="form-edit-abo" method="POST" action="">
       @csrf @method('PATCH')
-      <div class="p-6 space-y-4">
+      <div class="p-6 space-y-4 overflow-y-auto flex-1">
         <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
           {{ __('messages.etablissement') }} : <strong id="edit-abo-nom"></strong><br/>
           {{ __('admin.periode_actuelle') }} : <strong id="edit-abo-periode"></strong>
@@ -198,7 +198,7 @@
                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"></textarea>
         </div>
       </div>
-      <div class="flex justify-end gap-3 px-6 py-4 border-t">
+      <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
         <button type="button" onclick="fermerModal('modal-edit-abo')"
                 class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('messages.annuler') }}</button>
         <button type="submit"
@@ -211,19 +211,19 @@
 </div>
 
 {{-- ══ MODAL : Supprimer abonnement ══ --}}
-<div id="modal-delete-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+<div id="modal-delete-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-sm mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-red-100">
+  <div class="bg-white rounded-xl w-full max-w-sm shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-red-100 shrink-0">
       <h3 class="font-bold text-red-600">{{ __('admin.supprimer_abonnement') }}</h3>
       <button onclick="fermerModal('modal-delete-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
     </div>
-    <div class="p-6">
+    <div class="p-6 overflow-y-auto flex-1">
       <p class="text-sm text-gray-600 leading-relaxed">
         {!! __('admin.confirm_suppr_abonnement', ['nom' => '<span id="delete-abo-nom" class="text-red-600"></span>']) !!}
       </p>
     </div>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t">
+    <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
       <button onclick="fermerModal('modal-delete-abo')"
               class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('messages.annuler') }}</button>
       <form id="form-delete-abo" method="POST" style="display:inline;">
@@ -333,12 +333,31 @@ function ouvrirModal(id) {
     var el = document.getElementById(id);
     el.classList.remove('hidden');
     el.style.display = 'flex';
+    // Le scroll de la page derriere le modal est verrouille : sans cela on
+    // empilait la barre de defilement du document ET celle du modal, et le
+    // fond bougeait pendant qu'on remplissait le formulaire.
+    document.body.style.overflow = 'hidden';
+    // Le premier champ reçoit le focus pour que la tabulation reste dans le
+    // modal au lieu de repartir vers la page cachee dessous.
+    var premier = el.querySelector('input:not([type=hidden]), select, textarea');
+    if (premier) { premier.focus(); }
 }
 function fermerModal(id) {
     var el = document.getElementById(id);
     el.classList.add('hidden');
     el.style.display = 'none';
+    // On ne libere le scroll que si plus aucun modal n'est ouvert.
+    var ouvert = Array.prototype.some.call(
+        document.querySelectorAll('[id^="modal-"]'),
+        function (m) { return m.style.display === 'flex'; }
+    );
+    if (!ouvert) { document.body.style.overflow = ''; }
 }
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var ouvert = document.querySelector('[id^="modal-"][style*="display: flex"]');
+    if (ouvert) { fermerModal(ouvert.id); }
+});
 document.addEventListener('DOMContentLoaded', function () {
     majPeriode(document.getElementById('date-debut-new').value,
                document.getElementById('duree-mois-new').value, 'periode-prevue-new');

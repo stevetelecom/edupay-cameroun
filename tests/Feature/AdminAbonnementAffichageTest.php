@@ -357,6 +357,63 @@ class AdminAbonnementAffichageTest extends TestCase
     }
 
     /**
+     * Les modaux ne doivent pas deborder de l'ecran.
+     *
+     * Constate sur /admin-ep2026/abonnements : « Modifier » et « Renouveler »
+     * depassaient la hauteur du viewport et affichaient deux barres de
+     * defilement, celle du document en plus de celle du modal. Le fond
+     * bougeait pendant qu'on remplissait le formulaire.
+     *
+     * Le correctif est structurel, donc on le verifie sur le HTML rendu :
+     * overlay scrollable, panneau borne en hauteur, et surtout UNE SEULE zone
+     * scrollable (le corps du formulaire) entre un entete et un pied figes.
+     */
+    public function test_les_modales_sont_bornees_en_hauteur_avec_un_seul_scroll(): void
+    {
+        $html = $this->get(route('admin.abonnements.index'))->assertOk()->getContent();
+
+        foreach (['modal-new-abo', 'modal-renew-abo', 'modal-edit-abo', 'modal-delete-abo'] as $id) {
+            $debut = strpos($html, 'id="' . $id . '"');
+            $this->assertNotFalse($debut, $id . ' est absent de la page.');
+
+            // L'overlay doit pouvoir defiler si le panneau depasse.
+            $overlay = substr($html, $debut, strpos($html, '>', $debut) - $debut);
+            $this->assertStringContainsString('overflow-y-auto', $overlay, $id . ' : overlay non scrollable.');
+
+            $bloc = substr($html, $debut, strpos($html, 'id="modal-', $debut + 1) === false
+                ? 6000
+                : strpos($html, 'id="modal-', $debut + 1) - $debut);
+
+            // Panneau borne, contenu en colonne flex.
+            $this->assertStringContainsString('max-h-[calc(100vh-2rem)]', $bloc, $id . ' : panneau sans hauteur maximale.');
+            $this->assertStringContainsString('flex-col', $bloc, $id . ' : panneau non organise en colonne.');
+
+            // Une seule zone scrollable : le corps du formulaire.
+            $this->assertSame(
+                1,
+                substr_count($bloc, 'overflow-y-auto flex-1'),
+                $id . ' : le nombre de zones scrollables n\'est pas 1.'
+            );
+
+            // Entete et pied figes, donc toujours atteignables.
+            $this->assertStringContainsString('shrink-0', $bloc, $id . ' : entete ou pied compressible.');
+        }
+    }
+
+    /**
+     * Le scroll de la page doit etre verrouille tant qu'un modal est ouvert,
+     * et libere a la fermeture. C'est ce qui produisait la seconde barre.
+     */
+    public function test_le_modal_verrouille_le_scroll_de_la_page(): void
+    {
+        $html = $this->get(route('admin.abonnements.index'))->assertOk()->getContent();
+
+        $this->assertStringContainsString("document.body.style.overflow = 'hidden'", $html);
+        $this->assertStringContainsString("if (!ouvert) { document.body.style.overflow = ''; }", $html);
+        $this->assertStringContainsString("e.key !== 'Escape'", $html);
+    }
+
+    /**
      * Non-regression : deux enregistrements du meme formulaire (double clic)
      * ne doivent pas laisser deux abonnements identiques.
      *
