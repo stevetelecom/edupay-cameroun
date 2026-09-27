@@ -64,6 +64,7 @@ return [
     'montant_total' => 'Total amount',
     'montant_a_encaisser' => 'Amount to collect',
     'abonnement_active_jusquau' => 'Subscription :plan activated until :date (:mois months) — total :montant FCFA',
+    'abonnement_doublon_refus' => 'An identical subscription already exists for %etablissement% from %debut% to %fin%. Nothing was recorded twice.',
     'abonnement_modifie_jusquau' => 'Plan :plan updated until :date (:mois months) — total :montant FCFA',
     'abonnement_renouvelle_jusquau' => 'Subscription renewed until :date (:mois months) — total :montant FCFA',
     'tous_statuts' => 'All statuses',

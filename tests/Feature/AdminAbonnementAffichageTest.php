@@ -356,6 +356,41 @@ class AdminAbonnementAffichageTest extends TestCase
         ];
     }
 
+    /**
+     * Non-regression : deux enregistrements du meme formulaire (double clic)
+     * ne doivent pas laisser deux abonnements identiques.
+     *
+     * Concretement constate en base le 27/09/2026 : les abonnements #6 et #7
+     * portaient la meme periode (26/08/2026 au 25/09/2026), pour le meme plan,
+     * crees a 4 secondes d'ecart. Le KPI recettes comptait alors 20 000 FCFA
+     * au lieu de 10 000 pour une seule periode reellement souscrite.
+     *
+     * Le second enregistrement est refuse, la transaction n'est donc pas
+     * meme ouverte.
+     */
+    public function test_deux_enregistrements_identiques_donneent_un_seul_abonnement(): void
+    {
+        $etablissement = $this->etablissement('Ecole Double Clic');
+
+        $payload = [
+            'etablissement_id' => $etablissement->id,
+            'plan'             => 'standard',
+            'date_debut'       => '2026-08-26',
+            'duree_mois'       => 1,
+        ];
+
+        $this->post(route('admin.abonnements.store'), $payload)
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->post(route('admin.abonnements.store'), $payload)
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertSame(1, Abonnement::where('etablissement_id', $etablissement->id)->count());
+        $this->assertSame(1, Abonnement::query()->sole()->dureeEnMois());
+    }
+
     /** Une duree absente vaut 1 mois : c'est la regle metier du plan courant. */
     public function test_une_creation_sans_duree_applique_le_mois_par_defaut(): void
     {

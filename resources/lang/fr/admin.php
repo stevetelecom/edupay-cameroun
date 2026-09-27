@@ -64,6 +64,7 @@ return [
     'montant_total' => 'Montant total',
     'montant_a_encaisser' => 'Montant à encaisser',
     'abonnement_active_jusquau' => 'Abonnement :plan activé jusqu\'au :date (:mois mois) — total :montant FCFA',
+    'abonnement_doublon_refus' => 'Un abonnement identique existe déjà pour %etablissement% du %debut% au %fin%. Rien n\'a été enregistré deux fois.',
     'abonnement_modifie_jusquau' => 'Plan :plan modifié jusqu\'au :date (:mois mois) — total :montant FCFA',
     'abonnement_renouvelle_jusquau' => 'Abonnement renouvelé jusqu\'au :date (:mois mois) — total :montant FCFA',
     'tous_statuts' => 'Tous les statuts',

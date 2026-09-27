@@ -7,6 +7,7 @@ use App\Models\Etablissement;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class AbonnementController extends Controller
@@ -238,48 +239,73 @@ class AbonnementController extends Controller
         $dateFin = $periode['date_fin'];
         $montant = Abonnement::montantPlan($validated['plan']);
 
-        // Désactiver l'abonnement précédent si existant
-        Abonnement::where('etablissement_id', $validated['etablissement_id'])
-            ->whereIn('statut', ['actif', 'grace_period'])
-            ->update(['statut' => 'expire']);
+        // Verrou sur la ligne etablissement + transaction : deux enregistrements
+        // du meme formulaire (double clic, double soumission) perdaient la
+        // course et chacun desactivait le juste-cree, donc il restait DEUX
+        // abonnements identiques pour la meme periode. Constate en base le
+        // 27/09/2026 : abonnements #6 et #7, memes dates, crees a 4 secondes
+        // d'ecart, qui faisaient compter 20 000 FCFA au lieu de 10 000.
+        return DB::transaction(function () use ($request, $validated, $dateDebut, $periode, $dateFin, $montant) {
+            Etablissement::where('id', $validated['etablissement_id'])->lockForUpdate()->firstOrFail();
 
-        $abonnement = Abonnement::create([
-            'etablissement_id'   => $validated['etablissement_id'],
-            'plan'               => $validated['plan'],
-            'montant_mensuel'    => $montant,
-            'date_debut'         => $dateDebut,
-            'date_fin'           => $dateFin,
-            'grace_period_fin'   => $periode['grace_period_fin'],
-            'statut'             => 'actif',
-            'reference_paiement' => $validated['reference_paiement'] ?? null,
-            'notes'              => $validated['notes'] ?? null,
-            'active_par'         => Auth::guard('admin')->id(),
-            'active_at'          => now(),
-        ]);
+            // Refus explicite d'une periode identique deja enregistree.
+            $dejaCouvre = Abonnement::where('etablissement_id', $validated['etablissement_id'])
+                ->whereDate('date_debut', $dateDebut->toDateString())
+                ->whereDate('date_fin', $dateFin->toDateString())
+                ->where('plan', $validated['plan'])
+                ->exists();
 
-        // Mettre à jour l'établissement
-        Etablissement::find($validated['etablissement_id'])->update([
-            'plan_abonnement'      => $validated['plan'],
-            'abonnement_expire_le' => $dateFin,
-        ]);
+            if ($dejaCouvre) {
+                return back()->with('error', __('admin.abonnement_doublon_refus', [
+                    'etablissement' => Etablissement::find($validated['etablissement_id'])->nom,
+                    'debut'         => $dateDebut->format('d/m/Y'),
+                    'fin'           => $dateFin->format('d/m/Y'),
+                ]));
+            }
 
-        $montantTotal = Abonnement::montantTotalPour($validated['plan'], $periode['duree_mois']);
+            // Désactiver l'abonnement précédent si existant
+            Abonnement::where('etablissement_id', $validated['etablissement_id'])
+                ->whereIn('statut', ['actif', 'grace_period'])
+                ->update(['statut' => 'expire']);
 
-        AuditLog::enregistrer(
-            Auth::guard('admin')->user(),
-            'ABONNEMENT_ACTIVE',
-            'Abonnement ' . strtoupper($validated['plan']) . ' activé pour établissement #' . $validated['etablissement_id']
-                . ' (' . $periode['duree_mois'] . ' mois, jusqu\'au ' . $dateFin->format('d/m/Y')
-                . ', total ' . number_format($montantTotal, 0, ',', ' ') . ' FCFA)',
-            $request, 'INFO'
-        );
+            $abonnement = Abonnement::create([
+                'etablissement_id'   => $validated['etablissement_id'],
+                'plan'               => $validated['plan'],
+                'montant_mensuel'    => $montant,
+                'date_debut'         => $dateDebut,
+                'date_fin'           => $dateFin,
+                'grace_period_fin'   => $periode['grace_period_fin'],
+                'statut'             => 'actif',
+                'reference_paiement' => $validated['reference_paiement'] ?? null,
+                'notes'              => $validated['notes'] ?? null,
+                'active_par'         => Auth::guard('admin')->id(),
+                'active_at'          => now(),
+            ]);
 
-        return back()->with('success', __('admin.abonnement_active_jusquau', [
-            'plan'    => ucfirst($validated['plan']),
-            'date'    => $dateFin->format('d/m/Y'),
-            'mois'    => $periode['duree_mois'],
-            'montant' => number_format($montantTotal, 0, ',', ' '),
-        ]));
+            // Mettre à jour l'établissement
+            Etablissement::where('id', $validated['etablissement_id'])->update([
+                'plan_abonnement'      => $validated['plan'],
+                'abonnement_expire_le' => $dateFin,
+            ]);
+
+            $montantTotal = Abonnement::montantTotalPour($validated['plan'], $periode['duree_mois']);
+
+            AuditLog::enregistrer(
+                Auth::guard('admin')->user(),
+                'ABONNEMENT_ACTIVE',
+                'Abonnement ' . strtoupper($validated['plan']) . ' activé pour établissement #' . $validated['etablissement_id']
+                    . ' (' . $periode['duree_mois'] . ' mois, jusqu\'au ' . $dateFin->format('d/m/Y')
+                    . ', total ' . number_format($montantTotal, 0, ',', ' ') . ' FCFA)',
+                $request, 'INFO'
+            );
+
+            return back()->with('success', __('admin.abonnement_active_jusquau', [
+                'plan'    => ucfirst($validated['plan']),
+                'date'    => $dateFin->format('d/m/Y'),
+                'mois'    => $periode['duree_mois'],
+                'montant' => number_format($montantTotal, 0, ',', ' '),
+            ]));
+        });
     }
 
     public function update(Request $request, Abonnement $abonnement)
