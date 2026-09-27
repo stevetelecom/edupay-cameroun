@@ -36,7 +36,7 @@
         .toast.t-success{background:#085041;color:#fff;}
         .toast.t-error{background:#9B2C2C;color:#fff;}
         .toast.t-info{background:#1A4F8A;color:#fff;}
-        .toast svg{flex-shrink:0;margin-top:1px;}
+        .toast .material-symbols-outlined{flex-shrink:0;margin-top:1px;}
         .toast.closing{animation:toast-out .2s ease-in forwards;}
         @keyframes toast-in{from{opacity:0;transform:translateX(30px);}to{opacity:1;transform:translateX(0);}}
         @keyframes toast-out{from{opacity:1;transform:translateX(0);}to{opacity:0;transform:translateX(30px);}}
@@ -323,19 +323,19 @@
     <div class="toast-wrap" id="toast-wrap">
         @if(session('success'))
         <div class="toast t-success" data-toast>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>
             <span>{{ session('success') }}</span>
         </div>
         @endif
         @if(session('error'))
         <div class="toast t-error" data-toast>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span class="material-symbols-outlined" style="font-size:16px;">error</span>
             <span>{{ session('error') }}</span>
         </div>
         @endif
         @if(session('info'))
         <div class="toast t-info" data-toast>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <span class="material-symbols-outlined" style="font-size:16px;">info</span>
             <span>{{ session('info') }}</span>
         </div>
         @endif
@@ -677,6 +677,13 @@
     .ep-btn-red    { background:#fee2e2; color:#dc2626; }
     .ep-dt-name { font-weight:600; color:#111; font-size:13px; }
     .ep-dt-sub  { font-size:11px; color:#9ca3af; margin-top:1px; }
+    /* Durée souscrite affichée à côté des dates : rend visible une période
+       incohérente avec le libellé « /mois » du plan. */
+    .ep-badge-duree {
+        display:inline-block; font-size:10px; font-weight:700; line-height:1;
+        color:#0B2545; background:#E6F0FB; border:1px solid #c7dcf3;
+        border-radius:99px; padding:2px 6px; margin-left:4px; vertical-align:1px;
+    }
     .ep-dt-center { text-align:center; font-weight:600; color:#374151; }
     .ep-link    { color:#0D9E75 !important; }
     .ep-pwd-wrap { position: relative; }
@@ -805,16 +812,17 @@
         if (!wrap) return;
 
         var icons = {
-            success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
-            error:   '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
-            info:    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>'
+            success: 'check_circle',
+            error:   'error',
+            warning: 'warning',
+            info:    'info'
         };
 
         var el = document.createElement('div');
         el.className = 'toast t-' + type;
         el.setAttribute('data-toast', '');
-        el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">'
-            + (icons[type] || icons.info) + '</svg><span></span>';
+        el.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">'
+            + (icons[type] || icons.info) + '</span><span></span>';
         el.querySelector('span').textContent = message;
 
         wrap.appendChild(el);

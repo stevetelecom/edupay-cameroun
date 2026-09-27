@@ -190,6 +190,14 @@ return [
     'etape3'                    => 'Étape 3',
     'expiration_warning'        => 'Votre abonnement expire le :date (:jours jours)',
     'expire_le'                 => 'Expire le',
+    // Etat REEL de la periode, derive des dates (Abonnement::etat()).
+    // Avant, une periode finie s'affichait « 0 jours restants », ce qui
+    // laisse croire a un abonnement encore valable jusqu'au jour meme.
+    'abonnement_expire'        => 'Abonnement expiré le :date',
+    'grace_alerte' => 'Votre abonnement a expiré le :date. Vous avez jusqu\'au :grace pour renouveler.',
+    'abonnement_expire_grace'  => 'Abonnement expiré le :date. Grâce jusqu\'au :grace.',
+    'periode_echue'             => 'Période échue',
+    'abon_renouveler' => 'Renouveler mon abonnement',
     'exporter_donnees'          => 'Exporter les données',
     'exporter_excel'            => 'Exporter en Excel (CSV)',
     'exporter_hint'             => 'Téléchargez un rapport détaillé au format Excel ou PDF',
@@ -322,6 +330,11 @@ return [
     'non_inclus'                => 'Non inclus',
     'non_precise'               => 'Non précisé',
     'nos_formules'              => 'Nos formules',
+    'votre_periode_actuelle'    => 'Votre période actuelle',
+    'au'                        => 'au',
+    'mois'                      => 'mois',
+    'montant_total_paye'        => 'Montant total payé',
+    'date_non_renseignee'        => 'non renseignée',
     'nouveau_role'              => 'Nouveau rôle',
     'nouvel_apprenant'          => 'Nouvel apprenant',
     'nouvel_apprenant_hint'     => "Remplissez les informations de l'apprenant",

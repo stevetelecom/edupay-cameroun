@@ -41,8 +41,28 @@
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.date_debut') }}</label>
-          <input type="date" name="date_debut" required value="{{ now()->format('Y-m-d') }}"
+          <input type="date" name="date_debut" id="date-debut-new" required value="{{ now()->format('Y-m-d') }}"
+                 onchange="majResume('periode-prevue-new', 'montant-prevu-new', this.value, document.getElementById('duree-mois-new').value, planCourant)"
                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"/>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.duree_abonnement') }}</label>
+          <select name="duree_mois" id="duree-mois-new"
+                  onchange="majResume('periode-prevue-new', 'montant-prevu-new', document.getElementById('date-debut-new').value, this.value, planCourant)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
+            @foreach(\App\Models\Abonnement::DUREES_MOIS as $mois)
+              <option value="{{ $mois }}">{{ $mois }} {{ __('admin.mois') }}</option>
+            @endforeach
+          </select>
+          {{-- Recapitulatif calcule : impossible de saisir une periode qui ne
+               correspond pas a la duree choisie, sans meme lire le code. --}}
+          <div id="periode-prevue-new"
+               class="mt-2 text-xs text-[#0D9E75] bg-[#E8F7F1] rounded-lg px-3 py-2 font-medium"></div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.montant_a_encaisser') }}</label>
+          <div id="montant-prevu-new"
+               class="text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 font-bold"></div>
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.ref_paiement_recu') }}</label>
@@ -83,6 +103,22 @@
           {{ __('admin.plan_actuel_label') }} <strong id="renew-plan"></strong>
         </div>
         <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.duree_abonnement') }}</label>
+          <select name="duree_mois" id="duree-mois-renew" onchange="majResume('periode-prevue-renew', 'montant-prevu-renew', renouvellementDebut(), this.value, planRenouvellement)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
+            @foreach(\App\Models\Abonnement::DUREES_MOIS as $mois)
+              <option value="{{ $mois }}">{{ $mois }} {{ __('admin.mois') }}</option>
+            @endforeach
+          </select>
+          <div id="periode-prevue-renew"
+               class="mt-2 text-xs text-[#0D9E75] bg-[#E8F7F1] rounded-lg px-3 py-2 font-medium"></div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.montant_a_encaisser') }}</label>
+          <div id="montant-prevu-renew"
+               class="text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 font-bold"></div>
+        </div>
+        <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.ref_paiement_recu') }}</label>
           <input type="text" name="reference_paiement" placeholder="{{ __('admin.ph_ref_om') }}"
                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"/>
@@ -116,7 +152,9 @@
       @csrf @method('PATCH')
       <div class="p-6 space-y-4">
         <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
-          {{ __('messages.etablissement') }} : <strong id="edit-abo-nom"></strong>
+          {{ __('messages.etablissement') }} : <strong id="edit-abo-nom"></strong><br/>
+          {{ __('admin.periode_actuelle') }} : <strong id="edit-abo-periode"></strong>
+          <input type="hidden" id="edit-abo-debut" value="">
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-2">{{ __('admin.nouveau_plan') }}</label>
@@ -132,6 +170,22 @@
             </label>
             @endforeach
           </div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.duree_abonnement') }}</label>
+          <select name="duree_mois" id="duree-mois-edit" onchange="majResume('periode-prevue-edit', 'montant-prevu-edit', document.getElementById('edit-abo-debut').value, this.value, planEdition)"
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
+            @foreach(\App\Models\Abonnement::DUREES_MOIS as $mois)
+              <option value="{{ $mois }}">{{ $mois }} {{ __('admin.mois') }}</option>
+            @endforeach
+          </select>
+          <div id="periode-prevue-edit"
+               class="mt-2 text-xs text-[#0D9E75] bg-[#E8F7F1] rounded-lg px-3 py-2 font-medium"></div>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.montant_a_encaisser') }}</label>
+          <div id="montant-prevu-edit"
+               class="text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 font-bold"></div>
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.ref_paiement') }}</label>
@@ -207,22 +261,26 @@
 </div>
 
 {{-- KPIs --}}
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
   <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="text-2xl font-bold text-[#0D9E75]">{{ $stats['actifs'] }}</div>
+    <div class="text-2xl font-bold text-[#0D9E75]" id="kpi-actifs">{{ $stats['actifs'] }}</div>
     <div class="text-xs text-gray-500 mt-1">{{ __('admin.abonnements_actifs') }}</div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="text-2xl font-bold text-[#E8A020]">{{ $stats['grace_period'] }}</div>
+    <div class="text-2xl font-bold text-[#E8A020]" id="kpi-grace">{{ $stats['grace_period'] }}</div>
     <div class="text-xs text-gray-500 mt-1">{{ __('admin.en_grace_period') }}</div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="text-2xl font-bold text-red-500">{{ $stats['expires'] }}</div>
+    <div class="text-2xl font-bold text-red-500" id="kpi-expires">{{ $stats['expires'] }}</div>
     <div class="text-xs text-gray-500 mt-1">{{ __('admin.expires') }}</div>
   </div>
   <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="text-2xl font-bold text-[#0B2545]">{{ number_format($stats['revenus_mois'],0,',',' ') }}</div>
+    <div class="text-2xl font-bold text-[#0B2545]" id="kpi-revenus">{{ number_format($stats['revenus_mois'],0,',',' ') }}</div>
     <div class="text-xs text-gray-500 mt-1">{{ __('admin.fcfa_encaisse_mois') }}</div>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-xl p-4">
+    <div class="text-2xl font-bold text-[#B45309]" id="kpi-a-renouveler">{{ $stats['a_renouveler'] }}</div>
+    <div class="text-xs text-gray-500 mt-1">{{ __('admin.a_renouveler') }}</div>
   </div>
 </div>
 
@@ -281,14 +339,101 @@ function fermerModal(id) {
     el.classList.add('hidden');
     el.style.display = 'none';
 }
+document.addEventListener('DOMContentLoaded', function () {
+    majPeriode(document.getElementById('date-debut-new').value,
+               document.getElementById('duree-mois-new').value, 'periode-prevue-new');
+    majPeriode(renouvellementDebut(),
+               document.getElementById('duree-mois-renew').value, 'periode-prevue-renew');
+});
+const PLANS = @json(\App\Models\Abonnement::PLANS);
+
+/** Montant total a encaisser = prix du plan x duree souscrite. */
+function majMontant(cible, plan, mois) {
+    var el = document.getElementById(cible);
+    if (!el) return;
+    var prix = PLANS[plan] ? PLANS[plan].montant : null;
+    if (prix === null) { el.textContent = ''; return; }
+    var n = parseInt(mois, 10) || 1;
+    el.innerHTML = nb(prix * n) + ' FCFA'
+        + ' <span class="opacity-70 font-normal">(' + nb(prix) + ' \u00d7 ' + n + ')</span>';
+}
+function nb(n) { return n.toLocaleString('fr-FR'); }
+function majResume(ciblePeriode, cibleMontant, debut, mois, plan) {
+    majPeriode(debut, mois, ciblePeriode);
+    majMontant(cibleMontant, plan, mois);
+}
 function selPlan(plan) {
     ['basique','standard','premium'].forEach(p => {
         const card = document.getElementById('plan-card-' + p);
         if (card) card.style.opacity = p === plan ? '1' : '0.5';
     });
+    planCourant = plan;
+    majMontant('montant-prevu-new', plan, document.getElementById('duree-mois-new').value);
 }
-function modifierAbo(id, nom, planActuel) {
+var planCourant = '';
+var planRenouvellement = '';
+var planEdition = '';
+/**
+ * Récapitulatif de la période qui sera enregistrée.
+ *
+ * Le calcul serveur fait foi (Abonnement::periode) ; celui-ci n'est qu'un
+ * aperçu. Le deuxieme peut diverger sur un cas limite de fin de mois
+ * (31 janvier + 1 mois), le serveur tranche toujours.
+ */
+// meme algorithme que Abonnement::dateFinPour() : ajout de mois sans
+// debordement (le 31/01 + 1 mois vaut le 28/02, pas le 03/03), puis -1 jour.
+function ajouterMoisSansDebordement(d, n) {
+    var jour = d.getDate();
+    var cible = new Date(d.getTime());
+    cible.setDate(1);
+    cible.setMonth(cible.getMonth() + n);
+    var dernierJour = new Date(cible.getFullYear(), cible.getMonth() + 1, 0).getDate();
+    cible.setDate(Math.min(jour, dernierJour));
+    return cible;
+}
+function fmtJour(d) {
+    return String(d.getDate()).padStart(2, '0') + '/'
+        + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+}
+function majPeriode(debut, mois, cible) {
+    var el = document.getElementById(cible);
+    if (!el) return;
+    if (!debut) { el.textContent = ''; return; }
+    var d = new Date(debut + 'T00:00:00');
+    if (isNaN(d)) { el.textContent = ''; return; }
+    var fin = ajouterMoisSansDebordement(d, parseInt(mois, 10));
+    fin.setDate(fin.getDate() - 1);
+    var grace = new Date(fin.getTime());
+    grace.setDate(grace.getDate() + 7);
+    el.textContent = debut.split('-').reverse().join('/') + ' au ' + fmtJour(fin)
+        + ' · {{ __('admin.grace_libelle') }} ' + fmtJour(grace);
+}
+function renouvellementDebut() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-'
+        + String(d.getDate()).padStart(2, '0');
+}
+function modifierAbo(id, nom, planActuel, debut, duree, periode) {
     document.getElementById('edit-abo-nom').textContent = nom;
+    document.getElementById('edit-abo-debut').value = debut;
+    document.getElementById('edit-abo-periode').textContent = periode;
+
+    // Une periode historique peut avoir une duree hors catalogue (les lignes
+    // #6 / #7 valent 13 mois). Sans option correspondante, le select renvoyait
+    // une valeur vide et l'enregistrement reecrasait la periode en 1 mois.
+    const select = document.getElementById('duree-mois-edit');
+    const catalogue = @json(\App\Models\Abonnement::DUREES_MOIS);
+    const connue = Array.from(select.options).some(o => o.value === String(duree));
+    if (!connue && !select.querySelector('option[data-hors-offre]')) {
+        const opt = document.createElement('option');
+        opt.value = String(duree);
+        opt.textContent = duree + ' {{ __('admin.mois') }} ({{ __('admin.duree_hors_offre') }})';
+        opt.setAttribute('data-hors-offre', '1');
+        select.appendChild(opt);
+    }
+    select.value = duree;
+    planEdition = planActuel;
+    majResume('periode-prevue-edit', 'montant-prevu-edit', debut, duree, planActuel);
     document.getElementById('form-edit-abo').action =
         "{{ url(config('app.admin_url_prefix', 'admin-ep2026') . '/abonnements') }}/" + id;
     ['basique','standard','premium'].forEach(p => {
@@ -303,6 +448,7 @@ function modifierAbo(id, nom, planActuel) {
     ouvrirModal('modal-edit-abo');
 }
 function selEditPlan(plan) {
+    majMontant('montant-prevu-edit', plan, document.getElementById('duree-mois-edit').value);
     ['basique','standard','premium'].forEach(p => {
         const card = document.getElementById('edit-plan-card-' + p);
         if (card) card.style.borderColor = p === plan ? '#0D9E75' : '';
@@ -315,8 +461,11 @@ function supprimerAbo(id, nom) {
     ouvrirModal('modal-delete-abo');
 }
 function renouveler(id, nom, plan) {
+    planRenouvellement = plan;
     document.getElementById('renew-nom').textContent  = nom;
-    document.getElementById('renew-plan').textContent = plan;
+    document.getElementById('renew-plan').textContent = PLANS[plan] ? PLANS[plan].nom : plan;
+    majResume('periode-prevue-renew', 'montant-prevu-renew', renouvellementDebut(),
+              document.getElementById('duree-mois-renew').value, plan);
     document.getElementById('form-renew').action =
         "{{ url(config('app.admin_url_prefix', 'admin-ep2026') . '/abonnements') }}/" + id + '/renouveler';
     ouvrirModal('modal-renew-abo');

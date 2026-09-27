@@ -38,7 +38,25 @@
                 default    => __('etablissement.plan_defaut_msg'),
             };
             $joursRestants = $abonnement->joursRestants();
-            $abonnementExpire = $abonnement->date_fin ? $abonnement->date_fin->format('d/m/Y') : '—';
+            $abonnementExpire = $abonnement->date_fin ? $abonnement->date_fin->format('d/m/Y') : '';
+
+            // Etat REEL, derive des dates et non du statut stocke. Sans cela,
+            // une periode terminee s'affichait « 0 jours restants » et
+            // l'avertissement « expire le 25/09 (0 jours) » : on pouvait
+            // croire que l'etablissement etait encore couvert ce jour-la.
+            $abonnementEtat = $abonnement->etat();
+            $abonnementEcheance = $abonnement->grace_period_fin
+                ? $abonnement->grace_period_fin->format('d/m/Y')
+                : '';
+
+            // L'icone principale suit l'ALERTE, pas seulement le plan : un
+            // abonnement expire ou en grace doit se voir immediatement, sans
+            // avoir a lire le texte.
+            $alerteIcon = match($abonnementEtat) {
+                'expire'       => 'error',
+                'grace_period' => 'warning',
+                default        => $joursRestants <= 7 ? 'warning' : $planColor['icon'],
+            };
         }
     @endphp
 
@@ -72,16 +90,30 @@
     {{-- Bannière plan abonnement --}}
     @if(isset($abonnement) && $abonnement && isset($planColor))
     <div style="background:{{ $planColor['bg'] }};border:1.5px solid {{ $planColor['border'] }};border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">
-        <span class="material-symbols-outlined" style="font-size:22px;color:{{ $planColor['border'] }};flex-shrink:0;margin-top:1px;">{{ $planColor['icon'] }}</span>
+        <span class="material-symbols-outlined" style="font-size:22px;color:{{ $planColor['border'] }};flex-shrink:0;margin-top:1px;">{{ $alerteIcon }}</span>
         <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:700;color:{{ $planColor['text'] }};margin-bottom:2px;">
                 {{ __('etablissement.plan_plan', ['plan' => $planLabel]) }}
                 <span style="font-weight:400;font-size:11px;margin-left:8px;background:{{ $planColor['border'] }};color:#fff;padding:1px 8px;border-radius:99px;">
-                    {{ __('etablissement.plan_badge', ['statut' => strtoupper($abonnement->statut)]) }}
+                    {{ __('etablissement.plan_badge', ['statut' => strtoupper(str_replace('_', ' ', $abonnementEtat))]) }}
                 </span>
             </div>
             <div style="font-size:12px;color:{{ $planColor['text'] }};opacity:0.85;line-height:1.5;">{{ $planMsg }}</div>
-            @if(isset($joursRestants) && $joursRestants <= 7)
+            @if($abonnementEtat === 'expire')
+            <div style="font-size:11px;color:#B91C1C;margin-top:4px;font-weight:700;display:flex;align-items:center;gap:4px;">
+                <span class="material-symbols-outlined" style="font-size:13px;">event_busy</span>
+                {{ __('etablissement.abonnement_expire', ['date' => $abonnementExpire]) }}
+            </div>
+            <div style="font-size:11px;color:#B45309;margin-top:2px;font-weight:600;display:flex;align-items:center;gap:4px;">
+                <span class="material-symbols-outlined" style="font-size:13px;">pending_actions</span>
+                <a href="{{ route('etablissement.abonnement.requis') }}" style="color:inherit;text-decoration:underline;">{{ __('etablissement.abon_renouveler') }}</a>
+            </div>
+            @elseif($abonnementEtat === 'grace_period')
+            <div style="font-size:11px;color:#B45309;margin-top:4px;font-weight:600;display:flex;align-items:center;gap:4px;">
+                <span class="material-symbols-outlined" style="font-size:13px;">warning</span>
+                {{ __('etablissement.abonnement_expire_grace', ['date' => $abonnementExpire, 'grace' => $abonnementEcheance]) }}
+            </div>
+            @elseif(isset($joursRestants) && $joursRestants <= 7)
             <div style="font-size:11px;color:#D94040;margin-top:4px;font-weight:600;display:flex;align-items:center;gap:4px;">
                 <span class="material-symbols-outlined" style="font-size:13px;">warning</span>
                 {!! __('etablissement.expiration_warning', ['jours' => $joursRestants, 'date' => $abonnementExpire]) !!}
@@ -90,8 +122,19 @@
         </div>
         <div style="flex-shrink:0;text-align:right;min-width:130px;">
             <div style="font-size:11px;color:{{ $planColor['text'] }};opacity:0.7;">{{ __('etablissement.expire_le') }}</div>
-            <div style="font-size:12px;font-weight:600;color:{{ $planColor['text'] }};">{{ $abonnementExpire ?? '—' }}</div>
-            @if(isset($joursRestants))
+            <div style="font-size:12px;font-weight:600;color:{{ $planColor['text'] }};">{{ $abonnementExpire ?: __('etablissement.date_non_renseignee') }}</div>
+            @if(isset($abonnement) && $abonnement && $abonnement->montant_mensuel)
+            <div style="font-size:10px;color:{{ $planColor['text'] }};opacity:0.7;margin-top:4px;border-top:1px solid {{ $planColor['border'] }}33;padding-top:4px;">
+                {{ __('etablissement.montant_total_paye') }}<br/>
+                <span style="font-size:13px;font-weight:800;color:{{ $planColor['text'] }};">{{ number_format($abonnement->montantTotal(), 0, ',', ' ') }}</span> FCFA<br/>
+                <span style="font-size:9px;opacity:.75;">{{ number_format((int) $abonnement->montant_mensuel, 0, ',', ' ') }} &times; {{ $abonnement->dureeEnMois() }} {{ __('etablissement.mois') }}</span>
+            </div>
+            @endif
+            @if($abonnementEtat === 'expire')
+            <div style="font-size:11px;color:#B91C1C;font-weight:700;margin-top:2px;">
+                {{ __('etablissement.periode_echue') }}
+            </div>
+            @elseif(isset($joursRestants))
             <div style="font-size:11px;color:{{ $joursRestants <= 7 ? '#D94040' : $planColor['text'] }};margin-top:2px;">
                 {{ __('etablissement.jours_restants', ['count' => $joursRestants]) }}
             </div>

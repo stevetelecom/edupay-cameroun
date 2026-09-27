@@ -35,7 +35,7 @@
             <div class="form-sub" style="max-width:480px;margin:6px auto 0;">
               {!! __('etablissement.abon_pas_actif', ['nom' => $etablissement->nom]) !!}
             </div>
-          @elseif($abonnement->statut === 'grace_period')
+          @elseif($abonnement->etat() === 'grace_period')
             <div class="form-sub" style="max-width:480px;margin:6px auto 0;color:#B45309;">
               {!! __('etablissement.abon_grace', ['plan' => ucfirst($abonnement->plan), 'date2' => $abonnement->grace_period_fin->format('d/m/Y')]) !!}
             </div>
@@ -45,6 +45,27 @@
             </div>
           @endif
         </div>
+
+        @if($abonnement)
+          {{-- Periode en cours et montant reellement paye (prix du plan x duree). --}}
+          <div style="display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:center;background:var(--ep-gold-lt);border:1px solid #F0E2C4;border-radius:var(--radius-md);padding:14px 18px;margin-bottom:22px;">
+            <div style="font-size:12px;color:#8A6A22;line-height:1.7;">
+              <strong style="color:#5C4711;">{{ __('etablissement.votre_periode_actuelle') }}</strong><br/>
+              {{ $abonnement->date_debut?->format('d/m/Y') }} {{ __('etablissement.au') }}
+              {{ $abonnement->date_fin?->format('d/m/Y') }}
+              <span style="opacity:.75;">({{ $abonnement->dureeEnMois() }} {{ __('etablissement.mois') }})</span>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:10px;font-weight:700;color:#8A6A22;text-transform:uppercase;letter-spacing:.06em;">{{ __('etablissement.montant_total_paye') }}</div>
+              <div style="font-size:21px;font-weight:800;color:#B45309;line-height:1.2;">
+                {{ number_format($abonnement->montantTotal(), 0, ',', ' ') }} <span style="font-size:12px;">FCFA</span>
+              </div>
+              <div style="font-size:10px;color:#8A6A22;opacity:.8;">
+                {{ number_format((int) $abonnement->montant_mensuel, 0, ',', ' ') }} &times; {{ $abonnement->dureeEnMois() }}
+              </div>
+            </div>
+          </div>
+        @endif
 
         {{-- ── Formules disponibles ── --}}
         <div style="font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">{{ __('etablissement.nos_formules') }}</div>

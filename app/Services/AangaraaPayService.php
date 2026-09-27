@@ -215,10 +215,16 @@ class AangaraaPayService
 
     public function detecterOperateur(string $telephone): string
     {
-        $numero = preg_replace('/\D/', '', $telephone);
+        // On passe par normaliserNumero() plutot que de redecouper le numero
+        // ici : les deux fonctions doivent tomber sur le meme numero national.
+        // Avant, « 00237 650 000 000 » etait normalise correctement pour
+        // l'appel API mais detecte ici avec le prefixe « 002 », donc renvoyait
+        // ALL et l'operateur n'etait plus reconnu.
+        $numero = $this->normaliserNumero($telephone);
         if (str_starts_with($numero, '237')) {
             $numero = substr($numero, 3);
         }
+
         $prefixe = (int) substr($numero, 0, 3);
         // 680-683 appartiennent a Nexttel/Viettel, pas a MTN — ne pas les inclure.
         if (($prefixe >= 650 && $prefixe <= 654) || ($prefixe >= 670 && $prefixe <= 679)) {
@@ -285,7 +291,23 @@ class AangaraaPayService
         }
 
         $numero    = $this->normaliserNumero($telephone);
-        $operateur = $operateurForce ?? $this->detecterOperateur($numero);
+        $detecte   = $this->detecterOperateur($numero);
+        $operateur = $operateurForce ?? $detecte;
+
+        // Le navigateur fait sa propre detection et envoie l'operateur choisi
+        // (fonctionne pour Orange comme pour MTN, verifie le 27/09/2026).
+        // Aucun forçage n'est applique ici : changer le comportement d'un
+        // encaissement deja valide n'a pas lieu d'être decide par une
+        // supposition. En revanche un desaccord est signale, car il
+        // indique soit une regle de prefixes a corriger, soit une
+        // detection cote navigateur a revoir.
+        if ($operateurForce !== null && $detecte !== 'ALL' && $operateurForce !== $detecte) {
+            Log::warning('AangaraaPay : operateur choisi != operateur detecte', [
+                'telephone'        => LogMasking::telephone($numero),
+                'operateur_choisi' => $operateurForce,
+                'operateur_detecte'=> $detecte,
+            ]);
+        }
 
         try {
             $payload = [

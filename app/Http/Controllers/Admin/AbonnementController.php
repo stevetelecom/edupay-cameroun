@@ -25,13 +25,34 @@ class AbonnementController extends Controller
 
         $abonnements = $query->paginate(20)->withQueryString();
 
+        $aujourdhui = now()->toDateString();
+
+        // Les compteurs sont calcules sur les DATES, pas sur le statut stocke.
+        // Le statut n'est qu'une valeur derivee, resynchronisee par
+        // abonnements:synchroniser (toutes les heures) et par le middleware
+        // CheckAbonnement (au passage d'un utilisateur) : entre deux
+        // synchronisations, une periode echue comptait encore comme « actif »,
+        // et une periode en grace était déjà sortie du compteur « actifs ».
         $stats = [
-            'actifs'       => Abonnement::where('statut', 'actif')->count(),
-            'grace_period' => Abonnement::where('statut', 'grace_period')->count(),
-            'expires'      => Abonnement::where('statut', 'expire')->count(),
-            'revenus_mois' => Abonnement::where('statut', 'actif')
+            'actifs'       => Abonnement::whereDate('date_fin', '>=', $aujourdhui)->count(),
+            'grace_period' => Abonnement::whereDate('date_fin', '<', $aujourdhui)
+                ->whereDate('grace_period_fin', '>=', $aujourdhui)->count(),
+            'expires'      => Abonnement::whereDate('grace_period_fin', '<', $aujourdhui)->count(),
+
+            // Argent reellement encaisse : SOMME DES MONTANTS TOTAUX, pas des
+            // prix unitaires. Un abonnement de 12 mois a 12 fois le prix
+            // mensuel, donc compter `montant_mensuel` sous-estimait la recette
+            // d'un facteur 3 a 12.
+            // whereMonth SANS whereYear cumulait en plus le mois courant de
+            // TOUTES les annees : le KPI gonflait a chaque janvier.
+            'revenus_mois' => Abonnement::whereDate('date_fin', '>=', $aujourdhui)
+                ->whereYear('date_debut', now()->year)
                 ->whereMonth('date_debut', now()->month)
-                ->sum('montant_mensuel'),
+                ->get(['montant_mensuel', 'date_debut', 'date_fin'])
+                ->sum(fn (Abonnement $a) => $a->montantTotal()),
+
+            // Argent en attente d'action : periodes echues needing renewal.
+            'a_renouveler' => Abonnement::whereDate('date_fin', '<', $aujourdhui)->count(),
         ];
 
         return view('admin.abonnements.index', compact('abonnements', 'stats'));
@@ -95,34 +116,92 @@ class AbonnementController extends Controller
             $etablissement = $abo->etablissement;
             $actions = '<div class="ep-actions">';
 
+            // La duree reelle est derivee des dates et doit etre connue AVANT
+            // la construction des boutons : c'est elle qui est transmise a
+            // modifierAbo() pour pre-remplir le formulaire. Un abonnement
+            // « mensuel » datant de 13 mois (constate le 27/09/2026 sur #6 et
+            // #7) apparait donc reellement comme tel.
+            $dureeMois = $abo->dureeEnMois();
+            $icone = fn (string $nom) => '<span class="material-symbols-outlined" style="font-size:15px;line-height:1;">' . $nom . '</span>';
+
             if (in_array($abo->statut, ['actif', 'grace_period', 'expire'])) {
-                $actions .= '<button onclick="renouveler(' . $abo->id . ', \'' . addslashes($etablissement->nom ?? '') . '\', \'' . addslashes(ucfirst($abo->plan)) . '\')" class="ep-btn-icon ep-btn-teal" title="Renouveler">'
-                    . '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 4 20 8 8 20 4 20 4 16 16 4"/></svg>'
+                $actions .= '<button type="button" onclick="renouveler(' . $abo->id . ', \'' . addslashes($etablissement->nom ?? '') . '\', \'' . addslashes($abo->plan) . '\')" class="ep-btn-icon ep-btn-teal" title="' . e(__('admin.renew')) . '">'
+                    . $icone('edit_square')
                     . '</button>';
             }
 
-            $actions .= '<button onclick="modifierAbo(' . $abo->id . ', \'' . addslashes($etablissement->nom ?? '') . '\', \'' . addslashes($abo->plan) . '\')" class="ep-btn-icon ep-btn-yellow" title="Modifier">'
-                . '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>'
+            $actions .= '<button type="button" onclick="modifierAbo(' . $abo->id
+                . ', \'' . addslashes($etablissement->nom ?? '') . '\''
+                . ', \'' . addslashes($abo->plan) . '\''
+                . ', \'' . $abo->date_debut?->format('Y-m-d') . '\''
+                . ', \'' . $dureeMois . '\''
+                . ', \'' . addslashes($abo->periodeAttendue()) . '\''
+                . ')" class="ep-btn-icon ep-btn-yellow" title="' . e(__('admin.edit')) . '">'
+                . $icone('edit')
                 . '</button>';
 
-            $actions .= '<button onclick="supprimerAbo(' . $abo->id . ', \'' . addslashes($etablissement->nom ?? '') . '\')" class="ep-btn-icon ep-btn-red" title="Supprimer">'
-                . '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>'
+            $actions .= '<button type="button" onclick="supprimerAbo(' . $abo->id . ', \'' . addslashes($etablissement->nom ?? '') . '\')" class="ep-btn-icon ep-btn-red" title="' . e(__('admin.supprimer')) . '">'
+                . $icone('delete')
                 . '</button>';
 
             $actions .= '</div>';
 
-            $periode = '<div class="ep-dt-sub">' . $abo->date_debut->format('d/m/Y') . ' → ' . $abo->date_fin->format('d/m/Y') . '</div>';
-            if ($abo->enGracePeriod()) {
-                $periode .= '<div class="ep-dt-sub ep-link text-amber-600">Grace jusqu\'au ' . $abo->grace_period_fin->format('d/m/Y') . '</div>';
-            } else {
-                $periode .= '<div class="ep-dt-sub text-gray-400">' . $abo->joursRestants() . ' jours restants</div>';
+            // Montant total encaisse : prix du plan multiplie par la duree
+            // souscrite (3 mois = 3 x le prix mensuel, 12 mois = 12 x).
+            // Sans cette ligne, seul le prix unitaire etait visible et
+            // l'administrateur ne pouvait pas verifier la somme percue.
+            $periode = '<div class="ep-dt-sub">'
+                . e($abo->date_debut?->format('d/m/Y') ?? '—') . ' au '
+                . e($abo->date_fin?->format('d/m/Y') ?? '—')
+                . ' <span class="ep-badge-duree">' . $dureeMois . ' mois</span></div>';
+
+            $periode .= '<div class="ep-dt-sub font-semibold text-gray-700">'
+                . e(number_format($abo->montantTotal(), 0, ',', ' ')) . ' FCFA'
+                . ' <span class="text-gray-400 font-normal">('
+                . e(number_format((int) $abo->montant_mensuel, 0, ',', ' ')) . ' × ' . $dureeMois . ')'
+                . '</span></div>';
+
+            // L'etat est calcule depuis les DATES, pas depuis le statut stocke :
+            // une periode finie s'affiche « Expiré » meme si le statut
+            // n'a jamais ete synchronise (le middleware ne mettait a jour
+            // qu'a la connexion d'un eleve).
+            switch ($abo->etat()) {
+                case 'expire':
+                    $periode .= '<div class="ep-dt-sub font-semibold text-red-600">'
+                        . e(__('admin.expire_le_abo', ['date' => $abo->date_fin?->format('d/m/Y')]))
+                        . '</div>';
+                    break;
+
+                case 'grace_period':
+                    $periode .= '<div class="ep-dt-sub font-semibold text-amber-600">'
+                        . e(__('admin.expire_le_abo', ['date' => $abo->date_fin?->format('d/m/Y')])) . '</div>';
+                    $periode .= '<div class="ep-dt-sub text-amber-600">'
+                        . e(__('admin.grace_jusqu_au', ['date' => $abo->grace_period_fin?->format('d/m/Y')]))
+                        . '</div>';
+                    break;
+
+                default:
+                    $periode .= '<div class="ep-dt-sub text-gray-400">'
+                        . e(trans_choice('admin.jours_restants_abo', $abo->joursRestants(), [
+                            'n' => $abo->joursRestants(),
+                        ]))
+                        . '</div>';
+            }
+
+            // Badge de statut : on affiche l'etat reel, et on signale quand la
+            // valeur stocke n'a pas encore ete resynchronisee.
+            $etat = $abo->etat();
+            $libelleStatut = e(ucfirst(str_replace('_', ' ', $etat)));
+            if ($abo->statutDesynchronise()) {
+                $libelleStatut .= ' <span class="ep-dt-sub text-gray-400" title="'
+                    . e(__('admin.statut_a_synchroniser')) . '">*</span>';
             }
 
             return [
                 '<div><div class="ep-dt-name">' . e($etablissement->nom ?? '—') . '</div><div class="ep-dt-sub">' . e($etablissement->ville ?? '—') . '</div></div>',
                 '<span class="text-xs font-semibold px-2 py-1 rounded-full ' . ($planCouleurs[$abo->plan] ?? '') . '">' . ucfirst($abo->plan) . '</span>',
                 $periode,
-                '<span class="text-xs font-medium px-2 py-1 rounded-full border ' . ($couleurs[$abo->statut] ?? '') . '">' . ucfirst(str_replace('_', ' ', $abo->statut)) . '</span>',
+                '<span class="text-xs font-medium px-2 py-1 rounded-full border ' . ($couleurs[$etat] ?? '') . '">' . $libelleStatut . '</span>',
                 '<div class="ep-dt-name">' . number_format($abo->montant_mensuel, 0, ',', ' ') . ' FCFA</div>',
                 $actions,
             ];
@@ -142,14 +221,22 @@ class AbonnementController extends Controller
             'etablissement_id'    => 'required|exists:etablissements,id',
             'plan'                => 'required|in:basique,standard,premium',
             'date_debut'          => 'required|date',
+            // Duree souscrite : 1 mois par defaut (abonnement mensuel).
+            'duree_mois'          => 'nullable|integer|in:' . implode(',', Abonnement::DUREES_MOIS),
             'reference_paiement'  => 'nullable|string|max:100',
             'notes'               => 'nullable|string|max:500',
+        ], [
+            'duree_mois.integer' => 'La durée doit être un nombre de mois entier.',
+            'duree_mois.in'       => 'La durée doit être l\'une des offres : ' . implode(',', Abonnement::DUREES_MOIS) . ' mois.',
         ]);
 
-        $dateDebut     = Carbon::parse($validated['date_debut']);
-        $dateFin       = $dateDebut->copy()->addMonth()->subDay();
-        $gracePeriod   = $dateFin->copy()->addDays(7);
-        $montant       = Abonnement::montantPlan($validated['plan']);
+        $dateDebut = Carbon::parse($validated['date_debut']);
+
+        // Toute la règle de durée passe par le modele : plus de « addMonth()
+        // ecrit en dur » qui peut deriver de la regle mensuelle.
+        $periode = Abonnement::periode($dateDebut, $validated['duree_mois'] ?? null);
+        $dateFin = $periode['date_fin'];
+        $montant = Abonnement::montantPlan($validated['plan']);
 
         // Désactiver l'abonnement précédent si existant
         Abonnement::where('etablissement_id', $validated['etablissement_id'])
@@ -162,7 +249,7 @@ class AbonnementController extends Controller
             'montant_mensuel'    => $montant,
             'date_debut'         => $dateDebut,
             'date_fin'           => $dateFin,
-            'grace_period_fin'   => $gracePeriod,
+            'grace_period_fin'   => $periode['grace_period_fin'],
             'statut'             => 'actif',
             'reference_paiement' => $validated['reference_paiement'] ?? null,
             'notes'              => $validated['notes'] ?? null,
@@ -176,33 +263,81 @@ class AbonnementController extends Controller
             'abonnement_expire_le' => $dateFin,
         ]);
 
+        $montantTotal = Abonnement::montantTotalPour($validated['plan'], $periode['duree_mois']);
+
         AuditLog::enregistrer(
             Auth::guard('admin')->user(),
             'ABONNEMENT_ACTIVE',
-            'Abonnement ' . strtoupper($validated['plan']) . ' activé pour établissement #' . $validated['etablissement_id'],
+            'Abonnement ' . strtoupper($validated['plan']) . ' activé pour établissement #' . $validated['etablissement_id']
+                . ' (' . $periode['duree_mois'] . ' mois, jusqu\'au ' . $dateFin->format('d/m/Y')
+                . ', total ' . number_format($montantTotal, 0, ',', ' ') . ' FCFA)',
             $request, 'INFO'
         );
 
-        return back()->with('success', 'Abonnement ' . ucfirst($validated['plan']) . ' activé avec succès jusqu\'au ' . $dateFin->format('d/m/Y') . '.');
+        return back()->with('success', __('admin.abonnement_active_jusquau', [
+            'plan'    => ucfirst($validated['plan']),
+            'date'    => $dateFin->format('d/m/Y'),
+            'mois'    => $periode['duree_mois'],
+            'montant' => number_format($montantTotal, 0, ',', ' '),
+        ]));
     }
 
     public function update(Request $request, Abonnement $abonnement)
     {
+        // Durees acceptees : le catalogue, plus la duree que porte DEJA cette
+        // ligne. Sans cetteTolerance, une periode historique de 13 mois ne
+        // pourrait plus etre enregistree du tout (le select propose 13 mois
+        // « hors offre », la validation le rejetait) et l'admin serait oblige
+        // de la raccourcir sans avoir choisi de le faire.
+        $dureesAutorisees = array_unique(array_merge(
+            Abonnement::DUREES_MOIS,
+            [$abonnement->dureeEnMois()]
+        ));
+
         $validated = $request->validate([
             'plan'               => 'required|in:basique,standard,premium',
+            'duree_mois'         => 'nullable|integer|in:' . implode(',', $dureesAutorisees),
             'reference_paiement' => 'nullable|string|max:100',
             'notes'              => 'nullable|string|max:500',
+        ], [
+            'duree_mois.integer' => 'La durée doit être un nombre de mois entier.',
+            'duree_mois.in'       => 'La durée doit être l\'une des offres : ' . implode(',', $dureesAutorisees) . ' mois.',
         ]);
 
-        $montant       = Abonnement::montantPlan($validated['plan']);
-        $nouvelleDateFin = $abonnement->date_debut->copy()->addMonth()->subDay();
-        $gracePeriod     = $nouvelleDateFin->copy()->addDays(7);
+        $montant = Abonnement::montantPlan($validated['plan']);
+
+        // La periode est RE-CALCULEE depuis date_debut : c'est ce qui garantit
+        // qu'un abonnement dit « 1 mois » ne peut pas finir 13 mois plus tard.
+        //
+        // En revanche, si aucune duree n'est transmise (select vide), on
+        // CONSERVE les dates existantes au lieu de les recalculer : une
+        // periode historique hors catalogue (13 mois, cf. #6 / #7) aurait ete
+        // silencieusement ramenee a 1 mois, ce qui reecrivait l'echeance et le
+        // montant deja encaisses.
+        $dureeDemandee = $validated['duree_mois'] ?? null;
+        $dureeActuelle  = $abonnement->dureeEnMois();
+
+        // On ne recalcule la periode que si la duree CHANGE vraiment. Envoyer
+        // la duree que porte deja la ligne (ou un select vide) doit la
+        // laisser intacte : sinon une periode hors catalogue de 13 mois
+        // repassait a 1 mois, puisque periode() ne connait que 1/3/6/12.
+        if ($dureeDemandee !== null && $dureeDemandee !== $dureeActuelle) {
+            $periode = Abonnement::periode($abonnement->date_debut, $dureeDemandee);
+        } else {
+            $periode = [
+                'date_fin'         => $abonnement->date_fin,
+                'grace_period_fin' => $abonnement->grace_period_fin,
+                'duree_mois'       => $dureeActuelle,
+            ];
+        }
+
+        $nouvelleDateFin = $periode['date_fin'];
 
         $abonnement->update([
             'plan'               => $validated['plan'],
             'montant_mensuel'    => $montant,
             'date_fin'           => $nouvelleDateFin,
-            'grace_period_fin'   => $gracePeriod,
+            'grace_period_fin'   => $periode['grace_period_fin'],
             'statut'             => 'actif',
             'reference_paiement' => $validated['reference_paiement'] ?? $abonnement->reference_paiement,
             'notes'              => $validated['notes'] ?? $abonnement->notes,
@@ -215,14 +350,23 @@ class AbonnementController extends Controller
             'abonnement_expire_le' => $nouvelleDateFin,
         ]);
 
+        $montantTotal = $montant * max(1, (int) $periode['duree_mois']);
+
         AuditLog::enregistrer(
             Auth::guard('admin')->user(),
             'ABONNEMENT_MODIFIE',
-            'Plan modifié → ' . strtoupper($validated['plan']) . ' pour établissement #' . $abonnement->etablissement_id,
+            'Plan modifié : ' . strtoupper($validated['plan']) . ' pour établissement #' . $abonnement->etablissement_id
+                . ' (' . $periode['duree_mois'] . ' mois, jusqu\'au ' . $nouvelleDateFin->format('d/m/Y')
+                . ', total ' . number_format($montantTotal, 0, ',', ' ') . ' FCFA)',
             $request, 'INFO'
         );
 
-        return back()->with('success', 'Plan modifié avec succès → ' . ucfirst($validated['plan']) . '.');
+        return back()->with('success', __('admin.abonnement_modifie_jusquau', [
+            'plan'    => ucfirst($validated['plan']),
+            'date'    => $nouvelleDateFin->format('d/m/Y'),
+            'mois'    => $periode['duree_mois'],
+            'montant' => number_format($montantTotal, 0, ',', ' '),
+        ]));
     }
 
     public function destroy(Request $request, Abonnement $abonnement)
@@ -249,18 +393,22 @@ class AbonnementController extends Controller
     public function renouveler(Request $request, Abonnement $abonnement)
     {
         $validated = $request->validate([
+            'duree_mois'         => 'nullable|integer|in:' . implode(',', Abonnement::DUREES_MOIS),
             'reference_paiement' => 'nullable|string|max:100',
             'notes'              => 'nullable|string|max:500',
+        ], [
+            'duree_mois.integer' => 'La durée doit être un nombre de mois entier.',
+            'duree_mois.in'       => 'La durée doit être l\'une des offres : ' . implode(',', Abonnement::DUREES_MOIS) . ' mois.',
         ]);
 
         $nouvelleDateDebut = Carbon::today();
-        $nouvelleDateFin   = $nouvelleDateDebut->copy()->addMonth()->subDay();
-        $gracePeriod       = $nouvelleDateFin->copy()->addDays(7);
+        $periode            = Abonnement::periode($nouvelleDateDebut, $validated['duree_mois'] ?? null);
+        $nouvelleDateFin    = $periode['date_fin'];
 
         $abonnement->update([
             'date_debut'         => $nouvelleDateDebut,
             'date_fin'           => $nouvelleDateFin,
-            'grace_period_fin'   => $gracePeriod,
+            'grace_period_fin'   => $periode['grace_period_fin'],
             'statut'             => 'actif',
             'reference_paiement' => $validated['reference_paiement'] ?? $abonnement->reference_paiement,
             'notes'              => $validated['notes'] ?? $abonnement->notes,
@@ -273,13 +421,21 @@ class AbonnementController extends Controller
             'abonnement_expire_le' => $nouvelleDateFin,
         ]);
 
+        $montantTotal = Abonnement::montantTotalPour($abonnement->plan, $periode['duree_mois']);
+
         AuditLog::enregistrer(
             Auth::guard('admin')->user(),
             'ABONNEMENT_RENOUVELE',
-            'Abonnement renouvelé pour établissement #' . $abonnement->etablissement_id,
+            'Abonnement renouvelé pour établissement #' . $abonnement->etablissement_id
+                . ' (' . $periode['duree_mois'] . ' mois, jusqu\'au ' . $nouvelleDateFin->format('d/m/Y')
+                . ', total ' . number_format($montantTotal, 0, ',', ' ') . ' FCFA)',
             $request, 'INFO'
         );
 
-        return back()->with('success', 'Abonnement renouvelé jusqu\'au ' . $nouvelleDateFin->format('d/m/Y') . '.');
+        return back()->with('success', __('admin.abonnement_renouvele_jusquau', [
+            'date'    => $nouvelleDateFin->format('d/m/Y'),
+            'mois'    => $periode['duree_mois'],
+            'montant' => number_format($montantTotal, 0, ',', ' '),
+        ]));
     }
 }

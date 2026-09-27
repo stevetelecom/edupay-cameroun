@@ -22,6 +22,18 @@ Schedule::job(new SendAlerteImpayeJournaliere)
 // independamment du webhook (peu fiable) et du polling client (limite a ~20 min)
 Schedule::command('aangaraa:reconcilie')->everyTwoMinutes();
 
+// Abonnements : le statut (actif / grace_period / expire) est une valeur
+// DERIVEE de date_fin et grace_period_fin. Il n'etait recalcule que par le
+// middleware CheckAbonnement, donc seulement quand un utilisateur de
+// l'etablissement visitait une page : le back office pouvait afficher
+// « actif » pour une periode terminee la veille (constate le 27/09/2026).
+// hourly() suffit : la precision n'a de sens qu'a la journee, et le
+// middleware continue d'appliquer le blocage immediat cote etablissement.
+Schedule::command('abonnements:synchroniser')
+    ->hourly()
+    ->withoutOverlapping()
+    ->name('synchronisation-abonnements');
+
 // Filet de securite des reversements — rattrape les commissions restees
 // 'calculee' (queue perdue, job echoue avant de passer a 'echec'...).
 // Volontairement limite aux etats sur lesquels un rejeu automatique ne peut

@@ -13,9 +13,11 @@ class AbonnementController extends Controller
     {
         $etablissement = Auth::user()->etablissement;
 
-        $dernierAbonnement = Abonnement::where('etablissement_id', $etablissement->id)
-            ->latest()
-            ->first();
+        // Meme selection que CheckAbonnement et Etablissement::abonnementCourant()
+        // (date_debut puis id) : `latest()` triait sur created_at, donc deux
+        // abonnements inseres le meme jour pouvaient afficher une periode
+        // differente de celle appliquee par le middleware.
+        $dernierAbonnement = $etablissement->abonnementCourant();
 
         return view('etablissement.abonnement-requis', [
             'etablissement' => $etablissement,
