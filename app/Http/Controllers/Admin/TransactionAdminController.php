@@ -44,17 +44,22 @@ class TransactionAdminController extends Controller
 
         $paiements = $query->paginate(20)->withQueryString();
 
+        // whereMonth seul ne filtre que le MOIS, pas l'annee : les KPI du mois
+        // cumulaient aussi le meme mois des annees precedentes.
+        $debutMois = now()->startOfMonth();
+        $finMois   = now()->endOfMonth();
+
         // KPIs
         $stats = [
             'total_mois'   => Paiement::where('statut', 'valide')
-                                ->whereMonth('created_at', now()->month)
+                                ->whereBetween('created_at', [$debutMois, $finMois])
                                 ->sum('montant'),
             'nb_mois'      => Paiement::where('statut', 'valide')
-                                ->whereMonth('created_at', now()->month)
+                                ->whereBetween('created_at', [$debutMois, $finMois])
                                 ->count(),
             'en_attente'   => Paiement::where('statut', 'en_attente')->count(),
             'echecs'       => Paiement::where('statut', 'echoue')
-                                ->whereMonth('created_at', now()->month)
+                                ->whereBetween('created_at', [$debutMois, $finMois])
                                 ->count(),
         ];
 

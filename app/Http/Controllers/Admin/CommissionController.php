@@ -37,9 +37,16 @@ class CommissionController extends Controller
 
         $commissions = $query->paginate(20)->withQueryString();
 
+        // whereMonth seul ne filtre que le MOIS, pas l'annee : le total
+        // affichait aussi les commissions du meme mois des annees precedentes
+        // (en septembre 2026, celles de septembre 2025 etaient comptees).
+        $debutMois = now()->startOfMonth();
+        $finMois   = now()->endOfMonth();
+
         $stats = [
-            'total_mois'   => Commission::whereMonth('created_at', now()->month)->sum('montant_commission'),
-            'nb_mois'      => Commission::whereMonth('created_at', now()->month)->count(),
+            'total_mois'   => Commission::whereBetween('created_at', [$debutMois, $finMois])
+                                    ->sum('montant_commission'),
+            'nb_mois'      => Commission::whereBetween('created_at', [$debutMois, $finMois])->count(),
             'calculees'    => Commission::where('statut', Commission::STATUT_CALCULEE)->count(),
             'prelevees'    => Commission::where('statut', Commission::STATUT_PRELEVEE)->count(),
 

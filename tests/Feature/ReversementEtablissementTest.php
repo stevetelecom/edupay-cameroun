@@ -564,4 +564,65 @@ class ReversementEtablissementTest extends TestCase
 
         $this->assertNotNull($calcul['erreur']);
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // KPI du mois : le filtre ne doit pas melanger les annees
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * whereMonth seul filtre le MOIS et ignore l'annee. Les commissions du
+     * meme mois des annees precedentes etaient donc comptees dans le total,
+     * ce qui gonfrait la marge affichee au super admin.
+     */
+    public function test_le_total_du_mois_ignore_les_annees_precedentes(): void
+    {
+        $maintenant = now();
+
+        // Commission 30 : mois courant. 20 : mois precedent. 10 : meme mois
+        // homonyme de l'annee precedente. 30 : janvier de cette annee.
+        // Seul le mois courant appartient a la fenetre.
+        $cas = [
+            [0, 'commission', 30, $maintenant],
+            [-1, 'commission', 20, $maintenant->copy()->subMonthNoOverflow()],
+            [-13, 'commission', 10, $maintenant->copy()->subYearNoOverflow()],
+            [0, 'janvier', 30, $maintenant->copy()->startOfYear()],
+        ];
+
+        foreach ($cas as [$decalage, $etiquette, $montant, $date]) {
+            $paiement             = $this->creerPaiement(50000);
+            $paiement->created_at = $date;
+            $paiement->save();
+
+            $commission = Commission::create([
+                'paiement_id'               => $paiement->id,
+                'etablissement_id'          => $this->etab->id,
+                'montant_transaction'       => 50000,
+                'taux'                      => 0.023,
+                'montant_commission'        => $montant,
+                'montant_net_etablissement' => 50000,
+                'frais_aangaraa'            => 1100,
+                'statut'                    => Commission::STATUT_CALCULEE,
+            ]);
+            $commission->created_at = $date;
+            $commission->save();
+        }
+
+        $debutMois = $maintenant->copy()->startOfMonth();
+        $finMois   = $maintenant->copy()->endOfMonth();
+
+        $total = Commission::whereBetween('created_at', [$debutMois, $finMois])
+            ->sum('montant_commission');
+
+        // Seul septembre compte : 30. Le mois precedent, le mois homonyme de
+        // l'annee d'avant et janvier sont tous hors de la fenetre.
+        $this->assertSame(30, $total);
+
+        // L'ancien filtre whereMonth seul aurait additionne le mois homonyme
+        // de l'annee precedente : 30 (septembre 2026) + 10 (septembre 2025)
+        // = 40. C'etait ce que le super admin voyait.
+        $ancien = Commission::whereMonth('created_at', $maintenant->month)
+            ->sum('montant_commission');
+
+        $this->assertSame(40, $ancien, 'Le filtre sans whereYear doit rester le buggy, sinon le test ne prouve rien');
+    }
 }
