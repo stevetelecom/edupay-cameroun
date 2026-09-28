@@ -51,3 +51,5 @@
 
 
 NB: on code en local pas besoin de tester directement sur le repo avant d;envoyer donc tu me donne le code directement si ca ne donne pas on vas debugeur progressivement ensemble , donc pas besoin de cloner le repo a chaque prompt que je t'envoi tu fais ca uniquement pour verifier tout ce qui est coder de facon generale par le cahier de charge  ou le plan d'action et  quand je te demande  de le faire moi meme ne prends jamais cet initiative toi meme.
+
+- eviter des textes avec des tirets de six ( - ) comme la plupart des ia le font
