@@ -189,7 +189,7 @@ class OnboardingController extends Controller
     {
         $this->autoriserAccesApprenant($apprenant);
 
-        // 🔒 Permission : on ne peut PAS détacher un enfant à qui des frais de
+        // Permission : on ne peut PAS détacher un enfant à qui des frais de
         // scolarité ont déjà été affectés (même sans paiement) — le détachement
         // casserait la structure de frais/paiements de l'ancien établissement
         // et permettrait un contournement du règlement.
@@ -223,7 +223,7 @@ class OnboardingController extends Controller
         // Affiche l'annuaire : quand rien n'est saisi, on liste TOUS les apprenants
         // actifs de l'établissement (comme pour la liste des établissements).
         if ($search !== '') {
-            // 🔒 Sécurité (E-01) : pas de recherche libre qui expose tout l'annuaire
+            // Sécurité (E-01) : pas de recherche libre qui expose tout l'annuaire
             // dès la première frappe. Le parent doit saisir au moins 3 caractères
             // (matricule exact, ou nom / prénom seul, ou nom+prénom) — sinon aucun
             // résultat. Empêche la fouille de données personnelles de mineurs.
@@ -266,7 +266,7 @@ class OnboardingController extends Controller
     // ── Helpers privés ──
     private function resoudreEtablissement(array $validated): ?Etablissement
     {
-        // 🔒 Sécurité : dans les DEUX cas, l'établissement doit être 'actif'.
+        // Sécurité : dans les DEUX cas, l'établissement doit être 'actif'.
         // Sans ce check sur etablissement_id, un payeur pouvait se rattacher
         // à un établissement en_attente ou suspendu en connaissant/devinant son ID.
         if (!empty($validated['etablissement_id'])) {

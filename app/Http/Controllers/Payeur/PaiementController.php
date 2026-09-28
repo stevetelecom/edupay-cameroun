@@ -296,7 +296,7 @@ class PaiementController extends Controller
                 return false;
             }
 
-            // 🔒 Annulation définitive (audit C) : un paiement annulé ne peut
+            // Annulation définitive (audit C) : un paiement annulé ne peut
             // JAMAIS encaisser, même si l'opérateur renvoie SUCCESSFUL en retard.
             if ($paiement->estAnnule()) {
                 \Illuminate\Support\Facades\Log::warning('Paiement annulé confirmé par l\'opérateur — aucun encaissement (action manuelle requise)', [
@@ -556,7 +556,7 @@ class PaiementController extends Controller
             abort(403, 'Vous n\'êtes pas autorisé à accéder à ce dossier de paiement.');
         }
 
-        // 🔒 Sécurité (E-01) : tant que l'établissement n'a pas validé le
+        // Sécurité (E-01) : tant que l'établissement n'a pas validé le
         // rattachement (auto-création via apprenant_id/matricule au moment
         // de l'onboarding), on bloque l'accès aux frais/solde — évite qu'un
         // payeur consulte les données financières d'un enfant qui n'est pas
