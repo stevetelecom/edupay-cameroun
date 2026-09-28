@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\EtablissementAdminController;
 use App\Http\Controllers\Admin\PayeurAdminController;
 use App\Http\Controllers\Admin\TransactionAdminController;
 use App\Http\Controllers\Admin\CommissionController;
+use App\Http\Controllers\Admin\MargeReportController;
 use App\Http\Controllers\Admin\LogSecuriteController;
 use App\Http\Controllers\Admin\ReclamationAdminController;
 use App\Http\Controllers\Admin\ParametreSystemeController;
@@ -120,6 +121,9 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
         Route::patch('/{commission}/prelever',       [CommissionController::class, 'marquerPrelevee'])->name('prelever');
         Route::patch('/{commission}/rejouer',        [CommissionController::class, 'rejouerReversement'])->name('rejouer');
     });
+
+    // Marge EduPay (periode jour / semaine / mois / annee)
+    Route::get('marge', [MargeReportController::class, 'index'])->name('marge.index');
 
     // Reclamations
     Route::prefix('reclamations')->name('reclamations.')->group(function () {

@@ -427,6 +427,63 @@ class AangaraaPayService
         }
     }
 
+    /**
+     * Solde reel du service chez AangaraaPay.
+     *
+     * C'est le SEUL chiffre qui dit combien d'argent la plateforme detient
+     * reellement. Le reste (marge_edupay) est une comptabilite interne qui
+     * suppose les frais AangaraaPay connus a l'avance ; si le prestataire
+     * preleve ailleurs, l'ecart se voit ici et nulle part ailleurs.
+     *
+     * Endpoint documente : GET /service/balance/{app_key}. Lecture seule,
+     * aucun argent bouge.
+     */
+    public function solde(): array
+    {
+        try {
+            $response = Http::timeout(20)
+                ->get($this->apiUrl . '/service/balance/'.$this->appKey);
+
+            $data = $response->json();
+
+            if (! $response->successful()) {
+                Log::warning('AangaraaPay balance indisponible', [
+                    'http'      => $response->status(),
+                    'response'  => LogMasking::payloadReduit($data),
+                ]);
+
+                return [
+                    'ok'        => false,
+                    'solde'     => null,
+                    'message'   => $data['message'] ?? 'Solde indisponible (HTTP '.$response->status().')',
+                ];
+            }
+
+            $details = $data['data']['balance_details'] ?? [];
+
+            return [
+                'ok'           => true,
+                'solde'        => (float) ($data['data']['balance_in_db'] ?? 0),
+                'service_id'   => $data['data']['service_id'] ?? null,
+                'service_name' => $data['data']['service_name'] ?? null,
+                'parOperateur' => [
+                    'mtn'    => (float) ($details['mtn_cameroon']['amount']    ?? 0),
+                    'orange' => (float) ($details['orange_cameroon']['amount'] ?? 0),
+                ],
+                'nbTransactions' => $details['total']['transactions_count'] ?? null,
+                'message'     => null,
+            ];
+        } catch (\Throwable $e) {
+            Log::error('AangaraaPay balance exception', ['error' => $e->getMessage()]);
+
+            return [
+                'ok'      => false,
+                'solde'   => null,
+                'message' => 'Erreur : '.$e->getMessage(),
+            ];
+        }
+    }
+
     public function verifierStatut(string $payToken): array
     {
         try {
