@@ -84,6 +84,7 @@ return [
     'taux_commission_ex' => 'Commission rate (e.g. 0.025 for 2.5%)',
     'taux_0_10' => 'Value between 0 and 0.1 (0% to 10%)',
     'taux_actuel_plateforme' => 'Current platform rate: <strong>:pct</strong>',
+    'taux_etablissement_libelle' => 'This rate is a label stored on this establishment commissions. It does not change the fees charged to the payer: the applied rate comes from the system settings (AangaraaPay cost + EduPay margin), changed in System settings.',
     'marquer_prelevee' => 'Mark as collected',
     'marquer_prelevee_btn' => 'Mark collected',
     'confirm_marquer_prelevee' => 'This commission will be marked as collected. This action is recorded in the audit logs.',

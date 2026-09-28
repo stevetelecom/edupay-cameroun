@@ -54,10 +54,19 @@ class CommissionController extends Controller
             ->orderBy('nom')
             ->get(['id', 'nom']);
 
-        $tauxActuel = config('services.edupay.taux_commission', 0.025);
+        // Taux reellement applique aux paiements, lu dans les parametres
+        // systeme. Lire la config ('taux_commission' fige a 2,5 % dans
+        // .env) affichait un taux qui ne correspondait plus aux frais
+        // preleves, et le taux propre a l'etablissement n'entre dans aucun
+        // calcul : il est conserve comme libelle sur la commission.
+        $serviceFrais  = app(\App\Services\AangaraaPayService::class);
+        $tauxActuel    = $serviceFrais->tauxFraisService();
+        $tauxAangaraa  = $serviceFrais->tauxAangaraa();
+        $margeEdupay   = $serviceFrais->margeEdupay();
 
         return view('admin.commissions.index', compact(
-            'commissions', 'stats', 'etablissements', 'tauxActuel'
+            'commissions', 'stats', 'etablissements', 'tauxActuel',
+            'tauxAangaraa', 'margeEdupay'
         ));
     }
 

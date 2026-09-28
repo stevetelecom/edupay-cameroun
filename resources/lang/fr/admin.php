@@ -84,6 +84,7 @@ return [
     'taux_commission_ex' => 'Taux de commission (ex: 0.025 pour 2,5%)',
     'taux_0_10' => 'Valeur entre 0 et 0.1 (0% à 10%)',
     'taux_actuel_plateforme' => 'Taux actuel plateforme : <strong>:pct</strong>',
+    'taux_etablissement_libelle' => 'Ce taux est un libellé enregistré sur les commissions de cet établissement. Il ne modifie pas les frais prélevés au payeur : le taux appliqué vient des paramètres système (coût AangaraaPay + marge EduPay), à changer dans Paramètres système.',
     'marquer_prelevee' => 'Marquer comme prélevée',
     'marquer_prelevee_btn' => 'Marquer prélevée',
     'confirm_marquer_prelevee' => "Cette commission sera marquée comme prélevée. Cette action est enregistrée dans les logs d'audit.",

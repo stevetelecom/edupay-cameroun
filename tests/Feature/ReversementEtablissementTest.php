@@ -418,39 +418,73 @@ class ReversementEtablissementTest extends TestCase
     // P1 — cout reel du reversement (2,2 % et non 2 %)
     // ─────────────────────────────────────────────────────────────
 
-    public function test_bareme_reel_sur_chaque_palier(): void
+    public function test_frais_suivent_le_taux_global_a_chaque_montant(): void
     {
         $service = new AangaraaPayService();
 
-        // 50 000 FCFA : 800 de frais visibles pour 1 100 reellement preleves
-        // par AangaraaPay. Le deficit etait masque par max(0, ...).
+        // 50 000 FCFA de frais de scolarite : 2,3 % de frais (2,2 % de cout
+        // AangaraaPay + 0,1 % de marge EduPay).
         $detail = $service->calculerFrais(50000);
 
-        $this->assertSame(800, $detail['frais_service']);
+        $this->assertSame(1150, $detail['frais_service']);
         $this->assertSame(1100, $detail['frais_aangaraa']);
-        $this->assertSame(0, $detail['marge_edupay']);
-        $this->assertSame(50800, $detail['montant_total_paye']);
+        $this->assertSame(50, $detail['marge_edupay']);
+        $this->assertSame(51150, $detail['montant_total_paye']);
     }
 
     public function test_taux_interne_correspond_a_la_commission_mesuree(): void
     {
-        $this->assertSame(0.022, AangaraaPayService::TAUX_AANGARAA);
+        $this->assertSame(0.022, AangaraaPayService::TAUX_AANGARAA_DEFAUT);
 
         $detail = (new AangaraaPayService())->calculerFrais(100000);
 
-        // 1500 de frais visibles, 2 200 preleves par le prestataire.
-        $this->assertSame(1500, $detail['frais_service']);
+        // 2 300 de frais visibles, dont 2 200 preleves par le prestataire.
+        $this->assertSame(2300, $detail['frais_service']);
         $this->assertSame(2200, $detail['frais_aangaraa']);
+        $this->assertSame(100, $detail['marge_edupay']);
     }
 
-    public function test_bareme_visible_inchange_pour_le_payeur(): void
+    public function test_marge_jamais_negative_sur_toute_la_gamme(): void
     {
-        // Le barème charge au payeur est une décision commerciale : la
-        // correction du taux interne ne doit pas le modifier.
-        $detail = (new AangaraaPayService())->calculerFrais(10000);
+        $service = new AangaraaPayService();
 
-        $this->assertSame(200, $detail['frais_service']);
-        $this->assertSame(10200, $detail['montant_total_paye']);
+        // Ancien defaut : a 50 000 FCFA les frais visibles (800) etaient
+        // inferieurs au cout du reversement (1 100), et max(0, ...) masquait
+        // la perte. L'arrondi ne doit pas reintroduire ce cas.
+        foreach ([1000, 5000, 10000, 25000, 50000, 100000, 200000, 1000000] as $montant) {
+            $detail = $service->calculerFrais($montant);
+
+            $this->assertGreaterThanOrEqual(
+                0,
+                $detail['marge_edupay'],
+                "Marge negative sur '.$montant.' FCFA"
+            );
+            $this->assertSame(
+                $detail['montant_frais'] + $detail['frais_service'],
+                $detail['montant_total_paye'],
+                'Le total debite doit etre la somme des deux lignes'
+            );
+        }
+    }
+
+    public function test_etablissement_recoit_exactement_les_frais_de_scolarite(): void
+    {
+        $service = new AangaraaPayService();
+        $detail  = $service->calculerFrais(50000);
+
+        // Ce que le payeur debite entre sur le compte AangaraaPay...
+        $this->assertSame(51150, $detail['montant_total_paye']);
+
+        // ...ce que l'etablissement recoit vaut les seuls frais de scolarite,
+        // donc la difference reste sur le compte : 50 FCFA de marge.
+        $net = $detail['montant_frais'];
+
+        $this->assertSame(50000, $net);
+        $this->assertSame(
+            $detail['montant_total_paye'] - $net,
+            $detail['frais_service'],
+            'Le solde conserve doit etre exactement les frais de service'
+        );
     }
 
     // ─────────────────────────────────────────────────────────────

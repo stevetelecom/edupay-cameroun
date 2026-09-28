@@ -4,33 +4,36 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Models\ParametreSysteme;
 use App\Support\LogMasking;
 
 class AangaraaPayService
 {
     /**
-     * Taux reellement preleve par AangaraaPay sur un reversement, mesure le
-     * 27/09/2026 sur l'API de production : reponse
+     * Cout AangaraaPay par defaut, mesure le 27/09/2026 sur l'API de
+     * production : reponse
      * `{"commission_rate":2.2,"commission_amount":0.02,"total_required":1.02}`
-     * pour un virement de 1,00 — soit 2,2 % payes EN PLUS du montant livre.
+     * pour un virement de 1,00, soit 2,2 % payes EN PLUS du montant livre.
      *
-     * L'ancien code estimait 2 %, ce qui sous-estimait le cout reel et,
-     * combine avec max(0, ...), affichait une marge de 0 sur la plupart des
-     * montants (a 50 000 FCFA : 800 de frais visibles pour 1 100 preleves).
-     * Ce taux sert uniquement a la COMPTABILITE interne : le bareme visible
-     * reste fixe par le bareme ci-dessous, c'est une decision commerciale.
+     * Valeur de repli : le taux reel est un parametre systeme, modifiable
+     * depuis Admin > Parametres systeme, pour ne pas redemarrer l'application
+     * quand la grille du prestataire change.
      */
-    public const TAUX_AANGARAA = 0.022;
+    public const TAUX_AANGARAA_DEFAUT = 0.022;
 
-    /** Bareme des frais visibles par le payeur (fusion EduPay + AangaraaPay). */
-    public const BAREME_FRAIS = [
-        10000  => 200,
-        25000  => 400,
-        50000  => 800,
-        100000 => 1500,
-    ];
-
-    public const FRAIS_PAR_DEFAUT = 2500;
+    /**
+     * Marge que preleve EduPay sur chaque transaction, par defaut.
+     *
+     * Modele retenu : le payeur regle « frais de scolarite + frais de
+     * paiement », l'etablissement recoit exactement les frais de scolarite
+     * (ReverserEtablissementJob reverse `montant_net_etablissement`, qui vaut
+     * le montant des frais de scolarite), et la difference reste sur le
+     * compte AangaraaPay. Les frais visibles doivent donc couvrir le cout
+     * AangaraaPay PLUS cette marge, sinon la plateforme est a perte sur
+     * chaque encaissement — ce que faisait le barème figé de 200/400/800/
+     * 1500/2500 FCFA.
+     */
+    public const MARGE_EDUPAY_DEFAUT = 0.001;
 
     private string $apiUrl;
     private string $appKey;
@@ -93,46 +96,106 @@ class AangaraaPayService
     }
 
     /**
+     * Cout AangaraaPay en vigueur, lu dans les parametres systeme.
+     * Repli sur la constante si le parametre est absent ou corrompu.
+     */
+    public function tauxAangaraa(): float
+    {
+        $taux = (float) ParametreSysteme::obtenir('taux_aangaraa', self::TAUX_AANGARAA_DEFAUT);
+
+        // Un cout superieur a 100 % rendrait les frais absurdes : on l'ignore
+        // plutot que de faire exploser le montant debite au payeur.
+        if ($taux < 0 || $taux > 1) {
+            Log::warning('Taux AangaraaPay hors bornes, repli sur la valeur par defaut', [
+                'taux_parametre' => $taux,
+                'taux_repli'     => self::TAUX_AANGARAA_DEFAUT,
+            ]);
+
+            return self::TAUX_AANGARAA_DEFAUT;
+        }
+
+        return $taux;
+    }
+
+    /**
+     * Marge EduPay en vigueur, lue dans les parametres systeme.
+     * Repli sur la constante si le parametre est absent ou corrompu.
+     */
+    public function margeEdupay(): float
+    {
+        $marge = (float) ParametreSysteme::obtenir('marge_edupay', self::MARGE_EDUPAY_DEFAUT);
+
+        if ($marge < 0 || $marge > 1) {
+            Log::warning('Marge EduPay hors bornes, repli sur la valeur par defaut', [
+                'marge_parametre' => $marge,
+                'marge_repli'     => self::MARGE_EDUPAY_DEFAUT,
+            ]);
+
+            return self::MARGE_EDUPAY_DEFAUT;
+        }
+
+        return $marge;
+    }
+
+    /**
+     * Taux global des frais de service : cout du prestataire + marge EduPay.
+     * C'est ce taux unique, et non un bareme, qui est affiche au payeur.
+     */
+    public function tauxFraisService(): float
+    {
+        return $this->tauxAangaraa() + $this->margeEdupay();
+    }
+
+    /**
      * Calcule les frais de service visibles par le payeur.
-     * Barème dégressif — fusionné EduPay + AangaraaPay.
-     * Le payeur ne voit qu'une seule ligne "Frais de service EduPay".
+     *
+     * Modele : le payeur regle « frais de scolarite + frais de paiement », le
+     * total debite entre sur le compte AangaraaPay, l'etablissement recoit
+     * exactement les frais de scolarite (ReverserEtablissementJob) et la
+     * difference reste sur le compte. Les frais doivent donc couvrir le cout
+     * du reversement PLUS la marge EduPay.
+     *
+     * AangaraaPay preleve 2,2 % sur le RETRAIT (le reversement vaut les frais
+     * de scolarite), pas sur le depot : le cout porte donc bien sur $montant.
+     *
+     * Arrondis : frais arrondis au franc SUPERIEUR et cout arrondi au franc
+     * INFERIEUR, pour que l'arrondi ne puisse jamais faire passer la marge
+     * sous zero. Le controle ci-dessous reste une garde-fou.
      */
     public function calculerFrais(int $montant): array
     {
-        // Frais visibles (fusion EduPay + AangaraaPay) : barème unique, declare
-        // en constante pour ne pas avoir deux définitions qui divergent.
-        $fraisVisibles = self::FRAIS_PAR_DEFAUT;
+        $tauxAangaraa = $this->tauxAangaraa();
+        $margeEdupay   = $this->margeEdupay();
+        $tauxGlobal    = $tauxAangaraa + $margeEdupay;
 
-        foreach (self::BAREME_FRAIS as $plafond => $frais) {
-            if ($montant <= $plafond) {
-                $fraisVisibles = $frais;
-                break;
-            }
-        }
+        // Frais visibles = part AangaraaPay + part EduPay.
+        $fraisVisibles = (int) ceil($montant * $tauxGlobal);
 
-        // Cout reel du reversement, mesuré chez AangaraaPay (2,2 %).
-        $fraisAangaraa = (int) round($montant * self::TAUX_AANGARAA);
+        // Cout reel du reversement, mesure chez AangaraaPay (2,2 % du retrait).
+        $fraisAangaraa = (int) floor($montant * $tauxAangaraa);
 
-        // Marge EduPay = frais visibles - part AangaraaPay. Le max(0, ...) est
-        // conserve : le bareme visible releve d'une decision commerciale, on ne
-        // le change pas ici. En revanche le deficit n'est plus silencieux.
-        $margeEdupay = max(0, $fraisVisibles - $fraisAangaraa);
+        $margeReelle = $fraisVisibles - $fraisAangaraa;
 
-        if ($fraisAangaraa > $fraisVisibles) {
-            Log::warning('Frais de service inferieurs au reversement AangaraaPay', [
+        if ($margeReelle < 0) {
+            Log::warning('Marge EduPay negative sur ce montant', [
                 'montant'          => $montant,
                 'frais_encaisses'  => $fraisVisibles,
                 'cout_reversement' => $fraisAangaraa,
-                'perte'            => $fraisAangaraa - $fraisVisibles,
+                'perte'            => -$margeReelle,
+                'taux_aangaraa'    => $tauxAangaraa,
+                'marge_edupay'     => $margeEdupay,
             ]);
         }
 
         return [
-            'montant_frais'       => $montant,          // Frais scolaires nets
-            'frais_service'       => $fraisVisibles,    // Ce que voit le payeur
-            'frais_aangaraa'      => $fraisAangaraa,    // Cout reel du reversement
-            'marge_edupay'        => $margeEdupay,      // Gain EduPay
-            'montant_total_paye'  => $montant + $fraisVisibles, // Total débité
+            'montant_frais'       => $montant,                                   // Frais scolaires nets
+            'frais_service'       => $fraisVisibles,                             // Ce que voit le payeur
+            'frais_aangaraa'      => $fraisAangaraa,                             // Cout reel du reversement
+            'marge_edupay'        => $margeReelle,                               // Gain EduPay
+            'taux_frais'          => $tauxGlobal,                                // Taux global applique
+            'taux_aangaraa'       => $tauxAangaraa,
+            'taux_marge_edupay'   => $margeEdupay,
+            'montant_total_paye'  => $montant + $fraisVisibles,                  // Total debite
         ];
     }
 

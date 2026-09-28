@@ -11,10 +11,25 @@ use Illuminate\Support\Facades\Artisan;
 
 class ParametreSystemeController extends Controller
 {
+    /**
+     * Couts et taux qui pilotent l'argent des paiements. Les frais visibles
+     * preleves au payeur valent (taux_aangaraa + marge_edupay) du montant des
+     * frais de scolarite : c'est ce qui couvre le reversement au prestataire
+     * et laisse la marge d'EduPay sur le compte AangaraaPay.
+     */
+    public const TAUX_AANGARAA_DEFAUT = \App\Services\AangaraaPayService::TAUX_AANGARAA_DEFAUT;
+
+    public const MARGE_EDUPAY_DEFAUT   = \App\Services\AangaraaPayService::MARGE_EDUPAY_DEFAUT;
+
     public function index()
     {
+        $tauxAangaraa = (float) ParametreSysteme::obtenir('taux_aangaraa', self::TAUX_AANGARAA_DEFAUT);
+        $margeEdupay  = (float) ParametreSysteme::obtenir('marge_edupay', self::MARGE_EDUPAY_DEFAUT);
+
         $parametres = [
-            'taux_commission'  => (float) ParametreSysteme::obtenir('taux_commission', 0.025),
+            'taux_aangaraa'    => $tauxAangaraa,
+            'marge_edupay'     => $margeEdupay,
+            'taux_commission'  => $tauxAangaraa + $margeEdupay,
             'timeout_paiement' => (int) ParametreSysteme::obtenir('timeout_paiement', 120),
             'max_tranches'     => (int) ParametreSysteme::obtenir('max_tranches', 3),
             'sms_actif'        => ParametreSysteme::obtenirBool('sms_actif', true),
@@ -40,17 +55,27 @@ class ParametreSystemeController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'taux_commission'  => ['required', 'numeric', 'min:0', 'max:0.1'],
+            'taux_aangaraa'    => ['required', 'numeric', 'min:0', 'max:0.5'],
+            'marge_edupay'     => ['required', 'numeric', 'min:0', 'max:0.1'],
             'timeout_paiement' => ['required', 'integer', 'min:30', 'max:600'],
             'max_tranches'     => ['required', 'integer', 'min:1', 'max:12'],
             'langue_defaut'    => ['required', 'in:fr,en'],
         ], [
-            'taux_commission.required'  => 'Le taux est obligatoire.',
-            'taux_commission.max'       => 'Le taux maximum est 10%.',
+            'taux_aangaraa.required'    => 'Le taux AangaraaPay est obligatoire.',
+            'taux_aangaraa.max'         => 'Le taux AangaraaPay maximum est 50%.',
+            'marge_edupay.required'     => 'La marge EduPay est obligatoire.',
+            'marge_edupay.max'          => 'La marge EduPay maximum est 10%.',
             'timeout_paiement.required' => 'Le timeout est obligatoire.',
             'max_tranches.required'     => 'Le nombre de tranches est obligatoire.',
             'langue_defaut.in'          => 'Langue invalide (fr ou en uniquement).',
         ]);
+
+        // Refus explicite : en dessous du cout du prestataire, chaque paiement
+        // fait perdre de l'argent a la plateforme. Preferer une erreur lisible a
+        // un deficit silencieux sur tous les encaissements.
+        if ((float) $request->marge_edupay < 0) {
+            return back()->withErrors(['marge_edupay' => 'La marge ne peut pas etre negative.'])->withInput();
+        }
 
         $mtnActif    = $request->has('mtn_actif');
         $orangeActif = $request->has('orange_actif');
@@ -62,7 +87,8 @@ class ParametreSystemeController extends Controller
         }
 
         ParametreSysteme::definir([
-            'taux_commission'  => $request->taux_commission,
+            'taux_aangaraa'    => $request->taux_aangaraa,
+            'marge_edupay'     => $request->marge_edupay,
             'timeout_paiement' => $request->timeout_paiement,
             'max_tranches'     => $request->max_tranches,
             'sms_actif'        => $request->has('sms_actif') ? '1' : '0',
@@ -75,7 +101,9 @@ class ParametreSystemeController extends Controller
         AuditLog::enregistrer(
             Auth::guard('admin')->user(),
             'PARAMETRES_MODIFIES',
-            'Parametres systeme mis a jour : taux=' . $request->taux_commission
+            'Parametres systeme mis a jour : taux_aangaraa=' . $request->taux_aangaraa
+                . ', marge_edupay=' . $request->marge_edupay
+                . ', taux_frais_total=' . ((float) $request->taux_aangaraa + (float) $request->marge_edupay)
                 . ', timeout=' . $request->timeout_paiement
                 . ', max_tranches=' . $request->max_tranches
                 . ', mtn=' . ($mtnActif ? 'on' : 'off')

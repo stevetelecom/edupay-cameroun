@@ -33,10 +33,13 @@
           </div>
           <div style="font-size:11px;color:#aaa;margin-top:6px;">{{ __('admin.taux_0_10') }}</div>
         </div>
-        <div style="background:#FEF3DC;border-left:3px solid #E8A020;border-radius:6px;padding:10px 12px;margin-bottom:16px;">
+        <div style="background:#FEF3DC;border-left:3px solid #E8A020;border-radius:6px;padding:10px 12px;margin-bottom:8px;">
           <div style="font-size:12px;color:#854F0B;">
-            {!! __('admin.taux_actuel_plateforme', ['pct' => e(number_format($tauxActuel * 100, 1) . '%')]) !!}
+            {!! __('admin.taux_actuel_plateforme', ['pct' => e(number_format($tauxActuel * 100, 2) . '%')]) !!}
           </div>
+        </div>
+        <div style="background:#FEF2F2;border-left:3px solid #DC2626;border-radius:6px;padding:10px 12px;margin-bottom:16px;">
+          <div style="font-size:11px;color:#991B1B;">{!! __('admin.taux_etablissement_libelle') !!}</div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" onclick="epModal.close('modal-modifier-taux')"

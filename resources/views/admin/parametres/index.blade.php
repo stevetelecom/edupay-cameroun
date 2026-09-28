@@ -58,7 +58,8 @@
       <p style="font-size:13px;color:#555;margin-bottom:16px;">{{ __('admin.confirmez_cette_action') }}</p>
       <form id="form-maintenance" method="POST" action="{{ route('admin.parametres.update') }}">
         @csrf @method('POST')
-        <input type="hidden" name="taux_commission" value="{{ $parametres['taux_commission'] }}">
+        <input type="hidden" name="taux_aangaraa" value="{{ $parametres['taux_aangaraa'] }}">
+        <input type="hidden" name="marge_edupay" value="{{ $parametres['marge_edupay'] }}">
         <input type="hidden" name="timeout_paiement" value="{{ $parametres['timeout_paiement'] }}">
         <input type="hidden" name="max_tranches" value="{{ $parametres['max_tranches'] }}">
         <input type="hidden" name="langue_defaut" value="{{ $parametres['langue_defaut'] }}">
@@ -126,29 +127,59 @@
     {{-- Colonne gauche --}}
     <div class="space-y-4">
 
-      {{-- Taux commission --}}
+      {{-- Taux des frais de service : cout prestataire + marge EduPay --}}
       <div class="bg-white border border-gray-200 rounded-xl p-5">
-        <h2 style="font-size:14px;font-weight:700;color:#111;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        <h2 style="font-size:14px;font-weight:700;color:#111;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
           {{ __('admin.taux_commission_lbl') }}
-        </h2>        <div style="margin-bottom:12px;">
-          <label style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">
-            {{ __('admin.taux_global_ex') }}
-          </label>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <input type="number" name="taux_commission" id="taux_commission"
-                   value="{{ $parametres['taux_commission'] }}"
-                   step="0.001" min="0" max="0.1" required
-                   style="flex:1;padding:10px 12px;font-size:15px;font-weight:700;border:2px solid #E8A020;border-radius:8px;outline:none;text-align:center;" />
-            <div style="text-align:center;min-width:60px;">
-              <div style="font-size:20px;font-weight:800;color:#E8A020;" id="taux-display">
-                {{ number_format($parametres['taux_commission'] * 100, 1, ',', '') }}%
+        </h2>
+        <p style="font-size:11px;color:#6b7280;margin:0 0 16px;">
+          Le payeur regle les frais de scolarite plus ces frais de service. L'etablissement recoit
+          uniquement les frais de scolarite, le cout AangaraaPay est preleve sur le reversement, et la
+          marge reste sur le compte AangaraaPay.
+        </p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div>
+            <label for="taux_aangaraa" style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">
+              Cout AangaraaPay
+            </label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" name="taux_aangaraa" id="taux_aangaraa"
+                     value="{{ $parametres['taux_aangaraa'] }}"
+                     step="0.001" min="0" max="0.5" required
+                     style="flex:1;padding:10px 12px;font-size:15px;font-weight:700;border:2px solid #E8A020;border-radius:8px;outline:none;text-align:center;" />
+              <div id="taux-aangaraa-display" style="font-size:18px;font-weight:800;color:#E8A020;min-width:52px;text-align:right;">
+                {{ number_format($parametres['taux_aangaraa'] * 100, 1, ',', '') }}%
               </div>
-              <div style="font-size:10px;color:#aaa;">{{ __('messages.par_transaction') }}</div>
             </div>
+            <p style="font-size:10px;color:#9ca3af;margin:4px 0 0;">Preleve par le prestataire sur chaque reversement.</p>
+          </div>
+
+          <div>
+            <label for="marge_edupay" style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">
+              Marge EduPay
+            </label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" name="marge_edupay" id="marge_edupay"
+                     value="{{ $parametres['marge_edupay'] }}"
+                     step="0.001" min="0" max="0.1" required
+                     style="flex:1;padding:10px 12px;font-size:15px;font-weight:700;border:2px solid #E8A020;border-radius:8px;outline:none;text-align:center;" />
+              <div id="marge-edupay-display" style="font-size:18px;font-weight:800;color:#E8A020;min-width:52px;text-align:right;">
+                {{ number_format($parametres['marge_edupay'] * 100, 1, ',', '') }}%
+              </div>
+            </div>
+            <p style="font-size:10px;color:#9ca3af;margin:4px 0 0;">Benefice conserve par EduPay sur chaque paiement.</p>
           </div>
         </div>
-        <div style="background:#FEF3DC;border-left:3px solid #E8A020;border-radius:6px;padding:8px 12px;">
+
+        <div style="background:#FEF3DC;border-left:3px solid #E8A020;border-radius:6px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="font-size:11px;color:#854F0B;">{{ __('admin.taux_global_ex') }}</div>
+          <div style="font-size:20px;font-weight:800;color:#E8A020;" id="taux-display">
+            {{ number_format($parametres['taux_commission'] * 100, 2, ',', '') }}%
+          </div>
+        </div>
+        <div style="background:#FEF3DC;border-left:3px solid #E8A020;border-radius:6px;padding:8px 12px;margin-top:8px;">
           <div style="font-size:11px;color:#854F0B;">{{ __('admin.profil_std_cobac') }}</div>
         </div>
       </div>
@@ -303,9 +334,30 @@
 
 @push('scripts')
 <script>
-document.getElementById('taux_commission').addEventListener('input', function() {
+document.getElementById('taux_commission')?.addEventListener('input', function() {
     const pct = (parseFloat(this.value || 0) * 100).toFixed(1).replace('.', ',');
     document.getElementById('taux-display').textContent = pct + '%';
 });
+
+// Le total affiché est la somme des deux taux : le modifier de l'un
+// recalcule l'autre, pour que le super admin voie toujours le total réel
+// prélevé au payeur.
+function majTotal() {
+    const a = parseFloat(document.getElementById('taux_aangaraa')?.value || 0);
+    const m = parseFloat(document.getElementById('marge_edupay')?.value || 0);
+    const el = document.getElementById('taux-display');
+    if (el) el.textContent = ((a + m) * 100).toFixed(2).replace('.', ',') + '%';
+}
+
+for (const [id, aff] of [['taux_aangaraa', 'taux-aangaraa-display'], ['marge_edupay', 'marge-edupay-display']]) {
+    const champ = document.getElementById(id);
+    if (!champ) continue;
+    champ.addEventListener('input', function() {
+        const pct = (parseFloat(this.value || 0) * 100).toFixed(1).replace('.', ',');
+        const cible = document.getElementById(aff);
+        if (cible) cible.textContent = pct + '%';
+        majTotal();
+    });
+}
 </script>
 @endpush

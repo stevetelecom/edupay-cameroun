@@ -16,23 +16,16 @@
     // l'option plutot que d'afficher un montant non payable.
     $fractionnable  = ($fraisApprenant->categorieFrais->fractionnable ?? false) && ($montants['tranche_valide'] ?? true);
 
-    // Calcul frais de service selon barème dégressif
-    function calculerFraisService(int $montant): array {
-        $fraisVisibles = match(true) {
-            $montant <= 10000  => 200,
-            $montant <= 25000  => 400,
-            $montant <= 50000  => 800,
-            $montant <= 100000 => 1500,
-            default            => 2500,
-        };
-        return [
-            'frais'  => $fraisVisibles,
-            'total'  => $montant + $fraisVisibles,
-        ];
-    }
+    // Frais de service : calculés par le service AangaraaPay, jamais recopiés
+    // ici. Le barème était dupliqué dans cette vue et le recalculait à la
+    // main, ce qui pouvait afficher un total différent du montant réellement
+    // débité. Les taux viennent des paramètres système modifiables en super
+    // admin : les afficher en dur ici les désynchroniserait à nouveau.
+    $serviceFrais  = app(\App\Services\AangaraaPayService::class);
+    $tauxFraisVue  = $serviceFrais->tauxFraisService();
 
-    $fraisIntegral = calculerFraisService((int) $resteAPayer);
-    $fraisTranche  = calculerFraisService($montantTranche);
+    $fraisIntegral = $serviceFrais->calculerFrais((int) $resteAPayer);
+    $fraisTranche  = $serviceFrais->calculerFrais($montantTranche);
 @endphp
 
 @section('content')
@@ -158,11 +151,11 @@
                 <span>{{ __('payeur.pay_frais_service') }}
                     <span style="font-size:10px;color:#aaa;display:block;">{{ __('payeur.pay_frais_service_sous') }}</span>
                 </span>
-                <span style="font-weight:600;color:#555;" id="pay-frais-recap">{{ number_format($fraisIntegral['frais'], 0, ',', ' ') }} FCFA</span>
+                <span style="font-weight:600;color:#555;" id="pay-frais-recap">{{ number_format($fraisIntegral['frais_service'], 0, ',', ' ') }} FCFA</span>
             </div>
             <div style="border-top:1px solid #eee;padding-top:12px;margin-bottom:6px;display:flex;justify-content:space-between;">
                 <span style="font-size:15px;font-weight:700;">{{ __('payeur.pay_total_a_payer') }}</span>
-                <span style="font-size:22px;font-weight:700;color:var(--ep-teal);" id="pay-total-recap">{{ number_format($fraisIntegral['total'], 0, ',', ' ') }} FCFA</span>
+                <span style="font-size:22px;font-weight:700;color:var(--ep-teal);" id="pay-total-recap">{{ number_format($fraisIntegral['montant_total_paye'], 0, ',', ' ') }} FCFA</span>
             </div>
 
             {{-- ── Indicateur opérateur ── --}}
@@ -196,14 +189,13 @@ const PAYEUR_L10N = {
 const montantIntegral = {{ (int) $resteAPayer }};
 const montantTranche  = {{ $montantTranche }};
 
-// Barème frais de service (identique au backend AangaraaPayService::calculerFrais)
+// Frais de service : le taux vient du serveur (AangaraaPayService), qui lit
+// les paramètres système. On ne recopie plus le barème ici : le payeur
+// pouvait voir un total différent de celui réellement débité.
+// Arrondis identiques au backend : frais au franc supérieur.
+const TAUX_FRAIS = {{ $tauxFraisVue }};
 function calculerFrais(montant) {
-    let frais;
-    if      (montant <= 10000)  frais = 200;
-    else if (montant <= 25000)  frais = 400;
-    else if (montant <= 50000)  frais = 800;
-    else if (montant <= 100000) frais = 1500;
-    else                        frais = 2500;
+    const frais = Math.ceil(montant * TAUX_FRAIS);
     return { frais, total: montant + frais };
 }
 

@@ -186,7 +186,7 @@
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
                 <div class="text-xl font-bold text-gray-700">
-                    {{ $etablissement->taux_commission ? number_format($etablissement->taux_commission * 100, 1)."%" : "2,5%" }}
+                    {{ number_format(app(\App\Services\AangaraaPayService::class)->tauxFraisService() * 100, 2)."%" }}
                 </div>
                 <div class="text-xs text-gray-500 mt-0.5">{{ __('admin.taux_comm') }}</div>
             </div>
