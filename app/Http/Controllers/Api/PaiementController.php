@@ -292,7 +292,7 @@ class PaiementController extends Controller
                 return false;
             }
 
-            // 🔒 Annulation définitive (audit C) : un paiement annulé ne peut
+            // Annulation définitive (audit C) : un paiement annulé ne peut
             // JAMAIS encaisser, même si l'opérateur renvoie SUCCESSFUL en retard.
             if ($paiement->estAnnule()) {
                 Log::warning('Paiement annulé confirmé par l\'opérateur — aucun encaissement (action manuelle requise)', [

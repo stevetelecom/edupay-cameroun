@@ -21,7 +21,7 @@
 <body>
     <div class="header">
         <h1>EduPay Cameroun — {{ __('etablissement.pdf_rapport_titre') }}</h1>
-        <p>{!! __('etablissement.pdf_rapport_soustitre', ['etab' => Auth::user()->etablissement->nom ?? '', 'annee' => $anneeScolaire, 'date' => now()->format('d/m/Y à H:i')]) !!}</p>
+        <p>{!! __('etablissement.pdf_rapport_soustitre', ['etab' => e(Auth::user()->etablissement->nom ?? ''), 'annee' => e($anneeScolaire), 'date' => e(now()->format('d/m/Y à H:i'))]) !!}</p>
     </div>
     <div class="goldline"></div>
 

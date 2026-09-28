@@ -90,7 +90,7 @@ class DatabaseSeeder extends Seeder
         // ────────────────────────────────────────────
         // RÉCAPITULATIF
         // ────────────────────────────────────────────
-        $this->command->info('✅ Seeder de test terminé.');
+        $this->command->info('Seeder de test terminé.');
         $this->command->table(
             ['Module', 'Identifiant', 'Mot de passe', 'Note'],
             [

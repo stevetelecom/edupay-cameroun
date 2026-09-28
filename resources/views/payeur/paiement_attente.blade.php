@@ -48,7 +48,7 @@
         <div id="msg-attente">
             <div id="msg-attente-titre" style="font-size:17px;font-weight:700;margin-bottom:8px;">{{ __('payeur.pa_attente_titre') }}</div>
             <div style="font-size:13px;color:#888;margin-bottom:14px;">
-                {!! __('payeur.pa_attente_confirm', ['montant' => number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' '), 'tel' => $paiement->telephone_paiement]) !!}<br><br>
+                {!! __('payeur.pa_attente_confirm', ['montant' => e(number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' ')), 'tel' => e($paiement->telephone_paiement)]) !!}<br><br>
                 {{ __('payeur.pa_ref') }} : <code>{{ $paiement->reference }}</code>
             </div>
             <div style="display:inline-flex;align-items:center;gap:8px;background:{{ $operateurAffiche['bg'] }};border:1px solid {{ $operateurAffiche['border'] }};border-radius:20px;padding:5px 14px;margin-bottom:16px;font-size:12px;font-weight:700;color:{{ $operateurAffiche['texte'] }};">
@@ -71,7 +71,7 @@
                 <strong>{{ __('payeur.pa_attente_rejetez') }}</strong> {{ __('payeur.pa_attente_validez') }}
             </div>
             <div id="msg-attente-prolonge" style="display:none;background:#FEF9EC;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#854F0B;line-height:1.6;text-align:left;">
-                {!! __('payeur.pa_attente_prolonge', ['ref' => $paiement->reference]) !!}
+                {!! __('payeur.pa_attente_prolonge', ['ref' => e($paiement->reference)]) !!}
             </div>
             <div style="font-size:11px;color:#aaa;">{{ __('payeur.pa_attente_verification') }}</div>
             <button type="button" onclick="verifierMaintenant()" id="btn-verifier-maintenant"
@@ -83,7 +83,7 @@
         <div id="msg-valide" style="display:none;">
             <div style="font-size:17px;font-weight:700;color:#085041;margin-bottom:8px;">{{ __('payeur.pa_valide_titre') }}</div>
             <div style="font-size:13px;color:#888;margin-bottom:20px;">
-                {!! __('payeur.pa_valide_confirme', ['montant' => number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' ')]) !!}
+                {!! __('payeur.pa_valide_confirme', ['montant' => e(number_format($paiement->montant_total_paye ?? $paiement->montant, 0, ',', ' '))]) !!}
             </div>
             <a href="{{ route('payeur.dashboard') }}" class="btn-p" style="width:auto;padding:10px 24px;">
                 {{ __('payeur.pa_retour_dashboard') }}

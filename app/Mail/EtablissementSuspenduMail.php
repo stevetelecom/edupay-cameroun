@@ -18,7 +18,7 @@ class EtablissementSuspenduMail extends Mailable
     ) {}
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '⚠️ Votre établissement a été suspendu sur EduPay');
+        return new Envelope(subject: 'Votre etablissement a ete suspendu sur EduPay');
     }
     public function content(): Content
     {

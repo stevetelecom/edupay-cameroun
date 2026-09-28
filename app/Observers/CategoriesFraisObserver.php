@@ -15,7 +15,7 @@ use App\Models\FraisApprenant;
  * Le « nom » et la description, eux, se propagent déjà tout seuls car
  * toutes les vues/API lisent la relation Eloquent $frais->categorieFrais.
  *
- * ⚠️ Sécurité : on ne met à jour que les FraisApprenant SANS aucun
+ * SÉCURITÉ : on ne met à jour que les FraisApprenant SANS aucun
  *    paiement. Un frais déjà payé (totalement ou partiellement) garde son
  *    montant d'origine pour ne pas fausser l'historique des encaissements.
  */

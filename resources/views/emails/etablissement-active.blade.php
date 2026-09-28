@@ -38,9 +38,9 @@
             <div class="badge-actif">
                 <span>{{ __('etablissement.em_active_badge') }}</span>
             </div>
-            <div class="title">{!! __('etablissement.em_active_felicitations', ['prenom' => $responsable->prenom]) !!}</div>
+            <div class="title">{!! __('etablissement.em_active_felicitations', ['prenom' => e($responsable->prenom)]) !!}</div>
             <div class="text">
-                {!! __('etablissement.em_active_texte', ['etab' => $etablissement->nom]) !!}
+                {!! __('etablissement.em_active_texte', ['etab' => e($etablissement->nom)]) !!}
             </div>
             <div class="info-box">
                 <div class="info-row">
@@ -57,7 +57,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('etablissement.statut') }}</span>
-                    <span class="info-val" style="color:#0D9E75;">✅ {{ __('etablissement.em_actif') }}</span>
+                    <span class="info-val" style="color:#0D9E75;">{{ __('etablissement.em_actif') }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('etablissement.em_label_active_le') }}</span>
@@ -65,11 +65,11 @@
                 </div>
             </div>
             <div class="steps">
-                <div class="steps-title">🚀 {{ __('etablissement.em_prochaines_etapes') }}</div>
+                <div class="steps-title">{{ __('etablissement.em_prochaines_etapes') }}</div>
                 <div class="step"><div class="step-num">1</div><div>{{ __('etablissement.em_etape_backoffice') }}</div></div>
                 <div class="step"><div class="step-num">2</div><div>{{ __('etablissement.em_etape_frais') }}</div></div>
                 <div class="step"><div class="step-num">3</div><div>{{ __('etablissement.em_etape_annuaire') }}</div></div>
-                <div class="step"><div class="step-num">4</div><div>{!! __('etablissement.em_etape_partage', ['code' => $etablissement->code_etablissement]) !!}</div></div>
+                <div class="step"><div class="step-num">4</div><div>{!! __('etablissement.em_etape_partage', ['code' => e($etablissement->code_etablissement)]) !!}</div></div>
             </div>
             <a href="{{ config('app.url') }}/connexion" class="btn">
                 {{ __('etablissement.em_btn_backoffice') }} →

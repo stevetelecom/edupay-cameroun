@@ -13,7 +13,7 @@
     </div>
     <div class="ep-modal-body">
       <p style="font-size:13px;color:#555;line-height:1.6;">
-        {!! __('payeur.retirer_confirm_body', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]) !!}<br><br>
+        {!! __('payeur.retirer_confirm_body', ['prenom' => e($apprenant->prenom), 'nom' => e($apprenant->nom)]) !!}<br><br>
         {{ __('payeur.retirer_confirm_irreversible') }}
       </p>
     </div>

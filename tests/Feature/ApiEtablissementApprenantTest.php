@@ -50,6 +50,8 @@ class ApiEtablissementApprenantTest extends TestCase
             'annee_scolaire_active'  => self::ANNEE_ACTIVE,
         ]);
 
+            $this->abonnerEtablissement($this->etablissement);
+
         $this->directeur = User::factory()->create([
             'etablissement_id' => $this->etablissement->id,
         ]);

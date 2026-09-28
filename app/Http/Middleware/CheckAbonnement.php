@@ -51,12 +51,27 @@ class CheckAbonnement
         // renouveler), le profil et la déconnexion.
         $routesAutorisees = ['etablissement.profil.*', 'etablissement.abonnement.*', 'etablissement.dashboard', 'logout'];
 
+        // Le back-office establishment avait ce middleware côté web
+        // (routes/web.php:140) mais PAS côté API : le groupe
+        // `/api/v1/etablissement/*` laissait un établissement expiré
+        // encaisser, saisir des paiements et annuler des opérations. Les
+        // clients mobiles doivent répondre en JSON, jamais en redirect HTML.
+        $estApi = $request->routeIs('api.*') || $request->expectsJson();
+        if ($estApi) {
+            $routesAutorisees = [
+                'api.v1.etablissement.dashboard',
+                'api.v1.etablissement.profil',
+                'api.v1.etablissement.profil.*',
+                'api.v1.etablissement.abonnement',
+            ];
+        }
+
         // Pas d'abonnement du tout
         if (!$abonnement) {
             if ($request->routeIs(...$routesAutorisees)) {
                 return $next($request);
             }
-            return redirect()->route('etablissement.abonnement.requis');
+            return $this->refuser($estApi, null, __('etablissement.abonnement_requis'));
         }
 
         // L'état vient des DATES (Abonnement::etat()), plus du statut stocké :
@@ -71,10 +86,15 @@ class CheckAbonnement
 
             // Alerte grace period. Le message etait en francais code en dur,
             // donc l'utilisateur anglais de l'application le lisait en francais.
-            session()->flash('warning_abonnement', __('etablissement.grace_alerte', [
-                'date'  => $abonnement->date_fin->format('d/m/Y'),
-                'grace' => $abonnement->grace_period_fin->format('d/m/Y'),
-            ]));
+            // Le groupe `api` n'a pas de StartSession : flashed sans garde,
+            // cet avertissement aurait tente d'ouvrir une session sur une
+            // requete JSON. L'API renvoie l'etat dans le corps du 402.
+            if ($request->hasSession()) {
+                session()->flash('warning_abonnement', __('etablissement.grace_alerte', [
+                    'date'  => $abonnement->date_fin->format('d/m/Y'),
+                    'grace' => $abonnement->grace_period_fin->format('d/m/Y'),
+                ]));
+            }
         }
 
         if ($etat === 'expire') {
@@ -93,9 +113,31 @@ class CheckAbonnement
             if ($request->routeIs(...$routesAutorisees)) {
                 return $next($request);
             }
-            return redirect()->route('etablissement.abonnement.requis');
+            return $this->refuser($estApi, $abonnement, __('etablissement.abonnement_expire', [
+                'date' => $abonnement->date_fin?->format('d/m/Y'),
+            ]));
         }
 
         return $next($request);
+    }
+
+    /**
+     * 402 Payment Required : l'echec porte sur l'abonnement, pas sur les
+     * droits de l'utilisateur. Le code `abonnement_requis` permet au mobile
+     * d'afficher la bannière de renouvellement plutôt qu'une erreur générique.
+     */
+    private function refuser(bool $estApi, ?Abonnement $abonnement, string $message): Response
+    {
+        if (! $estApi) {
+            return redirect()->route('etablissement.abonnement.requis');
+        }
+
+        return response()->json([
+            'message'      => $message,
+            'code'         => 'abonnement_requis',
+            'etat'         => $abonnement?->etat(),
+            'date_fin'     => $abonnement?->date_fin?->toDateString(),
+            'grace_fin'    => $abonnement?->grace_period_fin?->toDateString(),
+        ], 402);
     }
 }

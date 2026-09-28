@@ -15,7 +15,7 @@ body{font-family:Arial,sans-serif;background:#f5f5f5;margin:0;padding:0;}
   <div class="bd">
     <p style="font-size:16px;font-weight:700;color:#0B2545;margin-bottom:8px;">{{ __('admin.em_reset_titre') }}</p>
     <p style="font-size:13px;color:#555;margin-bottom:16px;">
-      {!! __('admin.em_reset_bonjour', ['prenom' => $admin->prenom]) !!}
+      {!! __('admin.em_reset_bonjour', ['prenom' => e($admin->prenom)]) !!}
       {!! __('admin.em_reset_code_intro') !!}
     </p>
     <div class="code">{{ $code }}</div>

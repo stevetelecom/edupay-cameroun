@@ -22,7 +22,7 @@ class EtablissementActiveMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '✅ Votre établissement est maintenant actif sur EduPay !',
+            subject: 'Votre etablissement est maintenant actif sur EduPay',
         );
     }
 

@@ -220,7 +220,7 @@
     </div>
     <div class="p-6 overflow-y-auto flex-1">
       <p class="text-sm text-gray-600 leading-relaxed">
-        {!! __('admin.confirm_suppr_abonnement', ['nom' => '<span id="delete-abo-nom" class="text-red-600"></span>']) !!}
+        {!! __('admin.confirm_suppr_abonnement', ['nom' => e('<span id="delete-abo-nom" class="text-red-600"></span>')]) !!}
       </p>
     </div>
     <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
@@ -242,10 +242,10 @@
 @section('content')
 
 @if(session('success'))
-<div class="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg mb-4">✓ {{ session('success') }}</div>
+<div class="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg mb-4">{{ session('success') }}</div>
 @endif
 @if(session('error'))
-<div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg mb-4">✗ {{ session('error') }}</div>
+<div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg mb-4">{{ session('error') }}</div>
 @endif
 
 {{-- En-tête --}}

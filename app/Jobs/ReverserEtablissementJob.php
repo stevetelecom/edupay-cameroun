@@ -115,10 +115,37 @@ class ReverserEtablissementJob implements ShouldQueue
 
         // ── On pose 'en_cours' AVANT l'appel HTTP. C'est ce qui rend le double
         //    virement détectable au tour suivant (voir le garde-fou en tête).
-        $commission->update([
-            'statut'                  => Commission::STATUT_EN_COURS,
-            'reversement_tente_le'    => now(),
-        ]);
+        //
+        //    La réservation se fait par un UPDATE conditionnel, pas par un
+        //    `update()` inconditionnel suivi d'un rechargement : deux workers
+        //    (ou le job et la commande `aangaraa:reversements`) pouvaient lire
+        //    `calculee` au meme instant, passer chacun le garde-fou de la
+        //    ligne 55, et appeler l'API chacun de leur cote. Une seule
+        //    reservation reussit, l'autre l'autre concurrent qui attend
+        //    `en_cours` sans confirmation et part en verification manuelle.
+        $reserve = Commission::whereKey($this->commissionId)
+            ->where('statut', Commission::STATUT_CALCULEE)
+            ->update([
+                'statut'               => Commission::STATUT_EN_COURS,
+                'reversement_tente_le' => now(),
+            ]);
+
+        // L'UPDATE conditionnel passe par le query builder : l'instance
+        // Eloquent en memoire n'a donc toujours pas vu le nouveau statut. Sans
+        // ce rafraichissement, le `update(['statut' => 'calculee'])` de
+        // `mettreAJourEchecTemporaire()` ne trouvait aucun attribut sale et
+        // n'ecrivait rien : un refus net laissait la commission en
+        // `en_cours` a jamais, donc bloquee pour tout rejeu.
+        $commission->refresh();
+
+        if ($reserve === 0) {
+            $this->mettreEnAttenteDeVerification(
+                $commission,
+                'Un autre traitement a reserve ce reversement entre-temps (statut : '
+                . $commission->statut . ') : aucun nouvel envoi.'
+            );
+            return;
+        }
 
         $resultat = $aangaraa->reverserEtablissement(
             telephone:   $numeroReversement,

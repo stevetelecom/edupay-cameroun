@@ -119,7 +119,7 @@ class ApprenantController extends Controller
             return response()->json(['message' => 'Cet apprenant ne vous est pas rattaché.'], 403);
         }
 
-        // 🔒 Permission : impossible de détacher un enfant à qui des frais de
+        // Permission : impossible de détacher un enfant à qui des frais de
         // scolarité ont déjà été affectés (même sans paiement) — cohérent web/API.
         if ($apprenant->frais()->exists() || $apprenant->paiements()->exists()) {
             return response()->json([
@@ -268,6 +268,69 @@ class ApprenantController extends Controller
                 'type'               => $e->type,
                 'code_etablissement' => $e->code_etablissement,
                 'logo'               => $e->logo ? asset('storage/' . $e->logo) : null,
+            ]),
+        ]);
+    }
+
+    /**
+     * Recherche d'apprenants dans un établissement donné (annuaire de
+     * rattachement). Miroir de OnboardingController::searchApprenants (web).
+     *
+     * Sécurité (E-01) : pas de recherche libre exposant tout l'annuaire dès
+     * la première frappe. 3 caractères minimum requis, sauf pour lister
+     * l'annuaire complet quand aucune recherche n'est saisie.
+     */
+    public function searchApprenants(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'etablissement_id' => ['sometimes', 'required', 'integer', 'exists:etablissements,id'],
+            // Borne haute : sans elle, `q` arrivait arbitrairement long et
+            // chaque mot de la saisie devenait un `LIKE %mot%` sur toute la
+            // table des apprenants.
+            'q' => ['sometimes', 'nullable', 'string', 'max:60'],
+        ]);
+
+        $etablissementId = $validated['etablissement_id'] ?? null;
+        $search          = trim((string) ($validated['q'] ?? ''));
+
+        if (! $etablissementId) {
+            return response()->json(['data' => []]);
+        }
+
+        $query = Apprenant::where('etablissement_id', $etablissementId)
+            ->where('actif', true);
+
+        if ($search !== '') {
+            if (mb_strlen($search) < 3) {
+                return response()->json(['data' => []]);
+            }
+
+            $query->where(function ($query) use ($search) {
+                $query->where('matricule', $search)
+                    ->orWhere(function ($sub) use ($search) {
+                        $mots = preg_split('/\s+/', $search, -1, PREG_SPLIT_NO_EMPTY);
+                        foreach ($mots as $mot) {
+                            $sub->where(function ($s) use ($mot) {
+                                $s->where('nom', 'like', "%{$mot}%")
+                                  ->orWhere('prenom', 'like', "%{$mot}%");
+                            });
+                        }
+                    });
+            });
+        }
+
+        $apprenants = $query
+            ->orderBy('nom')
+            ->limit(10)
+            ->get(['id', 'nom', 'prenom', 'classe', 'matricule']);
+
+        return response()->json([
+            'data' => $apprenants->map(fn ($a) => [
+                'id'        => $a->id,
+                'nom'       => $a->nom,
+                'prenom'    => $a->prenom,
+                'classe'    => $a->classe,
+                'matricule' => $a->matricule,
             ]),
         ]);
     }

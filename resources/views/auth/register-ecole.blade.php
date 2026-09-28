@@ -264,8 +264,8 @@
       {{-- ───────────────────────── ÉTAPE 4 : VALIDATION ───────────────────────── --}}
       @if ($step === 4)
         @if (session('inscription_reussie'))
-          <div class="form-title">🎉 {{ __('auth.demande_envoyee') }}</div>
-          <div class="form-sub">{!! __('auth.votre_code_etab', ['code' => session('code_etablissement')]) !!}</div>
+          <div class="form-title">{{ __('auth.demande_envoyee') }}</div>
+          <div class="form-sub">{!! __('auth.votre_code_etab', ['code' => e(session('code_etablissement'))]) !!}</div>
           <div style="background:var(--ep-teal-lt);border-radius:8px;padding:14px;margin:16px 0;font-size:13px;color:#085041;">
             {{ __('auth.verification_24h') }}
           </div>

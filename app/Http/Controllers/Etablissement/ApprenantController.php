@@ -240,7 +240,7 @@ class ApprenantController extends Controller
             'date_naissance' => ['nullable', 'date'],
             'sexe'           => ['nullable', Rule::in(['M', 'F'])],
             'actif'          => ['nullable', 'boolean'],
-            // 🔒 Sécurité (IDOR) : la catégorie de frais doit appartenir à CET établissement,
+            // Sécurité (IDOR) : la catégorie de frais doit appartenir à CET établissement,
             // sinon un comptable/caissier pourrait injecter le categorie_frais_id d'un autre
             // établissement et créer un FraisApprenant lié à sa structure tarifaire.
             'categorie_frais_id' => [
@@ -393,7 +393,7 @@ class ApprenantController extends Controller
 
     /**
      * Suppression groupée d'apprenants (depuis le tableau back-office).
-     * 🔒 Sécurité :
+     * Sécurité :
      *  - Seuls les apprenants de CET établissement sont supprimés (jamais ceux
      *    d'un autre établissement, même si un id extérieur est envoyé).
      *  - Si la case "supprimer_toutes_les_pages" est cochée, on applique aussi

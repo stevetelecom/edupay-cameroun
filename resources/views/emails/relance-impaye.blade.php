@@ -33,7 +33,7 @@
         <div class="body">
             <div class="title">{{ __('payeur.em_relance_titre') }}</div>
             <div class="text">
-                {!! __('payeur.em_relance_bonjour', ['nom' => $apprenant->prenom.' '.$apprenant->nom]) !!}
+                {!! __('payeur.em_relance_bonjour', ['nom' => e($apprenant->prenom.' '.$apprenant->nom)]) !!}
                 {{ __('payeur.em_relance_intro') }}
             </div>
 

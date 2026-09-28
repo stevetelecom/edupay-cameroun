@@ -28,8 +28,8 @@
             <div class="title">{{ __('etablissement.em_invitation_titre', ['prenom' => $utilisateur->prenom]) }}</div>
             <div class="text">
                 {!! __('etablissement.em_invitation_intro', [
-                    'etab' => $utilisateur->etablissement->nom ?? __('etablissement.em_invitation_etab_fallback'),
-                    'role' => $roleLabel
+                    'etab' => e($utilisateur->etablissement->nom ?? __('etablissement.em_invitation_etab_fallback')),
+                    'role' => e($roleLabel)
                 ]) !!}
             </div>
 

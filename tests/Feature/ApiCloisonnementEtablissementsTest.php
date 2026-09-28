@@ -42,6 +42,9 @@ class ApiCloisonnementEtablissementsTest extends TestCase
         $this->etablissement = $this->creerEtablissement('Mon Ecole');
         $this->concurrent     = $this->creerEtablissement('Ecole Concurrente');
 
+        $this->abonnerEtablissement($this->etablissement);
+        $this->abonnerEtablissement($this->concurrent);
+
         $this->directeur = User::factory()->create([
             'etablissement_id' => $this->etablissement->id,
         ]);

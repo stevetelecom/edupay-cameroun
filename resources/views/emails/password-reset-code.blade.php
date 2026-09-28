@@ -26,13 +26,13 @@
         </div>
         
         <div class="content">
-            {!! __('auth.em_bonjour_nom', ['nom' => $userName]) !!}
+            {!! __('auth.em_bonjour_nom', ['nom' => e($userName)]) !!}
             
             <p>{{ __('auth.em_reset_demande') }}</p>
             
             <div class="code-box">
                 <div class="code">{{ $code }}</div>
-                <div class="expires">{!! __('auth.em_reset_code_expire', ['duree' => $expiresIn]) !!}</div>
+                <div class="expires">{!! __('auth.em_reset_code_expire', ['duree' => e($expiresIn)]) !!}</div>
             </div>
 
             <p>{{ __('auth.em_reset_entrez_code') }}</p>

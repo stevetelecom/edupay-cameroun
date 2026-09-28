@@ -34,7 +34,7 @@
         <div class="body">
             <div class="title">{{ $type === 'relance' ? __('auth.em_otp_titre_relance') : __('auth.em_otp_titre') }}</div>
             <div class="text">
-                {!! __('auth.em_otp_bonjour', ['nom' => $user->prenom.' '.$user->nom]) !!}
+                {!! __('auth.em_otp_bonjour', ['nom' => e($user->prenom.' '.$user->nom)]) !!}
                 {{ $type === 'relance' ? __('auth.em_otp_connexion_relance') : __('auth.em_otp_connexion_detectee') }}
             </div>
 

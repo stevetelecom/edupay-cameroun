@@ -399,8 +399,12 @@ class AbonnementController extends Controller
     {
         $nom = $abonnement->etablissement->nom ?? 'inconnu';
 
+        // `plan_abonnement` est un enum NOT NULL sans valeur par defaut :
+        // y ecrire null levait une contrainte et la suppression echouait en
+        // 500. 'aucun' est la valeur de repli utilisee partout ailleurs
+        // (CheckAbonnement::handle).
         $abonnement->etablissement->update([
-            'plan_abonnement'      => null,
+            'plan_abonnement'      => 'aucun',
             'abonnement_expire_le' => null,
         ]);
 

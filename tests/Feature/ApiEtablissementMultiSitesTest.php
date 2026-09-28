@@ -135,10 +135,14 @@ class ApiEtablissementMultiSitesTest extends TestCase
 
     public function test_sans_abonnement_le_multi_sites_est_refuse()
     {
+        // 402 et non 403 : depuis que `check.abonnement` s'applique aussi a
+        // l'API (parite avec routes/web.php:140), l'absence d'abonnement est
+        // detectee avant le controle du plan, et repond 402 + un code dedie.
         $reponse = $this->actingAs($this->directeur, 'sanctum')
             ->getJson(route('api.v1.etablissement.sites.index'))
-            ->assertForbidden();
+            ->assertStatus(402);
 
+        $this->assertSame('abonnement_requis', $reponse->json('code'));
         $this->assertStringContainsString('abonnement', mb_strtolower($reponse->json('message')));
     }
 

@@ -14,11 +14,16 @@ Route::prefix('v1')->group(function () {
 
     // ── Authentification publique ──────────────────────────────
     Route::prefix('auth')->group(function () {
-        Route::post('/register',            [\App\Http\Controllers\Api\AuthController::class, 'register'])->name('api.v1.auth.register');
-        Route::post('/inscription-etablissement', [\App\Http\Controllers\Api\InscriptionEtablissementController::class, 'store'])->name('api.v1.auth.inscription-etablissement');
-        Route::post('/login',               [\App\Http\Controllers\Api\AuthController::class, 'login'])->name('api.v1.auth.login');
-        Route::post('/forgot-password',     [\App\Http\Controllers\Api\AuthController::class, 'forgotPassword'])->name('api.v1.auth.forgot');
-        Route::post('/reset-password',      [\App\Http\Controllers\Api\AuthController::class, 'resetPassword'])->name('api.v1.auth.reset');
+        // Throttles : ces 5 routes n'en avaient aucun (seuls /otp et
+        // /otp/verify etaient limites). Sans limite, le brute-force du login
+        // et l'envoi massif de codes de reinitialisation n'etaient pas
+        // freines, et `/inscription-etablissement` ne l'etait pas
+        // bridee non plus.
+        Route::post('/register',            [\App\Http\Controllers\Api\AuthController::class, 'register'])->middleware('throttle:5,1')->name('api.v1.auth.register');
+        Route::post('/inscription-etablissement', [\App\Http\Controllers\Api\InscriptionEtablissementController::class, 'store'])->middleware('throttle:5,1')->name('api.v1.auth.inscription-etablissement');
+        Route::post('/login',               [\App\Http\Controllers\Api\AuthController::class, 'login'])->middleware('throttle:10,1')->name('api.v1.auth.login');
+        Route::post('/forgot-password',     [\App\Http\Controllers\Api\AuthController::class, 'forgotPassword'])->middleware('throttle:3,1')->name('api.v1.auth.forgot');
+        Route::post('/reset-password',      [\App\Http\Controllers\Api\AuthController::class, 'resetPassword'])->middleware('throttle:5,1')->name('api.v1.auth.reset');
 
         // OTP par email (connexion sans mot de passe)
         Route::post('/otp',            [\App\Http\Controllers\Api\AuthController::class, 'sendOtp'])->middleware('throttle:10,1')->name('api.v1.auth.otp');
@@ -34,12 +39,15 @@ Route::prefix('v1')->group(function () {
 
     // ── Contact public (formulaire de contact → email support) ───
     Route::post('/contact', [\App\Http\Controllers\Api\ContactController::class, 'submit'])
+        ->middleware('throttle:3,1')
         ->name('api.v1.contact.submit');
 
     // ── Public : stats globales + détail établissement (équivalent landing) ──
     Route::get('/stats', [\App\Http\Controllers\Api\EtablissementPublicController::class, 'stats'])
+        ->middleware('throttle:60,1')
         ->name('api.v1.stats');
     Route::get('/etablissements/{code}', [\App\Http\Controllers\Api\EtablissementPublicController::class, 'show'])
+        ->middleware('throttle:60,1')
         ->name('api.v1.etablissements.show');
 
     // ── Routes protégées (token Sanctum) ───────────────────────
@@ -56,6 +64,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/apprenants',                   [\App\Http\Controllers\Api\ApprenantController::class, 'index'])->name('api.v1.apprenants.index');
         Route::get('/apprenants/mes-enfants',       [\App\Http\Controllers\Api\ApprenantController::class, 'mesEnfants'])->name('api.v1.apprenants.mesEnfants');
         Route::get('/apprenants/etablissements',    [\App\Http\Controllers\Api\ApprenantController::class, 'etablissements'])->name('api.v1.apprenants.etablissements');
+        // Recherche d'un enfant a rattacher : une requete = un LIKE par mot
+        // sur toute la table des apprenants, sans aucune limite de debit.
+        Route::get('/apprenants/search',            [\App\Http\Controllers\Api\ApprenantController::class, 'searchApprenants'])->middleware('throttle:30,1')->name('api.v1.apprenants.search');
         Route::post('/apprenants/rattacher',        [\App\Http\Controllers\Api\ApprenantController::class, 'rattacher'])->name('api.v1.apprenants.rattacher');
         Route::put('/apprenants/{apprenant}',       [\App\Http\Controllers\Api\ApprenantController::class, 'updateInfo'])->name('api.v1.apprenants.update');
         Route::delete('/apprenants/{apprenant}',    [\App\Http\Controllers\Api\ApprenantController::class, 'detacher'])->name('api.v1.apprenants.detacher');
@@ -89,7 +100,7 @@ Route::prefix('v1')->group(function () {
     });
 
     // ── Back-office Établissement (directeur / comptable / caissier) ──
-    Route::prefix('etablissement')->middleware(['auth:sanctum', \App\Http\Middleware\CompteSuspendu::class])->group(function () {
+    Route::prefix('etablissement')->middleware(['auth:sanctum', \App\Http\Middleware\CompteSuspendu::class, 'check.abonnement'])->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Api\Etablissement\DashboardController::class, 'index'])->name('api.v1.etablissement.dashboard');
 
         // Apprenants

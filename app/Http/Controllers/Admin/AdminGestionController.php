@@ -297,10 +297,19 @@ class AdminGestionController extends Controller
 
         $admin->update(['est_actif' => false]);
 
+        // Suspension = retrait immediat de l'acces, pas seulement a la
+        // prochaine connexion : `est_actif` est desormais revérifié par
+        // SuperAdminMiddleware et AdminAuthController, mais une session et un
+        // cookie « se souvenir de moi » deja emis continuaient de passer
+        // jusqu'a expiration. On invalide donc les deux ici.
+        $admin->setRememberToken(\Illuminate\Support\Str::random(60));
+        $admin->save();
+        $admin->tokens()->delete();
+
         AuditLog::enregistrer(
             Auth::guard('admin')->user(),
             'ADMIN_SUSPENDU',
-            'Admin suspendu : ' . $admin->email,
+            'Admin suspendu, sessions et tokens revokes : ' . $admin->email,
             $request,
             'WARNING'
         );

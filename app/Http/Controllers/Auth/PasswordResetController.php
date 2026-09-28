@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Admin;
 use App\Models\PasswordReset;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -30,7 +31,7 @@ class PasswordResetController extends Controller
 
         $this->genererEtEnvoyerCode($email);
 
-        // 🔒 Réponse strictement identique que le compte existe ou non
+        // Réponse strictement identique que le compte existe ou non
         return redirect()->route('password.verify.form', ['email' => $email])
             ->with('success', self::MESSAGE_GENERIQUE);
     }
@@ -120,6 +121,23 @@ class PasswordResetController extends Controller
             DB::transaction(function () use ($user, $email, $resetRecord, $request) {
                 $user->update(['password' => $request->password]);
                 PasswordReset::forEmail($email, $resetRecord->guard)->delete();
+
+                // L'API revocait les tokens apres un reset
+                // (Api/AuthController.php:232), le web non : changer son mot
+                // de passe depuis un lien laisse la session courante ET le
+                // cookie « se souvenir de moi » valides. Un attaquant qui
+                // avait vole la session la gardait apres la remediation, et
+                // l'utilisateur ne pouvait justement plus se deconnecter
+                // puisque le mot de passe etait change.
+                $user->tokens()->delete();
+                $user->setRememberToken(\Illuminate\Support\Str::random(60));
+                $user->save();
+
+                if ($user instanceof Admin) {
+                    Auth::guard('admin')->logoutOtherDevices($request->input('password'));
+                } else {
+                    Auth::guard('web')->logoutOtherDevices($request->input('password'));
+                }
             });
 
             return redirect()->route('login')
@@ -136,7 +154,7 @@ class PasswordResetController extends Controller
 
         $this->genererEtEnvoyerCode($email);
 
-        // 🔒 Réponse strictement identique que le compte existe ou non
+        // Réponse strictement identique que le compte existe ou non
         return back()->with('success', self::MESSAGE_GENERIQUE);
     }
 

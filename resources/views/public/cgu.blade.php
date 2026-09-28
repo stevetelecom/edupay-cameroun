@@ -51,7 +51,7 @@
   <div class="seclbl">{{ __('public.cgu_s5_titre') }}</div>
   <div class="epcard" style="margin-bottom:14px;">
     <div style="font-size:13px;color:#555;line-height:1.8;">
-      {!! __('public.cgu_s5_texte', ['link' => '<a href="'.route('contact').'" style="color:var(--ep-teal);font-weight:600;">'.__('public.cgu_s5_link_text').'</a>']) !!}
+      {!! __('public.cgu_s5_texte', ['link' => e('<a href="'.route('contact').'" style="color:var(--ep-teal);font-weight:600;">'.__('public.cgu_s5_link_text').'</a>')]) !!}
     </div>
   </div>
 

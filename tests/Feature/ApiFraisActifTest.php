@@ -45,6 +45,8 @@ class ApiFraisActifTest extends TestCase
             'annee_scolaire_active' => '2026-2027',
         ]);
 
+            $this->abonnerEtablissement($this->etablissement);
+
         $this->directeur = User::factory()->create(['etablissement_id' => $this->etablissement->id]);
         $this->directeur->assignRole('directeur');
 
@@ -153,6 +155,8 @@ class ApiFraisActifTest extends TestCase
             'statut'                => 'actif',
             'annee_scolaire_active' => '2026-2027',
         ]);
+
+        $this->abonnerEtablissement($autre);
 
         $directeurAutre = User::factory()->create(['etablissement_id' => $autre->id]);
         $directeurAutre->assignRole('directeur');

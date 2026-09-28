@@ -40,7 +40,15 @@ Route::middleware('guest:admin')->group(function () {
         ->middleware('throttle:10,1')->name('password.reset');
 });
 
-Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+// Deconnexion : `auth:admin` mais PAS `super.admin`, pour qu'un compte
+// suspendu puisse tout de meme fermer sa session (meme raison que
+// /api/v1/auth/logout). Sans `auth:admin`, un POST anonyme touchait la
+// session et repartait avec un 302 « deconnecte » : la route repondait
+// comme si une deconnexion avait eu lieu, et le journal d'audit etait
+// sollicite par des visiteurs non connectes.
+Route::post('/logout', [AdminAuthController::class, 'logout'])
+    ->middleware('auth:admin')
+    ->name('logout');
 
 /*
 |--------------------------------------------------------------------------

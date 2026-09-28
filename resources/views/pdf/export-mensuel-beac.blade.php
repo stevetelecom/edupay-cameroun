@@ -22,7 +22,7 @@
 <body>
     <div class="header">
         <h1>{{ __('admin.pdf_beac_titre') }}</h1>
-        <p>{!! __('admin.pdf_generer_le', ['periode' => $periodeLabel, 'date' => now()->format('d/m/Y à H:i')]) !!}</p>
+        <p>{!! __('admin.pdf_generer_le', ['periode' => e($periodeLabel), 'date' => e(now()->format('d/m/Y à H:i'))]) !!}</p>
     </div>
     <div class="goldline"></div>
 

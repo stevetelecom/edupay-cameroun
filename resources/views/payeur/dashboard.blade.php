@@ -247,7 +247,7 @@
           </div>
           <div style="text-align:right;">
             <div style="font-size:15px;font-weight:700;color:{{ $resteF > 0 ? 'var(--ep-red)' : 'var(--ep-teal)' }};">
-              {{ $resteF > 0 ? number_format($resteF,0,',',' ').' '. __('payeur.fcfa_restant') : '✓ '. __('payeur.regle') }}
+              {{ $resteF > 0 ? number_format($resteF,0,',',' ').' '. __('payeur.fcfa_restant') : __('payeur.regle') }}
             </div>
             <div style="font-size:11px;color:#aaa;">{{ __('payeur.total') }} : {{ number_format($frais->montant_total,0,',',' ') }} {{ __('payeur.fcfa_short') }}</div>
           </div>
@@ -406,7 +406,7 @@
           @elseif($statutA === 'aucun')
             <div style="font-size:12px;color:#999;margin-bottom:10px;">{{ __('payeur.aucun_frais') }}</div>
           @else
-            <div style="font-size:12px;color:var(--ep-teal);font-weight:600;margin-bottom:10px;">✓ {{ __('payeur.tous_frais_regles') }}</div>
+            <div style="font-size:12px;color:var(--ep-teal);font-weight:600;margin-bottom:10px;">{{ __('payeur.tous_frais_regles') }}</div>
           @endif
           <div style="display:flex;gap:6px;">
             @if($premierImpayeA)

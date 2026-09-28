@@ -33,9 +33,9 @@
         </div>
         <div class="body">
             <div class="badge"><span>{{ __('etablissement.em_suspendu_badge') }}</span></div>
-            <div class="title">{!! __('etablissement.em_bonjour_prenom', ['prenom' => $responsable->prenom]) !!}</div>
+            <div class="title">{!! __('etablissement.em_bonjour_prenom', ['prenom' => e($responsable->prenom)]) !!}</div>
             <div class="text">
-                {!! __('etablissement.em_suspendu_texte', ['etab' => $etablissement->nom]) !!}
+                {!! __('etablissement.em_suspendu_texte', ['etab' => e($etablissement->nom)]) !!}
                 {{ __('etablissement.em_suspendu_paiements_desactives') }}
             </div>
             <div class="info-box">
@@ -49,7 +49,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('etablissement.statut') }}</span>
-                    <span class="info-val" style="color:#E8A020;">⚠️ {{ __('etablissement.em_suspendu') }}</span>
+                    <span class="info-val" style="color:#E8A020;">{{ __('etablissement.em_suspendu') }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('etablissement.date') }}</span>
@@ -62,7 +62,7 @@
             </div>
             @endif
             <div class="contact-box">
-                📧 {{ __('etablissement.em_suspendu_contester') }}
+                {{ __('etablissement.em_suspendu_contester') }}
             </div>
         </div>
         <div class="footer">

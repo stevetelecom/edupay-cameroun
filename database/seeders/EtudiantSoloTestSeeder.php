@@ -141,7 +141,7 @@ class EtudiantSoloTestSeeder extends Seeder
         // ────────────────────────────────────────────
         // RÉCAPITULATIF
         // ────────────────────────────────────────────
-        $this->command->info('✅ Compte étudiant solo de test créé avec succès.');
+        $this->command->info('Compte étudiant solo de test créé avec succès.');
         $this->command->table(
             ['Élément', 'Détail'],
             [

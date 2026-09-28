@@ -24,7 +24,7 @@ class ApprenantStoreRequest extends FormRequest
             'date_naissance'    => ['nullable', 'date'],
             'sexe'              => ['nullable', Rule::in(['M', 'F'])],
             'actif'             => ['nullable', 'boolean'],
-            // 🔒 IDOR : la catégorie de frais doit appartenir à CET établissement
+            // IDOR : la catégorie de frais doit appartenir à CET établissement
             'categorie_frais_id' => [
                 'nullable',
                 Rule::exists('categories_frais', 'id')->where('etablissement_id', $etablissementId),

@@ -209,6 +209,49 @@ class ReversementEtablissementTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_une_commission_deja_reservee_ne_declenche_pas_un_second_virement(): void
+    {
+        Http::fake([
+            '*/withdrawal' => Http::response([
+                'status'  => 'SUCCESS',
+                'message' => 'Transfert enregistre',
+                'data'    => ['transaction_id' => 'REV-OK-1', 'operator' => 'MTN_Cameroon'],
+            ], 200),
+        ]);
+
+        $commission = $this->commission();
+
+        // Premier passage : la reservation atomique pose 'en_cours'.
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        $commission->refresh();
+        $this->assertSame(Commission::STATUT_PRELEVEE, $commission->statut);
+        Http::assertSentCount(1);
+
+        // Second passage sur la meme commission (rejeu de la commande
+        // aangaraa:reversements, double dispatch) : l'UPDATE conditionnel
+        // ne reserve rien, le virement ne repart pas.
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        $commission->refresh();
+        $this->assertSame(Commission::STATUT_PRELEVEE, $commission->statut);
+        Http::assertSentCount(1);
+    }
+
+    public function test_une_commission_prelevee_ne_repart_rien(): void
+    {
+        Http::fake();
+
+        // Une commission deja prelevee ne peut pas etre reservee de nouveau :
+        // ni l'UPDATE conditionnel, ni l'appel HTTP ne repartent.
+        $commission = $this->commission(Commission::STATUT_PRELEVEE);
+
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        Http::assertNothingSent();
+        $this->assertSame(Commission::STATUT_PRELEVEE, $commission->fresh()->statut);
+    }
+
     public function test_refus_aangaraa_laisse_la_commission_rejouable(): void
     {
         Http::fake([

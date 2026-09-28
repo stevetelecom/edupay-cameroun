@@ -55,8 +55,42 @@ class RemboursementController extends Controller
             'Ce paiement n\'appartient pas à votre établissement.'
         );
 
-        if ($validated['montant'] > $paiement->montant) {
-            return back()->withInput()->withErrors(['montant' => 'Le montant ne peut pas dépasser celui du paiement (' . number_format($paiement->montant, 0, ',', ' ') . ' FCFA).']);
+        // Garde-fous identiques a ceux de l'API
+        // (Api/Etablissement/RemboursementController.php:102-125), absents
+        // d'ici. Sans eux, un caissier pouvait poster autant de demandes que
+        // de fois sur le meme paiement, chacune approuvee ensuite par un
+        // directeur : l'argent sortait N fois pour un seul encaissement.
+        if ($paiement->statut !== 'valide') {
+            return back()->withInput()->withErrors([
+                'paiement_id' => 'Seul un paiement validé peut être remboursé.',
+            ]);
+        }
+
+        $dejaEnCours = Remboursement::where('paiement_id', $paiement->id)
+            ->whereIn('statut', ['en_attente', 'approuve'])
+            ->exists();
+
+        if ($dejaEnCours) {
+            return back()->withInput()->withErrors([
+                'paiement_id' => 'Un remboursement est déjà en cours pour ce paiement.',
+            ]);
+        }
+
+        // Plafond sur le CUMUL approuve, pas seulement sur la demande
+        // courante : deux demandes partielles acceptees et approuvees
+        //Independamment totalisaient plus que le paiement.
+        $dejaRembourse = (float) Remboursement::where('paiement_id', $paiement->id)
+            ->where('statut', 'approuve')
+            ->sum('montant');
+
+        $plafond = (float) $paiement->montant - $dejaRembourse;
+
+        if ((float) $validated['montant'] > $plafond) {
+            return back()->withInput()->withErrors([
+                'montant' => $dejaRembourse > 0
+                    ? 'Le cumulative ne peut pas dépasser ' . number_format($plafond, 0, ',', ' ') . ' FCFA (déjà ' . number_format($dejaRembourse, 0, ',', ' ') . ' FCFA remboursés sur ce paiement).'
+                    : 'Le montant ne peut pas dépasser celui du paiement (' . number_format($paiement->montant, 0, ',', ' ') . ' FCFA).',
+            ]);
         }
 
         Remboursement::create([
@@ -80,18 +114,57 @@ class RemboursementController extends Controller
             return back()->with('error', 'Cette demande a déjà été traitée.');
         }
 
+        $paiement = $remboursement->paiement;
+
+        // Revalidation a l'approbation. Le controle de store() ne suffit pas :
+        // entre la demande et l'approbation, le paiement a pu etre rembourse,
+        // annule, ou avoir deja fait l'objet d'un autre remboursement approuve.
+        if ($paiement->statut !== 'valide') {
+            return back()->with('error', 'Ce paiement n\'est plus validé, le remboursement ne peut pas être approuvé.');
+        }
+
+        $cumule = (float) Remboursement::where('paiement_id', $paiement->id)
+            ->where('statut', 'approuve')
+            ->sum('montant') + (float) $remboursement->montant;
+
+        if ($cumule > (float) $paiement->montant) {
+            return back()->with('error', 'Le cumulative des remboursements approuvé (' . number_format($cumule, 0, ',', ' ') . ' FCFA) dépasse le paiement (' . number_format($paiement->montant, 0, ',', ' ') . ' FCFA).');
+        }
+
+        // Avertissement claw-back, comme l'API : rembourser apres reversement
+        // fait sortir de l'etablissement une somme qu'il a deja recue.
+        $commission = $paiement->commission()->first();
+        $dejaReverse = $commission?->reversementEffectue() === true;
+
+        if ($dejaReverse) {
+            \Illuminate\Support\Facades\Log::critical('Remboursement approuve (web) alors que le reversement etait deja effectue', [
+                'remboursement_id'  => $remboursement->id,
+                'paiement_id'       => $paiement->id,
+                'commission_id'     => $commission->id,
+                'montant_rembourse' => (float) $remboursement->montant,
+                'reference'         => $commission->reference_reversement,
+            ]);
+        }
+
         $remboursement->update([
             'statut'     => 'approuve',
             'traite_par' => Auth::id(),
             'traite_le'  => now(),
         ]);
 
-        if ($remboursement->montant >= $remboursement->paiement->montant) {
-            $remboursement->paiement->update(['statut' => 'rembourse']);
+        if ($cumule >= (float) $paiement->montant) {
+            $paiement->update(['statut' => 'rembourse']);
+        }
+
+        $message = 'Remboursement de ' . number_format($remboursement->montant, 0, ',', ' ') . ' FCFA approuvé.';
+
+        if ($dejaReverse) {
+            $message .= ' ATTENTION : cet argent a déjà été reversé à votre établissement (référence '
+                . ($commission->reference_reversement ?? 'inconnue') . '), il faudra le récupérer.';
         }
 
         return redirect()->route('etablissement.remboursements.index')
-            ->with('success', 'Remboursement de ' . number_format($remboursement->montant, 0, ',', ' ') . ' FCFA approuvé.');
+            ->with('success', $message);
     }
 
     public function refuser(Request $request, Remboursement $remboursement): RedirectResponse

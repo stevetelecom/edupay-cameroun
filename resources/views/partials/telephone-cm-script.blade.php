@@ -47,7 +47,7 @@ function initTelephoneCm(selector) {
                 hint.textContent = (9 - digits.length) + ' chiffre(s) restant(s)';
                 hint.style.color = '#999';
             } else {
-                hint.textContent = '✓ Numéro valide';
+                hint.textContent = 'Numero valide';
                 hint.style.color = 'var(--ep-teal, #0D9E75)';
             }
         }

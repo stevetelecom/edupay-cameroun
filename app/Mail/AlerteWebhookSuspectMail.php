@@ -22,7 +22,7 @@ class AlerteWebhookSuspectMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🚨 ALERTE SÉCURITÉ — Webhook AangaraaPay suspect',
+            subject: 'ALERTE SECURITE - Webhook AangaraaPay suspect',
         );
     }
 

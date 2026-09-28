@@ -59,8 +59,8 @@
     <div class="title">{{ __('payeur.em_impaye_titre') }}</div>
 
     <div class="text">
-      {!! __('payeur.em_bonjour_nom', ['nom' => $apprenant->parents->first()?->prenom ?? __('payeur.em_parent_fallback')]) !!}
-      {!! __('payeur.em_impaye_intro', ['enfant' => $apprenant->nom.' '.$apprenant->prenom]) !!}
+      {!! __('payeur.em_bonjour_nom', ['nom' => e($apprenant->parents->first()?->prenom ?? __('payeur.em_parent_fallback'))]) !!}
+      {!! __('payeur.em_impaye_intro', ['enfant' => e($apprenant->nom.' '.$apprenant->prenom)]) !!}
     </div>
 
     <div class="montant-block">
@@ -100,7 +100,7 @@
     </div>
 
     <div class="tip">
-      <strong>📞 {{ __('payeur.em_besoin_aide') }}</strong><br>
+      <strong>{{ __('payeur.em_besoin_aide') }}</strong><br>
       {{ __('payeur.em_contacter_support') }} : <a href="mailto:edupay@mekontso.gsi2026.com" style="color:#D94040;">edupay@mekontso.gsi2026.com</a>
     </div>
 

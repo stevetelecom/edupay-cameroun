@@ -49,7 +49,7 @@
           style="align-self:flex-end;background:rgba(255,255,255,.1);border:none;
                  color:#fff;width:32px;height:32px;border-radius:8px;font-size:18px;
                  cursor:pointer;display:flex;align-items:center;justify-content:center;
-                 margin-bottom:16px;">✕</button>
+                 margin-bottom:16px;"><span class="material-symbols-outlined" style="font-size:20px;">close</span></button>
 
   <a href="{{ route('landing') }}"
      style="color:{{ $routeActuelle==='landing'?'#fff':'rgba(255,255,255,.7)' }};

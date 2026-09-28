@@ -35,7 +35,7 @@
         </div>
         <div style="background:#FEF3DC;border-left:3px solid #E8A020;border-radius:6px;padding:10px 12px;margin-bottom:16px;">
           <div style="font-size:12px;color:#854F0B;">
-            {!! __('admin.taux_actuel_plateforme', ['pct' => number_format($tauxActuel * 100, 1) . '%']) !!}
+            {!! __('admin.taux_actuel_plateforme', ['pct' => e(number_format($tauxActuel * 100, 1) . '%')]) !!}
           </div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;">

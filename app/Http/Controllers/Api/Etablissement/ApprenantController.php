@@ -240,7 +240,7 @@ class ApprenantController extends Controller
 
     /**
      * Suppression groupée d'apprenants (miroir web bulkDestroy).
-     * 🔒 Seuls les apprenants de CET établissement sont supprimés.
+     * Seuls les apprenants de CET établissement sont supprimés.
      *
      * Body attendu : { "ids": [1,2,3] } (requis)
      */
@@ -284,7 +284,7 @@ class ApprenantController extends Controller
 
     /**
      * Désaffecte une catégorie de frais d'un apprenant (miroir web desaffecter).
-     * 🔒 Permission identique au web : refus si des paiements sont enregistrés.
+     * Permission identique au web : refus si des paiements sont enregistrés.
      */
     public function desaffecter(Request $request, Apprenant $apprenant, FraisApprenant $fraisApprenant): JsonResponse
     {

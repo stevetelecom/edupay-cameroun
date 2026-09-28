@@ -116,7 +116,7 @@
       <label style="display:flex;align-items:flex-start;gap:10px;background:#fff7f7;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;margin-bottom:14px;cursor:pointer;">
         <input type="checkbox" id="supprimer-etab-confirm" onchange="document.getElementById('btn-supprimer-etab-confirme').disabled = !this.checked;"
                style="width:16px;height:16px;margin-top:1px;accent-color:#dc2626;flex-shrink:0;">
-        <span style="font-size:12px;color:#b91c1c;line-height:1.5;">{!! __('admin.confirm_suppression_check', ['nom' => '<strong id="supprimer-etab-check-nom"></strong>']) !!}</span>
+        <span style="font-size:12px;color:#b91c1c;line-height:1.5;">{!! __('admin.confirm_suppression_check', ['nom' => e('<strong id="supprimer-etab-check-nom"></strong>')]) !!}</span>
       </label>
       <form id="form-supprimer-etab" method="POST">
         @csrf @method('DELETE')

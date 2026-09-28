@@ -58,8 +58,8 @@
     <div class="title">{{ __('payeur.em_rappel_titre', ['jours' => 5]) }}</div>
 
     <div class="text">
-      {!! __('payeur.em_bonjour_nom', ['nom' => $apprenant->parents->first()?->prenom ?? __('payeur.em_parent_fallback')]) !!}
-      {!! __('payeur.em_rappel_intro', ['enfant' => $apprenant->nom.' '.$apprenant->prenom]) !!}
+      {!! __('payeur.em_bonjour_nom', ['nom' => e($apprenant->parents->first()?->prenom ?? __('payeur.em_parent_fallback'))]) !!}
+      {!! __('payeur.em_rappel_intro', ['enfant' => e($apprenant->nom.' '.$apprenant->prenom)]) !!}
     </div>
 
     <div class="countdown">

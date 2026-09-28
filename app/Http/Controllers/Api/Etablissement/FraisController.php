@@ -104,7 +104,7 @@ class FraisController extends Controller
 
     /**
      * Supprime une catégorie de frais.
-     * 🔒 Protégée si des paiements existent ET que c'est l'année active — pour
+     * Protégée si des paiements existent ET que c'est l'année active — pour
      * une année passée, suppression cascade complète autorisée (miroir web).
      */
     public function destroy(Request $request, CategoriesFrais $frais): JsonResponse

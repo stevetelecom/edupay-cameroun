@@ -71,7 +71,19 @@ class AdminAuthController extends Controller
 
         $admin = Admin::where('email', $request->email)->first();
 
-        if (! $admin) {
+        // Meme message qu'un email inconnu : sinon on enumerait les comptes,
+        // et surtout un compte suspendu renvoyait une erreur distincte qui
+        // confirmait son existence.
+        if (! $admin || ! $admin->est_actif) {
+            if ($admin && ! $admin->est_actif) {
+                AuditLog::enregistrerSansUser(
+                    'LOGIN_BLOQUE',
+                    'Compte desactive tente de se connecter : ' . $request->email,
+                    $request,
+                    'WARNING'
+                );
+            }
+
             throw ValidationException::withMessages([
                 'email' => 'Identifiants incorrects.',
             ]);
@@ -169,6 +181,22 @@ class AdminAuthController extends Controller
 
         /** @var Admin $admin */
         $admin = Admin::findOrFail($adminId);
+
+        // Le compte a pu etre suspendu entre le login et la saisie du code.
+        if (! $admin->est_actif) {
+            $request->session()->forget('admin_2fa_id');
+            Cache::forget('2fa_admin_' . $admin->id);
+            Cache::forget('admin_2fa_attempts_' . $admin->id);
+
+            AuditLog::enregistrer(
+                $admin, 'LOGIN_BLOQUE',
+                'Compte desactive detecte a la validation 2FA.',
+                $request, 'WARNING'
+            );
+
+            return redirect()->route('admin.login')
+                ->with('error', 'Ce compte a été désactivé. Contactez un Super Administrateur.');
+        }
 
         // Limite de tentatives anti brute-force (5 max / 15 min)
         $attemptsKey = 'admin_2fa_attempts_' . $admin->id;

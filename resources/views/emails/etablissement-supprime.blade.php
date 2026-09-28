@@ -33,9 +33,9 @@
         </div>
         <div class="body">
             <div class="badge"><span>{{ __('etablissement.em_supprime_badge') }}</span></div>
-            <div class="title">{!! __('etablissement.em_bonjour_prenom', ['prenom' => $responsable->prenom]) !!}</div>
+            <div class="title">{!! __('etablissement.em_bonjour_prenom', ['prenom' => e($responsable->prenom)]) !!}</div>
             <div class="text">
-                {!! __('etablissement.em_supprime_texte', ['etab' => $nomEtablissement]) !!}
+                {!! __('etablissement.em_supprime_texte', ['etab' => e($nomEtablissement)]) !!}
                 {{ __('etablissement.em_supprime_acces_desactives') }}
             </div>
             <div class="info-box">
@@ -45,7 +45,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('etablissement.statut') }}</span>
-                    <span class="info-val" style="color:#DC2626;">❌ {{ __('etablissement.em_supprime') }}</span>
+                    <span class="info-val" style="color:#DC2626;">{{ __('etablissement.em_supprime') }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">{{ __('etablissement.date') }}</span>
@@ -53,10 +53,10 @@
                 </div>
             </div>
             <div class="warning-box">
-                ⚠️ {{ __('etablissement.em_supprime_irreversible') }}
+                {{ __('etablissement.em_supprime_irreversible') }}
             </div>
             <div class="contact-box">
-                📧 {{ __('etablissement.em_supprime_contact') }}
+                {{ __('etablissement.em_supprime_contact') }}
             </div>
         </div>
         <div class="footer">

@@ -119,15 +119,11 @@
     <div class="subtitle">{{ __('etablissement.annee_scolaire') }} {{ $anneeScolaire }}</div>
 
     <div class="body-text">
-        {!! __('payeur.pdf_cert_texte', [
-            'nom'    => $apprenant->prenom.' '.$apprenant->nom,
-            'classe' => $apprenant->classe,
-            'etab'   => $apprenant->etablissement->nom ?? '—',
-        ]) !!}
+        {!! __('payeur.pdf_cert_texte', ['nom' => e($apprenant->prenom.' '.$apprenant->nom), 'classe' => e($apprenant->classe), 'etab' => e($apprenant->etablissement->nom ?? '—')]) !!}
     </div>
 
     <div class="stamp-box">
-        <div class="pct">{!! __('payeur.pdf_pct_regle', ['pct' => $pourcentage]) !!}</div>
+        <div class="pct">{!! __('payeur.pdf_pct_regle', ['pct' => e($pourcentage)]) !!}</div>
         <div class="lbl">{{ __('payeur.pdf_fcfa_payes_sur', [
             'paye'  => number_format($montantPaye, 0, ',', ' '),
             'total' => number_format($montantTotal, 0, ',', ' '),

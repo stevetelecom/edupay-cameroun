@@ -34,7 +34,7 @@
         <div class="body">
             <div class="title">{{ __('admin.em_2fa_titre') }}</div>
             <div class="text">
-                {!! __('admin.em_2fa_bonjour', ['nom' => $admin->prenom.' '.$admin->nom]) !!}
+                {!! __('admin.em_2fa_bonjour', ['nom' => e($admin->prenom.' '.$admin->nom)]) !!}
                 {{ __('admin.em_2fa_connexion_detectee') }}
                 {{ __('admin.em_2fa_code_usage_unique') }}
             </div>

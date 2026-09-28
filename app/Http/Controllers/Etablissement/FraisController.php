@@ -82,7 +82,7 @@ class FraisController extends Controller
 
     /**
      * Désaffecte une catégorie de frais d'un apprenant (retire le FraisApprenant).
-     * 🔒 Permission : on ne peut désaffecter que si AUCUN paiement n'est enregistré
+     * Permission : on ne peut désaffecter que si AUCUN paiement n'est enregistré
      * pour cette catégorie — sinon on briserait l'historique de règlement.
      */
     public function desaffecter(Apprenant $apprenant, FraisApprenant $fraisApprenant)
@@ -204,7 +204,7 @@ class FraisController extends Controller
     /**
      * Répartit montant_total sur nb_tranches_max échéances.
      * Augmente/ réduit automatiquement le nombre de tranches pour coller à nb_tranches_max.
-     * 🔒 Ne touche pas aux FraisApprenant (déjà réglés) — seuls les montants échéanciers et
+     * Ne touche pas aux FraisApprenant (déjà réglés) — seuls les montants échéanciers et
      *   les échéances futures sont alignés.
      */
     private function synchroniserEcheanciers(CategoriesFrais $frais): void
@@ -255,7 +255,7 @@ class FraisController extends Controller
             fn ($q) => $q->where('categorie_frais_id', $frais->id)
         )->exists();
 
-        // 🔒 Pour l'année ACTIVE uniquement : on protège les paiements réels en cours.
+        // Pour l'année ACTIVE uniquement : on protège les paiements réels en cours.
         // Pour une année PASSÉE, on autorise la suppression cascade complète — les
         // seeders/tests d'une ancienne rentrée n'ont plus besoin d'être conservés,
         // et garder chaque année indéfiniment saturerait la base pour rien.

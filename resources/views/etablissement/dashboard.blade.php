@@ -74,7 +74,7 @@
             @if($statut === 'en_attente')
             <div style="font-size:11px;color:#92400E;margin-top:4px;opacity:0.7;display:flex;align-items:center;gap:4px;">
                 <span class="material-symbols-outlined" style="font-size:13px;">mail</span>
-                {!! __('etablissement.email_notif_validation', ['email' => Auth::user()->email]) !!}
+                {!! __('etablissement.email_notif_validation', ['email' => e(Auth::user()->email)]) !!}
             </div>
             @endif
         </div>
@@ -116,7 +116,7 @@
             @elseif(isset($joursRestants) && $joursRestants <= 7)
             <div style="font-size:11px;color:#D94040;margin-top:4px;font-weight:600;display:flex;align-items:center;gap:4px;">
                 <span class="material-symbols-outlined" style="font-size:13px;">warning</span>
-                {!! __('etablissement.expiration_warning', ['jours' => $joursRestants, 'date' => $abonnementExpire]) !!}
+                {!! __('etablissement.expiration_warning', ['jours' => e($joursRestants), 'date' => e($abonnementExpire)]) !!}
             </div>
             @endif
         </div>
@@ -277,7 +277,7 @@
 
     {{-- ── Info recouvrement pour établissement ── --}}
     <div style="font-size:12px;color:#999;margin-top:16px;text-align:center;">
-        {!! __('etablissement.taux_etab_info', ['taux' => number_format($tauxRecouvrementDecimal ?? 0, 2, ',', '')]) !!}
+        {!! __('etablissement.taux_etab_info', ['taux' => e(number_format($tauxRecouvrementDecimal ?? 0, 2, ',', ''))]) !!}
     </div>
 
 @endsection

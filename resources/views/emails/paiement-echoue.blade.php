@@ -20,8 +20,8 @@
 <div style="font-size:17px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">{{ __('payeur.em_echec_titre') }}</div>
 
 <p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 18px;">
-{!! __('payeur.em_echec_bonjour', ['prenom' => $paiement->user->prenom ?? __('payeur.em_utilisateur_fallback')]) !!}
-{!! __('payeur.em_echec_intro', ['enfant' => ($paiement->apprenant->prenom ?? '').' '.($paiement->apprenant->nom ?? '')]) !!}
+{!! __('payeur.em_echec_bonjour', ['prenom' => e($paiement->user->prenom ?? __('payeur.em_utilisateur_fallback'))]) !!}
+{!! __('payeur.em_echec_intro', ['enfant' => e(($paiement->apprenant->prenom ?? '').' '.($paiement->apprenant->nom ?? ''))]) !!}
 </p>
 
 <table width="100%" cellpadding="8" cellspacing="0" style="background:#f8f9fa;border-radius:8px;font-size:13px;color:#333;margin-bottom:18px;">

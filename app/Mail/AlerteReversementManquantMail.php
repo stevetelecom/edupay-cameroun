@@ -31,7 +31,7 @@ class AlerteReversementManquantMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🚨 ALERTE ARGENT — Reversement établissement non effectué',
+            subject: 'ALERTE - Reversement etablissement non effectue',
         );
     }
 

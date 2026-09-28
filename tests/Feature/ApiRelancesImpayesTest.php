@@ -47,6 +47,9 @@ class ApiRelancesImpayesTest extends TestCase
         $this->etablissement = $this->creerEtablissement('Ecole Relance', 'REL-2026');
         $this->autreEtablissement = $this->creerEtablissement('Ecole Suivante', 'SUIV-2026');
 
+        $this->abonnerEtablissement($this->etablissement);
+        $this->abonnerEtablissement($this->autreEtablissement);
+
         $this->directeur = User::factory()->create([
             'etablissement_id' => $this->etablissement->id,
         ]);

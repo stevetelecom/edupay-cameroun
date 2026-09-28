@@ -67,7 +67,7 @@
           <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #f5f5f5;">
             <span style="color:#666;">{{ $frais->categorieFrais->nom ?? __('payeur.frais') }}</span>
             <span style="font-weight:600;color:{{ $resteF > 0 ? 'var(--ep-red)' : 'var(--ep-teal)' }};">
-              {{ $resteF > 0 ? __('payeur.reste_fcfa', ['montant' => number_format($resteF,0,',',' ')]) : '✓ '. __('payeur.statut_regle') }}
+              {{ $resteF > 0 ? __('payeur.reste_fcfa', ['montant' => number_format($resteF,0,',',' ')]) : __('payeur.statut_regle') }}
             </span>
           </div>
         @empty
@@ -85,7 +85,7 @@
           </div>
         @else
           <div style="font-size:12px;color:var(--ep-teal);font-weight:600;margin-top:10px;margin-bottom:10px;">
-            ✓ {{ __('payeur.tous_frais_regles') }}
+            {{ __('payeur.tous_frais_regles') }}
           </div>
         @endif
 

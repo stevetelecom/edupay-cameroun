@@ -230,7 +230,7 @@ class PayeurTestSeeder extends Seeder
         // ────────────────────────────────────────────
         // RÉCAPITULATIF
         // ────────────────────────────────────────────
-        $this->command->info('✅ Données de test Payeur créées avec succès.');
+        $this->command->info('Données de test Payeur créées avec succès.');
         $this->command->table(
             ['Élément', 'Détail'],
             [

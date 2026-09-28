@@ -76,7 +76,7 @@
     </div>
     <div class="ep-modal-body">
       <p style="font-size:13px;color:#555;line-height:1.6;">
-        {!! __('etablissement.desaffecter_confirm', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]) !!}
+        {!! __('etablissement.desaffecter_confirm', ['prenom' => e($apprenant->prenom), 'nom' => e($apprenant->nom)]) !!}
         <strong id="desaffecter-categorie-nom"></strong>
       </p>
       <div style="background:#fdf3f3;border:1px solid #f5c6c6;border-radius:8px;padding:10px 12px;font-size:12px;color:#b13a3a;margin-top:10px;">

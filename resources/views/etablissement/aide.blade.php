@@ -20,7 +20,7 @@
     </div>
     <div>
       <div style="font-size:13px;font-weight:700;margin-bottom:3px;">{{ __('etablissement.apprenants') }}</div>
-      <div style="font-size:12px;color:#666;line-height:1.6;">{!! __('etablissement.aide_apprenants_desc', ['url' => route('etablissement.apprenants.import.template')]) !!}</div>
+      <div style="font-size:12px;color:#666;line-height:1.6;">{!! __('etablissement.aide_apprenants_desc', ['url' => e(route('etablissement.apprenants.import.template'))]) !!}</div>
     </div>
   </div>
 

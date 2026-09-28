@@ -150,7 +150,7 @@ class LandingController extends Controller
             'message' => ['required', 'string', 'max:2000'],
         ]);
 
-        // 📝 Logging: Message reçu
+        // Logging: Message reçu
         Log::info('Nouveau message de contact', [
             'name'           => $data['name'],
             'email'          => LogMasking::email($data['email']),
@@ -163,8 +163,8 @@ class LandingController extends Controller
         try {
             $recipientEmail = config('mail.contact_address', config('mail.from.address'));
             
-            // 📝 Logging: Tentative d'envoi
-            Log::info("📨 Envoi de l'email à: {$recipientEmail}", [
+            // Logging: Tentative d'envoi
+            Log::info("Envoi de l'email à: {$recipientEmail}", [
                 'from' => $data['email'],
                 'name' => $data['name'],
             ]);
@@ -172,15 +172,15 @@ class LandingController extends Controller
             Mail::to($recipientEmail)
                 ->send(new ContactMessageMail($data));
 
-            // 📝 Logging: Succès
-            Log::info("✅ Email de contact envoyé avec succès", [
+            // Logging: Succès
+            Log::info("Email de contact envoyé avec succès", [
                 'from' => $data['email'],
                 'to' => $recipientEmail,
             ]);
 
         } catch (\Throwable $exception) {
-            // 📝 Logging: Erreur
-            Log::error("❌ Erreur lors de l'envoi du message de contact", [
+            // Logging: Erreur
+            Log::error("Erreur lors de l'envoi du message de contact", [
                 'email' => $data['email'],
                 'error' => $exception->getMessage(),
                 'trace' => $exception->getTraceAsString(),

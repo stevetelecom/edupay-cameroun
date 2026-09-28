@@ -13,7 +13,7 @@ use App\Support\AnneeScolaire;
  *   - $tauxRecouvrementDecimal : taux de recouvrement (même calcul que le dashboard)
  *   - $countImpayes            : nombre de dossiers de frais impayés (badge sidebar)
  *
- * ⚠️ Avant ce composer, ces deux variables n'étaient passées QUE par
+ * ATTENTION : avant ce composer, ces deux variables n'étaient passées QUE par
  *    DashboardController -> la sidebar affichait 0% et aucun badge sur tous
  *    les autres onglets, alors que le tableau de bord affichait la bonne valeur.
  *    Ce composer unifie l'affichage sur TOUTES les pages du back-office.

@@ -17,7 +17,7 @@ class EtablissementSupprimeMail extends Mailable
     ) {}
     public function envelope(): Envelope
     {
-        return new Envelope(subject: '❌ Votre établissement a été retiré de EduPay');
+        return new Envelope(subject: 'Votre etablissement a ete retire de EduPay');
     }
     public function content(): Content
     {
