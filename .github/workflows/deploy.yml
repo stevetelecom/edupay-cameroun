@@ -91,6 +91,8 @@ jobs:
                php artisan migrate --force && \
                php artisan db:seed --class=AdminSeeder --force && \
                php artisan db:seed --class=DatabaseSeeder --force && \
+               php artisan db:seed --class=EtablissementsPaginationSeeder --force && \
+               php artisan db:seed --class=PayeurRegleTestSeeder --force && \
                php artisan permission:cache-reset && \
                php artisan storage:link && \
               php artisan config:cache && \
