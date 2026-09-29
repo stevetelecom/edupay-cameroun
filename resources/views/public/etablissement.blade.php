@@ -1,20 +1,42 @@
 @extends('layouts.public')
 @section('title', $etablissement->nom . ' — EduPay Cameroun')
+
+@push('styles')
+<style>
+/* Halo pulsant autour du logo de l'établissement (hero de la fiche) */
+@keyframes etabLogoPulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(13,158,117,.22), 0 8px 24px rgba(0,0,0,.35); }
+    50%      { box-shadow: 0 0 0 9px rgba(13,158,117,.10), 0 8px 24px rgba(0,0,0,.35); }
+}
+@media (prefers-reduced-motion: reduce) {
+    [style*="etabLogoPulse"] { animation: none !important; }
+}
+</style>
+@endpush
+
 @section('content')
 @include('layouts._navbar_public')
 
 <div class="hero-band">
   <div style="padding:36px 28px 28px;background:#0B2545;">
     <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
-      @if($etablissement->logo)
+      @if(!empty($etablissement->logo))
+        {{-- Logo officiel de l'établissement, halo lumineux animé --}}
         <img src="{{ asset('storage/'.$etablissement->logo) }}"
-             alt="{{ $etablissement->nom }}"
-             style="width:72px;height:72px;border-radius:14px;object-fit:cover;border:2px solid rgba(255,255,255,.15);flex-shrink:0;" />
+             alt="Logo {{ $etablissement->nom }}"
+             style="width:72px;height:72px;border-radius:14px;object-fit:cover;
+                    border:2px solid rgba(255,255,255,.25);flex-shrink:0;
+                    box-shadow:0 0 0 4px rgba(13,158,117,.22), 0 8px 24px rgba(0,0,0,.35);
+                    animation:etabLogoPulse 3.5s ease-in-out infinite;" />
       @else
-        <div style="width:72px;height:72px;border-radius:14px;background:var(--ep-teal-lt);
+        {{-- Pas de logo fourni : première lettre du nom --}}
+        <div style="width:72px;height:72px;border-radius:14px;
+                    background:linear-gradient(135deg,#0D9E75,#0A8562);
                     display:flex;align-items:center;justify-content:center;flex-shrink:0;
-                    font-size:28px;font-weight:700;color:var(--ep-teal);">
-          {{ strtoupper(substr($etablissement->nom, 0, 1)) }}
+                    font-family:'Poppins',sans-serif;font-size:30px;font-weight:800;color:#fff;
+                    box-shadow:0 0 0 4px rgba(13,158,117,.22), 0 8px 24px rgba(0,0,0,.35);
+                    animation:etabLogoPulse 3.5s ease-in-out infinite;">
+          {{ mb_strtoupper(mb_substr($etablissement->nom, 0, 1)) }}
         </div>
       @endif
       <div>

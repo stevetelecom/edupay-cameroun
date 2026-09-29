@@ -146,6 +146,8 @@ class RegisterEcolController extends Controller
 
         $documentPath = $request->file('document_agrement')->store('agrements', 'public');
 
+        // Logo rangé dans logos/ (le même dossier que la re-soumission depuis
+        // les paramètres de l'établissement, cf. ParametreController::update).
         $logoPath = $request->hasFile('logo')
             ? $request->file('logo')->store('logos', 'public')
             : null;

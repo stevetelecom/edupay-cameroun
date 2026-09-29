@@ -231,15 +231,39 @@
          bande colorée au survol, badge « Payer en ligne ») --}}
     <div id="etabs-grid" class="lp-etabs" data-reveal-stagger="60">
       @forelse($etablissements as $etab)
+      {{-- Dégradé de l'avatar initiale selon le type d'établissement
+           (uniquement utilisé quand l'école n'a pas fourni de logo) --}}
+      @php
+        $avGrades = [
+            'maternelle'      => ['#F5B93F', '#C9860E'],
+            'primaire'        => ['#0D9E75', '#085041'],
+            'college'         => ['#1F6FB2', '#123C66'],
+            'lycee_general'   => ['#7C3AED', '#4C1D95'],
+            'lycee_technique' => ['#D94040', '#7E1F1A'],
+            'institut_prive'  => ['#0A8562', '#064C39'],
+            'universite'      => ['#16406E', '#0B2545'],
+            'groupe_scolaire' => ['#E8A020', '#8B5E10'],
+        ];
+        $av = $avGrades[$etab->type] ?? ['#0D9E75', '#0A8562'];
+      @endphp
       <a href="{{ route('etablissement.show', $etab->code_etablissement) }}"
          class="lp-etab reveal-on-scroll"
+         style="--lp-av1: {{ $av[0] }}; --lp-av2: {{ $av[1] }};"
          data-nom="{{ e(strtolower($etab->nom)) }}"
          data-ville="{{ e(strtolower($etab->ville ?? '')) }}"
          data-type="{{ e(strtolower($etab->type ?? '')) }}">
-        @if($etab->logo)
-          <img class="lp-etab-logo" src="{{ asset('storage/'.$etab->logo) }}" alt="{{ $etab->nom }}" loading="lazy" />
+        @if(!empty($etab->logo))
+          {{-- Logo officiel de l'établissement (uploadé à l'inscription
+               ou depuis les paramètres). Un logo est TOUJOURS préféré à
+               l'initiale : c'est l'identité visuelle réelle de l'école. --}}
+          <img class="lp-etab-logo" src="{{ asset('storage/'.$etab->logo) }}"
+               alt="Logo {{ $etab->nom }}" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+          {{-- Repli si le fichier logo est introuvable (404) : initiale --}}
+          <div class="lp-etab-avatar" style="display:none;" aria-hidden="true">{{ mb_strtoupper(mb_substr($etab->nom, 0, 1)) }}</div>
         @else
-          <div class="lp-etab-avatar" aria-hidden="true">{{ strtoupper(substr($etab->nom, 0, 1)) }}</div>
+          {{-- Pas encore de logo fourni : première lettre du nom --}}
+          <div class="lp-etab-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr($etab->nom, 0, 1)) }}</div>
         @endif
 
         <div class="lp-etab-nom" title="{{ $etab->nom }}">{{ $etab->nom }}</div>
@@ -415,48 +439,91 @@
 </div>{{-- /.ep-body2 --}}
 </div>{{-- /.lp : fin du wrapper de variables --}}
 
-{{-- ══ FOOTER (inchangé, partagé avec les pages publiques) ══ --}}
-<div class="ep-footer">
-  <div class="footer-grid">
-    <div>
-      <div class="footer-logo" style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>EduPay Cameroun</div>
-      <div class="footer-desc">{{ __('public.footer_desc') }}</div>
-      <div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div>
-    </div>
-    <div>
-      <div class="footer-col-title">{{ __('public.footer_col_produit') }}</div>
-      <a class="footer-link" href="{{ route('landing') }}">{{ __('public.footer_fonctionnalites') }}</a>
-      <a class="footer-link" href="{{ route('temoignages') }}">{{ __('public.footer_temoignages') }}</a>
-      <a class="footer-link" href="{{ route('tarifs') }}">{{ __('public.footer_tarifs') }}</a>
-    </div>
-    <div>
-      <div class="footer-col-title">{{ __('public.footer_col_etablissements') }}</div>
-      <a class="footer-link" href="{{ route('register.ecole.step1') }}">{{ __('public.footer_inscrire_ecole') }}</a>
-      <a class="footer-link" href="{{ route('login', ['role' => 'etablissement']) }}">{{ __('public.footer_backoffice') }}</a>
-      <a class="footer-link" href="{{ route('guide') }}">{{ __('public.footer_guide_utilisation') }}</a>
-      <a class="footer-link" href="{{ route('support') }}">{{ __('public.footer_support_dedie') }}</a>
-    </div>
-    <div>
-      <div class="footer-col-title">{{ __('public.footer_col_informations') }}</div>
-      <a class="footer-link" href="{{ route('about') }}">{{ __('public.footer_a_propos') }}</a>
-      <a class="footer-link" href="{{ route('contact') }}">{{ __('public.footer_contact') }}</a>
-      <a class="footer-link" href="{{ route('confidentialite') }}">{{ __('public.footer_confidentialite') }}</a>
-      <a class="footer-link" href="{{ route('cgu') }}">{{ __('public.footer_conditions') }}</a>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div>
-      <div class="footer-legal">{{ __('public.footer_legal') }}</div>
-      <div class="certif">
-        <span class="cert-badge">{{ __('public.footer_mtn_partner') }}</span>
-        <span class="cert-badge">{{ __('public.footer_orange_integre') }}</span>
-        <span class="cert-badge">{{ __('public.footer_cinetpay_certifie') }}</span>
-        <span class="cert-badge">{{ __('public.footer_cobac_conforme') }}</span>
+{{-- ══ FOOTER PRO v3 : 4 colonnes, colonnes contact + newsletter
+     visuel des moyens de paiement, barre légale complète ══ --}}
+<footer class="ep-footer lp-footer">
+  <div class="lp-footer-inner">
+
+    {{-- Rangée 1 : marque + 3 colonnes de liens + contact --}}
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo" style="display:flex;align-items:center;gap:10px;">
+          <span style="width:46px;height:46px;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.2);">
+            <img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" />
+          </span>
+          <span>Edu<span style="color:#5DCAA5;">Pay</span></span>
+        </div>
+        <div class="footer-desc">{{ __('public.footer_desc') }}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+          <span class="footer-badge"><span class="material-symbols-rounded" style="font-size:13px;color:#5DCAA5;">lock</span>TLS 1.3</span>
+          <span class="footer-badge"><span class="material-symbols-rounded" style="font-size:13px;color:#5DCAA5;">verified_user</span>PCI-DSS</span>
+          <span class="footer-badge"><span class="material-symbols-rounded" style="font-size:13px;color:#5DCAA5;">account_balance</span>COBAC</span>
+        </div>
+      </div>
+
+      <div>
+        <div class="footer-col-title">{{ __('public.footer_col_produit') }}</div>
+        <a class="footer-link" href="{{ route('landing') }}">{{ __('public.footer_fonctionnalites') }}</a>
+        <a class="footer-link" href="{{ route('tarifs') }}">{{ __('public.footer_tarifs') }}</a>
+        <a class="footer-link" href="{{ route('temoignages') }}">{{ __('public.footer_temoignages') }}</a>
+        <a class="footer-link" href="{{ route('guide') }}">{{ __('public.footer_guide_utilisation') }}</a>
+      </div>
+
+      <div>
+        <div class="footer-col-title">{{ __('public.footer_col_etablissements') }}</div>
+        <a class="footer-link" href="{{ route('register.ecole.step1') }}">{{ __('public.footer_inscrire_ecole') }}</a>
+        <a class="footer-link" href="{{ route('login', ['role' => 'etablissement']) }}">{{ __('public.footer_backoffice') }}</a>
+        <a class="footer-link" href="{{ route('support') }}">{{ __('public.footer_support_dedie') }}</a>
+      </div>
+
+      <div>
+        <div class="footer-col-title">{{ __('public.footer_col_contact') }}</div>
+        <a class="footer-link" href="mailto:{{ config('mail.contact_address', 'contact@edupay.cm') }}" style="text-transform:none;letter-spacing:0;">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">mail</span>
+          {{ config('mail.contact_address', 'contact@edupay.cm') }}
+        </a>
+        <a class="footer-link" href="tel:+237600000000" style="text-transform:none;letter-spacing:0;">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">call</span>
+          (+237) 6 00 00 00 00
+        </a>
+        <a class="footer-link" href="{{ route('contact') }}">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">forum</span>
+          {{ __('public.footer_contact') }}
+        </a>
+        <a class="footer-link" href="{{ route('about') }}">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">info</span>
+          {{ __('public.footer_a_propos') }}
+        </a>
       </div>
     </div>
-    @include('partials.footer-socials')
+
+    {{-- Rangée 2 : moyens de paiement acceptés (icônes Material sur
+         pastilles aux couleurs officielles des opérateurs) --}}
+    <div class="lp-footer-paiements">
+      <span class="lp-footer-paiements-label">{{ __('public.footer_moyens_paiement') }}</span>
+      <span class="lp-paiement-chip" style="background:#FFCC00;color:#3A2E00;">MTN MoMo</span>
+      <span class="lp-paiement-chip" style="background:#FF6600;color:#fff;">Orange Money</span>
+      <span class="lp-paiement-chip" style="background:#1F6FB2;color:#fff;">Visa</span>
+      <span class="lp-paiement-chip" style="background:#1A1F71;color:#fff;">Mastercard</span>
+      <span class="lp-paiement-chip" style="background:#0B2545;color:#9FE1CB;">AangaraaPay</span>
+    </div>
+
+    {{-- Rangée 3 : barre légale --}}
+    <div class="footer-bottom">
+      <div>
+        <div class="footer-legal">{{ __('public.footer_legal') }}</div>
+        <div class="certif">
+          <span class="cert-badge">{{ __('public.footer_mtn_partner') }}</span>
+          <span class="cert-badge">{{ __('public.footer_orange_integre') }}</span>
+          <span class="cert-badge">{{ __('public.footer_cinetpay_certifie') }}</span>
+          <span class="cert-badge">{{ __('public.footer_cobac_conforme') }}</span>
+        </div>
+      </div>
+      @include('partials.footer-socials')
+    </div>
+
   </div>
-</div>
+</footer>
 
 @endsection
 

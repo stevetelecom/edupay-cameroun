@@ -282,6 +282,9 @@ return [
     'regulateur_cobac'              => "Sous surveillance COBAC",
     'regulateur_beac'               => "Normes BEAC des paiements",
     'regulateur_donnees'            => "Données chiffrées AES-256",
+    /* ── Footer pro v3 ── */
+    'footer_col_contact'            => 'Contact',
+    'footer_moyens_paiement'        => 'Moyens de paiement acceptés',
     'informations_contact'          => 'Informations de contact',
     'inscription_gratuite_desc'     => 'Inscription gratuite · Onboarding en 24h · Support dédié · Aucun engagement',
     'inscription_gratuite_support'  => 'Inscription gratuite · Support dédié',

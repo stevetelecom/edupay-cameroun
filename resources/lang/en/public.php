@@ -282,6 +282,9 @@ return [
     'regulateur_cobac'              => 'Under COBAC supervision',
     'regulateur_beac'               => 'BEAC payment standards',
     'regulateur_donnees'            => 'AES-256 encrypted data',
+    /* ── Pro footer v3 ── */
+    'footer_col_contact'            => 'Contact',
+    'footer_moyens_paiement'        => 'Accepted payment methods',
     'informations_contact'          => 'Contact information',
     'inscription_gratuite_desc'     => 'Free registration · 24h onboarding · Dedicated support · No commitment',
     'inscription_gratuite_support'  => 'Free registration · Dedicated support',
