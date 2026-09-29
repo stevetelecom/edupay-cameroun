@@ -1066,6 +1066,206 @@
 }
 .lp-cta-final .lp-btn { position: relative; z-index: 1; }
 
+/* ============================================================
+   5bis. PAGE CONTACT & SUPPORT — cartes coordonnées, champs de
+   formulaire, select personnalisé, grille FAQ. Styles partagés
+   contact.blade.php + support.blade.php (tout via variables).
+   ============================================================ */
+
+/* Grille 2 colonnes de la page contact : coordonnées | formulaire */
+.lp-contact-g {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 22px;
+    max-width: 1120px;
+    margin: 0 auto;
+    align-items: start;
+}
+@media (max-width: 900px) {
+    .lp-contact-g { grid-template-columns: 1fr; }
+}
+
+/* Carte de section (page contact) */
+.lp-carte-contact {
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: var(--lp-rayon);
+    box-shadow: var(--lp-ombre);
+    padding: 22px;
+}
+.lp-carte-contact-titre {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--lp-encre);
+    margin-bottom: 16px;
+}
+.lp-carte-contact-titre .material-symbols-rounded {
+    font-size: 19px;
+    color: var(--lp-teal);
+}
+
+/* Ligne de coordonnée : pastille dégradée + texte (pattern lp-valeur) */
+.lp-coord {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+    padding: 14px 15px;
+    border-radius: 12px;
+    background: var(--lp-fond);
+    border: 1px solid var(--lp-bord);
+}
+.lp-coord + .lp-coord { margin-top: 12px; }
+.lp-coord-ico {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--lp-couleur, var(--lp-teal)), var(--lp-couleur2, var(--lp-teal2)));
+    color: #fff;
+}
+.lp-coord-ico .material-symbols-rounded { font-size: 19px; }
+.lp-coord b {
+    display: block;
+    font-size: 12.5px;
+    color: var(--lp-encre);
+}
+.lp-coord small {
+    display: block;
+    font-size: 12.5px;
+    color: var(--lp-gris);
+    line-height: 1.6;
+    margin-top: 2px;
+}
+.lp-coord-desc {
+    font-size: 12.5px;
+    color: var(--lp-gris);
+    line-height: 1.75;
+    margin: 0 0 4px;
+}
+
+/* Grille des 4 cartes coordonnées (page support) */
+.lp-coords {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+@media (max-width: 900px) {
+    .lp-coords { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+    .lp-coords { grid-template-columns: 1fr; }
+}
+
+/* Grille FAQ : 2 colonnes de cartes lp-valeur */
+.lp-faq {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+@media (max-width: 900px) {
+    .lp-faq { grid-template-columns: 1fr; }
+}
+
+/* Champs du formulaire : label avec pastille icône colorée */
+.lp-champs {
+    display: grid;
+    gap: 17px;
+    margin-top: 14px;
+}
+.lp-lbl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--lp-encre);
+    margin-bottom: 7px;
+    letter-spacing: .02em;
+}
+.lp-lbl .material-symbols-rounded { font-size: 17px; color: var(--lp-lbl-c, var(--lp-teal)); }
+.lp-textarea {
+    width: 100%;
+    min-height: 130px;
+    resize: vertical;
+    padding: 12px 14px;
+    border: 1.5px solid var(--lp-bord);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: var(--lp-encre);
+    background: var(--lp-carte);
+    outline: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+.lp-textarea:focus {
+    border-color: var(--lp-teal);
+    box-shadow: 0 0 0 3px rgba(13,158,117,.14);
+}
+.lp-err { font-size: 12px; color: var(--lp-red); margin-top: 6px; }
+
+/* Select sujet personnalisé : déclencheur + menu déroulant v3 */
+.lp-select-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--lp-bord);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: var(--lp-encre);
+    background: var(--lp-carte);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.lp-select-trigger svg { transition: transform .2s ease; flex-shrink: 0; stroke: var(--lp-gris); }
+.lp-select-dd {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(11,37,69,.16);
+    z-index: 100;
+    overflow: hidden;
+}
+.select-opt {
+    padding: 12px 15px;
+    font-size: 13px;
+    color: var(--lp-encre);
+    cursor: pointer;
+    border-bottom: 1px solid var(--lp-bord);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background .15s ease;
+}
+.select-opt:last-child { border-bottom: none; }
+.select-opt:hover { background: var(--lp-fond); }
+.select-opt .opt-check {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--lp-bord);
+    background: var(--lp-carte);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color .15s ease, background .15s ease;
+}
+
 /* Bandeau régulateur : licence + conformité, copie produit près du CTA */
 .lp-regulateur {
     display: flex;
@@ -1194,6 +1394,9 @@ html[data-theme="dark"] .lp-partenaire { color: var(--ep-gris); }
 html[data-theme="dark"] .lp-partenaire:hover { color: var(--ep-encre); }
 html[data-theme="dark"] .lp-regulateur { border-top-color: var(--ep-bordure); }
 html[data-theme="dark"] .lp-regulateur span { color: var(--ep-gris); }
+/* Contact & support : ombres renforcées sur cartes + menu déroulant */
+html[data-theme="dark"] .lp-carte-contact { box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+html[data-theme="dark"] .lp-select-dd { box-shadow: 0 12px 32px rgba(0,0,0,.5); }
 html[data-theme="dark"] .lp-etab-avatar { box-shadow: 0 5px 16px rgba(0,0,0,.45); }
 html[data-theme="dark"] .lp-etab-type { background: var(--ep-teal-lt); color: var(--ep-teal-mid); }
 html[data-theme="dark"] .lp-toast-paiement { background: var(--ep-carte); }
@@ -1693,3 +1896,39 @@ html[data-theme="dark"] .lp-badge-momo { background: var(--ep-carte); color: var
 }
 .lp-etape-lien:hover { gap: 8px; }
 .lp-etape-lien .material-symbols-rounded { font-size: 15px; }
+
+/* ============================================================
+   12bis. RÉCONCILIATION REVEAL × CARTES v3 — les cartes de la
+   bibliothèque (.lp-feat, .lp-type, .lp-etab, .lp-valeur, .lp-kpi,
+   .lp-temoignage, .lp-plan, .lp-etape, .lp-carte-contact) écrasent
+   la transition posée par scroll-reveal.css (chargée AVANT), donc
+   l'apparition saute du transform 24px→0 sans fondre l'opacité.
+   On réconcilie : transition du reveal réintégrée + garder le hover.
+   ============================================================ */
+.reveal-on-scroll.lp-feat,
+.reveal-on-scroll.lp-type,
+.reveal-on-scroll.lp-etab,
+.reveal-on-scroll.lp-valeur,
+.reveal-on-scroll.lp-kpi,
+.reveal-on-scroll.lp-temoignage,
+.reveal-on-scroll.lp-plan,
+.reveal-on-scroll.lp-etape,
+.reveal-on-scroll.lp-carte-contact,
+.reveal-on-scroll.lp-cta-final,
+.reveal-on-scroll.lp-regulateur {
+    transition: opacity .6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform .6s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow .28s ease, border-color .28s ease;
+}
+/* Une fois la carte révélée : hover rapide, transform libéré pour le lift */
+.revealed.lp-feat,
+.revealed.lp-type,
+.revealed.lp-etab,
+.revealed.lp-valeur,
+.revealed.lp-kpi,
+.revealed.lp-temoignage,
+.revealed.lp-plan,
+.revealed.lp-etape,
+.revealed.lp-carte-contact {
+    transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
