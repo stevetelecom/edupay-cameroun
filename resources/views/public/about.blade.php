@@ -2,58 +2,160 @@
 
 @section('title', __('public.about_title'))
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/edupay-landing.css') }}">
+<style>
+/* Corps des pages secondaires : suit le thème clair/sombre */
+.lp .ep-body2, .lp-page .ep-body2 { background: transparent; }
+</style>
+@endpush
+
 @section('content')
 
 @include('layouts._navbar_public')
-<div class="hero-band">
-  <div style="padding:36px 28px 28px;text-align:center;background:#0B2545">
-    <div class="hero-tag" style="justify-content:center;">{{ __('public.about_hero_tag') }}</div>
-    <div style="font-size:28px;font-weight:700;color:#fff;margin:10px 0;line-height:1.3;">{{ __('public.about_hero_h1_prefix') }}<em style="font-style:normal;color:#5DCAA5;">{{ __('public.about_hero_h1_em') }}</em></div>
-    <div style="font-size:14px;color:rgba(255,255,255,.55);max-width:500px;margin:0 auto;line-height:1.7;">{{ __('public.about_hero_sub') }}</div>
+<div class="lp lp-page">
+{{-- ══ HERO SECONDAIRE v3 : orbes + badge + stats glassmorphism ══ --}}
+<div class="lp-hero-sec">
+  <div class="lp-orb lp-orb-a" aria-hidden="true"></div>
+  <div class="lp-orb lp-orb-b" aria-hidden="true"></div>
+  <div class="lp-hero-sec-inner">
+    <div class="lp-tag" style="justify-content:center;">
+      <span class="lp-pulse" aria-hidden="true"></span>
+      <span class="material-symbols-rounded" aria-hidden="true">diversity_3</span>
+      {{ __('public.about_hero_tag') }}
+    </div>
+    <h1 class="lp-h1" style="font-size:34px;">
+      {{ __('public.about_hero_h1_prefix') }}
+      <em>{{ __('public.about_hero_h1_em') }}</em>
+    </h1>
+    <p class="lp-sub" style="margin-left:auto;margin-right:auto;">{{ __('public.about_hero_sub') }}</p>
   </div>
 </div>
 
 <div class="ep-body2">
 
-  <div class="seclbl" style="margin-top:4px;">{{ __('public.notre_mission') }}</div>
-  <div class="mission-card" style="margin-bottom:16px;">
-    <div style="font-size:15px;font-weight:700;margin-bottom:8px;">{{ __('public.mission_titre') }}</div>
-    <div style="font-size:13px;color:#555;line-height:1.75;">{{ __('public.mission_texte') }}</div>
+  {{-- ══ MISSION v3 ══ --}}
+  <div class="lp-section" style="padding-top:44px;">
+    <div class="lp-seclbl reveal-on-scroll">
+      <span class="material-symbols-rounded" aria-hidden="true">flag</span>
+      {{ __('public.mission_lbl') }}
+    </div>
+    <h2 class="lp-sectitre reveal-on-scroll">{{ __('public.mission_titre') }}</h2>
+    <div class="lp-feat" style="max-width:760px;margin:0 auto 8px;--lp-couleur:#0D9E75;--lp-couleur2:#0A8562;">
+      <p class="lp-feat-desc" style="font-size:13.5px;margin:0;">{{ __('public.mission_texte') }}</p>
+      <div style="display:flex;align-items:center;gap:9px;margin-top:14px;padding-top:14px;border-top:1px solid var(--lp-bord);">
+        <span class="material-symbols-rounded" style="font-size:19px;color:var(--lp-teal);" aria-hidden="true">verified</span>
+        <b style="font-size:12.5px;color:var(--lp-encre);">{{ __('public.mission_conclusion') }}</b>
+      </div>
+    </div>
   </div>
 
-  <div class="seclbl">{{ __('public.nos_valeurs') }}</div>
-  <div class="g2" style="margin-bottom:20px;">
-    <div class="value-card" style="border-left-color:var(--ep-teal);"><div style="font-size:13px;font-weight:700;margin-bottom:5px;">{{ __('public.valeur_accessibilite_titre') }}</div><div style="font-size:12px;color:#666;line-height:1.6;">{{ __('public.valeur_accessibilite_desc') }}</div></div>
-    <div class="value-card" style="border-left-color:var(--ep-gold);"><div style="font-size:13px;font-weight:700;margin-bottom:5px;">{{ __('public.valeur_securite_titre') }}</div><div style="font-size:12px;color:#666;line-height:1.6;">{{ __('public.valeur_securite_desc') }}</div></div>
-    <div class="value-card" style="border-left-color:#185FA5;"><div style="font-size:13px;font-weight:700;margin-bottom:5px;">{{ __('public.valeur_ancrage_titre') }}</div><div style="font-size:12px;color:#666;line-height:1.6;">{{ __('public.valeur_ancrage_desc') }}</div></div>
-    <div class="value-card" style="border-left-color:#7C3AED;"><div style="font-size:13px;font-weight:700;margin-bottom:5px;">{{ __('public.valeur_impact_titre') }}</div><div style="font-size:12px;color:#666;line-height:1.6;">{{ __('public.valeur_impact_desc') }}</div></div>
+  {{-- ══ VALEURS v3 : 4 cartes avec pastilles Material animées ══ --}}
+  <div class="lp-section">
+    <div class="lp-seclbl reveal-on-scroll">
+      <span class="material-symbols-rounded" aria-hidden="true">diamond</span>
+      {{ __('public.nos_valeurs') }}
+    </div>
+    <h2 class="lp-sectitre reveal-on-scroll">{{ __('public.nos_valeurs') }}</h2>
+    <p class="lp-secsub reveal-on-scroll">{{ __('public.valeurs_sub') }}</p>
+
+    <div class="lp-feats" data-reveal-stagger="70">
+      <div class="lp-valeur reveal-on-scroll" style="--lp-couleur:#0D9E75;--lp-couleur2:#0A8562;">
+        <div class="lp-valeur-ico"><span class="material-symbols-rounded">public</span></div>
+        <b>{{ __('public.valeur_accessibilite_titre') }}</b>
+        <small>{{ __('public.valeur_accessibilite_desc') }}</small>
+      </div>
+      <div class="lp-valeur reveal-on-scroll" style="--lp-couleur:#E8A020;--lp-couleur2:#C9860E;">
+        <div class="lp-valeur-ico"><span class="material-symbols-rounded">shield_lock</span></div>
+        <b>{{ __('public.valeur_securite_titre') }}</b>
+        <small>{{ __('public.valeur_securite_desc') }}</small>
+      </div>
+      <div class="lp-valeur reveal-on-scroll" style="--lp-couleur:#1F6FB2;--lp-couleur2:#123C66;">
+        <div class="lp-valeur-ico"><span class="material-symbols-rounded">location_on</span></div>
+        <b>{{ __('public.valeur_ancrage_titre') }}</b>
+        <small>{{ __('public.valeur_ancrage_desc') }}</small>
+      </div>
+      <div class="lp-valeur reveal-on-scroll" style="--lp-couleur:#7C3AED;--lp-couleur2:#4C1D95;">
+        <div class="lp-valeur-ico"><span class="material-symbols-rounded">trending_up</span></div>
+        <b>{{ __('public.valeur_impact_titre') }}</b>
+        <small>{{ __('public.valeur_impact_desc') }}</small>
+      </div>
+    </div>
   </div>
 
-  <div class="seclbl">{{ __('public.contexte_cameroun') }}</div>
-  <div class="g4" style="margin-bottom:20px;" data-stats-container>
-    <div class="kpi"><div class="kval">30 000+</div><div class="klbl">{{ __('public.ctx_etabs_30k') }}</div></div>
-    <div class="kpi"><div class="kval stat-counter" data-count="6000000">0</div><div class="klbl">{{ __('public.ctx_apprenants_6m') }}</div></div>
-    <div class="kpi"><div class="kval stat-counter" data-count="12000000">0</div><div class="klbl">{{ __('public.ctx_momo_12m') }}</div></div>
-    <div class="kpi"><div class="kval stat-counter" data-count="45" data-suffix="%">0%</div><div class="klbl">{{ __('public.ctx_smartphone_45') }}</div></div>
+  {{-- ══ CONTEXTE CAMEROUN v3 : KPI avec pastilles Material ══ --}}
+  <div class="lp-section">
+    <div class="lp-seclbl reveal-on-scroll">
+      <span class="material-symbols-rounded" aria-hidden="true">travel_explore</span>
+      {{ __('public.contexte_cameroun') }}
+    </div>
+    <div class="lp-feats" style="grid-template-columns:repeat(4,1fr);gap:14px;" data-reveal-stagger="60">
+      <div class="lp-kpi reveal-on-scroll" style="--lp-couleur:#0D9E75;--lp-couleur2:#085041;">
+        <div class="lp-kpi-ico"><span class="material-symbols-rounded">school</span></div>
+        <div>
+          <div class="lp-kpi-v">30 000+</div>
+          <div class="lp-kpi-l">{{ __('public.ctx_etabs_30k') }}</div>
+        </div>
+      </div>
+      <div class="lp-kpi reveal-on-scroll" style="--lp-couleur:#1F6FB2;--lp-couleur2:#123C66;">
+        <div class="lp-kpi-ico"><span class="material-symbols-rounded">groups</span></div>
+        <div>
+          <div class="lp-kpi-v stat-counter" data-count="6000000">0</div>
+          <div class="lp-kpi-l">{{ __('public.ctx_apprenants_6m') }}</div>
+        </div>
+      </div>
+      <div class="lp-kpi reveal-on-scroll" style="--lp-couleur:#E8A020;--lp-couleur2:#C9860E;">
+        <div class="lp-kpi-ico"><span class="material-symbols-rounded">smartphone</span></div>
+        <div>
+          <div class="lp-kpi-v stat-counter" data-count="12000000">0</div>
+          <div class="lp-kpi-l">{{ __('public.ctx_momo_12m') }}</div>
+        </div>
+      </div>
+      <div class="lp-kpi reveal-on-scroll" style="--lp-couleur:#7C3AED;--lp-couleur2:#4C1D95;">
+        <div class="lp-kpi-ico"><span class="material-symbols-rounded">phone_android</span></div>
+        <div>
+          <div class="lp-kpi-v stat-counter" data-count="45" data-suffix="%">0%</div>
+          <div class="lp-kpi-l">{{ __('public.ctx_smartphone_45') }}</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="seclbl">{{ __('public.edupay_chiffres') }}</div>
-  <div class="g4" style="margin-bottom:20px;" data-stats-container>
-    <div class="kpi" style="background:var(--ep-teal-lt);border:1px solid rgba(13,158,117,.15);">
-      <div class="kval stat-counter" style="color:var(--ep-teal);" data-count="{{ $stats['nb_etablissements'] }}">0</div>
-      <div class="klbl">{{ __('public.etabs_actifs') }}</div>
+  {{-- ══ EDUPAY EN CHIFFRES v3 ══ --}}
+  <div class="lp-section">
+    <div class="lp-seclbl reveal-on-scroll">
+      <span class="material-symbols-rounded" aria-hidden="true">query_stats</span>
+      {{ __('public.edupay_chiffres') }}
     </div>
-    <div class="kpi" style="background:var(--ep-blue-lt);border:1px solid rgba(24,95,165,.15);">
-      <div class="kval stat-counter" style="color:#185FA5;" data-count="{{ $stats['nb_apprenants'] }}">0</div>
-      <div class="klbl">{{ __('public.apprenants_inscrits') }}</div>
-    </div>
-    <div class="kpi" style="background:var(--ep-gold-lt);border:1px solid rgba(232,160,32,.15);">
-      <div class="kval stat-counter" style="color:#854F0B;" data-count="{{ $stats['nb_paiements'] }}">0</div>
-      <div class="klbl">{{ __('public.paiements_valides') }}</div>
-    </div>
-    <div class="kpi" style="background:#F3F4F6;border:1px solid #E5E7EB;">
-      <div class="kval stat-counter" style="color:#374151;" data-count="{{ $stats['montant_total'] }}" data-suffix=" FCFA">0 FCFA</div>
-      <div class="klbl">{{ __('public.fcfa_collectes') }}</div>
+    <div class="lp-feats" style="grid-template-columns:repeat(4,1fr);gap:14px;" data-reveal-stagger="60" data-stats-container>
+      <div class="lp-kpi reveal-on-scroll" style="--lp-couleur:#0D9E75;--lp-couleur2:#085041;">
+        <div class="lp-kpi-ico"><span class="material-symbols-rounded">apartment</span></div>
+        <div>
+          <div class="lp-kpi-v stat-counter" data-count="{{ $stats['nb_etablissements'] }}">0</div>
+          <div class="lp-kpi-l">{{ __('public.etabs_actifs') }}</div>
+        </div>
+      </div>
+      <div class="lp-kpi reveal-on-scroll" style="--lp-couleur:#1F6FB2;--lp-couleur2:#123C66;">
+        <div class="lp-kpi-ico"><span class="material-symbols-rounded">group</span></div>
+        <div>
+          <div class="lp-kpi-v stat-counter" data-count="{{ $stats['nb_apprenants'] }}">0</div>
+          <div class="lp-kpi-l">{{ __('public.apprenants_inscrits') }}</div>
+        </div>
+      </div>
+      <div class="lp-kpi reveal-on-scroll" style="--lp-couleur:#E8A020;--lp-couleur2:#C9860E;">
+        <div class="lp-kpi-ico"><span class="material-symbols-rounded">task_alt</span></div>
+        <div>
+          <div class="lp-kpi-v stat-counter" data-count="{{ $stats['nb_paiements'] }}">0</div>
+          <div class="lp-kpi-l">{{ __('public.paiements_valides') }}</div>
+        </div>
+      </div>
+      <div class="lp-kpi reveal-on-scroll" style="--lp-couleur:#7C3AED;--lp-couleur2:#4C1D95;">
+        <div class="lp-kpi-ico"><span class="material-symbols-rounded">payments</span></div>
+        <div>
+          <div class="lp-kpi-v stat-counter" data-count="{{ $stats['montant_total'] }}" data-suffix=" FCFA">0 FCFA</div>
+          <div class="lp-kpi-l">{{ __('public.fcfa_collectes') }}</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -325,18 +427,60 @@
       }
     });
   </script>
-</div>
+</div>{{-- /.ep-body2 --}}
+</div>{{-- /.lp : fin du wrapper de variables --}}
 
-</div>
-
-<div class="ep-footer">
-  <div class="footer-grid">
-    <div><div class="footer-logo" style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>EduPay Cameroun</div><div class="footer-desc">{{ __('public.footer_school_brief') }}</div><div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div></div>
-    <div><div class="footer-col-title">{{ __('public.footer_col_produit') }}</div><a class="footer-link" href="{{ route('landing') }}">{{ __('public.footer_accueil') }}</a><a class="footer-link" href="{{ route('temoignages') }}">{{ __('public.footer_temoignages') }}</a><a class="footer-link" href="{{ route('tarifs') }}">{{ __('public.footer_tarifs') }}</a></div>
-    <div><div class="footer-col-title">{{ __('public.footer_col_etablissements') }}</div><a class="footer-link" href="{{ route('register.ecole.step1') }}">{{ __('public.footer_inscription') }}</a><a class="footer-link" href="{{ route('support') }}">{{ __('public.footer_support') }}</a></div>
-    <div><div class="footer-col-title">{{ __('public.footer_col_legal') }}</div><a class="footer-link" href="{{ route('confidentialite') }}">{{ __('public.footer_confidentialite') }}</a><a class="footer-link" href="{{ route('cgu') }}">CGU</a></div>
+{{-- ══ FOOTER PRO v3 (identique à la landing) ══ --}}
+<footer class="ep-footer lp-footer">
+  <div class="lp-footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo" style="display:flex;align-items:center;gap:10px;">
+          <span style="width:46px;height:46px;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.2);">
+            <img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" />
+          </span>
+          <span>Edu<span style="color:#5DCAA5;">Pay</span></span>
+        </div>
+        <div class="footer-desc">{{ __('public.footer_school_brief') }}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+          <span class="footer-badge"><span class="material-symbols-rounded" style="font-size:13px;color:#5DCAA5;">lock</span>TLS 1.3</span>
+          <span class="footer-badge"><span class="material-symbols-rounded" style="font-size:13px;color:#5DCAA5;">verified_user</span>PCI-DSS</span>
+          <span class="footer-badge"><span class="material-symbols-rounded" style="font-size:13px;color:#5DCAA5;">account_balance</span>COBAC</span>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">{{ __('public.footer_col_produit') }}</div>
+        <a class="footer-link" href="{{ route('landing') }}">{{ __('public.footer_accueil') }}</a>
+        <a class="footer-link" href="{{ route('temoignages') }}">{{ __('public.footer_temoignages') }}</a>
+        <a class="footer-link" href="{{ route('tarifs') }}">{{ __('public.footer_tarifs') }}</a>
+        <a class="footer-link" href="{{ route('guide') }}">{{ __('public.footer_guide') }}</a>
+      </div>
+      <div>
+        <div class="footer-col-title">{{ __('public.footer_col_etablissements') }}</div>
+        <a class="footer-link" href="{{ route('register.ecole.step1') }}">{{ __('public.footer_inscription') }}</a>
+        <a class="footer-link" href="{{ route('support') }}">{{ __('public.footer_support') }}</a>
+      </div>
+      <div>
+        <div class="footer-col-title">{{ __('public.footer_col_contact') }}</div>
+        <a class="footer-link" href="mailto:{{ config('mail.contact_address', 'contact@edupay.cm') }}" style="text-transform:none;letter-spacing:0;">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">mail</span>
+          {{ config('mail.contact_address', 'contact@edupay.cm') }}
+        </a>
+        <a class="footer-link" href="{{ route('contact') }}">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">forum</span>
+          {{ __('public.footer_contact') }}
+        </a>
+        <a class="footer-link" href="{{ route('confidentialite') }}">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">policy</span>
+          {{ __('public.footer_confidentialite') }}
+        </a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-legal">{{ __('public.footer_legal_brief') }}</div>
+      @include('partials.footer-socials')
+    </div>
   </div>
-  <div class="footer-bottom"><div class="footer-legal">{{ __('public.footer_legal_brief') }}</div>@include('partials.footer-socials')</div>
-</div>
+</footer>
 
 @endsection

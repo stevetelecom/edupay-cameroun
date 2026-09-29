@@ -285,6 +285,10 @@ return [
     /* ── Footer pro v3 ── */
     'footer_col_contact'            => 'Contact',
     'footer_moyens_paiement'        => 'Moyens de paiement acceptés',
+    /* ── Pages secondaires v3 (À propos, Témoignages) ── */
+    'mission_lbl'                   => 'Notre raison d’être',
+    'mission_conclusion'            => 'EduPay Cameroun : la fintech scolaire pensée par des Camerounais, pour les Camerounais.',
+    'valeurs_sub'                   => 'Quatre principes guident chaque décision que nous prenons.',
     'informations_contact'          => 'Informations de contact',
     'inscription_gratuite_desc'     => 'Inscription gratuite · Onboarding en 24h · Support dédié · Aucun engagement',
     'inscription_gratuite_support'  => 'Inscription gratuite · Support dédié',

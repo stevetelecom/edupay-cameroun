@@ -1276,3 +1276,234 @@ html[data-theme="dark"] .lp-badge-momo { background: var(--ep-carte); color: var
     .lp-footer { padding: 36px 18px 20px; }
     .lp-footer-paiements-label { width: 100%; margin-bottom: 2px; }
 }
+
+/* ============================================================
+   9. HERO SECONDAIRE (À propos, Témoignages, …)
+   Version compacte du hero landing : orbes + trame, centré.
+   ============================================================ */
+.lp-hero-sec {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0B2545 0%, #103459 45%, #0A8562 100%);
+    color: #fff;
+    text-align: center;
+}
+.lp-hero-sec .lp-orb { z-index: 0; }
+.lp-hero-sec-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 52px 28px 44px;
+}
+/* Stats du hero secondaire : ligne de chiffres en glassmorphism */
+.lp-hero-sec-stats {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+.lp-hero-sec-stat {
+    min-width: 150px;
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 14px;
+    padding: 14px 18px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: background .25s ease, transform .25s ease;
+}
+.lp-hero-sec-stat:hover { background: rgba(255,255,255,.11); transform: translateY(-3px); }
+.lp-hero-sec-stat .lp-stat-v { font-size: 21px; }
+.lp-hero-sec-stat .lp-stat-l { font-size: 10.5px; }
+
+/* ============================================================
+   10. CARTES PAGES SECONDAIRES (valeurs, KPI, témoignages)
+   Réutilise le langage v3 : pastilles époxy Material, hover lift.
+   ============================================================ */
+/* Carte valeur (À propos) */
+.lp-valeur {
+    position: relative;
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: var(--lp-rayon);
+    padding: 18px;
+    box-shadow: var(--lp-ombre);
+    transition: transform .28s ease, box-shadow .28s ease;
+    overflow: hidden;
+}
+.lp-valeur::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--lp-couleur, var(--lp-teal));
+    opacity: .6;
+    transition: opacity .28s ease, width .28s ease;
+}
+.lp-valeur:hover { transform: translateY(-5px); box-shadow: var(--lp-ombre-hover); }
+.lp-valeur:hover::before { opacity: 1; width: 4px; }
+.lp-valeur-ico {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 11px;
+    background: linear-gradient(135deg, var(--lp-couleur, #0D9E75), var(--lp-couleur2, #0A8562));
+    box-shadow: 0 4px 12px rgba(11,37,69,.18);
+    transition: transform .3s ease;
+}
+.lp-valeur:hover .lp-valeur-ico { transform: scale(1.08) rotate(-5deg); }
+.lp-valeur-ico .material-symbols-rounded {
+    font-size: 21px;
+    color: #fff;
+    font-variation-settings: 'FILL' 1, 'wght' 500;
+}
+.lp-valeur b {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--lp-encre);
+    margin-bottom: 5px;
+}
+.lp-valeur small {
+    display: block;
+    font-size: 12px;
+    color: var(--lp-gris);
+    line-height: 1.65;
+}
+
+/* Carte KPI avec pastille (pages secondaires) : style admin.html */
+.lp-kpi {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: var(--lp-rayon);
+    padding: 16px;
+    box-shadow: var(--lp-ombre);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+.lp-kpi:hover { transform: translateY(-4px); box-shadow: var(--lp-ombre-hover); }
+.lp-kpi-ico {
+    width: 46px; height: 46px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, var(--lp-couleur, #0D9E75), var(--lp-couleur2, #0A8562));
+    box-shadow: 0 4px 12px rgba(11,37,69,.20);
+}
+.lp-kpi-ico .material-symbols-rounded {
+    font-size: 23px;
+    color: #fff;
+    font-variation-settings: 'FILL' 1, 'wght' 500;
+}
+.lp-kpi-v {
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--lp-encre);
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+.lp-kpi-l {
+    font-size: 11px;
+    color: var(--lp-gris);
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* Carte témoignage v3 */
+.lp-temoignage {
+    position: relative;
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: var(--lp-rayon);
+    padding: 22px;
+    box-shadow: var(--lp-ombre);
+    transition: transform .28s ease, box-shadow .28s ease;
+    overflow: hidden;
+}
+.lp-temoignage::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, var(--lp-couleur, #0D9E75), var(--lp-couleur2, #9FE1CB));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .3s ease;
+}
+.lp-temoignage:hover { transform: translateY(-5px); box-shadow: var(--lp-ombre-hover); }
+.lp-temoignage:hover::before { transform: scaleX(1); }
+.lp-temo-etoiles {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 10px;
+}
+.lp-temo-etoiles .material-symbols-rounded {
+    font-size: 17px;
+    color: var(--lp-gold);
+    font-variation-settings: 'FILL' 1, 'wght' 500;
+}
+.lp-temo-etoiles .material-symbols-rounded.etoile-vide {
+    color: var(--lp-bord);
+}
+.lp-temo-texte {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--lp-encre);
+    line-height: 1.75;
+    margin-bottom: 16px;
+}
+.lp-temo-auteur {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.lp-temo-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(135deg, var(--lp-couleur, #0D9E75), var(--lp-couleur2, #0A8562));
+    box-shadow: 0 4px 12px rgba(11,37,69,.18);
+}
+.lp-temo-nom {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--lp-encre);
+}
+.lp-temo-ecole {
+    font-size: 11px;
+    color: var(--lp-gris);
+    margin-top: 1px;
+}
+.lp-temo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-top: 5px;
+    background: var(--lp-teal-lt);
+    color: #085041;
+}
+
+/* Responsive des cartes secondaires */
+@media (max-width: 640px) {
+    .lp-hero-sec-inner { padding: 38px 18px 34px; }
+    .lp-hero-sec-stat { min-width: 0; flex: 1 1 40%; }
+}
