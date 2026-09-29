@@ -16,10 +16,13 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-5">
-  <div>
-    <h1 class="text-xl font-bold text-gray-900">{{ __('messages.logs_securite') }}</h1>
-    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.audit_complet') }}</p>
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="ep-ico navy ep-ico-entete"><span class="material-symbols-outlined">shield_lock</span></div>
+    <div>
+    <h3 style="margin:0;">{{ __('messages.logs_securite') }}</h3>
+    <p class="text-sm text-gray-500 mt-0.5 ep-sous-titre" style="margin-top:2px;">{{ __('admin.audit_complet') }}</p>
+    </div>
   </div>
   <a href="{{ route('admin.logs.index', array_merge(request()->query(), ['export'=>1])) }}"
      style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:13px;font-weight:500;color:#444;text-decoration:none;">
@@ -29,41 +32,34 @@
 </div>
 
 {{-- KPIs --}}
+{{-- KPIs : pastilles époxy Material Symbols (style dashboard) --}}
 <div class="grid grid-cols-4 gap-4 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-[#E0F5EE] rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico vert"><span class="material-symbols-outlined">shield</span></div>
     <div>
-      <div class="text-xl font-bold text-gray-900">{{ $stats['total_jour'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.evenements_aujourdhui') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['total_jour'] }}</div>
+      <div class="klbl">{{ __('admin.evenements_aujourdhui') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico rouge"><span class="material-symbols-outlined">report</span></div>
     <div>
-      <div class="text-xl font-bold text-red-700">{{ $stats['critiques'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.critiques_aujourdhui') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['critiques'] }}</div>
+      <div class="klbl">{{ __('admin.critiques_aujourdhui') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-yellow-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-yellow-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">warning</span></div>
     <div>
-      <div class="text-xl font-bold text-yellow-700">{{ $stats['warnings'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.warnings_aujourdhui') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['warnings'] }}</div>
+      <div class="klbl">{{ __('admin.warnings_aujourdhui') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico bleu"><span class="material-symbols-outlined">how_to_reg</span></div>
     <div>
-      <div class="text-xl font-bold text-blue-700">{{ $stats['connexions'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.connexions_aujourdhui') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['connexions'] }}</div>
+      <div class="klbl">{{ __('admin.connexions_aujourdhui') }}</div>
     </div>
   </div>
 </div>

@@ -1,0 +1,133 @@
+/* ============================================================
+   EDUPAY CAMEROUN — SIDEBARS v2 (style tableau de bord unifié)
+   Ce fichier est chargé APRÈS edupay-theme.css sur les 3 layouts.
+   Il rend les 3 sidebars identiques au tableau de bord (maquette
+   admin.html) : dégradé navy → teal, texte clair Poppins 13.5px,
+   hover translucide, item actif avec pastille dorée à gauche,
+   dégradé or sur les icônes de l'item actif.
+
+   Concerne :
+   - admin.blade.php          → .sidebar-link (+ SVG stroke)
+   - payeur.blade.php         → .sbar-item (+ SVG stroke)
+   - etablissement.blade.php  → .sbar-item (+ SVG stroke)
+
+   Notes de robustesse :
+   - Les SVG héritent automatiquement du dégradé via currentColor,
+     sans rien changer au HTML des vues.
+   - Les règles inline `style="margin-top:4px"` éventuelles sur les
+     liens (espacements legacy) restent supportées.
+   ============================================================ */
+
+/* ---------- Base commune aux deux familles de sélecteurs ---------- */
+.sidebar-link,
+.sbar-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    border-radius: 11px !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    letter-spacing: .01em;
+    color: #D4E4EF !important;
+    background: transparent !important;
+    text-decoration: none !important;
+    margin-bottom: 2px;
+    transition: background .2s ease, color .2s ease, padding-left .2s ease;
+    position: relative;
+}
+
+/* Icônes SVG : trait clair, légère transparence (primes sur la règle
+   générique #9FC4DB de edupay-theme.css grâce à l'ordre de chargement) */
+.sidebar-link svg,
+.sbar-item svg {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    stroke: currentColor !important;
+    opacity: .85;
+    transition: opacity .2s ease, stroke .2s ease, filter .2s ease;
+}
+
+/* ── Survol : translucide blanc (identique au dashboard) ── */
+.sidebar-link:hover:not(.active):not(.on):not(.disabled),
+.sbar-item:hover:not(.active):not(.on):not(.disabled) {
+    background: rgba(255,255,255,.10) !important;
+    color: #fff !important;
+    padding-left: 15px !important;
+}
+.sidebar-link:hover:not(.active):not(.on):not(.disabled) svg,
+.sbar-item:hover:not(.active):not(.on):not(.disabled) svg {
+    opacity: 1;
+}
+
+/* ── Item actif : translucide + accent latéral doré ── */
+.sidebar-link.active,
+.sidebar-link.on,
+.sbar-item.active,
+.sbar-item.on {
+    background: rgba(255,255,255,.16) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    box-shadow: inset 3px 0 0 var(--ep-gold, #E8A020) !important;
+}
+
+/* Icônes de l'item actif : dorées avec halo lumineux (dashboard) */
+.sidebar-link.active svg,
+.sidebar-link.on svg,
+.sbar-item.active svg,
+.sbar-item.on svg {
+    stroke: var(--ep-gold, #E8A020) !important;
+    opacity: 1;
+    filter: drop-shadow(0 0 4px rgba(232,160,32,.35));
+}
+
+/* ── Item désactivé (payeur : menus verrouillés) ── */
+.sbar-item.disabled {
+    color: rgba(212,228,239,.45) !important;
+    cursor: not-allowed !important;
+    opacity: .7;
+}
+.sbar-item.disabled:hover:not(.on) { background: transparent !important; padding-left: 12px !important; }
+
+/* ── Badge compteur éventuel dans un item ── */
+.sidebar-link .badge-cnt,
+.sbar-item .badge-cnt { margin-left: auto; }
+
+/* ============================================================
+   PASTILLES ICÔNES DE LA SIDEBAR (.ep-ico-side) — Super Admin
+   Version compacte des pastilles époxy du dashboard (.ep-ico) :
+   dégradé saturé + icône blanche FILL, exactement le même style
+   que les cartes KPI du tableau de bord.
+   ============================================================ */
+.ep-ico-side {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(0,0,0,.28);
+}
+.ep-ico-side .material-symbols-outlined {
+    font-size: 19px !important;
+    color: #fff !important;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+/* La pastille reste identique dans TOUS les états (la différence
+   visuelle se fait par le fond de l'item, pas par l'icône) */
+.sidebar-link:hover:not(.active):not(.on) .ep-ico-side,
+.sidebar-link.active .ep-ico-side { transform: none; box-shadow: 0 3px 8px rgba(0,0,0,.28); }
+
+/* ============================================================
+   MODE SOMBRE — repères doux (la sidebar garde son dégradé navy,
+   seuls les états actifs/hover gagnent en lisibilité)
+   ============================================================ */
+html[data-theme="dark"] .sidebar-link,
+html[data-theme="dark"] .sbar-item { color: #C4D6E4 !important; }
+html[data-theme="dark"] .sidebar-link.active,
+html[data-theme="dark"] .sidebar-link.on,
+html[data-theme="dark"] .sbar-item.active,
+html[data-theme="dark"] .sbar-item.on {
+    background: rgba(255,255,255,.10) !important;
+    box-shadow: inset 3px 0 0 var(--ep-gold, #E8A020) !important;
+}

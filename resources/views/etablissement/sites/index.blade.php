@@ -174,20 +174,25 @@
 @endif
 
 @if(session('success'))
-<div class="epcard" style="background:#d1fae5;border-left:4px solid #059669;color:#065f46;margin-bottom:16px;padding:12px 16px;">
-  <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">check_circle</span> {{ session('success') }}
+<div class="ep-bandeau succes" style="align-items:center;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">check_circle</span></div>
+  <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('success') }}</div></div>
 </div>
 @endif
 @if(session('error'))
-<div class="epcard" style="background:var(--ep-red-lt);border-left:4px solid var(--ep-red);color:#9B2C2C;margin-bottom:16px;padding:12px 16px;">
-  {{ session('error') }}
+<div class="ep-bandeau danger" style="align-items:center;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">error</span></div>
+  <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('error') }}</div></div>
 </div>
 @endif
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-  <div>
-    <div style="font-size:17px;font-weight:700;">{{ __('etablissement.gestion_groupe') }}</div>
-    <div style="font-size:12px;color:#888;">{{ __('etablissement.sites_rattaches', ['nom' => $sitePrincipal->nom]) }}</div>
+<div class="ep-entete" style="justify-content:space-between;margin-bottom:16px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="material-symbols-outlined">domain</span>
+    <div>
+      <h3>{{ __('etablissement.gestion_groupe') }}</h3>
+      <div class="ep-sous-titre" style="margin-top:2px;">{{ __('etablissement.sites_rattaches', ['nom' => $sitePrincipal->nom]) }}</div>
+    </div>
   </div>
   @if($estSitePrincipal && Auth::user()->hasRole('directeur'))
   <button class="btn-p" style="width:auto;"
@@ -197,19 +202,28 @@
   @endif
 </div>
 
-{{-- KPIs groupe --}}
+{{-- KPIs groupe — pastilles + compteurs animés --}}
 <div class="g3" style="margin-bottom:20px;">
-  <div class="kpi">
-    <div class="kval">{{ $kpisParSite->count() }}</div>
-    <div class="klbl">{{ __('etablissement.sites_groupe') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico bleu"><span class="material-symbols-outlined">domain</span></div>
+    <div>
+      <div class="kval" data-ep-count>{{ $kpisParSite->count() }}</div>
+      <div class="klbl">{{ __('etablissement.sites_groupe') }}</div>
+    </div>
   </div>
-  <div class="kpi">
-    <div class="kval">{{ number_format($totalGroupeApprenants,0,',',' ') }}</div>
-    <div class="klbl">{{ __('etablissement.apprenants_tous_sites') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico vert"><span class="material-symbols-outlined">school</span></div>
+    <div>
+      <div class="kval" data-ep-count>{{ number_format($totalGroupeApprenants,0,',',' ') }}</div>
+      <div class="klbl">{{ __('etablissement.apprenants_tous_sites') }}</div>
+    </div>
   </div>
-  <div class="kpi">
-    <div class="kval">{{ number_format($totalGroupeEncaisse,0,',',' ') }}</div>
-    <div class="klbl">{{ __('etablissement.fcfa_groupe') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">account_balance_wallet</span></div>
+    <div>
+      <div class="kval" data-ep-count>{{ number_format($totalGroupeEncaisse,0,',',' ') }}</div>
+      <div class="klbl">{{ __('etablissement.fcfa_groupe') }}</div>
+    </div>
   </div>
 </div>
 
@@ -298,9 +312,12 @@
   @endforeach
 </div>
 
-{{-- Note d'information --}}
-<div style="margin-top:14px;background:var(--ep-blue-lt);border-radius:var(--radius-md);padding:12px 16px;font-size:12px;color:#1A4F8A;border-left:3px solid #1A4F8A;">
-  {{ __('etablissement.cdc_note_e12') }}
+{{-- Note d'information — bandeau info cohérent avec les autres pages --}}
+<div class="ep-bandeau info" style="margin-top:14px;align-items:center;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">info</span></div>
+  <div class="ep-bandeau-corps">
+    <div class="ep-bandeau-texte">{{ __('etablissement.cdc_note_e12') }}</div>
+  </div>
 </div>
 
 @endsection
@@ -335,8 +352,8 @@ function voirSite(nom, type, statut, ville, quartier, tel, email, nbApp, encaiss
         + '<div><div class="lbl">' + EP_LANG.sites.emailLbl + '</div><div>' + email + '</div></div>'
         + '</div>'
         + '<div class="g2" style="gap:12px;">'
-        + '<div class="kpi"><div class="kval">' + Number(nbApp).toLocaleString('fr-FR') + '</div><div class="klbl">' + EP_LANG.sites.apprenantsLbl + '</div></div>'
-        + '<div class="kpi"><div class="kval" style="color:#085041;">' + Number(encaisse).toLocaleString('fr-FR') + '</div><div class="klbl">' + EP_LANG.sites.fcfaEncaisseLbl + '</div></div>'
+        + '<div class="kpi"><div class="kval" data-ep-count>' + Number(nbApp).toLocaleString('fr-FR') + '</div><div class="klbl">' + EP_LANG.sites.apprenantsLbl + '</div></div>'
+        + '<div class="kpi"><div class="kval" data-ep-count style="color:#085041;">' + Number(encaisse).toLocaleString('fr-FR') + '</div><div class="klbl">' + EP_LANG.sites.fcfaEncaisseLbl + '</div></div>'
         + '</div>';
 
     document.getElementById('detail-site-body').innerHTML = html;

@@ -21,100 +21,133 @@
     <div class="grid grid-cols-2 xl:grid-cols-6 gap-4 mb-6">
 
         {{-- Volume de transactions --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('admin.volume_mois') }}</span>
-                <div class="w-8 h-8 bg-[#E0F5EE] rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="1" x2="12" y2="23"/>
-                        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-                    </svg>
-                </div>
+        <div class="kpi ep-kpi">
+            <div class="ep-ico vert">
+                <span class="material-symbols-outlined">payments</span>
             </div>
-            <div class="text-2xl font-bold text-[#0D9E75]">
-                {{ number_format($volumeMois, 0, ',', ' ') }}
+            <div>
+                <div class="kval" data-ep-count>{{ number_format($volumeMois, 0, ',', ' ') }}</div>
+                <div class="klbl">{{ __('admin.volume_mois') }} · FCFA</div>
+                @if(!is_null($variationVolume ?? null))
+                    <span class="ep-var {{ $variationVolume >= 0 ? 'haut' : 'bas' }}">
+                        <span class="material-symbols-outlined">{{ $variationVolume >= 0 ? 'trending_up' : 'trending_down' }}</span>
+                        {{ $variationVolume >= 0 ? '+' : '' }}{{ number_format($variationVolume, 1, ',', ' ') }} % / {{ __('admin.mois_precedent') }}
+                    </span>
+                @endif
             </div>
-            <div class="text-xs text-gray-500 mt-1">{{ __('admin.fcfa_encaisse_dash') }}</div>
         </div>
 
         {{-- Commissions --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('messages.commissions') }}</span>
-                <div class="w-8 h-8 bg-[#FEF3DC] rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-[#E8A020]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                        <polyline points="17 6 23 6 23 12"/>
-                    </svg>
-                </div>
+        <div class="kpi ep-kpi">
+            <div class="ep-ico or">
+                <span class="material-symbols-outlined">trending_up</span>
             </div>
-            <div class="text-2xl font-bold text-[#E8A020]">
-                {{ number_format($commissionsMois, 0, ',', ' ') }}
+            <div>
+                <div class="kval" data-ep-count>{{ number_format($commissionsMois, 0, ',', ' ') }}</div>
+                <div class="klbl">{{ __('messages.commissions') }} · FCFA</div>
             </div>
-            <div class="text-xs text-gray-500 mt-1">{{ __('admin.fcfa_ce_mois') }}</div>
         </div>
 
         {{-- Établissements actifs --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('messages.etablissements') }}</span>
-                <div class="w-8 h-8 bg-[#E6F0FB] rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-[#185FA5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="7" width="20" height="15"/>
-                        <polyline points="16 2 12 7 8 2"/>
-                    </svg>
-                </div>
+        <div class="kpi ep-kpi">
+            <div class="ep-ico bleu">
+                <span class="material-symbols-outlined">apartment</span>
             </div>
-            <div class="text-2xl font-bold text-gray-900">{{ $etablissementsActifs }}</div>
-            <div class="text-xs text-gray-500 mt-1">{{ __('admin.actifs_sur_plateforme') }}</div>
+            <div>
+                <div class="kval" data-ep-count>{{ $etablissementsActifs }}</div>
+                <div class="klbl">{{ __('admin.actifs_sur_plateforme') }}</div>
+            </div>
         </div>
 
         {{-- Payeurs --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('admin.payeurs') }}</span>
-                <div class="w-8 h-8 bg-[#E0F5EE] rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                </div>
+        <div class="kpi ep-kpi">
+            <div class="ep-ico purple">
+                <span class="material-symbols-outlined">group</span>
             </div>
-            <div class="text-2xl font-bold text-gray-900">{{ number_format($payeursTotaux, 0, ',', ' ') }}</div>
-            <div class="text-xs text-gray-500 mt-1">{{ __('admin.payeurs_inscrits_plateforme') }}</div>
+            <div>
+                <div class="kval" data-ep-count>{{ number_format($payeursTotaux, 0, ',', ' ') }}</div>
+                <div class="klbl">{{ __('admin.payeurs_inscrits_plateforme') }}</div>
+            </div>
         </div>
 
         {{-- Transactions --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('messages.transactions') }}</span>
-                <div class="w-8 h-8 bg-[#FBEAEA] rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-[#D94040]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                        <line x1="1" y1="10" x2="23" y2="10"/>
-                    </svg>
-                </div>
+        <div class="kpi ep-kpi">
+            <div class="ep-ico navy">
+                <span class="material-symbols-outlined">credit_card</span>
             </div>
-            <div class="text-2xl font-bold text-gray-900">{{ number_format($transactionsMois, 0, ',', ' ') }}</div>
-            <div class="text-xs text-gray-500 mt-1">{{ __('admin.validees_ce_mois_dash') }}</div>
+            <div>
+                <div class="kval" data-ep-count>{{ number_format($transactionsMois, 0, ',', ' ') }}</div>
+                <div class="klbl">{{ __('admin.validees_ce_mois_dash') }}</div>
+            </div>
         </div>
 
         {{-- Réclamations --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ __('messages.reclamations') }}</span>
-                <div class="w-8 h-8 bg-[#FCEAEA] rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-[#C53030]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 9v4"/>
-                        <path d="M12 17h.01"/>
-                        <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
-                    </svg>
-                </div>
+        <div class="kpi ep-kpi">
+            <div class="ep-ico rouge">
+                <span class="material-symbols-outlined">support_agent</span>
             </div>
-            <div class="text-2xl font-bold text-[#D32F2F]">{{ number_format($reclamationsMois, 0, ',', ' ') }}</div>
-            <div class="text-xs text-gray-500 mt-1">{{ __('admin.crees_ce_mois') }}</div>
+            <div>
+                <div class="kval" data-ep-count>{{ number_format($reclamationsMois, 0, ',', ' ') }}</div>
+                <div class="klbl">{{ __('admin.crees_ce_mois') }}</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══ GRAPHIQUES — évolution mensuelle + répartition moyens (Chart.js) ══ --}}
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
+
+        {{-- Courbe : évolution mensuelle des encaissements --}}
+        <div class="bg-white rounded-xl p-5 xl:col-span-2 ep-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined" style="color:#E8A020;font-size:22px;">query_stats</span>
+                    <div>
+                        <h2 class="text-sm font-bold text-gray-900">{{ __('admin.evolution_mensuelle_taux') }}</h2>
+                        <p class="text-xs text-gray-500 mt-0.5">12 derniers mois</p>
+                    </div>
+                </div>
+                <span class="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full font-medium">
+                    <span class="material-symbols-outlined" style="font-size:14px;">trending_up</span>
+                    {{ __('admin.taux_global') }}
+                </span>
+            </div>
+            <div style="height:300px;">
+                <canvas id="chart-evolution"></canvas>
+            </div>
+        </div>
+
+        {{-- Donut : répartition par moyen de paiement --}}
+        <div class="bg-white rounded-xl p-5 ep-shadow">
+            <div class="ep-entete">
+                <span class="material-symbols-outlined">donut_large</span>
+                <h3>{{ __('admin.repartition_paiements') }}</h3>
+            </div>
+            <div style="height:260px;">
+                <canvas id="chart-moyens"></canvas>
+            </div>
+            <div class="mt-4 space-y-2">
+                @php
+                    $moyensLegende = [
+                        'mtn_momo'     => ['label' => 'MTN MoMo',      'couleur' => '#E8A020'],
+                        'orange_money' => ['label' => 'Orange Money',  'couleur' => '#FF6600'],
+                        'carte'        => ['label' => __('admin.carte_bancaire'), 'couleur' => '#1F6FB2'],
+                    ];
+                    $totalTxLegende = $repartitionMoyens->sum('total') ?: 1;
+                @endphp
+                @foreach ($moyensLegende as $key => $info)
+                    @php
+                        $rowL = $repartitionMoyens->get($key);
+                        $pctL = $rowL ? round(($rowL->total / $totalTxLegende) * 100, 1) : 0;
+                    @endphp
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:{{ $info['couleur'] }}"></span>
+                            <span class="text-gray-600 font-medium">{{ $info['label'] }}</span>
+                        </div>
+                        <span class="font-bold text-gray-800">{{ $pctL }}%</span>
+                    </div>
+                @endforeach
+            </div>
         </div>
     </div>
 
@@ -165,7 +198,10 @@
         {{-- Derniers établissements inscrits --}}
         <div class="bg-white border border-gray-200 rounded-xl p-5">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-sm font-bold text-gray-900">{{ __('admin.derniers_etablissements_inscrits') }}</h2>
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined" style="color:#E8A020;font-size:20px;">apartment</span>
+                    <h2 class="text-sm font-bold text-gray-900">{{ __('admin.derniers_etablissements_inscrits') }}</h2>
+                </div>
                 @if (Route::has('admin.etablissements.index'))
                 <a href="{{ route('admin.etablissements.index') }}"
                    class="text-xs text-[#0D9E75] hover:underline font-medium">
@@ -195,9 +231,12 @@
     {{-- ── Taux de recouvrement GLOBAL ── --}}
     <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
         <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-sm font-bold text-gray-900">{{ __('admin.taux_recouvrement_plateforme') }}</h2>
-                <p class="text-xs text-gray-500 mt-1">{{ __('admin.calcul_taux') }}</p>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined" style="color:#E8A020;font-size:22px;">donut_small</span>
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900">{{ __('admin.taux_recouvrement_plateforme') }}</h2>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('admin.calcul_taux') }}</p>
+                </div>
             </div>
             <div class="text-right">
                 <div class="text-4xl font-bold text-[#0D9E75]">{{ number_format($tauxRecouvrementGlobal, 2, ',', '') }}%</div>
@@ -216,7 +255,10 @@
 
         {{-- Taux par région --}}
         <div class="bg-white border border-gray-200 rounded-xl p-5">
-            <h2 class="text-sm font-bold text-gray-900 mb-4">{{ __('admin.taux_par_region') }}</h2>
+            <div class="ep-entete">
+                <span class="material-symbols-outlined">public</span>
+                <h3>{{ __('admin.taux_par_region') }}</h3>
+            </div>
             <div class="space-y-2.5 max-h-72 overflow-y-auto">
                 @forelse ($tauxParRegion as $region)
                     <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg">
@@ -237,7 +279,10 @@
 
         {{-- Top 10 établissements par taux de recouvrement --}}
         <div class="bg-white border border-gray-200 rounded-xl p-5">
-            <h2 class="text-sm font-bold text-gray-900 mb-4">{{ __('admin.top_etablissements_taux') }}</h2>
+            <div class="ep-entete">
+                <span class="material-symbols-outlined">emoji_events</span>
+                <h3>{{ __('admin.top_etablissements_taux') }}</h3>
+            </div>
             <div class="space-y-2.5 max-h-72 overflow-y-auto">
                 @forelse ($tauxParEtablissement as $index => $etab)
                     <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg">
@@ -264,55 +309,264 @@
         </div>
     </div>
 
-    {{-- ── Évolution mensuelle du taux de recouvrement ── --}}
-    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
-        <h2 class="text-sm font-bold text-gray-900 mb-4">{{ __('admin.evolution_mensuelle_taux') }}</h2>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b border-gray-200">
-                        <th class="text-left py-2 px-3 text-xs font-bold text-gray-600">{{ __('admin.mois_col') }}</th>
-                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">{{ __('admin.montant_paye_col') }}</th>
-                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">{{ __('admin.montant_total_col') }}</th>
-                        <th class="text-right py-2 px-3 text-xs font-bold text-gray-600">{{ __('admin.taux_col') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($evolutionMensuelle as $mois)
-                        <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="py-2.5 px-3 font-semibold text-gray-800">{{ $mois['mois'] }}</td>
-                            <td class="py-2.5 px-3 text-right text-gray-600">{{ number_format($mois['montant_paye'], 0, ',', ' ') }} FCFA</td>
-                            <td class="py-2.5 px-3 text-right text-gray-600">{{ number_format($mois['montant_total'], 0, ',', ' ') }} FCFA</td>
-                            <td class="py-2.5 px-3 text-right">
-                                <span class="font-bold" style="color:{{ $mois['taux'] >= 80 ? '#0D9E75' : ($mois['taux'] >= 50 ? '#E8A020' : '#D94040') }}">
-                                    {{ number_format($mois['taux'], 2, ',', '') }}%
-                                </span>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+    {{-- ── Évolution mensuelle du taux de recouvrement : barres + ligne (Chart.js) ── --}}
+    <div class="bg-white rounded-xl p-5 mb-5 ep-shadow">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined" style="color:#E8A020;font-size:22px;">bar_chart</span>
+                <div>
+                    <h2 class="text-sm font-bold text-gray-900">{{ __('admin.evolution_mensuelle_taux') }}</h2>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ __('admin.calcul_taux') }}</p>
+                </div>
+            </div>
+        </div>
+        <div style="height:320px;">
+            <canvas id="chart-evolution-detail"></canvas>
         </div>
     </div>
 
-    <div class="bg-[#FEF3DC] rounded-xl border-l-4 border-[#E8A020] px-5 py-4 flex items-center justify-between">
-        <div>
-            <div class="text-sm font-bold text-[#854F0B]">{{ __('admin.taux_commission_configurable') }}</div>
-            <div class="text-xs text-[#BA7517] mt-1">
-                <strong>{{ number_format($tauxCommission * 100, 1, ',', '') }}%</strong>
-                {{ __('messages.par_transaction') }} · {{ __('admin.profil_std_cobac') }}
+    {{-- Bandeau taux commission — composant ep-bandeau v2 --}}
+    <div class="ep-bandeau attente" style="align-items:center;">
+        <div class="ep-bandeau-ico">
+            <span class="material-symbols-outlined">percent</span>
+        </div>
+        <div class="ep-bandeau-corps">
+            <div class="ep-bandeau-titre">{{ __('admin.taux_commission_configurable') }}</div>
+            <div class="ep-bandeau-texte">
+                {{-- Taux réel (composer AdminSidebarComposer) + détail des 2 composantes --}}
+                <strong style="font-size:14px;color:#854F0B;">{{ number_format($tauxCommission * 100, 2, ',', '') }}%</strong>
+                {{ __('messages.par_transaction') }}
+                <span style="opacity:.8;">(AangaraaPay {{ number_format($tauxAangaraaPct, 2, ',', '') }}% + EduPay {{ number_format($margeEdupayPct, 2, ',', '') }}%)</span>
+                · {{ __('admin.profil_std_cobac') }}
             </div>
         </div>
         @if (Route::has('admin.commissions.index'))
         <a href="{{ route('admin.commissions.index') }}"
-           class="bg-[#854F0B] hover:bg-[#6B3E09] text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-            </svg>
+           class="btn-p" style="width:auto;display:inline-flex;align-items:center;gap:6px;padding:9px 18px;font-size:12.5px;flex-shrink:0;">
+            <span class="material-symbols-outlined" style="font-size:15px;">edit</span>
             {{ __('admin.modifier_taux') }}
         </a>
         @endif
-    </div>
+    </div>@endsection
 
-@endsection
+@push('scripts')
+{{-- Chart.js via CDN --}}
+<script src="{{ asset('js/chart.umd.min.js') }}"></script>
+<script>
+(function () {
+    'use strict';
+
+    // ── Construction (ou re-construction) de tous les graphiques.
+    //    La fonction est rappelée à chaque changement de thème clair/sombre
+    //    (événement « ep-themechange ») pour adapter grille, ticks et pointes. ──
+    function monterGraphiques() {
+
+        // Détruit les instances existantes avant re-création (bascule de thème)
+        ['chart-evolution', 'chart-moyens', 'chart-evolution-detail'].forEach(function (id) {
+            var c = document.getElementById(id);
+            if (c && window.Chart && Chart.getChart(c)) Chart.getChart(c).destroy();
+        });
+
+    // ── Données injectées depuis le contrôleur (JSON sécurisé) ──
+    const evolution = @json($evolutionMensuelle);
+    const repartition = @json($repartitionMoyens);
+
+    // ── Palette EduPay ──
+    const TEAL  = '#0D9E75';
+    const NAVY  = '#0B2545';
+    const GOLD  = '#E8A020';
+    const BLUE  = '#1F6FB2';
+    const RED   = '#FF6600';
+    const GRIS  = '#5A6472';
+
+    // Thème actuel : adapte les couleurs de lecture des graphiques
+    const sombre = document.documentElement.getAttribute('data-theme') === 'dark';
+
+    Chart.defaults.font.family = "'Poppins', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = sombre ? '#8CA0B8' : GRIS;
+
+    // ══ 1. Courbe : évolution mensuelle du taux (12 mois) ══
+    const ctxEvo = document.getElementById('chart-evolution');
+    if (ctxEvo) {
+        new Chart(ctxEvo, {
+            type: 'line',
+            data: {
+                labels: evolution.map(m => m.mois),
+                datasets: [{
+                    label: 'Taux de recouvrement (%)',
+                    data: evolution.map(m => m.taux),
+                    borderColor: TEAL,
+                    backgroundColor: 'rgba(13,158,117,.12)',
+                    fill: true,
+                    tension: .4,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: sombre ? '#0E1A2E' : '#fff',
+                    pointBorderColor: TEAL,
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: NAVY,
+                        padding: 12,
+                        cornerRadius: 10,
+                        titleFont: { weight: '700' },
+                        callbacks: {
+                            label: (ctx) => ' ' + ctx.parsed.y.toFixed(2) + ' %',
+                            afterLabel: (ctx) => {
+                                const m = evolution[ctx.dataIndex];
+                                return ' ' + (m.montant_paye || 0).toLocaleString('fr-FR') + ' / ' + (m.montant_total || 0).toLocaleString('fr-FR') + ' FCFA';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 45 } },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: sombre ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.05)' },
+                        ticks: { callback: (v) => v + '%' }
+                    }
+                }
+            }
+        });
+    }
+
+    // ══ 2. Donut : répartition par moyen de paiement ══
+    const ctxMoy = document.getElementById('chart-moyens');
+    if (ctxMoy) {
+        const moyensConfig = {
+            'mtn_momo':     { label: 'MTN MoMo',     couleur: GOLD },
+            'orange_money': { label: 'Orange Money', couleur: RED },
+            'carte':        { label: 'Carte bancaire', couleur: BLUE }
+        };
+        const labels = [], data = [], couleurs = [];
+        Object.keys(moyensConfig).forEach(k => {
+            const r = repartition[k];
+            if (r && r.total > 0) {
+                labels.push(moyensConfig[k].label);
+                data.push(r.total);
+                couleurs.push(moyensConfig[k].couleur);
+            }
+        });
+        // Cas où aucune transaction ce mois : donut vide propre
+        if (data.length === 0) {
+            labels.push('Aucune transaction');
+            data.push(1);
+            couleurs.push(sombre ? '#1C2C45' : '#E4E9EE');
+        }
+        new Chart(ctxMoy, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: couleurs,
+                    borderWidth: 3,
+                    borderColor: sombre ? '#0E1A2E' : '#fff',
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14 } },
+                    tooltip: {
+                        backgroundColor: NAVY,
+                        padding: 12,
+                        cornerRadius: 10,
+                        callbacks: {
+                            label: (ctx) => {
+                                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+                                return ' ' + ctx.label + ' : ' + pct + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // ══ 3. Barres + ligne : détail mensuel montants et taux ══
+    const ctxDet = document.getElementById('chart-evolution-detail');
+    if (ctxDet) {
+        new Chart(ctxDet, {
+            type: 'bar',
+            data: {
+                labels: evolution.map(m => m.mois),
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Montant payé (FCFA)',
+                        data: evolution.map(m => m.montant_paye),
+                        backgroundColor: sombre ? 'rgba(13,158,117,.85)' : 'rgba(13,158,117,.75)',
+                        borderRadius: 6,
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'line',
+                        label: 'Taux (%)',
+                        data: evolution.map(m => m.taux),
+                        borderColor: GOLD,
+                        backgroundColor: GOLD,
+                        borderWidth: 2.5,
+                        pointRadius: 3,
+                        tension: .35,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: { position: 'top', labels: { usePointStyle: true, padding: 16 } },
+                    tooltip: {
+                        backgroundColor: NAVY,
+                        padding: 12,
+                        cornerRadius: 10
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 45 } },
+                    y: {
+                        position: 'left',
+                        beginAtZero: true,
+                        grid: { color: sombre ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.05)' },
+                        ticks: { callback: (v) => (v >= 1000000 ? (v/1000000) + 'M' : (v >= 1000 ? (v/1000) + 'k' : v)) }
+                    },
+                    y1: {
+                        position: 'right',
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { drawOnChartArea: false },
+                        ticks: { callback: (v) => v + '%', color: GOLD }
+                    }
+                }
+            }
+        });
+    }
+
+    // Premier rendu, puis re-rendu en fondu à chaque bascule clair/sombre
+    monterGraphiques();
+    var epTimerTheme = null;
+    document.addEventListener('ep-themechange', function () {
+        clearTimeout(epTimerTheme);
+        epTimerTheme = setTimeout(monterGraphiques, 350);
+    });
+})();
+</script>
+@endpush

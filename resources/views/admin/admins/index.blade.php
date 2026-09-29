@@ -6,52 +6,51 @@
 
 @push('modals')
 
-{{-- ══ MODAL : Ajouter un admin ══ --}}
-<div id="modal-create-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
-     onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-lg mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b">
-      <h3 class="font-bold text-gray-900">{{ __('admin.ajouter_admin') }}</h3>
-      <button onclick="fermerModal('modal-create-admin')"
-              class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+{{-- ══ MODAL : Ajouter un admin — composant ep-modal (coins 16px, en-tête pastille époxy, Poppins) ══ --}}
+<div id="modal-create-admin" class="ep-modal-overlay"
+     onclick="if(event.target===this)epModal.close('modal-create-admin')">
+  <div class="ep-modal ep-modal-md">
+    <div class="ep-modal-head">
+      <div style="display:flex;align-items:center;gap:11px;min-width:0;">
+        <div class="ep-ico purple ep-ico-side"><span class="material-symbols-outlined">person_add</span></div>
+        <h3>{{ __('admin.ajouter_admin') }}</h3>
+      </div>
+      <button class="ep-modal-close" onclick="epModal.close('modal-create-admin')" aria-label="Fermer">×</button>
     </div>
     <form method="POST" action="{{ route('admin.admins.store') }}">
       @csrf
-      <div class="p-6 space-y-4">
+      <div class="ep-modal-body" style="padding:20px;">
 
+        {{-- Champs en .lbl/.inp : même style que les modals payeur/école --}}
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.prenom') }} *</label>
-            <input type="text" name="prenom" required
-                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"
+            <label class="lbl">{{ __('admin.prenom') }} *</label>
+            <input type="text" name="prenom" required class="inp"
                    placeholder="Wandji" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.nom') }} *</label>
-            <input type="text" name="nom" required
-                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"
+            <label class="lbl">{{ __('messages.nom') }} *</label>
+            <input type="text" name="nom" required class="inp"
                    placeholder="NGUELE" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.email') }} *</label>
-          <input type="email" name="email" required
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"
+          <label class="lbl">{{ __('admin.email') }} *</label>
+          <input type="email" name="email" required class="inp"
                  placeholder="wandji@edupay.cm" />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.telephone_2fa') }}</label>
-          <input type="text" class="tel-cm-input" data-allow-fixe="false" name="telephone" placeholder="6XXXXXXXX" required
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"
-                 placeholder="6XXXXXXXX" />
+          <label class="lbl">{{ __('admin.telephone_2fa') }}</label>
+          <input type="text" name="telephone" placeholder="6XXXXXXXX" required
+                 class="inp tel-cm-input"
+                 data-allow-fixe="false" />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.role_etoile') }}</label>
-          <select name="role" required
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75] bg-white">
+          <label class="lbl">{{ __('admin.role_etoile') }}</label>
+          <select name="role" required class="select">
             @foreach($rolesDisponibles as $valeur => $libelle)
               <option value="{{ $valeur }}">{{ $libelle }}</option>
             @endforeach
@@ -59,26 +58,25 @@
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.mdp_min10') }}</label>
-          <input type="password" name="password" required autocomplete="new-password"
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+          <label class="lbl">{{ __('admin.mdp_min10') }}</label>
+          <input type="password" name="password" required autocomplete="new-password" class="inp" />
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.confirmer_mdp') }}</label>
-          <input type="password" name="password_confirmation" required
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+          <label class="lbl">{{ __('admin.confirmer_mdp') }}</label>
+          <input type="password" name="password_confirmation" required class="inp" />
         </div>
 
       </div>
-      <div class="flex justify-end gap-3 px-6 py-4 border-t">
+      <div class="ep-modal-foot">
         <button type="button"
-                onclick="fermerModal('modal-create-admin')"
-                class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+                onclick="epModal.close('modal-create-admin')"
+                class="btn-o" style="width:auto;padding:8px 16px;">
           {{ __('messages.annuler') }}
         </button>
         <button type="submit"
-                class="px-5 py-2 text-sm bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold rounded-lg">
+                class="btn-p" style="width:auto;padding:9px 22px;display:inline-flex;align-items:center;gap:6px;">
+          <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>
           {{ __('admin.creer_le_compte') }}
         </button>
       </div>
@@ -236,8 +234,9 @@
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.telephone') }}</label>
-          <input type="text" class="tel-cm-input" data-allow-fixe="false" name="telephone" id="edit-telephone"
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+          <input type="text" name="telephone" id="edit-telephone"
+                 class="tel-cm-input w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"
+                 data-allow-fixe="false" />
         </div>
         <div>
           <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.role_etoile') }}</label>
@@ -272,10 +271,13 @@
 @endpush
 
     {{-- En-tête --}}
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-xl font-bold text-gray-900">{{ __('admin.equipe_supervision') }}</h1>
-        <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.total_admins_enregistres', ['count' => $totalAdmins]) }}</p>
+    <div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:22px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="ep-ico purple ep-ico-entete"><span class="material-symbols-outlined">manage_accounts</span></div>
+        <div>
+          <h3 style="margin:0;">{{ __('admin.equipe_supervision') }}</h3>
+          <p class="text-sm text-gray-500 mt-0.5 ep-sous-titre" style="margin-top:2px;">{{ __('admin.total_admins_enregistres', ['count' => $totalAdmins]) }}</p>
+        </div>
       </div>
       @if(Auth::guard('admin')->user()->hasRole('super-admin'))
         <button onclick="ouvrirModal('modal-create-admin')"
@@ -286,13 +288,15 @@
     </div>
 
     @if(session('success'))
-      <div class="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg mb-4">
-        {{ session('success') }}
+      <div class="ep-bandeau succes" style="align-items:center;margin-bottom:16px;">
+        <div class="ep-bandeau-ico"><span class="material-symbols-outlined">check_circle</span></div>
+        <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('success') }}</div></div>
       </div>
     @endif
     @if(session('error'))
-      <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg mb-4">
-        {{ session('error') }}
+      <div class="ep-bandeau danger" style="align-items:center;margin-bottom:16px;">
+        <div class="ep-bandeau-ico"><span class="material-symbols-outlined">error</span></div>
+        <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('error') }}</div></div>
       </div>
     @endif
 

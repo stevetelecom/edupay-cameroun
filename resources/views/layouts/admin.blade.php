@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full" data-theme="light">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,11 +7,31 @@
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', __('messages.super_admin')) — EduPay Cameroun</title>
 
+    {{-- Mode sombre EduPay : applique la préférence enregistrée AVANT le
+         premier rendu (anti-FOUC), sans aucune dépendance externe --}}
+    <script>(function(){try{var t=localStorage.getItem('ep-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+
     {{-- Tailwind CSS + config EduPay --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Material Symbols (icônes utilisées par les toasts et les actions du tableau) --}}
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0" />
+    {{-- Google Fonts : Poppins (identité visuelle EduPay v2) --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+
+    {{-- Material Symbols version VARIABLE (axes en plage) : indispensable
+         pour que les pastilles époxy (.ep-ico FILL 1) affichent les icônes
+         remplies, comme sur les autres espaces. --}}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    {{-- Thème global EduPay v2 : Poppins + Material Rounded + sidebars dégradées (chargé AVANT les styles inline) --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-theme.css') }}">
+    {{-- Thème dashboards v2.1 : pastilles icônes KPI, cases de sélection, animations --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-dashboards.css') }}">
+    {{-- Sidebar unifiée style tableau de bord (chargée après le thème) --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-sidebar.css') }}">
+    {{-- Harmonisation des titres/liens de retour des pages secondaires --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-pages.css') }}">
 
     {{-- DataTables CSS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
@@ -46,30 +66,57 @@
     </style>
   <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
   <link rel="apple-touch-icon" href="{{ asset('images/logo.jpeg') }}">
+  {{-- Compatibilité modals : façade epModal + helpers globaux (charger en premier) --}}
+  <script src="{{ asset('js/ep-modal-polyfill.js') }}" defer></script>
+  <script src="{{ asset('js/ep-bandeaux.js') }}" defer></script>
+  <script src="{{ asset('js/ep-compteurs.js') }}" defer></script>
+  {{-- Thème clair / sombre : initialisation + bascule fluide --}}
+  <script src="{{ asset('js/ep-theme.js') }}" defer></script>
 </head>
 <body class="h-full bg-gray-100 font-sans text-gray-900 antialiased">
 
     {{-- ── Header Super Admin ── --}}
     <header class="bg-[#0B2545] text-white px-6 py-3 flex items-center justify-between shadow-md">
-        <div>
-            <span class="text-lg font-bold tracking-tight text-white/70">
-                Edu<span class="text-[#5DCAA5]/70">Pay</span>
-            </span>
-            <span class="ml-2 text-sm font-semibold text-white/60">Cameroun</span>
-            <span class="ml-2 text-sm text-white/30">·</span>
-            <span class="ml-2 text-sm font-semibold text-white/50">{{ __('messages.super_admin') }}</span>
+        <div class="flex items-center gap-3 min-w-0">
+            {{-- Logo EduPay (pastille blanche style maquette admin.html) --}}
+            <img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun"
+                 class="w-10 h-10 rounded-full object-cover bg-white shrink-0"
+                 style="box-shadow:0 2px 10px rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.25);" />
+            <div class="flex items-baseline gap-2 flex-wrap min-w-0">
+                <span class="text-lg font-bold tracking-tight text-white/70">
+                    Edu<span class="text-[#5DCAA5]/70">Pay</span>
+                </span>
+                <span class="text-sm font-semibold text-white/60">Cameroun</span>
+                <span class="text-sm text-white/30">·</span>
+                <span class="text-sm font-semibold text-white/50">{{ __('messages.super_admin') }}</span>
+            </div>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="text-xs px-2.5 py-1 rounded-full bg-[#E8A020]/15 text-[#E8A020] border border-[#E8A020]/30 font-medium">
+        <div class="flex items-center gap-3">
+            <span class="text-xs px-2.5 py-1 rounded-full bg-[#E8A020]/15 text-[#E8A020] border border-[#E8A020]/30 font-medium hidden sm:inline-flex">
                 {{ __('messages.admin_systeme') }}
             </span>
-            <span class="text-sm text-white/70">
+            {{-- Bascule thème clair / sombre : soleil en clair, lune en sombre --}}
+            <button type="button" class="ep-theme-toggle" data-action="ep-theme-toggle"
+                    aria-label="{{ __('messages.theme_sombre') }}">
+                <span class="material-symbols-outlined ep-tt-soleil">light_mode</span>
+                <span class="material-symbols-outlined ep-tt-lune">dark_mode</span>
+            </button>
+            {{-- Langue : pastille globe + chevron, sans emojis --}}
+            <form method="POST" action="{{ route('locale.switch') }}" class="ep-lang">
+                @csrf
+                <span class="material-symbols-outlined">public</span>
+                <select name="locale" onchange="this.form.submit()" aria-label="Langue">
+                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
+                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
+                </select>
+            </form>
+            {{-- Nom + avatar à anneau --}}
+            <span class="text-sm text-white/70 hidden md:inline">
                 {{ Auth::guard('admin')->user()->nom_complet }}
             </span>
             <div class="relative">
-                <button onclick="toggleProfilAdmin()"
-                        class="w-9 h-9 rounded-full bg-[#D94040] flex items-center justify-center text-white text-sm font-bold hover:bg-red-700 transition-colors focus:outline-none">
-                    {{ Auth::guard('admin')->user()->initiales }}
+                <button onclick="toggleProfilAdmin()" class="ep-avatar-ring" aria-label="Mon profil">
+                    <span class="ep-avatar-core">{{ Auth::guard('admin')->user()->initiales }}</span>
                 </button>
 
                 {{-- Dropdown profil --}}
@@ -160,18 +207,12 @@
 
                 </div>
             </div>
-            <form method="POST" action="{{ route('locale.switch') }}" class="inline">
-                @csrf
-                <select name="locale" onchange="this.form.submit()" class="text-xs bg-white/10 hover:bg-white/20 border border-white/20 rounded-full px-3 py-1.5 text-white cursor-pointer">
-                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
-                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
-                </select>
-            </form>
+            {{-- Déconnexion : bouton rond iconique --}}
             <form method="POST" action="{{ route('admin.logout') }}" class="inline">
                 @csrf
-                <button type="submit"
-                    class="text-white/50 hover:text-white text-xs border border-white/20 hover:border-white/40 px-3 py-1.5 rounded-full transition-colors">
-                    {{ __('messages.deconnexion') }}
+                <button type="submit" title="{{ __('messages.deconnexion') }}"
+                    class="w-[38px] h-[38px] rounded-xl border border-white/20 bg-white/5 hover:bg-white/15 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff;">logout</span>
                 </button>
             </form>
         </div>
@@ -187,10 +228,7 @@
                 {{-- Vue globale --}}
                 <a href="{{ route('admin.dashboard') }}"
                    class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-                        <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-                    </svg>
+                    <span class="ep-ico navy ep-ico-side"><span class="material-symbols-outlined">public</span></span>
                     {{ __('messages.vue_globale') }}
                 </a>
 
@@ -198,9 +236,7 @@
                 @if (Route::has('admin.etablissements.index'))
                 <a href="{{ route('admin.etablissements.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.etablissements.*') ? 'active' : '' }}">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="7" width="20" height="15"/><polyline points="16 2 12 7 8 2"/>
-                    </svg>
+                    <span class="ep-ico vert ep-ico-side"><span class="material-symbols-outlined">apartment</span></span>
                     {{ __('messages.etablissements') }}
                 </a>
                 @endif
@@ -208,7 +244,7 @@
                 {{-- Comptes payeurs --}}
                 <a href="{{ route('admin.payeurs.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.payeurs.*') ? 'active' : '' }}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span class="ep-ico bleu ep-ico-side"><span class="material-symbols-outlined">family_restroom</span></span>
                     {{ __('messages.comptes_payeurs') }}
                 </a>
 
@@ -216,10 +252,7 @@
                 @if (Route::has('admin.transactions.index'))
                 <a href="{{ route('admin.transactions.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                        <line x1="1" y1="10" x2="23" y2="10"/>
-                    </svg>
+                    <span class="ep-ico vert ep-ico-side"><span class="material-symbols-outlined">credit_card</span></span>
                     {{ __('messages.transactions') }}
                 </a>
                 @endif
@@ -228,10 +261,7 @@
                 @if (Route::has('admin.commissions.index'))
                 <a href="{{ route('admin.commissions.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.commissions.*') ? 'active' : '' }}">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                        <polyline points="17 6 23 6 23 12"/>
-                    </svg>
+                    <span class="ep-ico or ep-ico-side"><span class="material-symbols-outlined">trending_up</span></span>
                     {{ __('messages.commissions') }}
                 </a>
                 @endif
@@ -241,7 +271,7 @@
                 @if (Route::has('admin.marge.index'))
                 <a href="{{ route('admin.marge.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.marge.*') ? 'active' : '' }}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span class="ep-ico or ep-ico-side"><span class="material-symbols-outlined">payments</span></span>
                     {{ __('admin.marge_eduplay') }}
                 </a>
                 @endif
@@ -250,9 +280,7 @@
                 @if (Route::has('admin.reclamations.index'))
                 <a href="{{ route('admin.reclamations.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.reclamations.*') ? 'active' : '' }}">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-                    </svg>
+                    <span class="ep-ico rouge ep-ico-side"><span class="material-symbols-outlined">forum</span></span>
                     {{ __('messages.reclamations') }}
                 </a>
                 @endif
@@ -261,9 +289,7 @@
                 @if (Route::has('admin.logs.index'))
                 <a href="{{ route('admin.logs.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    </svg>
+                    <span class="ep-ico navy ep-ico-side"><span class="material-symbols-outlined">shield_lock</span></span>
                     {{ __('messages.logs_securite') }}
                 </a>
                 @endif
@@ -272,9 +298,7 @@
                 @if (Route::has('admin.abonnements.index'))
                 <a href="{{ route('admin.abonnements.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.abonnements.*') ? 'active' : '' }}">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>
-                    </svg>
+                    <span class="ep-ico purple ep-ico-side"><span class="material-symbols-outlined">workspace_premium</span></span>
                     {{ __('messages.abonnements') }}
                 </a>
                 @endif
@@ -282,10 +306,7 @@
                 @if (Route::has('admin.exports.index'))
                 <a href="{{ route('admin.exports.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.exports.*') ? 'active' : '' }}">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                    </svg>
+                    <span class="ep-ico bleu ep-ico-side"><span class="material-symbols-outlined">description</span></span>
                     {{ __('messages.exports_reglementaires') }}
                 </a>
                 @endif
@@ -294,32 +315,36 @@
                 @if (Route::has('admin.parametres.index'))
                 <a href="{{ route('admin.parametres.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.parametres.*') ? 'active' : '' }}">
-                    <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
-                    </svg>
+                    <span class="ep-ico vert ep-ico-side"><span class="material-symbols-outlined">tune</span></span>
                     {{ __('messages.params_sys') }}
                 </a>
                 @endif
                 <a href="{{ route('admin.admins.index') }}"
                    class="sidebar-link {{ request()->routeIs('admin.admins.*') ? 'active' : '' }}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 010 7.75"/>
-                    </svg>
+                    <span class="ep-ico purple ep-ico-side"><span class="material-symbols-outlined">manage_accounts</span></span>
                     {{ __('messages.equipe_admin') }}
                 </a>
             </nav>
 
-            {{-- Widget commission active --}}
+            {{-- Widget commission active — taux RÉEL (taux_aangaraa + marge_edupay)
+                 injecté par AdminSidebarComposer + détail des 2 composantes --}}
             <div class="mt-5 bg-[#FEF3DC] rounded-lg p-3 border-l-2 border-[#E8A020]">
                 <div class="text-xs font-semibold text-[#8B5E10]">{{ __('messages.commission_active') }}</div>
                 <div class="text-2xl font-bold text-[#663E08] mt-1">
-                    {{ number_format(($tauxCommission ?? 0.025) * 100, 1, ',', '') }}%
+                    {{ number_format($tauxCommission * 100, 2, ',', '') }}%
                 </div>
                 <div class="text-xs text-[#8B5E10] mt-0.5">{{ __('messages.par_transaction') }}</div>
+                {{-- Détail des 2 composantes (coût prestataire + marge EduPay) --}}
+                <div class="mt-2 pt-2 border-t border-[#E8A020]/25 space-y-0.5">
+                    <div class="flex justify-between text-[10.5px] text-[#8B5E10]">
+                        <span>AangaraaPay</span>
+                        <span class="font-semibold">{{ number_format($tauxAangaraaPct, 2, ',', '') }}%</span>
+                    </div>
+                    <div class="flex justify-between text-[10.5px] text-[#8B5E10]">
+                        <span>EduPay</span>
+                        <span class="font-semibold">{{ number_format($margeEdupayPct, 2, ',', '') }}%</span>
+                    </div>
+                </div>
             </div>
         </aside>
 
@@ -488,7 +513,9 @@
             color: #085041;
             font-weight: 600;
         }
-        .sidebar-link.active svg { stroke: #0D9E75; }
+        .sidebar-link.active svg { stroke: var(--ep-gold, #E8A020); }
+        /* Thème v2 : les règles du fichier edupay-theme.css (chargé avant)
+           priment sur les couleurs legacy ci-dessus grâce à l'ordre + !important. */
 
         /* Responsive overrides for admin content pages */
         .admin-body main .grid.grid-cols-4 {
@@ -888,6 +915,8 @@
             if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
         }
     };
+    // Expose l'API pour les onclick inline des pages (polyfill réassigné)
+    window.epModal = epModal;
     // Fermer en cliquant sur l'overlay
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('ep-modal-overlay')) {

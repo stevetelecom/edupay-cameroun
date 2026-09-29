@@ -137,67 +137,58 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-5">
-  <div>
-    <h1 class="text-xl font-bold text-gray-900">{{ __('admin.comptes_payeurs') }}</h1>
-    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.parents_eleves_etudiants') }}</p>
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="ep-ico bleu ep-ico-entete"><span class="material-symbols-outlined">family_restroom</span></div>
+    <div>
+    <h3 style="margin:0;">{{ __('admin.comptes_payeurs') }}</h3>
+    <p class="text-sm text-gray-500 mt-0.5 ep-sous-titre" style="margin-top:2px;">{{ __('admin.parents_eleves_etudiants') }}</p>
+    </div>
   </div>
 </div>
 
-{{-- KPIs --}}
+{{-- KPIs : pastilles époxy Material Symbols (style dashboard) --}}
 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-[#E0F5EE] rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico navy"><span class="material-symbols-outlined">group</span></div>
     <div>
-      <div class="text-xl font-bold text-gray-900">{{ $stats['total'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.total') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['total'] }}</div>
+      <div class="klbl">{{ __('admin.total') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico vert"><span class="material-symbols-outlined">verified</span></div>
     <div>
-      <div class="text-xl font-bold text-green-700">{{ $stats['actifs'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.actifs') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['actifs'] }}</div>
+      <div class="klbl">{{ __('admin.actifs') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico rouge"><span class="material-symbols-outlined">block</span></div>
     <div>
-      <div class="text-xl font-bold text-red-700">{{ $stats['suspendus'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.suspendus') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['suspendus'] }}</div>
+      <div class="klbl">{{ __('admin.suspendus') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-[#FEF3DC] rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-[#854F0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">family_restroom</span></div>
     <div>
-      <div class="text-xl font-bold text-[#854F0B]">{{ $stats['parents'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.parents') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['parents'] }}</div>
+      <div class="klbl">{{ __('admin.parents') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-[#FEF3DC] rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-[#854F0B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21v-2a4 4 0 0 0-3-3.87"/><path d="M17 22v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="15" cy="6" r="3"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">backpack</span></div>
     <div>
-      <div class="text-xl font-bold text-[#854F0B]">{{ $stats['eleves'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.eleves') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['eleves'] }}</div>
+      <div class="klbl">{{ __('admin.eleves') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-[#E8F0FE] rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 9L12 4 2 9l10 5 10-5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v6"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico bleu"><span class="material-symbols-outlined">school</span></div>
     <div>
-      <div class="text-xl font-bold text-blue-700">{{ $stats['etudiants'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.etudiants') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['etudiants'] }}</div>
+      <div class="klbl">{{ __('admin.etudiants') }}</div>
     </div>
   </div>
 </div>

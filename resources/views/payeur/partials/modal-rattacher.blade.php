@@ -14,9 +14,10 @@
           {{ __('payeur.m_etape1_titre') }}
         </div>
 
-        {{-- Filtres --}}
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <div style="position:relative;flex:1;">
+        {{-- Filtres — flex-wrap : sur petit écran les champs passent à la
+             ligne au lieu d'écraser la barre de recherche principale --}}
+        <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <div style="position:relative;flex:1;min-width:180px;">
             <input type="text" id="m-etab-search"
                    placeholder="{{ __('payeur.m_nom_etablissement') }}…"
                    style="width:100%;padding:9px 12px 9px 34px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
@@ -26,12 +27,12 @@
           </div>
           <input type="text" id="m-etab-ville"
                  placeholder="{{ __('payeur.m_ville') }}…"
-                 style="width:130px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"
+                 style="width:130px;flex:1 1 110px;min-width:100px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
                  oninput="mFiltrerEtabs()"
                  onfocus="document.getElementById('m-etab-liste').style.display='block'" />
           <input type="text" id="m-etab-code"
                  placeholder="{{ __('payeur.m_code') }}…"
-                 style="width:110px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;"
+                 style="width:110px;flex:1 1 96px;min-width:90px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
                  oninput="mFiltrerEtabs()"
                  onfocus="document.getElementById('m-etab-liste').style.display='block'" />
           <button type="button" onclick="mFiltrerEtabs();document.getElementById('m-etab-liste').style.display='block';"

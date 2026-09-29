@@ -87,93 +87,94 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-5">
-  <div>
-    <h1 class="text-xl font-bold text-gray-900">{{ __('messages.commissions') }}</h1>
-    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.suivi_commission') }}</p>
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="ep-ico or ep-ico-entete"><span class="material-symbols-outlined">trending_up</span></div>
+    <div>
+    <h3 style="margin:0;">{{ __('messages.commissions') }}</h3>
+    <p class="text-sm text-gray-500 mt-0.5 ep-sous-titre" style="margin-top:2px;">{{ __('admin.suivi_commission') }}</p>
+    </div>
   </div>
 </div>
 
 {{-- KPIs --}}
 <div class="grid grid-cols-4 gap-4 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-[#FEF3DC] rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-[#E8A020]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">trending_up</span></div>
     <div>
-      <div class="text-xl font-bold text-[#E8A020]">{{ number_format($stats['total_mois'], 0, ',', ' ') }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.fcfa_ce_mois') }}</div>
+      <div class="kval" data-ep-count>{{ number_format($stats['total_mois'], 0, ',', ' ') }}</div>
+      <div class="klbl">{{ __('admin.fcfa_ce_mois') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico bleu"><span class="material-symbols-outlined">receipt_long</span></div>
     <div>
-      <div class="text-xl font-bold text-gray-900">{{ $stats['nb_mois'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.ce_mois') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['nb_mois'] }}</div>
+      <div class="klbl">{{ __('admin.ce_mois') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-yellow-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-yellow-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">pending_actions</span></div>
     <div>
-      <div class="text-xl font-bold text-yellow-700">{{ $stats['calculees'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.a_prelever') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['calculees'] }}</div>
+      <div class="klbl">{{ __('admin.a_prelever') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico vert"><span class="material-symbols-outlined">savings</span></div>
     <div>
-      <div class="text-xl font-bold text-green-700">{{ $stats['prelevees'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.prelevees') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['prelevees'] }}</div>
+      <div class="klbl">{{ __('admin.prelevees') }}</div>
     </div>
   </div>
   {{-- Argent bloque : reverse en echec OU dont le sort est inconnu. Ces
        reversements partent de la carte ci-dessus, pas du chiffre « à prélever »
        (qui ne compte que les 'calculee'), l'argent était donc invisible. --}}
-  <div class="border rounded-xl p-4 flex items-center gap-3 {{ $stats['a_traiter'] > 0 ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200' }}">
-    <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 {{ $stats['a_traiter'] > 0 ? 'bg-red-100' : 'bg-gray-50' }}">
-      <svg class="w-4 h-4 {{ $stats['a_traiter'] > 0 ? 'text-red-600' : 'text-gray-400' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    </div>
+  <div class="kpi ep-kpi" {{ $stats['a_traiter'] > 0 ? 'style=background:var(--ep-red-lt);border:1.5px solid rgba(217,64,64,.35)' : '' }}>
+    <div class="ep-ico {{ $stats['a_traiter'] > 0 ? 'rouge' : 'navy' }}"><span class="material-symbols-outlined">{{ $stats['a_traiter'] > 0 ? 'gpp_bad' : 'gpp_good' }}</span></div>
     <div>
-      <div class="text-xl font-bold {{ $stats['a_traiter'] > 0 ? 'text-red-700' : 'text-gray-400' }}">{{ $stats['a_traiter'] }}</div>
-      <div class="text-xs {{ $stats['a_traiter'] > 0 ? 'text-red-600' : 'text-gray-400' }}">
+      <div class="kval" data-ep-count style="{{ $stats['a_traiter'] > 0 ? 'color:#9B2C2C' : '' }}">{{ $stats['a_traiter'] }}</div>
+      <div class="klbl" style="{{ $stats['a_traiter'] > 0 ? 'color:#B03A2E' : '' }}">
         {{ __('admin.a_traiter') }} —
-        <span class="font-semibold">{{ number_format($stats['montant_bloque'], 0, ',', ' ') }} FCFA</span>
+        {{ number_format($stats['montant_bloque'], 0, ',', ' ') }} FCFA
       </div>
     </div>
   </div>
 </div>
 
 @if($stats['a_traiter'] > 0)
-<div style="background:#FEE2E2;border-left:4px solid #DC2626;border-radius:10px;padding:14px 20px;margin-bottom:20px;">
-  <div style="font-size:13px;font-weight:700;color:#991B1B;">{{ __('admin.a_traiter_titre') }}</div>
-  <div style="font-size:12px;color:#991B1B;margin-top:4px;line-height:1.6;">{!! __('admin.a_traiter_texte') !!}</div>
-  @if($stats['a_traiter'] > 0)
+<div class="ep-bandeau danger">
+  <div class="ep-bandeau-ico">
+    <span class="material-symbols-outlined">report</span>
+  </div>
+  <div class="ep-bandeau-corps">
+    <div class="ep-bandeau-titre">
+      {{ __('admin.a_traiter_titre') }}
+      <span class="ep-bandeau-badge">{{ $stats['a_traiter'] }}</span>
+    </div>
+    <div class="ep-bandeau-texte">{!! __('admin.a_traiter_texte') !!}</div>
     <a href="{{ route('admin.commissions.index', ['statut' => 'echec']) }}"
-       style="display:inline-block;margin-top:10px;font-size:12px;font-weight:700;color:#991B1B;text-decoration:underline;">
+       style="display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;font-weight:700;color:#991B1B;text-decoration:underline;">
       {{ __('admin.voir_echecs') }} →
     </a>
-  @endif
+  </div>
 </div>
 @endif
 
-{{-- Bandeau taux global --}}
-<div style="background:#FEF3DC;border-left:4px solid #E8A020;border-radius:10px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-  <div>
-    <div style="font-size:13px;font-weight:700;color:#854F0B;">{{ __('admin.taux_global_config') }}</div>
-    <div style="font-size:12px;color:#BA7517;margin-top:2px;">
-      <strong>{{ number_format($tauxActuel * 100, 1, ',', '') }}%</strong>
+{{-- Bandeau taux global — composant ep-bandeau v2 --}}
+<div class="ep-bandeau attente" style="align-items:center;">
+  <div class="ep-bandeau-ico">
+    <span class="material-symbols-outlined">percent</span>
+  </div>
+  <div class="ep-bandeau-corps">
+    <div class="ep-bandeau-titre">{{ __('admin.taux_global_config') }}</div>
+    <div class="ep-bandeau-texte">
+      <strong style="font-size:14px;color:#854F0B;">{{ number_format($tauxActuel * 100, 1, ',', '') }}%</strong>
       {{ __('admin.par_transaction_profil') }}
     </div>
   </div>
-  <button onclick="ouvrirModifierTauxGlobal()"
-          style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#854F0B;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+  <button onclick="ouvrirModifierTauxGlobal()" class="btn-p" style="width:auto;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:12px;flex-shrink:0;">
+    <span class="material-symbols-outlined" style="font-size:15px;">edit</span>
     {{ __('admin.modifier_taux') }}
   </button>
 </div>

@@ -105,7 +105,30 @@ class ApprenantController extends Controller
             ->orderBy('date_echeance')
             ->get();
 
-        return view('etablissement.apprenants.index', compact('apprenants', 'classes', 'categories', 'echeanciers'));
+        // ── Statistiques générales du bandeau KPI (données RÉELLES de la BDD) ──
+        // Base : apprenants ACTIFS de l'établissement (les soft-deleted et
+        // désactivés ne comptent pas dans les effectifs affichés).
+        $statsApprenants = [
+            // Total et sexes — comptage direct sur la table apprenants
+            'total'     => Apprenant::where('etablissement_id', $etablissementId)->where('actif', true)->count(),
+            'filles'    => Apprenant::where('etablissement_id', $etablissementId)->where('actif', true)->where('sexe', 'F')->count(),
+            'garcons'   => Apprenant::where('etablissement_id', $etablissementId)->where('actif', true)->where('sexe', 'M')->count(),
+            // Répartition par statut de paiement (année scolaire active)
+            'regles'    => Apprenant::where('etablissement_id', $etablissementId)->where('actif', true)
+                ->where('statut_paiement', 'regle')->count(),
+            'partiels'  => Apprenant::where('etablissement_id', $etablissementId)->where('actif', true)
+                ->where('statut_paiement', 'partiel')->count(),
+            'impayes'   => Apprenant::where('etablissement_id', $etablissementId)->where('actif', true)
+                ->where('statut_paiement', 'impaye')->count(),
+            // Rattachements : en attente de validation par l'établissement
+            'en_attente' => Apprenant::where('etablissement_id', $etablissementId)->where('actif', true)
+                ->where('source', 'payeur')->where('valide_par_etablissement', false)->count(),
+            // Nombre de classes distinctes (effectifs réels)
+            'nb_classes' => Apprenant::where('etablissement_id', $etablissementId)->where('actif', true)
+                ->distinct()->count('classe'),
+        ];
+
+        return view('etablissement.apprenants.index', compact('apprenants', 'classes', 'categories', 'echeanciers', 'statsApprenants'));
     }
 
     /**

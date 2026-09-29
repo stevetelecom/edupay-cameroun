@@ -1,15 +1,33 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full" data-theme="light">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', __('messages.mon_espace')) — EduPay Cameroun</title>
 
+    {{-- Mode sombre EduPay : applique la préférence enregistrée AVANT le
+         premier rendu (anti-FOUC), sans aucune dépendance externe --}}
+    <script>(function(){try{var t=localStorage.getItem('ep-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- Google Fonts : Poppins (identité visuelle EduPay v2) --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
 
     {{-- Material Symbols (icones utilisees dans les notifications) --}}
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    {{-- Thème global EduPay v2 : Poppins + Material Rounded + sidebars dégradées (chargé AVANT les styles inline) --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-theme.css') }}">
+    {{-- Thème dashboards v2.1 : pastilles icônes KPI, cases de sélection, animations --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-dashboards.css') }}">
+    {{-- Sidebar unifiée style tableau de bord (chargée après le thème) --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-sidebar.css') }}">
+    {{-- Harmonisation des titres/liens de retour des pages secondaires --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-pages.css') }}">
     <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -190,6 +208,12 @@
     @stack('styles')
   <link rel="stylesheet" href="{{ asset('css/buttons-enhanced.css') }}">
   <link rel="stylesheet" href="{{ asset('css/forms-enhanced.css') }}">
+  {{-- Compatibilité modals : façade epModal + helpers globaux (charger en premier) --}}
+  <script src="{{ asset('js/ep-modal-polyfill.js') }}" defer></script>
+  <script src="{{ asset('js/ep-bandeaux.js') }}" defer></script>
+  <script src="{{ asset('js/ep-compteurs.js') }}" defer></script>
+  {{-- Thème clair / sombre : initialisation + bascule fluide --}}
+  <script src="{{ asset('js/ep-theme.js') }}" defer></script>
   <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
   <link rel="apple-touch-icon" href="{{ asset('images/logo.jpeg') }}">
 </head>
@@ -208,16 +232,32 @@
           <span style="width:52px;height:52px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,.2);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>
           <span style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-.01em;">Edu<span style="color:#5DCAA5;">Pay</span></span>
         </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:12px;color:rgba(255,255,255,.65);">{{ $headerLabel }}</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:12px;color:rgba(255,255,255,.65);" class="ep-hide-sm">{{ $headerLabel }}</span>
+            {{-- Cloche notifications : ancre vers la zone notifications du dashboard --}}
+            <a href="{{ request()->routeIs('payeur.dashboard') ? '#ep-notifications' : route('payeur.dashboard') . '#ep-notifications' }}"
+               class="ep-bell" title="Notifications">
+                <span class="material-symbols-outlined">notifications</span>
+                @if(($nbNotifsPayeur ?? 0) > 0)<span class="ep-bell-badge">{{ $nbNotifsPayeur }}</span>@endif
+            </a>
+            {{-- Bascule thème clair / sombre --}}
+            <button type="button" class="ep-theme-toggle" data-action="ep-theme-toggle"
+                    aria-label="{{ __('messages.theme_sombre') }}">
+                <span class="material-symbols-outlined ep-tt-soleil">light_mode</span>
+                <span class="material-symbols-outlined ep-tt-lune">dark_mode</span>
+            </button>
+            {{-- Langue : pastille globe + chevron, sans emojis --}}
+            <form method="POST" action="{{ route('locale.switch') }}" class="ep-lang">
+                @csrf
+                <span class="material-symbols-outlined">public</span>
+                <select name="locale" onchange="this.form.submit()" aria-label="Langue">
+                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
+                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
+                </select>
+            </form>
             <div class="relative" style="position:relative;">
-                <button onclick="toggleProfilPayeur()"
-                        title="{{ __('messages.voir_profil') }}"
-                        style="width:36px;height:36px;border-radius:50%;background:var(--ep-teal);color:#fff;
-                               font-size:13px;font-weight:700;border:none;cursor:pointer;
-                               display:flex;align-items:center;justify-content:center;transition:opacity .15s;"
-                        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-                    {{ Auth::user()->initiales }}
+                <button onclick="toggleProfilPayeur()" class="ep-avatar-ring" aria-label="Mon profil">
+                    <span class="ep-avatar-core">{{ Auth::user()->initiales }}</span>
                 </button>
 
                 {{-- Dropdown profil payeur --}}
@@ -291,17 +331,12 @@
                     </div>
                 </div>
             </div>
-            <form method="POST" action="{{ route('locale.switch') }}" class="inline" style="display:inline-flex;align-items:center;">
-                @csrf
-                <select name="locale" onchange="this.form.submit()" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 10px;font-size:11px;font-weight:500;cursor:pointer;outline:none;">
-                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
-                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
-                </select>
-            </form>
+            {{-- Déconnexion : bouton rond iconique --}}
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
-                <button type="submit" style="background:transparent;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.2);padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer;">
-                    {{ __('messages.deconnexion') }}
+                <button type="submit" title="{{ __('messages.deconnexion') }}"
+                        style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .2s ease;">
+                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff;">logout</span>
                 </button>
             </form>
         </div>

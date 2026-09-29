@@ -55,8 +55,8 @@
     <form id="role-form" method="POST">
       @csrf @method('PUT')
       <div class="ep-modal-body">
-        <div style="font-size:13px;color:#555;margin-bottom:14px;">
-          {!! __('etablissement.utilisateur_label') !!}
+        <div style="font-size:13.5px;color:var(--ep-gris);margin-bottom:14px;font-family:'Poppins',sans-serif;">
+          {{ __('etablissement.utilisateur_label') }} : <strong id="role-user-nom" style="color:var(--ep-navy);"></strong>
         </div>
         <div class="lbl">{{ __('etablissement.nouveau_role') }}</div>
         <select class="select" name="role" id="role-select" required>
@@ -81,8 +81,9 @@
       <button class="ep-modal-close" onclick="epModal.close('modal-delete-user')">×</button>
     </div>
     <div class="ep-modal-body">
-      <p style="font-size:13px;color:#555;line-height:1.6;">
-        {!! __('etablissement.confirm_retirer_1') !!}
+      <p style="font-size:13.5px;color:var(--ep-gris);line-height:1.7;font-family:'Poppins',sans-serif;">
+        {{ __('etablissement.confirm_retirer_1') }}<br>
+        <strong id="delete-user-nom" style="color:var(--ep-navy);"></strong><br>
         {{ __('etablissement.confirm_retirer_2') }}
       </p>
     </div>
@@ -101,15 +102,19 @@
 @section('content')
 
 @if(session('success'))
-<div class="epcard" style="background:#d1fae5;border-left:4px solid #059669;color:#065f46;margin-bottom:16px;padding:12px 16px;">
-  <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">check_circle</span> {{ session('success') }}
+<div class="ep-bandeau succes" style="align-items:center;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">check_circle</span></div>
+  <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('success') }}</div></div>
 </div>
 @endif
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-  <div>
-    <div style="font-size:17px;font-weight:700;">{{ __('messages.utilisateurs_internes') }}</div>
-    <div style="font-size:12px;color:#888;">{{ __('etablissement.utilisateurs_motif') }}</div>
+<div class="ep-entete" style="justify-content:space-between;margin-bottom:16px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="material-symbols-outlined">badge</span>
+    <div>
+      <h3>{{ __('messages.utilisateurs_internes') }}</h3>
+      <div class="ep-sous-titre" style="margin-top:2px;">{{ __('etablissement.utilisateurs_motif') }}</div>
+    </div>
   </div>
   <button class="btn-p" style="width:auto;" onclick="epModal.open('modal-inviter')">
     {{ __('etablissement.inviter_btn') }}

@@ -280,23 +280,30 @@
 @section('content')
 
 @if(session('success'))
-<div class="epcard" style="background:#d1fae5;border-left:4px solid #059669;color:#065f46;margin-bottom:16px;padding:12px 16px;">
-  <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">check_circle</span> {{ session('success') }}
+<div class="ep-bandeau succes" style="align-items:center;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">check_circle</span></div>
+  <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('success') }}</div></div>
 </div>
 @endif
 @if(session('import_erreurs'))
-<div class="epcard" style="background:#fef3c7;border-left:4px solid #d97706;color:#92400e;margin-bottom:16px;padding:12px 16px;">
-  <strong>{{ __('etablissement.probleme_import') }}</strong>
-  <ul style="margin:8px 0 0;padding-left:18px;">
-    @foreach(session('import_erreurs') as $err)<li style="font-size:13px;">{{ $err }}</li>@endforeach
-  </ul>
+<div class="ep-bandeau attente">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">upload_problem</span></div>
+  <div class="ep-bandeau-corps">
+    <div class="ep-bandeau-titre">{{ __('etablissement.probleme_import') }}</div>
+    <ul class="ep-bandeau-texte" style="margin:6px 0 0;padding-left:18px;">
+      @foreach(session('import_erreurs') as $err)<li style="font-size:12.5px;">{{ $err }}</li>@endforeach
+    </ul>
+  </div>
 </div>
 @endif
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-  <div>
-    <div style="font-size:17px;font-weight:700;">{{ __('etablissement.apprenants') }}</div>
-    <div style="font-size:12px;color:#888;">{{ __('etablissement.nb_eleves_enregistres', ['count' => $apprenants->total() ?? $apprenants->count()]) }}</div>
+<div class="ep-entete" style="justify-content:space-between;margin-bottom:16px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="material-symbols-outlined">school</span>
+    <div>
+      <h3>{{ __('etablissement.apprenants') }}</h3>
+      <div class="ep-sous-titre" style="margin-top:2px;">{{ __('etablissement.nb_eleves_enregistres', ['count' => $apprenants->total() ?? $apprenants->count()]) }}</div>
+    </div>
   </div>
   <div style="display:flex;gap:8px;">
     <button class="btn-o" style="width:auto;padding:8px 16px;font-size:13px;"
@@ -308,6 +315,76 @@
       {{ __('etablissement.ajouter_apprenant_btn') }}
     </button>
   </div>
+</div>
+
+{{-- ── Bandeau statistiques générales — données RÉELLES de la base ──
+     Même style que les KPI du tableau de bord : pastilles époxy
+     Material Symbols + compteurs animés + variations. --}}
+<div class="g4" style="margin-bottom:16px;">
+    <div class="kpi ep-kpi">
+        <div class="ep-ico navy"><span class="material-symbols-outlined">groups</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ $statsApprenants['total'] ?? 0 }}</div>
+            <div class="klbl">{{ __('etablissement.apprenants') }}</div>
+        </div>
+    </div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico rouge"><span class="material-symbols-outlined">girl</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ $statsApprenants['filles'] ?? 0 }}</div>
+            <div class="klbl">{{ __('etablissement.kpi_filles') }}</div>
+        </div>
+    </div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico bleu"><span class="material-symbols-outlined">boy</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ $statsApprenants['garcons'] ?? 0 }}</div>
+            <div class="klbl">{{ __('etablissement.kpi_garcons') }}</div>
+        </div>
+    </div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico or"><span class="material-symbols-outlined">school</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ $statsApprenants['nb_classes'] ?? 0 }}</div>
+            <div class="klbl">{{ __('etablissement.kpi_classes') }}</div>
+        </div>
+    </div>
+</div>
+
+{{-- Statuts de paiement : deuxième rangée, pastilles d'état --}}
+<div class="g4" style="margin-bottom:18px;">
+    <div class="kpi ep-kpi">
+        <div class="ep-ico vert"><span class="material-symbols-outlined">task_alt</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ $statsApprenants['regles'] ?? 0 }}</div>
+            <div class="klbl">{{ __('etablissement.regle') }}</div>
+            <div class="ep-var {{ ($statsApprenants['total'] ?? 0) > 0 && ($statsApprenants['regles'] ?? 0) / max($statsApprenants['total'], 1) >= 0.5 ? 'haut' : '' }}">
+                <span class="material-symbols-outlined">{{ ($statsApprenants['total'] ?? 0) > 0 && ($statsApprenants['regles'] ?? 0) / max($statsApprenants['total'], 1) >= 0.5 ? 'trending_up' : 'trending_flat' }}</span>
+                {{ $statsApprenants['total'] ?? 0 }}% {{ __('etablissement.kpi_du_total') }}
+            </div>
+        </div>
+    </div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico or"><span class="material-symbols-outlined">pending_actions</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ $statsApprenants['partiels'] ?? 0 }}</div>
+            <div class="klbl">{{ __('etablissement.partiel') }}</div>
+        </div>
+    </div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico rouge"><span class="material-symbols-outlined">error</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ $statsApprenants['impayes'] ?? 0 }}</div>
+            <div class="klbl">{{ __('etablissement.impaye') }}</div>
+        </div>
+    </div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico purple"><span class="material-symbols-outlined">hourglass_top</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ $statsApprenants['en_attente'] ?? 0 }}</div>
+            <div class="klbl">{{ __('etablissement.kpi_en_attente_validation') }}</div>
+        </div>
+    </div>
 </div>
 
 {{-- Filtres --}}

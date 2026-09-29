@@ -242,17 +242,26 @@
 @section('content')
 
 @if(session('success'))
-<div class="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg mb-4">{{ session('success') }}</div>
+<div class="ep-bandeau succes" style="align-items:center;margin-bottom:16px;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">check_circle</span></div>
+  <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('success') }}</div></div>
+</div>
 @endif
 @if(session('error'))
-<div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg mb-4">{{ session('error') }}</div>
+<div class="ep-bandeau danger" style="align-items:center;margin-bottom:16px;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">error</span></div>
+  <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('error') }}</div></div>
+</div>
 @endif
 
 {{-- En-tête --}}
-<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-  <div>
-    <h1 class="text-xl font-bold text-gray-900">{{ __('admin.gestion_abonnements') }}</h1>
-    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.suivi_abonnements') }}</p>
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:22px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="ep-ico purple ep-ico-entete"><span class="material-symbols-outlined">workspace_premium</span></div>
+    <div>
+      <h3 style="margin:0;">{{ __('admin.gestion_abonnements') }}</h3>
+      <p class="text-sm text-gray-500 mt-0.5 ep-sous-titre" style="margin-top:2px;">{{ __('admin.suivi_abonnements') }}</p>
+    </div>
   </div>
   <button onclick="ouvrirModal('modal-new-abo')"
           class="px-4 py-2 text-sm bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold rounded-lg">
@@ -262,25 +271,40 @@
 
 {{-- KPIs --}}
 <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="text-2xl font-bold text-[#0D9E75]" id="kpi-actifs">{{ $stats['actifs'] }}</div>
-    <div class="text-xs text-gray-500 mt-1">{{ __('admin.abonnements_actifs') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico vert"><span class="material-symbols-outlined">workspace_premium</span></div>
+    <div>
+      <div class="kval" id="kpi-actifs" data-ep-count>{{ $stats['actifs'] }}</div>
+      <div class="klbl">{{ __('admin.abonnements_actifs') }}</div>
+    </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="text-2xl font-bold text-[#E8A020]" id="kpi-grace">{{ $stats['grace_period'] }}</div>
-    <div class="text-xs text-gray-500 mt-1">{{ __('admin.en_grace_period') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">hourglass_bottom</span></div>
+    <div>
+      <div class="kval" id="kpi-grace" data-ep-count>{{ $stats['grace_period'] }}</div>
+      <div class="klbl">{{ __('admin.en_grace_period') }}</div>
+    </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="text-2xl font-bold text-red-500" id="kpi-expires">{{ $stats['expires'] }}</div>
-    <div class="text-xs text-gray-500 mt-1">{{ __('admin.expires') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico rouge"><span class="material-symbols-outlined">event_busy</span></div>
+    <div>
+      <div class="kval" id="kpi-expires" data-ep-count>{{ $stats['expires'] }}</div>
+      <div class="klbl">{{ __('admin.expires') }}</div>
+    </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="text-2xl font-bold text-[#0B2545]" id="kpi-revenus">{{ number_format($stats['revenus_mois'],0,',',' ') }}</div>
-    <div class="text-xs text-gray-500 mt-1">{{ __('admin.fcfa_encaisse_mois') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico navy"><span class="material-symbols-outlined">savings</span></div>
+    <div>
+      <div class="kval" id="kpi-revenus">{{ number_format($stats['revenus_mois'],0,',',' ') }}</div>
+      <div class="klbl">{{ __('admin.fcfa_encaisse_mois') }}</div>
+    </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4">
-    <div class="text-2xl font-bold text-[#B45309]" id="kpi-a-renouveler">{{ $stats['a_renouveler'] }}</div>
-    <div class="text-xs text-gray-500 mt-1">{{ __('admin.a_renouveler') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">autorenew</span></div>
+    <div>
+      <div class="kval" id="kpi-a-renouveler" data-ep-count>{{ $stats['a_renouveler'] }}</div>
+      <div class="klbl">{{ __('admin.a_renouveler') }}</div>
+    </div>
   </div>
 </div>
 

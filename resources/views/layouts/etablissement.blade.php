@@ -1,13 +1,31 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full" data-theme="light">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
     <title>@yield('title', __('messages.tableau_de_bord')) — EduPay Cameroun</title>
 
+    {{-- Mode sombre EduPay : applique la préférence enregistrée AVANT le
+         premier rendu (anti-FOUC), sans aucune dépendance externe --}}
+    <script>(function(){try{var t=localStorage.getItem('ep-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- Google Fonts : Poppins (identité visuelle EduPay v2) --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+    {{-- Thème global EduPay v2 : Poppins + Material Rounded + sidebars dégradées (chargé AVANT les styles inline) --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-theme.css') }}">
+    {{-- Thème dashboards v2.1 : pastilles icônes KPI, cases de sélection, animations --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-dashboards.css') }}">
+    {{-- Sidebar unifiée style tableau de bord (chargée après le thème) --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-sidebar.css') }}">
+    {{-- Harmonisation des titres/liens de retour des pages secondaires --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-pages.css') }}">
 
     {{-- DataTables CSS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>
@@ -207,6 +225,12 @@
     @stack('styles')
   <link rel="stylesheet" href="{{ asset('css/buttons-enhanced.css') }}">
   <link rel="stylesheet" href="{{ asset('css/forms-enhanced.css') }}">
+  {{-- Compatibilité modals : façade epModal + helpers globaux (charger en premier) --}}
+  <script src="{{ asset('js/ep-modal-polyfill.js') }}" defer></script>
+  <script src="{{ asset('js/ep-bandeaux.js') }}" defer></script>
+  <script src="{{ asset('js/ep-compteurs.js') }}" defer></script>
+  {{-- Thème clair / sombre : initialisation + bascule fluide --}}
+  <script src="{{ asset('js/ep-theme.js') }}" defer></script>
   <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
   <link rel="apple-touch-icon" href="{{ asset('images/logo.jpeg') }}">
 </head>
@@ -233,10 +257,25 @@
             </div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:12px;color:rgba(255,255,255,.65);">
+            <span style="font-size:12px;color:rgba(255,255,255,.65);" class="ep-hide-sm">
                 {{ Auth::user()->prenom ?? '' }} {{ Auth::user()->nom ?? Auth::user()->name }}
                 @if(Auth::user()->roles->first()) ({{ ucfirst(Auth::user()->roles->first()->name) }})@endif
             </span>
+            {{-- Bascule thème clair / sombre --}}
+            <button type="button" class="ep-theme-toggle" data-action="ep-theme-toggle"
+                    aria-label="{{ __('messages.theme_sombre') }}">
+                <span class="material-symbols-outlined ep-tt-soleil">light_mode</span>
+                <span class="material-symbols-outlined ep-tt-lune">dark_mode</span>
+            </button>
+            {{-- Langue : pastille globe + chevron, sans emojis --}}
+            <form method="POST" action="{{ route('locale.switch') }}" class="ep-lang">
+                @csrf
+                <span class="material-symbols-outlined">public</span>
+                <select name="locale" onchange="this.form.submit()" aria-label="Langue">
+                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
+                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
+                </select>
+            </form>
             <div style="position:relative;">
                 <button onclick="toggleProfilEtab()"
                         title="{{ __('messages.voir_profil') }}"
@@ -329,17 +368,12 @@
                     </div>
                 </div>
             </div>
-            <form method="POST" action="{{ route('locale.switch') }}" style="display:inline-flex;align-items:center;">
-                @csrf
-                <select name="locale" onchange="this.form.submit()" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 10px;font-size:11px;font-weight:500;cursor:pointer;outline:none;">
-                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
-                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
-                </select>
-            </form>
+            {{-- Déconnexion : bouton rond iconique --}}
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" style="background:transparent;color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.2);padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer;">
-                    {{ __('messages.deconnexion') }}
+                <button type="submit" title="{{ __('messages.deconnexion') }}"
+                        style="width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .2s ease;">
+                    <span class="material-symbols-outlined" style="font-size:18px;color:#fff;">logout</span>
                 </button>
             </form>
         </div>
@@ -477,6 +511,8 @@
             document.body.style.overflow = '';
         }
     };
+    // Expose l'API pour les onclick inline des pages (polyfill réassigné)
+    window.epModal = epModal;
 
     // Boutons [data-modal-open] et [data-modal-close] déclaratifs
     document.addEventListener('DOMContentLoaded', function(){

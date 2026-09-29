@@ -15,6 +15,8 @@
     .kpis td { text-align:center; }
     .kpis .val { font-size:16px; font-weight:bold; display:block; }
     .section-title { font-size:13px; font-weight:bold; color:#0B2545; margin: 10px 0 6px; }
+    .section-hint { font-size:10px; color:#666; margin: 0 0 8px; }
+    .graphique { text-align:center; margin: 6px 0 14px; }
     .footer { font-size:9px; color:#888; text-align:center; margin-top: 30px; }
 </style>
 </head>
@@ -35,6 +37,30 @@
             </tr>
         </table>
 
+        {{-- ── Venn : répartition des paiements par moyen ── --}}
+        <div class="section-title">{{ __('etablissement.pdf_venn_titre') }}</div>
+        <div class="section-hint">{{ __('etablissement.pdf_venn_intro') }}</div>
+        <div class="graphique">{!! $svgVenn !!}</div>
+
+        {{-- Tableau de détail sous le Venn : exclusifs + multi-moyens --}}
+        <table>
+            <tr><th>{{ __('payeur.hist_moyen') }}</th><th>{{ __('etablissement.pdf_venn_col_apprenants') }}</th></tr>
+            @forelse($repartitionMoyens as $m)
+                <tr>
+                    <td>{{ match($m['mode']) { 'mtn_momo' => __('etablissement.mt_mtn'), 'orange_money' => __('etablissement.mt_orange'), 'carte' => __('etablissement.carte'), default => $m['mode'] } }}</td>
+                    <td>{{ $venn[$m['mode']] ?? 0 }} {{ __('etablissement.pdf_venn_col_apprenants')|lower }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="2">{{ __('admin.pdf_aucune_donnee') }}</td></tr>
+            @endforelse
+            @if(($nbApprenantsMultiMoyens ?? 0) > 0)
+                <tr>
+                    <td><strong>{{ __('etablissement.pdf_venn_ligne_multi') }}</strong></td>
+                    <td><strong>{{ $nbApprenantsMultiMoyens }}</strong></td>
+                </tr>
+            @endif
+        </table>
+
         <div class="section-title">{{ __('etablissement.pdf_section_moyen_paiement') }}</div>
         <table>
             <tr><th>{{ __('payeur.hist_moyen') }}</th><th>{{ __('etablissement.pdf_col_pourcentage') }}</th></tr>
@@ -48,13 +74,22 @@
             @endforelse
         </table>
 
+        {{-- ── Histogramme : recouvrement par classe ── --}}
         <div class="section-title">{{ __('etablissement.recouvrement_classe') }}</div>
+        <div class="graphique">{!! $svgClasses !!}</div>
+
         <table>
-            <tr><th>{{ __('etablissement.classe') }}</th><th>{{ __('etablissement.apprenants') }}</th><th>{{ __('etablissement.taux_recouvrement') }}</th></tr>
+            <tr><th>{{ __('etablissement.classe') }}</th><th>{{ __('etablissement.apprenants') }}</th><th>{{ __('etablissement.pdf_legende_attendu') }}</th><th>{{ __('etablissement.pdf_legende_encaisse') }}</th><th>{{ __('etablissement.taux_recouvrement') }}</th></tr>
             @forelse($repartitionClasses as $c)
-                <tr><td>{{ $c['nom'] }}</td><td>{{ $c['nb_apprenants'] }}</td><td>{{ $c['taux'] }}%</td></tr>
+                <tr>
+                    <td>{{ $c['nom'] }}</td>
+                    <td>{{ $c['nb_apprenants'] }}</td>
+                    <td>{{ number_format($c['attendu'] ?? 0, 0, ',', ' ') }}</td>
+                    <td>{{ number_format($c['paye'] ?? 0, 0, ',', ' ') }}</td>
+                    <td>{{ $c['taux'] }}%</td>
+                </tr>
             @empty
-                <tr><td colspan="3">{{ __('admin.pdf_aucune_donnee') }}</td></tr>
+                <tr><td colspan="5">{{ __('admin.pdf_aucune_donnee') }}</td></tr>
             @endforelse
         </table>
 

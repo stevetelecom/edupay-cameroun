@@ -43,19 +43,28 @@
         @endif
     </form>
 
-    {{-- ── KPIs rapides ── --}}
+    {{-- ── KPIs rapides — pastilles + compteurs animés ── --}}
     <div class="g3" style="margin-bottom:16px;">
-        <div class="kpi">
-            <div class="kval" style="color:var(--ep-teal);">{{ number_format($totalValide ?? 0, 0, ',', ' ') }}</div>
-            <div class="klbl">{{ __('etablissement.fcfa_valides') }}</div>
+        <div class="kpi ep-kpi">
+            <div class="ep-ico vert"><span class="material-symbols-outlined">paid</span></div>
+            <div>
+                <div class="kval" data-ep-count>{{ number_format($totalValide ?? 0, 0, ',', ' ') }}</div>
+                <div class="klbl">{{ __('etablissement.fcfa_valides') }}</div>
+            </div>
         </div>
-        <div class="kpi">
-            <div class="kval" style="color:var(--ep-gold);">{{ number_format($totalEnAttente ?? 0, 0, ',', ' ') }}</div>
-            <div class="klbl">{{ __('etablissement.fcfa_en_attente') }}</div>
+        <div class="kpi ep-kpi">
+            <div class="ep-ico or"><span class="material-symbols-outlined">hourglass_top</span></div>
+            <div>
+                <div class="kval" data-ep-count>{{ number_format($totalEnAttente ?? 0, 0, ',', ' ') }}</div>
+                <div class="klbl">{{ __('etablissement.fcfa_en_attente') }}</div>
+            </div>
         </div>
-        <div class="kpi">
-            <div class="kval">{{ $paiements->total() ?? $paiements->count() }}</div>
-            <div class="klbl">{{ __('etablissement.transactions') }}</div>
+        <div class="kpi ep-kpi">
+            <div class="ep-ico bleu"><span class="material-symbols-outlined">receipt_long</span></div>
+            <div>
+                <div class="kval" data-ep-count>{{ $paiements->total() ?? $paiements->count() }}</div>
+                <div class="klbl">{{ __('etablissement.transactions') }}</div>
+            </div>
         </div>
     </div>
 

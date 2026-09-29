@@ -52,11 +52,19 @@ return [
     'statut'                => 'Statut',
     'super_admin'           => 'Super Admin',
     'tableau_de_bord'       => 'Tableau de bord',
+    'theme_clair'           => 'Passer en mode clair',
+    'theme_sombre'          => 'Passer en mode sombre',
     'telephone'             => 'Téléphone',
     'temoignages'           => 'Témoignages',
+    'theme'                 => 'Thème',
     'transactions'          => 'Transactions',
     'utilisateurs_internes' => 'Utilisateurs internes',
     'ville'                 => 'Ville',
     'voir_profil'           => 'Voir le profil',
     'vue_globale'           => 'Vue globale',
+
+    // Modes d'affichage (thème clair / sombre)
+    'mode_affichage'        => 'Mode d\'affichage',
+    'mode_sombre_actif'     => 'Mode sombre activé',
+    'mode_sombre_desactive' => 'Mode sombre désactivé',
 ];

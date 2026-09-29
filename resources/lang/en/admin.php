@@ -517,4 +517,7 @@ return [
     'statut_prelevee'           => 'Withdrawn (sent to establishment)',
     'statut_echec'              => 'Transfer failed',
     'statut_a_verifier'         => 'To verify',
+
+    // ── Dashboard v2 (KPI variations) ──
+    'mois_precedent'            => 'vs last month',
 ];

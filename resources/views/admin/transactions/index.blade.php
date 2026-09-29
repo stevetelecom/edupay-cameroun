@@ -20,10 +20,13 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-5">
-  <div>
-    <h1 class="text-xl font-bold text-gray-900">{{ __('admin.supervision_transactions') }}</h1>
-    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.toutes_ecoles_temps_reel') }}</p>
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="ep-ico vert ep-ico-entete"><span class="material-symbols-outlined">credit_card</span></div>
+    <div>
+    <h3 style="margin:0;">{{ __('admin.supervision_transactions') }}</h3>
+    <p class="text-sm text-gray-500 mt-0.5 ep-sous-titre" style="margin-top:2px;">{{ __('admin.toutes_ecoles_temps_reel') }}</p>
+    </div>
   </div>
   <a href="{{ route('admin.transactions.index', array_merge(request()->query(), ['export'=>1])) }}"
      style="display:inline-flex;align-items:center;gap:8px;padding:8px 16px;background:#fff;border:1px solid #ddd;border-radius:8px;font-size:13px;font-weight:500;color:#444;text-decoration:none;">
@@ -34,40 +37,32 @@
 
 {{-- KPIs --}}
 <div class="grid grid-cols-4 gap-4 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-[#E0F5EE] rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico vert"><span class="material-symbols-outlined">payments</span></div>
     <div>
-      <div class="text-xl font-bold text-[#0D9E75]">{{ number_format($stats['total_mois'], 0, ',', ' ') }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.fcfa_ce_mois') }}</div>
+      <div class="kval" data-ep-count>{{ number_format($stats['total_mois'], 0, ',', ' ') }}</div>
+      <div class="klbl">{{ __('admin.fcfa_ce_mois') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico bleu"><span class="material-symbols-outlined">credit_card</span></div>
     <div>
-      <div class="text-xl font-bold text-gray-900">{{ $stats['nb_mois'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.validees_ce_mois') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['nb_mois'] }}</div>
+      <div class="klbl">{{ __('admin.validees_ce_mois') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-yellow-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-yellow-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">schedule</span></div>
     <div>
-      <div class="text-xl font-bold text-yellow-700">{{ $stats['en_attente'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.en_attente') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['en_attente'] }}</div>
+      <div class="klbl">{{ __('admin.en_attente') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico rouge"><span class="material-symbols-outlined">error</span></div>
     <div>
-      <div class="text-xl font-bold text-red-700">{{ $stats['echecs'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.echecs_ce_mois') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['echecs'] }}</div>
+      <div class="klbl">{{ __('admin.echecs_ce_mois') }}</div>
     </div>
   </div>
 </div>

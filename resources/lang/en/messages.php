@@ -52,6 +52,8 @@ return [
     'statut'                => 'Status',
     'super_admin'           => 'Super Admin',
     'tableau_de_bord'       => 'Dashboard',
+    'theme_clair'           => 'Switch to light mode',
+    'theme_sombre'          => 'Switch to dark mode',
     'telephone'             => 'Phone',
     'temoignages'           => 'Testimonials',
     'transactions'          => 'Transactions',
@@ -59,4 +61,9 @@ return [
     'ville'                 => 'City',
     'voir_profil'           => 'View profile',
     'vue_globale'           => 'Global view',
+
+    // Display modes (light / dark theme)
+    'mode_affichage'        => 'Display mode',
+    'mode_sombre_actif'     => 'Dark mode enabled',
+    'mode_sombre_desactive' => 'Dark mode disabled',
 ];

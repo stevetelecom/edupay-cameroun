@@ -10,6 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Support\AnneeScolaire;
+use App\Support\GraphiquesSvg;
 
 class RapportController extends Controller
 {
@@ -23,6 +24,19 @@ class RapportController extends Controller
     public function exportPdf(Request $request)
     {
         $data = $this->genererDonneesRapport();
+
+        // Graphiques rendus en SVG statique (DomPDF n'exécute pas JS) :
+        // mêmes données et mêmes couleurs que les charts du dashboard.
+        $data['svgVenn'] = GraphiquesSvg::venn(
+            $data['venn'],
+            $data['nbApprenantsMultiMoyens'],
+            [
+                'mtn_momo'     => __('etablissement.mt_mtn'),
+                'orange_money' => __('etablissement.mt_orange'),
+                'carte'        => __('etablissement.carte'),
+            ]
+        );
+        $data['svgClasses'] = GraphiquesSvg::barresClasses($data['repartitionClasses']);
 
         $pdf = Pdf::loadView('pdf.rapport', $data);
 
@@ -56,10 +70,35 @@ class RapportController extends Controller
             }
             fputcsv($handle, [], ';');
 
+            // ── Venn : apprenants par moyen (exclusifs) + multi-moyens ──
+            fputcsv($handle, ['Répartition des paiements par moyen (Venn)'], ';');
+            fputcsv($handle, ['Moyen', 'Apprenants (exclusifs)'], ';');
+            foreach ($data['repartitionMoyens'] as $m) {
+                $libelle = match ($m['mode']) {
+                    'mtn_momo'     => 'MTN MoMo',
+                    'orange_money' => 'Orange Money',
+                    'carte'        => 'Carte bancaire',
+                    default        => $m['mode'],
+                };
+                fputcsv($handle, [$libelle, $data['venn'][$m['mode']] ?? 0], ';');
+            }
+            fputcsv($handle, ['Multi-moyens (2 moyens ou plus)', $data['nbApprenantsMultiMoyens']], ';');
+            // Détail du chevauchement : apprenants groupés par nombre de moyens utilisés
+            foreach (($data['nbModesParApprenant'] ?? collect()) as $nbModes => $effectif) {
+                fputcsv($handle, ['Apprenants avec ' . $nbModes . ' moyen(s)', $effectif], ';');
+            }
+            fputcsv($handle, [], ';');
+
             fputcsv($handle, ['Recouvrement par classe'], ';');
-            fputcsv($handle, ['Classe', 'Nb apprenants', 'Taux'], ';');
+            fputcsv($handle, ['Classe', 'Nb apprenants', 'Attendu (FCFA)', 'Encaissé (FCFA)', 'Taux'], ';');
             foreach ($data['repartitionClasses'] as $c) {
-                fputcsv($handle, [$c['nom'], $c['nb_apprenants'], $c['taux'] . '%'], ';');
+                fputcsv($handle, [
+                    $c['nom'],
+                    $c['nb_apprenants'],
+                    $c['attendu'] ?? 0,
+                    $c['paye'] ?? 0,
+                    $c['taux'] . '%',
+                ], ';');
             }
 
             fclose($handle);
@@ -114,6 +153,34 @@ class RapportController extends Controller
             })
             ->toArray();
 
+        // ── Diagramme de Venn : chevauchement des moyens de paiement ──
+        // Un apprenant peut payer avec plusieurs moyens sur l'année : le
+        // diagramme de Venn montre les « exclusifs » (un seul moyen) et le
+        // cœur « multi-moyens » (au moins deux moyens différents).
+        $apprenantsMultiMoyens = Paiement::where('statut', 'valide')
+            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('fraisApprenant', fn ($q) => $q->where('annee_scolaire', $anneeScolaire))
+            ->selectRaw('apprenant_id, COUNT(DISTINCT mode_paiement) as nb_modes')
+            ->groupBy('apprenant_id')
+            ->get();
+        $idsMultiMoyens = $apprenantsMultiMoyens->where('nb_modes', '>=', 2)->pluck('apprenant_id');
+        $nbApprenantsMultiMoyens = $idsMultiMoyens->count();
+        // Détail du chevauchement pour l'export CSV : combien d'apprenants
+        // ont payé avec 1, 2 ou 3 moyens distincts.
+        $nbModesParApprenant = $apprenantsMultiMoyens
+            ->groupBy('nb_modes')
+            ->map(fn ($g) => $g->count());
+        $venn = [];
+        foreach (['mtn_momo', 'orange_money', 'carte'] as $modeVenn) {
+            $venn[$modeVenn] = Paiement::where('statut', 'valide')
+                ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+                ->whereHas('fraisApprenant', fn ($q) => $q->where('annee_scolaire', $anneeScolaire))
+                ->where('mode_paiement', $modeVenn)
+                ->when($idsMultiMoyens->isNotEmpty(), fn ($q) => $q->whereNotIn('apprenant_id', $idsMultiMoyens))
+                ->distinct('apprenant_id')
+                ->count('apprenant_id');
+        }
+
         $repartitionClasses = Apprenant::where('etablissement_id', $etablissementId)
             ->selectRaw('classe, COUNT(*) as nb_apprenants')
             ->groupBy('classe')
@@ -138,6 +205,8 @@ class RapportController extends Controller
                     'nom'           => $row->classe,
                     'nb_apprenants' => $row->nb_apprenants,
                     'taux'          => $attendu > 0 ? round(($paye / $attendu) * 100) : 0,
+                    'attendu'       => (int) $attendu,
+                    'paye'          => (int) $paye,
                 ];
             })
             ->toArray();
@@ -149,6 +218,10 @@ class RapportController extends Controller
             'nbApprenants'       => $nbApprenants,
             'repartitionMoyens'  => $repartitionMoyens,
             'repartitionClasses' => $repartitionClasses,
+            'venn'               => $venn,
+            'nbApprenantsMultiMoyens' => $nbApprenantsMultiMoyens,
+            'nbModesParApprenant' => $nbModesParApprenant,
+            'tickPasClasse'      => 100000,
             'anneeScolaire'      => $anneeScolaire,
         ];
     }

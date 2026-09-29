@@ -517,4 +517,7 @@ return [
     'statut_prelevee'           => 'Prelevee (reversee a l etablissement)',
     'statut_echec'              => 'Echec de reversement',
     'statut_a_verifier'         => 'A verifier',
+
+    // ── Dashboard v2 (variations KPI) ──
+    'mois_precedent'            => 'mois précédent',
 ];

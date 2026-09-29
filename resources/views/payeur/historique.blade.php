@@ -33,8 +33,10 @@
 @section('content')
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
         <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">&#8592; {{ __('payeur.hist_retour_dashboard') }}</a>
-        <a href="{{ route('payeur.historique') }}?export=pdf" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:#fff;border:1px solid #ddd !important;border-radius:8px;font-size:13px;font-weight:500;color:#444 !important;text-decoration:none;outline:none;box-shadow:none;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        {{-- Export PDF : bouton vert (dégradé teal) avec icône Material --}}
+        <a href="{{ route('payeur.historique') }}?export=pdf" class="ep-btn-pdf-vert"
+           style="text-decoration:none;">
+            <span class="material-symbols-outlined" style="font-size:17px;">picture_as_pdf</span>
             {{ __('payeur.hist_exporter_pdf') }}
         </a>
     </div>
@@ -85,6 +87,7 @@
                         </td>
                         <td style="text-align:right;">
                             <div style="display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;">
+                                {{-- Actions : icônes Material Symbols (plus lisibles que du texte) --}}
                                 <button type="button"
                                         onclick="ouvrirDetail(this)"
                                         data-reference="{{ $paiement->reference }}"
@@ -98,9 +101,10 @@
                                         data-telephone="{{ $paiement->telephone_paiement ?? '—' }}"
                                         data-date="{{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y H:i') : '—' }}"
                                         data-statut-badge="{{ match($paiement->statut) { 'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), 'rembourse' => __('payeur.statut_rembourse'), 'annule' => __('payeur.statut_annule'), default => $paiement->statut } }}"
-                                        style="font-size:11px;color:#1A4F8A;background:var(--ep-blue-lt);border:none;padding:5px 10px;border-radius:20px;cursor:pointer;"
-                                        title="{{ __('payeur.hist_voir_detail') }}">
-                                    {{ __('payeur.hist_detail') }}
+                                        class="ep-act-btn ep-act-btn-bleu"
+                                        title="{{ __('payeur.hist_voir_detail') }}"
+                                        aria-label="{{ __('payeur.hist_voir_detail') }}">
+                                    <span class="material-symbols-outlined">visibility</span>
                                 </button>
 
                                 @if($paiement->statut === 'en_attente' && ! $paiement->estAnnule())
@@ -108,18 +112,20 @@
                                           onsubmit="return confirm('{{ __('payeur.hist_confirm_annuler') }}')">
                                         @csrf
                                         <button type="submit"
-                                                style="font-size:11px;color:#854F0B;background:var(--ep-gold-lt);border:none;padding:5px 10px;border-radius:20px;cursor:pointer;"
-                                                title="{{ __('payeur.hist_annuler_titre') }}">
-                                            {{ __('payeur.hist_annuler') }}
+                                                class="ep-act-btn ep-act-btn-or"
+                                                title="{{ __('payeur.hist_annuler_titre') }}"
+                                                aria-label="{{ __('payeur.hist_annuler_titre') }}">
+                                            <span class="material-symbols-outlined">cancel</span>
                                         </button>
                                     </form>
                                 @endif
 
                                 @if($paiement->statut === 'echoue' && $paiement->fraisApprenant)
                                     <a href="{{ route('payeur.paiement.show', $paiement->fraisApprenant) }}"
-                                       style="font-size:11px;color:#085041;background:var(--ep-teal-lt);text-decoration:none;padding:5px 10px;border-radius:20px;display:inline-block;"
-                                       title="{{ __('payeur.hist_reesayer_titre') }}">
-                                        {{ __('payeur.hist_reesayer') }}
+                                       class="ep-act-btn ep-act-btn-vert"
+                                       title="{{ __('payeur.hist_reesayer_titre') }}"
+                                       aria-label="{{ __('payeur.hist_reesayer_titre') }}">
+                                        <span class="material-symbols-outlined">refresh</span>
                                     </a>
                                 @endif
                             </div>

@@ -139,49 +139,44 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-5">
-  <div>
-    <h1 class="text-xl font-bold text-gray-900">{{ __('admin.etablissements_partenaires') }}</h1>
-    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.gestion_activation_supervision') }}</p>
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="ep-ico vert ep-ico-entete"><span class="material-symbols-outlined">apartment</span></div>
+    <div>
+    <h3 style="margin:0;">{{ __('admin.etablissements_partenaires') }}</h3>
+    <p class="text-sm text-gray-500 mt-0.5 ep-sous-titre" style="margin-top:2px;">{{ __('admin.gestion_activation_supervision') }}</p>
+    </div>
   </div>
 </div>
 
-{{-- KPIs --}}
+{{-- KPIs : pastilles époxy Material Symbols (style dashboard) --}}
 <div class="grid grid-cols-4 gap-4 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-[#E0F5EE] rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-[#0D9E75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15"/><polyline points="16 2 12 7 8 2"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico navy"><span class="material-symbols-outlined">apartment</span></div>
     <div>
-      <div class="text-xl font-bold text-gray-900">{{ $stats['total'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.total') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['total'] }}</div>
+      <div class="klbl">{{ __('admin.total') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico vert"><span class="material-symbols-outlined">verified</span></div>
     <div>
-      <div class="text-xl font-bold text-green-700">{{ $stats['actifs'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.actifs') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['actifs'] }}</div>
+      <div class="klbl">{{ __('admin.actifs') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-yellow-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-yellow-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">hourglass_top</span></div>
     <div>
-      <div class="text-xl font-bold text-yellow-700">{{ $stats['en_attente'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.en_attente_s') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['en_attente'] }}</div>
+      <div class="klbl">{{ __('admin.en_attente_s') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico rouge"><span class="material-symbols-outlined">block</span></div>
     <div>
-      <div class="text-xl font-bold text-red-700">{{ $stats['suspendus'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.suspendus') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['suspendus'] }}</div>
+      <div class="klbl">{{ __('admin.suspendus') }}</div>
     </div>
   </div>
 </div>

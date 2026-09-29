@@ -35,6 +35,24 @@ class AppServiceProvider extends ServiceProvider
             \App\View\Composers\EtablissementSidebarComposer::class
         );
 
+        // Sidebar Super Admin : vrai taux de commission (taux_aangaraa +
+        // marge_edupay) partagé avec le layout, pour que le widget « Commission
+        // active » affiche le taux réellement appliqué et ses 2 composantes,
+        // sur TOUTES les pages du back-office Super Admin.
+        View::composer(
+            'layouts.admin',
+            \App\View\Composers\AdminSidebarComposer::class
+        );
+
+        // ⚠️ Piège Blade/Laravel : les sections (@section) des vues enfants sont
+        // rendues AVANT le layout, donc un composer sur 'layouts.admin' seul ne
+        // nourrit PAS le contenu du dashboard Super Admin qui affiche lui aussi
+        // $tauxAangaraaPct / $margeEdupayPct / $tauxCommission.
+        View::composer(
+            'admin.dashboard',
+            \App\View\Composers\AdminSidebarComposer::class
+        );
+
         // Propage automatiquement le montant d'une catégorie de frais modifiée
         // aux dossiers frais (FraisApprenant) où elle est affectée (sans paiement).
         \App\Models\CategoriesFrais::observe(\App\Observers\CategoriesFraisObserver::class);

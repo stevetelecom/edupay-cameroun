@@ -1,16 +1,25 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>@yield('title', 'EduPay Cameroun')</title>
+{{-- Mode sombre EduPay : applique la préférence enregistrée AVANT le
+     premier rendu (anti-FOUC), sans aucune dépendance externe --}}
+<script>(function(){try{var t=localStorage.getItem('ep-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<!-- Google Fonts : Poppins (identité visuelle EduPay v2) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
+{{-- Thème global EduPay v2 : Poppins + Material Rounded (chargé AVANT les styles inline) --}}
+<link rel="stylesheet" href="{{ asset('css/edupay-theme.css') }}">
 <style>
 :root{--ep-navy:#0B2545;--ep-teal:#0D9E75;--ep-teal2:#0A8562;--ep-teal-lt:#E0F5EE;--ep-teal-mid:#9FE1CB;--ep-gold:#E8A020;--ep-gold-lt:#FEF3DC;--ep-red:#D94040;--ep-red-lt:#FBEAEA;--ep-blue-lt:#E6F0FB;--ep-purple-lt:#EDE9FE;--border:rgba(0,0,0,0.09);--radius-md:8px;--radius-lg:12px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:#f1f3f5;color:#1a1a2e;}
+body{font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;background:#f1f3f5;color:#1a1a2e;}
 .epcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
 .pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
 .pg{background:#E0F5EE;color:#085041;}.pa{background:#FEF3DC;color:#8B5E10;}
@@ -31,26 +40,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .lbl{font-size:11px;color:#666;margin-bottom:5px;font-weight:500;}
 .divider{height:1px;background:#f0f0f0;margin:14px 0;}
 .ep-body2{padding:24px 28px;background:#f1f3f5;}
-/* HERO */
-.hero-band{background:var(--ep-navy);color:#fff;}
+/* HERO — dégradé logo EduPay : navy profond vers teal, avec accents gold */
+.hero-band{background:linear-gradient(135deg,#0B2545 0%,#103459 45%,#0A8562 100%);color:#fff;position:relative;overflow:hidden;}
+/* Halo décoratif gold, comme les accents du logo */
+.hero-band::before{content:'';position:absolute;width:520px;height:520px;border-radius:50%;
+  background:radial-gradient(circle,rgba(232,160,32,.18),transparent 65%);
+  top:-180px;right:-120px;pointer-events:none;}
+.hero-band::after{content:'';position:absolute;width:380px;height:380px;border-radius:50%;
+  background:radial-gradient(circle,rgba(13,158,117,.25),transparent 65%);
+  bottom:-140px;left:-100px;pointer-events:none;}
 .hero-top{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid rgba(255,255,255,.08);}
 .logo-t{font-size:20px;font-weight:700;letter-spacing:-.3px;}
 .logo-t span{color:#5DCAA5;}
 .hero-main{padding:48px 28px 36px;text-align:center;display:flex;flex-direction:column;align-items:center;}
-.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:5px 14px;font-size:11px;color:rgba(255,255,255,.75);margin-bottom:18px;}
-.hero-h1{font-size:36px;font-weight:700;line-height:1.2;max-width:620px;margin:0 auto 14px;}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(232,160,32,.12);border:1px solid rgba(232,160,32,.4);border-radius:20px;padding:6px 16px;font-size:11.5px;font-weight:600;color:#F5C86A;margin-bottom:18px;}
+.hero-h1{font-size:40px;font-weight:800;line-height:1.2;max-width:680px;margin:0 auto 16px;letter-spacing:-.01em;}
 .hero-h1 em{font-style:normal;color:#5DCAA5;}
-.hero-sub{font-size:14px;color:rgba(255,255,255,.6);max-width:440px;margin-bottom:28px;line-height:1.65;}
+.hero-sub{font-size:15.5px;color:rgba(255,255,255,.65);max-width:480px;margin-bottom:30px;line-height:1.7;}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
-.hbtn-main{background:var(--ep-teal);color:#fff;border:none;padding:13px 26px;border-radius:var(--radius-md);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;text-decoration:none;}
-.hbtn-main:hover{background:var(--ep-teal2);}
-.hbtn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);padding:13px 26px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;text-decoration:none;}
+.hbtn-main{background:linear-gradient(135deg,#0D9E75,#0A8562);color:#fff;border:none;padding:14px 30px;border-radius:12px;font-size:14.5px;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;transition:all .2s ease;text-decoration:none;box-shadow:0 6px 20px rgba(13,158,117,.4);}
+.hbtn-main:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 10px 26px rgba(13,158,117,.5);color:#fff;}
+.hbtn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1.5px solid rgba(255,255,255,.25);padding:14px 30px;border-radius:12px;font-size:14.5px;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:all .2s ease;text-decoration:none;backdrop-filter:blur(6px);}
+.hbtn-ghost:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.45);color:#fff;}
 .hero-stats{display:flex;border-top:1px solid rgba(255,255,255,.08);}
 .hstat{flex:1;padding:18px 28px;border-right:1px solid rgba(255,255,255,.08);text-align:center;}
 .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:18px;display:inline-flex;align-items:center;justify-content:center;}
 .hstat:last-child{border-right:none;}
-.hstat-v{font-size:22px;font-weight:700;color:#5DCAA5;}
-.hstat-l{font-size:11px;color:rgba(255,255,255,.5);margin-top:3px;}
+.hstat-v{font-size:26px;font-weight:800;color:#5DCAA5;}
+.hstat-l{font-size:12px;color:rgba(255,255,255,.55);margin-top:4px;}
 /* FEATURES */
 .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 .feat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;position:relative;overflow:hidden;}
@@ -59,8 +76,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .icon-round{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
 .icon-round svg{width:18px;height:18px;}
 .icon-sm{width:30px;height:30px;border-radius:10px;}
-.feat-title{font-size:14px;font-weight:600;margin-bottom:7px;}
-.feat-desc{font-size:12px;color:#777;line-height:1.65;}
+.feat-title{font-size:15px;font-weight:700;margin-bottom:8px;}
+.feat-desc{font-size:13px;color:#6b7280;line-height:1.7;}
 .feat-line{position:absolute;top:0;left:0;width:3px;height:100%;}
 /* ABOUT */
 .mission-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px;border-left:3px solid var(--ep-teal);}
@@ -75,15 +92,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .stars{color:var(--ep-gold);font-size:14px;margin-bottom:7px;}
 .av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}
 /* FOOTER */
-.ep-footer{background:var(--ep-navy);color:rgba(255,255,255,.75);padding:36px 28px 22px;}
+.ep-footer{background:linear-gradient(180deg,#0B2545,#081A32);color:rgba(255,255,255,.75);padding:36px 28px 22px;}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:28px;margin-bottom:28px;}
 .footer-logo{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;}
 .footer-logo span{color:#5DCAA5;}
-.footer-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:14px;}
+.footer-desc{font-family:'Poppins',sans-serif;font-size:12.5px;color:rgba(255,255,255,.55);line-height:1.75;margin-bottom:14px;}
 .footer-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:6px;padding:5px 10px;font-size:11px;color:rgba(255,255,255,.6);margin-right:6px;margin-bottom:6px;}
-.footer-col-title{font-size:11px;font-weight:600;color:rgba(255,255,255,.9);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;}
-.footer-link{display:block;font-size:12px;color:rgba(255,255,255,.5);margin-bottom:8px;cursor:pointer;text-decoration:none;}
-.footer-link:hover{color:rgba(255,255,255,.85);}
+/* Footer v2 : titres letter-spacing large, liens avec flèche teal animée */
+.footer-col-title{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,.92);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px;}
+.footer-link{display:flex;align-items:center;gap:0;font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:500;color:rgba(255,255,255,.55);margin-bottom:9px;cursor:pointer;text-decoration:none;transition:color .2s ease,transform .2s ease;}
+.footer-link::before{content:'→';opacity:0;margin-right:0;width:0;overflow:hidden;color:var(--ep-teal-mid,#9FE1CB);transition:width .25s ease,margin-right .25s ease,opacity .25s ease;}
+.footer-link:hover{color:#fff;transform:translateX(2px);}
+.footer-link:hover::before{opacity:1;width:16px;margin-right:6px;}
 .footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 .footer-legal{font-size:11px;color:rgba(255,255,255,.35);}
 .footer-socials{display:flex;gap:8px;}
@@ -164,8 +184,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .form-body{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 20px;}
 .form-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:520px;}
 .form-card-wide{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:720px;}
-.form-title{font-size:18px;font-weight:700;margin-bottom:4px;}
-.form-sub{font-size:13px;color:#888;margin-bottom:22px;}
+.form-title{font-size:20px;font-weight:800;margin-bottom:6px;}
+.form-sub{font-size:14px;color:#888;margin-bottom:22px;}
 .form-section{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.07em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;}
 .select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:var(--radius-md);font-size:13px;margin-bottom:12px;background:#fff;outline:none;}
 .select:focus{border-color:var(--ep-teal);}
@@ -204,7 +224,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 
 
     /* ══ NAVBAR PUBLIQUE ══ */
-    .pub-nav{background:#0B2545;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:100;}
+    /* Navbar publique : dégradé logo navy, ombre portée */
+.pub-nav{background:linear-gradient(90deg,#0B2545,#123B5E);border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:100;box-shadow:0 2px 14px rgba(11,37,69,.35);}
     .pub-nav-inner{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;}
     .nav-desk{display:flex;align-items:center;gap:4px;}
     .nav-link{color:rgba(255,255,255,.65);text-decoration:none;font-size:13px;padding:7px 12px;border-radius:20px;transition:all .15s;white-space:nowrap;}
@@ -213,8 +234,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     .nav-sep{width:1px;height:18px;background:rgba(255,255,255,.15);margin:0 4px;}
     .nav-btn-ghost{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;padding:7px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.25);white-space:nowrap;}
     .nav-btn-ghost:hover{background:rgba(255,255,255,.08);}
-    .nav-btn-main{color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:8px 16px;border-radius:20px;background:#0D9E75;white-space:nowrap;}
-    .nav-btn-main:hover{background:#0A8562;}
+.nav-btn-main{color:#fff;text-decoration:none;font-size:13px;font-weight:700;padding:9px 18px;border-radius:20px;background:linear-gradient(135deg,#0D9E75,#0A8562);white-space:nowrap;box-shadow:0 3px 10px rgba(13,158,117,.35);transition:all .2s ease;}
+.nav-btn-main:hover{filter:brightness(1.1);transform:translateY(-1px);}
     .nav-burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;border-radius:8px;}
     .nav-burger span{display:block;width:22px;height:2px;background:rgba(255,255,255,.85);border-radius:2px;transition:all .25s;}
     .nav-burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
@@ -253,6 +274,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   <link rel="stylesheet" href="{{ asset('css/video-bg.css') }}">
   <link rel="stylesheet" href="{{ asset('css/buttons-enhanced.css') }}">
   <link rel="stylesheet" href="{{ asset('css/forms-enhanced.css') }}">
+  {{-- Thème clair / sombre : initialisation + bascule fluide --}}
+  <script src="{{ asset('js/ep-theme.js') }}" defer></script>
   <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
   <link rel="apple-touch-icon" href="{{ asset('images/logo.jpeg') }}">
 </head>

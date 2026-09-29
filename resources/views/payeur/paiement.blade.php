@@ -30,32 +30,42 @@
 
 @section('content')
 
+    {{-- En-tête style tableau de bord : pill retour + badge sécurité --}}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">← {{ __('payeur.pay_retour') }}</a>
-        <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:#999;margin-left:auto;">
-            <span style="background:var(--ep-teal);width:7px;height:7px;border-radius:50%;display:inline-block;"></span>
+        <a href="{{ route('payeur.dashboard') }}" class="ep-retour-lien">
+            <span class="material-symbols-outlined" style="font-size:15px;">arrow_back</span>
+            {{ __('payeur.pay_retour') }}
+        </a>
+        <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ep-gris);margin-left:auto;font-family:'Poppins',sans-serif;">
+            <span class="material-symbols-outlined" style="font-size:15px;color:var(--ep-teal);">lock</span>
             {{ __('payeur.pay_connexion_securee') }}
         </span>
     </div>
 
     <div style="max-width:600px;margin:0 auto;">
 
-        {{-- ── Récap frais ── --}}
-        <div class="epcard" style="background:var(--ep-teal-lt);border-color:rgba(13,158,117,.2);margin-bottom:14px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div>
-                    <div style="font-size:11px;color:#0F6E56;margin-bottom:3px;">{{ __('payeur.pay_pour') }}</div>
-                    <div style="font-size:15px;font-weight:700;color:#085041;">
-                        {{ $fraisApprenant->apprenant->nom }} {{ $fraisApprenant->apprenant->prenom }}
-                        · {{ $fraisApprenant->apprenant->etablissement->nom ?? '' }}
+        {{-- ── Récap frais — carte pastille époxy (style dashboard) ── --}}
+        <div class="epcard" style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                <div style="display:flex;align-items:center;gap:13px;min-width:0;">
+                    <div class="ep-ico navy" style="width:46px;height:46px;border-radius:13px;">
+                        <span class="material-symbols-outlined" style="font-size:24px;">school</span>
                     </div>
-                    <div style="font-size:12px;color:#1B9E75;">
-                        {{ $fraisApprenant->categorieFrais->nom ?? __('payeur.pay_frais_scolaires') }} — {{ $fraisApprenant->annee_scolaire }}
+                    <div style="min-width:0;">
+                        <div style="font-size:16px;font-weight:700;font-family:'Poppins',sans-serif;color:var(--ep-navy);">
+                            {{ $fraisApprenant->apprenant->nom }} {{ $fraisApprenant->apprenant->prenom }}
+                        </div>
+                        <div style="font-size:12.5px;color:var(--ep-gris);font-family:'Poppins',sans-serif;">
+                            {{ $fraisApprenant->apprenant->etablissement->nom ?? '' }}
+                        </div>
+                        <div style="font-size:12.5px;color:var(--ep-teal2);font-weight:600;font-family:'Poppins',sans-serif;">
+                            {{ $fraisApprenant->categorieFrais->nom ?? __('payeur.pay_frais_scolaires') }} — {{ $fraisApprenant->annee_scolaire }}
+                        </div>
                     </div>
                 </div>
-                <div style="text-align:right;">
-                    <div style="font-size:26px;font-weight:700;color:#085041;">{{ number_format($resteAPayer, 0, ',', ' ') }}</div>
-                    <div style="font-size:11px;color:#0F6E56;">FCFA</div>
+                <div style="text-align:right;flex-shrink:0;">
+                    <div style="font-size:28px;font-weight:800;font-family:'Poppins',sans-serif;color:var(--ep-navy);">{{ number_format($resteAPayer, 0, ',', ' ') }}</div>
+                    <div style="font-size:11.5px;color:var(--ep-gris);font-family:'Poppins',sans-serif;">FCFA</div>
                 </div>
             </div>
         </div>
@@ -72,22 +82,22 @@
                 </div>
             @endif
 
-            <div style="display:flex;gap:10px;margin-bottom:16px;">
-                <label id="opt1" style="flex:1;padding:12px;border:2px solid var(--ep-teal);border-radius:var(--radius-md);cursor:pointer;background:var(--ep-teal-lt);text-align:center;display:block;">
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+                <label id="opt1" style="flex:1;min-width:180px;padding:14px 12px;border:2px solid var(--ep-teal);border-radius:12px;cursor:pointer;background:var(--ep-teal-lt);text-align:center;display:block;transition:transform .2s ease, box-shadow .2s ease;">
                     <input type="radio" name="type_paiement" value="integral" checked style="display:none;" onclick="selOpt(1)">
-                    <div style="font-size:11px;font-weight:700;color:#0F6E56;">{{ __('payeur.pay_integral') }}</div>
-                    <div style="font-size:10px;color:#1B9E75;margin-bottom:2px;">{{ __('payeur.pay_solde_total') }}</div>
-                    <div style="font-size:18px;font-weight:700;color:#085041;">{{ number_format($resteAPayer, 0, ',', ' ') }} FCFA</div>
+                    <div style="font-size:12.5px;font-weight:700;font-family:'Poppins',sans-serif;color:#0F6E56;">{{ __('payeur.pay_integral') }}</div>
+                    <div style="font-size:11px;color:#1B9E75;margin-bottom:3px;font-family:'Poppins',sans-serif;">{{ __('payeur.pay_solde_total') }}</div>
+                    <div style="font-size:20px;font-weight:800;font-family:'Poppins',sans-serif;color:#085041;">{{ number_format($resteAPayer, 0, ',', ' ') }} FCFA</div>
                 </label>
 
                 @if($fractionnable)
-                    <label id="opt2" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;display:block;">
+                    <label id="opt2" style="flex:1;min-width:180px;padding:14px 12px;border:1.5px solid #ddd;border-radius:12px;cursor:pointer;text-align:center;display:block;transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;">
                         <input type="radio" name="type_paiement" value="tranche" style="display:none;" onclick="selOpt(2)">
-                        <div style="font-size:11px;font-weight:700;color:#888;">{{ __('payeur.pay_tranche_suivante', ['n' => ($fraisApprenant->numero_tranche_suivante ?? 1), 'nb' => $nbTranches]) }}</div>
-                        <div style="font-size:10px;color:#aaa;margin-bottom:2px;">{{ __('payeur.pay_montant_auto') }}</div>
-                        <div style="font-size:18px;font-weight:700;">{{ number_format($montantTranche, 0, ',', ' ') }} FCFA</div>
+                        <div style="font-size:12.5px;font-weight:700;font-family:'Poppins',sans-serif;color:var(--ep-gris);">{{ __('payeur.pay_tranche_suivante', ['n' => ($fraisApprenant->numero_tranche_suivante ?? 1), 'nb' => $nbTranches]) }}</div>
+                        <div style="font-size:11px;color:#aaa;margin-bottom:3px;font-family:'Poppins',sans-serif;">{{ __('payeur.pay_montant_auto') }}</div>
+                        <div style="font-size:20px;font-weight:800;font-family:'Poppins',sans-serif;">{{ number_format($montantTranche, 0, ',', ' ') }} FCFA</div>
                         @if($fraisApprenant->prochaine_echeance ?? false)
-                            <div style="font-size:10px;color:#aaa;margin-top:2px;">
+                            <div style="font-size:11px;color:#aaa;margin-top:2px;font-family:'Poppins',sans-serif;">
                                 {{ __('payeur.pay_echeance') }} {{ \Carbon\Carbon::parse($fraisApprenant->prochaine_echeance)->format('d M. Y') }}
                             </div>
                         @endif
@@ -97,16 +107,16 @@
 
             {{-- ── Moyen de paiement — MTN + Orange uniquement ── --}}
             <div class="seclbl">{{ __('payeur.pay_moyen') }}</div>
-            <div style="display:flex;gap:10px;margin-bottom:16px;">
-                <label id="pm1" style="flex:1;padding:12px;border:2px solid #FFCC00;border-radius:var(--radius-md);background:#FFFBE6;cursor:pointer;text-align:center;display:block;">
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+                <label id="pm1" style="flex:1;min-width:170px;padding:14px 12px;border:2px solid #FFCC00;border-radius:12px;background:#FFFBE6;cursor:pointer;text-align:center;display:block;transition:transform .2s ease, box-shadow .2s ease;">
                     <input type="radio" name="mode_paiement" value="mtn_momo" checked style="display:none;" onclick="selPay(1)">
-                    <div style="font-size:12px;font-weight:700;color:#996600;">MTN</div>
-                    <div style="font-size:11px;color:#664400;">Mobile Money</div>
+                    <div style="font-size:14px;font-weight:800;font-family:'Poppins',sans-serif;color:#996600;">MTN</div>
+                    <div style="font-size:12px;color:#664400;font-family:'Poppins',sans-serif;">Mobile Money</div>
                 </label>
-                <label id="pm2" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:var(--radius-md);cursor:pointer;text-align:center;display:block;">
+                <label id="pm2" style="flex:1;min-width:170px;padding:14px 12px;border:1.5px solid #ddd;border-radius:12px;cursor:pointer;text-align:center;display:block;transition:transform .2s ease, border-color .2s ease;">
                     <input type="radio" name="mode_paiement" value="orange_money" style="display:none;" onclick="selPay(2)">
-                    <div style="font-size:12px;font-weight:700;color:#FF6600;">Orange</div>
-                    <div style="font-size:11px;">Money</div>
+                    <div style="font-size:14px;font-weight:800;font-family:'Poppins',sans-serif;color:#FF6600;">Orange</div>
+                    <div style="font-size:12px;font-family:'Poppins',sans-serif;">Money</div>
                 </label>
             </div>
 
@@ -154,8 +164,8 @@
                 <span style="font-weight:600;color:#555;" id="pay-frais-recap">{{ number_format($fraisIntegral['frais_service'], 0, ',', ' ') }} FCFA</span>
             </div>
             <div style="border-top:1px solid #eee;padding-top:12px;margin-bottom:6px;display:flex;justify-content:space-between;">
-                <span style="font-size:15px;font-weight:700;">{{ __('payeur.pay_total_a_payer') }}</span>
-                <span style="font-size:22px;font-weight:700;color:var(--ep-teal);" id="pay-total-recap">{{ number_format($fraisIntegral['montant_total_paye'], 0, ',', ' ') }} FCFA</span>
+                <span style="font-size:16px;font-weight:700;font-family:'Poppins',sans-serif;">{{ __('payeur.pay_total_a_payer') }}</span>
+                <span style="font-size:24px;font-weight:800;font-family:'Poppins',sans-serif;color:var(--ep-teal);" id="pay-total-recap">{{ number_format($fraisIntegral['montant_total_paye'], 0, ',', ' ') }} FCFA</span>
             </div>
 
             {{-- ── Indicateur opérateur ── --}}

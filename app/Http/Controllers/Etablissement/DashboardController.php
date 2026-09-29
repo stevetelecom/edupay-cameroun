@@ -80,6 +80,37 @@ class DashboardController extends Controller
             ->whereIn('statut', ['actif', 'grace_period'])
             ->latest()->first();
 
+        // Répartition des paiements validés par moyen (année scolaire active)
+        // — uniquement pour le graphique du tableau de bord, aucun impact métier.
+        $repartitionMoyensAnnee = Paiement::where('statut', 'valide')
+            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->whereHas('fraisApprenant', fn ($q) => $q->where('annee_scolaire', $anneeScolaire))
+            ->selectRaw('mode_paiement, COUNT(*) as total, SUM(montant) as volume')
+            ->groupBy('mode_paiement')
+            ->get()
+            ->keyBy('mode_paiement');
+
+        // Histogramme des 14 derniers jours : encaissements journaliers validés.
+        // Deux requêtes seulement : les montants du mois en cours, agrégés par
+        // jour en PHP (les montants du mois précédent complètent la fenêtre).
+        $montantsParJour = Paiement::where('statut', 'valide')
+            ->where('date_paiement', '>=', now()->subDays(13)->startOfDay())
+            ->whereHas('apprenant', fn ($q) => $q->where('etablissement_id', $etablissementId))
+            ->selectRaw('DATE(date_paiement) as jour, SUM(montant) as total')
+            ->groupByRaw('DATE(date_paiement)')
+            ->pluck('total', 'jour');
+
+        $histogramme14Jours = collect(range(13, 0))->map(function ($i) use ($montantsParJour) {
+            $date = now()->subDays($i);
+            $cle  = $date->toDateString();
+            return [
+                'jour'   => $date->day,                    // numéro du jour affiché sous la barre
+                'total'  => (int) ($montantsParJour[$cle] ?? 0),
+                'actif'  => $date->isWeekday(),            // week-ends atténués
+                'libelle'=> $date->locale(app()->getLocale())->isoFormat('ddd D MMM'),
+            ];
+        });
+
         return view('etablissement.dashboard', compact(
             'etablissement',
             'abonnement',
@@ -95,6 +126,8 @@ class DashboardController extends Controller
             'countImpayes',
             'anneeScolaire',
             'nbFraisAnnee',
+            'repartitionMoyensAnnee',
+            'histogramme14Jours',
         ));
     }
 }

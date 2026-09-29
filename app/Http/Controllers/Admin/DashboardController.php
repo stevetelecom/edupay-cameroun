@@ -27,6 +27,21 @@ class DashboardController extends Controller
             ->whereBetween('created_at', [$debut, $fin])
             ->sum('montant');
 
+        // Volume du mois précédent : sert à la variation affichée sur la carte
+        // KPI du dashboard (style maquette : « +12 % / hier »).
+        $volumeMoisPrecedent = Paiement::where('statut', 'valide')
+            ->whereBetween('created_at', [
+                Carbon::now()->subMonth()->startOfMonth(),
+                Carbon::now()->subMonth()->endOfMonth(),
+            ])
+            ->sum('montant');
+
+        // Variation en % : null si pas de base de comparaison (on n'affiche rien
+        // plutot qu'un « +∞ % » fallacieux).
+        $variationVolume = $volumeMoisPrecedent > 0
+            ? round((($volumeMois - $volumeMoisPrecedent) / $volumeMoisPrecedent) * 100, 1)
+            : null;
+
         $transactionsMois = Paiement::where('statut', 'valide')
             ->whereBetween('created_at', [$debut, $fin])
             ->count();
@@ -115,6 +130,7 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', [
             'volumeMois'                 => $volumeMois,
+            'variationVolume'            => $variationVolume,
             'commissionsMois'            => $commissionsMois,
             'etablissementsActifs'       => $etablissementsActifs,
             'payeursTotaux'              => $payeursTotaux,
@@ -127,7 +143,8 @@ class DashboardController extends Controller
             'reclamationsMois'           => $reclamationsMois,
             'derniersEtablissements'     => $derniersEtablissements,
             'dernieresTransactions'      => $dernieresTransactions,
-            'tauxCommission'             => 0.025,
+            // tauxCommission + composantes (tauxAangaraaPct/margeEdupayPct) sont
+            // fournis par AdminSidebarComposer : plus de valeur figée à 2,5 %.
             'pageTitle'                  => 'Tableau de bord — Super Admin EduPay',
             'mois'                       => now()->translatedFormat('F Y'),
         ]);

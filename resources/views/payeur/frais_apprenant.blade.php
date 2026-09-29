@@ -73,20 +73,29 @@
 
 @section('content')
 
+    {{-- En-tête de page aligné sur le tableau de bord (pastille dorée + Poppins) --}}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">← {{ __('payeur.retour') }}</a>
+        <a href="{{ route('payeur.dashboard') }}" class="ep-retour-lien">
+            <span class="material-symbols-outlined" style="font-size:15px;">arrow_back</span>
+            {{ __('payeur.retour') }}
+        </a>
     </div>
 
     {{-- En-tête apprenant --}}
-    <div class="epcard" style="background:var(--ep-teal-lt);border-color:rgba(13,158,117,.2);margin-bottom:18px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div>
-                <div style="font-size:15px;font-weight:700;color:#085041;">
-                    {{ $apprenant->prenom }} {{ $apprenant->nom }}
+    <div class="epcard" style="margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div class="ep-ico navy" style="width:44px;height:44px;border-radius:12px;">
+                    <span class="material-symbols-outlined" style="font-size:24px;">person</span>
                 </div>
-                <div style="font-size:12px;color:#1B9E75;">
-                    {{ $apprenant->etablissement->nom ?? '—' }} · {{ $apprenant->classe }}
-                    @if($apprenant->matricule) · Mat. {{ $apprenant->matricule }} @endif
+                <div>
+                    <div style="font-size:15px;font-weight:700;color:var(--ep-navy);">
+                        {{ $apprenant->prenom }} {{ $apprenant->nom }}
+                    </div>
+                    <div class="ep-sous-titre">
+                        {{ $apprenant->etablissement->nom ?? '—' }} · {{ $apprenant->classe }}
+                        @if($apprenant->matricule) · Mat. {{ $apprenant->matricule }} @endif
+                    </div>
                 </div>
             </div>
             <div style="display:flex;gap:8px;align-items:center;">
@@ -136,10 +145,10 @@
             {{-- En-tête frais --}}
             <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
                 <div>
-                    <div style="font-size:14px;font-weight:700;">
+                    <div class="ep-frais-titre">
                         {{ $frais->categorieFrais->nom ?? __('payeur.categorie_frais_defaut') }}
                     </div>
-                    <div style="font-size:11px;color:#888;">{{ $frais->annee_scolaire }}</div>
+                    <div style="font-size:11.5px;color:#888;font-weight:500;">{{ $frais->annee_scolaire }}</div>
                 </div>
                 <span class="pill {{ match($frais->statut) {
                     'regle' => 'pg', 'partiel' => 'pa', 'impaye' => 'pr', default => 'pa',

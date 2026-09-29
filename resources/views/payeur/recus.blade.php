@@ -49,10 +49,10 @@
             $aJour = $aFrais && $resteC <= 0;
         @endphp
         <div class="epcard" style="border-left:3px solid {{ $aJour ? 'var(--ep-gold)' : '#ccc' }};{{ $aFrais && $aJour ? '' : 'opacity:.6;' }}">
-            <div style="font-size:13px;font-weight:700;margin-bottom:4px;">
+            <div class="ep-frais-titre" style="margin-bottom:4px;">
                 {{ $apprenant->prenom }} {{ $apprenant->nom }} — {{ $apprenant->etablissement->nom ?? '—' }}
             </div>
-            <div style="font-size:11px;color:#888;margin-bottom:10px;">
+            <div style="font-size:11.5px;color:#888;margin-bottom:10px;font-weight:500;">
                 @if(!$aFrais)
                     {{ __('payeur.recu_aucun_frais') }}
                 @elseif($aJour)

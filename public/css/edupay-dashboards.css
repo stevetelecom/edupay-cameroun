@@ -1,0 +1,550 @@
+/* ============================================================
+   EDUPAY CAMEROUN — THEME DASHBOARDS v2.1
+   Complément du theme edupay-theme.css :
+   pastilles icônes des KPI (style maquette CAM-FRET),
+   en-têtes de panneaux avec icône dorée, cases de sélection
+   des tableaux, animations, responsive consolidé.
+   Aucune modification de HTML nécessaire pour les vues legacy :
+   les composants s'appliquent par classes utilitaires.
+   ============================================================ */
+
+/* ---------- 1. PASTILLES ICÔNES DES KPI (.ep-ico) ---------- */
+/* Usage : <div class="ep-ico"><span class="material-symbols-outlined">payments</span></div>
+   Variantes : .vert .or .bleu .rouge .navy
+   Style maquette CAM-FRET renforcé : pastille FONCÉE, icône BLANCHE REMPLIE,
+   bien visible même de loin. */
+.ep-ico {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform .25s ease, box-shadow .25s ease;
+    box-shadow: 0 4px 12px rgba(11,37,69,.18);
+}
+.ep-ico .material-symbols-outlined {
+    font-size: 26px;
+    color: #fff !important;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+/* Pastilles saturées en dégradé : l'icône se détache nettement */
+.ep-ico.vert   { background: linear-gradient(135deg, #10B981, #0A8562); }
+.ep-ico.or     { background: linear-gradient(135deg, #F5B93F, #C9860E); }
+.ep-ico.bleu   { background: linear-gradient(135deg, #3B82D6, #1F6FB2); }
+.ep-ico.rouge  { background: linear-gradient(135deg, #E85B5B, #B03A2E); }
+.ep-ico.navy   { background: linear-gradient(135deg, #16406E, #0B2545); }
+.ep-ico.purple { background: linear-gradient(135deg, #8B5CF6, #6D28D9); }
+.ep-ico:hover { transform: scale(1.06); box-shadow: 0 6px 16px rgba(11,37,69,.28); }
+
+/* La carte KPI contenant une pastille devient horizontale (style maquette) */
+.kpi.ep-kpi {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-align: left !important;
+    padding: 18px !important;
+}
+.kpi.ep-kpi:hover .ep-ico { transform: scale(1.08) rotate(-4deg); }
+.kpi.ep-kpi .kval { font-size: 24px !important; }
+.kpi.ep-kpi .klbl { margin-top: 2px !important; font-size: 12px !important; }
+
+/* Effet shimmer : balayage lumineux diagonal au survol de la carte KPI.
+   Le ::after est la bande claire ; elle traverse la carte en .6s. */
+.kpi { position: relative; overflow: hidden; }
+.kpi::after {
+    content: '';
+    position: absolute;
+    top: -60%;
+    left: -80%;
+    width: 50%;
+    height: 220%;
+    transform: rotate(20deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+    opacity: 0;
+    pointer-events: none;
+}
+.kpi:hover::after {
+    animation: epShimmer .65s ease;
+}
+@keyframes epShimmer {
+    0%   { opacity: 0; left: -80%; }
+    15%  { opacity: 1; }
+    100% { opacity: 0; left: 130%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .kpi:hover::after { animation: none !important; }
+}
+
+/* Variation sous le KPI (trending up/down) */
+.ep-var {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 3px;
+}
+.ep-var .material-symbols-outlined { font-size: 14px; }
+.ep-var.haut { color: var(--ep-ok, #0D9E75); }
+.ep-var.bas  { color: var(--ep-danger, #B03A2E); }
+
+/* ---------- 2. EN-TÊTES DE PANNEAUX AVEC ICÔNE (.ep-entete) ---------- */
+/* Usage : <div class="ep-entete"><span class="material-symbols-outlined">payments</span><h3>Titre</h3>...</div> */
+.ep-entete {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+/* Mini-pastille dorée derrière l'icône de titre : plus visible qu'une icône seule */
+.ep-entete > .material-symbols-outlined {
+    color: #fff !important;
+    font-size: 18px;
+    background: linear-gradient(135deg, #F5B93F, #C9860E);
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(201,134,14,.35);
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+.ep-entete h2, .ep-entete h3 {
+    font-size: 15.5px;
+    font-weight: 700;
+    color: var(--ep-navy, #0B2545);
+    margin: 0;
+}
+.ep-entete .ep-droite { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* Icônes inline posées par les vues (sans .ep-entete) : dorée + remplie,
+   pour rester cohérentes avec les en-têtes ci-dessus */
+.main-content .material-symbols-outlined[style*="color:var(--ep-gold)"],
+.main-content .material-symbols-outlined[style*="color:#E8A020"],
+.admin-main-content .material-symbols-outlined[style*="color:#E8A020"] {
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ---------- 3. CASES À COCHER DE SÉLECTION DES TABLEAUX ---------- */
+/* Style unique pour toutes les checkbox DataTables :
+   select-etablissement, payeur-check, select-apprenant... */
+.ep-dt-check,
+table.ep-dt input[type="checkbox"],
+table.ep-table input[type="checkbox"],
+.select-etablissement,
+.select-apprenant,
+.payeur-check,
+#select-all-etablissement,
+#select-all-payeur,
+#select-all-apprenants {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #C6D2DC;
+    border-radius: 5px;
+    background: #fff;
+    cursor: pointer;
+    position: relative;
+    transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+.ep-dt-check:hover,
+table.ep-dt input[type="checkbox"]:hover,
+.select-etablissement:hover,
+.select-apprenant:hover,
+.payeur-check:hover {
+    border-color: var(--ep-teal, #0D9E75);
+    box-shadow: 0 0 0 3px rgba(13,158,117,.12);
+}
+.ep-dt-check:checked,
+table.ep-dt input[type="checkbox"]:checked,
+table.ep-table input[type="checkbox"]:checked,
+.select-etablissement:checked,
+.select-apprenant:checked,
+.payeur-check:checked,
+#select-all-etablissement:checked,
+#select-all-payeur:checked,
+#select-all-apprenants:checked {
+    background: var(--ep-teal, #0D9E75);
+    border-color: var(--ep-teal, #0D9E75);
+}
+/* Coche blanche via SVG inline */
+.ep-dt-check:checked::after,
+table.ep-dt input[type="checkbox"]:checked::after,
+table.ep-table input[type="checkbox"]:checked::after,
+.select-etablissement:checked::after,
+.select-apprenant:checked::after,
+.payeur-check:checked::after,
+#select-all-etablissement:checked::after,
+#select-all-payeur:checked::after,
+#select-all-apprenants:checked::after {
+    content: '';
+    position: absolute;
+    left: 4.5px;
+    top: 1.5px;
+    width: 5px;
+    height: 9px;
+    border: solid #fff;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+}
+
+/* Ligne sélectionnée : surlignage teal clair avec barre latérale */
+table.ep-dt tbody tr.ep-row-selected td,
+table.ep-table tbody tr.ep-row-selected td {
+    background: var(--ep-teal-lt, #E0F5EE) !important;
+}
+table.ep-dt tbody tr.ep-row-selected td:first-child {
+    box-shadow: inset 3px 0 0 var(--ep-teal, #0D9E75);
+}
+
+/* Ligne cliquable : curseur pointer + hover main */
+table.ep-dt tbody tr { transition: background .15s ease; }
+
+/* Toolbar de sélection groupée (bulk toolbar) */
+.ep-bulk-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--ep-teal-lt, #E0F5EE);
+    border: 1px solid var(--ep-teal-mid, #9FE1CB);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    animation: epSlideDown .25s ease;
+}
+@keyframes epSlideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.ep-bulk-toolbar .material-symbols-outlined { color: var(--ep-teal2, #0A8562); font-size: 20px; }
+.ep-bulk-toolbar .ep-bulk-count { font-weight: 800; color: var(--ep-navy, #0B2545); }
+
+/* ---------- 4. ANIMATIONS D'APPARITION DES SECTIONS ---------- */
+@keyframes epFadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.main-content > * { animation: epFadeUp .35s ease both; }
+.main-content > *:nth-child(1) { animation-delay: .02s; }
+.main-content > *:nth-child(2) { animation-delay: .06s; }
+.main-content > *:nth-child(3) { animation-delay: .10s; }
+.main-content > *:nth-child(4) { animation-delay: .14s; }
+.main-content > *:nth-child(5) { animation-delay: .18s; }
+.main-content > *:nth-child(6) { animation-delay: .22s; }
+@media (prefers-reduced-motion: reduce) {
+    .main-content > * { animation: none !important; }
+}
+
+/* Admin (Tailwind) : même animation sur les blocs principaux */
+.admin-main-content > * { animation: epFadeUp .35s ease both; }
+
+/* ---------- 5. RESPONSIVE CONSOLIDÉ ---------- */
+@media (max-width: 1024px) {
+    .ep-ico { width: 42px; height: 42px; border-radius: 12px; }
+    .ep-ico .material-symbols-outlined { font-size: 21px; }
+    .kpi.ep-kpi .kval { font-size: 21px !important; }
+}
+
+@media (max-width: 768px) {
+    /* KPI horizontaux : reste lisibles en 2 colonnes */
+    .kpi.ep-kpi { padding: 13px !important; gap: 11px; }
+    .ep-ico { width: 38px; height: 38px; border-radius: 11px; }
+    .ep-ico .material-symbols-outlined { font-size: 19px; }
+    .kpi.ep-kpi .kval { font-size: 18px !important; }
+    .kpi.ep-kpi .klbl { font-size: 10.5px !important; }
+    .ep-var { font-size: 10px; }
+    .ep-entete h2, .ep-entete h3 { font-size: 14px; }
+    .ep-entete > .material-symbols-outlined { font-size: 19px; }
+
+    /* Tableaux : cases de sélection plus grosses au doigt */
+    .ep-dt-check, .select-etablissement, .select-apprenant,
+    .payeur-check, table.ep-dt input[type="checkbox"] {
+        width: 22px; height: 22px;
+    }
+    .ep-dt-check:checked::after, .select-etablissement:checked::after,
+    .select-apprenant:checked::after, .payeur-check:checked::after,
+    table.ep-dt input[type="checkbox"]:checked::after {
+        left: 5.5px; top: 2.5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ep-bulk-toolbar { padding: 8px 10px; font-size: 12px; }
+    .ep-bulk-toolbar .btn-p, .ep-bulk-toolbar .btn-o, .ep-bulk-toolbar .btn-r {
+        padding: 7px 10px; font-size: 11.5px;
+    }
+}
+
+/* ============================================================
+   6. BANDEAUX D'ÉTAT v2 (.ep-bandeau) — style maquette CAM-FRET
+   Accent latéral logo + icône en pastille pleine + titre en police
+   sidebar (Poppins 600, même traitement que .sbar-item) + badge pill
+   + chevron animé au clic (accordéon fluide).
+   ============================================================ */
+.ep-bandeau {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: #fff;
+    border: 1px solid var(--ep-bordure, #E4E9EE);
+    border-left: 5px solid var(--ep-teal, #0D9E75);
+    border-radius: 14px;
+    padding: 15px 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 6px 18px rgba(11,37,69,.07);
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .25s ease, transform .25s ease;
+}
+.ep-bandeau:hover { box-shadow: 0 10px 26px rgba(11,37,69,.12); }
+
+/* Variantes sémantiques : la couleur du logo correspond à l'état.
+   Chaque variante reçoit aussi un fond très légèrement teinté (3-4 %)
+   pour renforcer la lecture de l'état (« le bon fond ») tout en
+   restant blanc à 96 %. */
+.ep-bandeau.succes  { border-left-color: var(--ep-teal, #0D9E75); background: #F4FBF8; }
+.ep-bandeau.succes  .ep-bandeau-ico { background: linear-gradient(135deg, #10B981, #0A8562); }
+.ep-bandeau.attente { border-left-color: var(--ep-gold, #E8A020); background: #FFF8EA; }
+.ep-bandeau.attente .ep-bandeau-ico { background: linear-gradient(135deg, #F5B93F, #C9860E); }
+.ep-bandeau.danger  { border-left-color: var(--ep-red, #D94040); background: #FDF3F2; }
+.ep-bandeau.danger  .ep-bandeau-ico { background: linear-gradient(135deg, #E85B5B, #B03A2E); }
+.ep-bandeau.info    { border-left-color: #1F6FB2; background: #F3F8FD; }
+.ep-bandeau.info    .ep-bandeau-ico { background: linear-gradient(135deg, #3B82D6, #1F6FB2); }
+.ep-bandeau.neutre  { border-left-color: #9CA3AF; }
+.ep-bandeau.neutre  .ep-bandeau-ico { background: linear-gradient(135deg, #6B7280, #4B5563); }
+
+/* En mode sombre : les fonds teintés laissent place à la carte sombre
+   avec une légère transparence blanche pour garder le contraste. */
+html[data-theme="dark"] .ep-bandeau.succes,
+html[data-theme="dark"] .ep-bandeau.attente,
+html[data-theme="dark"] .ep-bandeau.danger,
+html[data-theme="dark"] .ep-bandeau.info { background: rgba(255,255,255,.03); }
+
+/* Pastille icône : pleine, dégradé de la variante, icône blanche remplie */
+.ep-bandeau-ico {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(11,37,69,.22);
+    background: linear-gradient(135deg, #10B981, #0A8562); /* défaut : vert logo */
+}
+.ep-bandeau-ico .material-symbols-outlined {
+    font-size: 22px;
+    color: #fff !important;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Corps du bandeau : même police/graisse que les items de la sidebar */
+.ep-bandeau-corps { flex: 1; min-width: 0; }
+.ep-bandeau-titre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 13.5px;
+    font-weight: 600;          /* comme .sbar-item.on */
+    letter-spacing: .01em;
+    color: var(--ep-navy, #0B2545);
+    margin-bottom: 3px;
+}
+.ep-bandeau-texte {
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--ep-gris, #5A6472);
+}
+
+/* Badge pill arrondi (compteur, statut) */
+.ep-bandeau-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(11,37,69,.08);
+    color: var(--ep-navy, #0B2545);
+    text-transform: uppercase;
+}
+
+/* Zone droite (date d'expiration, actions) */
+.ep-bandeau-droite {
+    margin-left: auto;
+    text-align: right;
+    flex-shrink: 0;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ep-gris, #5A6472);
+}
+
+/* Chevron animé : rotation au clic (accordéon) */
+.ep-bandeau-chevron {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    border: 1.5px solid var(--ep-bordure, #E4E9EE);
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--ep-gris, #5A6472);
+    transition: transform .3s cubic-bezier(.4,0,.2,1), background .2s ease, border-color .2s ease;
+}
+.ep-bandeau-chevron .material-symbols-outlined { font-size: 18px; transition: transform .3s cubic-bezier(.4,0,.2,1); }
+.ep-bandeau-chevron:hover { border-color: var(--ep-teal, #0D9E75); color: var(--ep-teal2, #0A8562); background: var(--ep-teal-lt, #E0F5EE); }
+.ep-bandeau.ouvert .ep-bandeau-chevron { background: var(--ep-teal, #0D9E75); border-color: var(--ep-teal, #0D9E75); color: #fff; }
+.ep-bandeau.ouvert .ep-bandeau-chevron .material-symbols-outlined { transform: rotate(180deg); }
+
+/* Contenu repliable : hauteur animée via JS (inline style max-height) */
+.ep-bandeau-contenu {
+    flex-basis: 100%;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .35s cubic-bezier(.4,0,.2,1), opacity .3s ease;
+    opacity: 0;
+}
+.ep-bandeau.ouvert .ep-bandeau-contenu { opacity: 1; }
+.ep-bandeau-contenu-inner {
+    padding-top: 12px;
+    margin-top: 12px;
+    border-top: 1px dashed var(--ep-bordure, #E4E9EE);
+    font-size: 12.5px;
+    color: var(--ep-gris, #5A6472);
+    line-height: 1.65;
+}
+
+/* Bandeaux LEGACY (divs inline-stylées existantes) : harmonisation douce
+   pour que tout prenne le nouveau style sans retoucher chaque vue. */
+.main-content div[style*="border-radius:10px"][style*="padding:12px 16px"],
+.main-content div[style*="border-radius:10px;padding:12px 16px"] {
+    border-radius: 14px !important;
+    box-shadow: 0 6px 18px rgba(11,37,69,.07) !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+.main-content div[style*="border-radius:10px"] > .material-symbols-outlined:first-child {
+    font-size: 21px;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.9);
+    border: 1.5px solid currentColor;
+    flex-shrink: 0;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    box-shadow: 0 3px 10px rgba(11,37,69,.12);
+}
+
+/* ============================================================
+   7. TOASTS v2 — notification premium (barre latérale + icône pastille)
+   ============================================================ */
+.toast-wrap { top: 20px; right: 20px; }
+.toast {
+    border-radius: 16px !important;
+    padding: 14px 18px !important;
+    min-width: 300px;
+    max-width: 400px;
+    gap: 12px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.22) !important;
+    backdrop-filter: blur(8px);
+    border-left: 4px solid transparent;
+    font-family: 'Poppins', sans-serif !important;
+}
+.toast.t-success { background: linear-gradient(135deg, #0A6B52, #085041) !important; border-left-color: #34D399; }
+.toast.t-error   { background: linear-gradient(135deg, #A83A3A, #8F1D1D) !important; border-left-color: #FCA5A5; }
+.toast.t-warning { background: linear-gradient(135deg, #B45309, #92400E) !important; border-left-color: #FCD34D; }
+.toast.t-info    { background: linear-gradient(135deg, #1A5A9E, #144677) !important; border-left-color: #93C5FD; }
+/* Icône du toast : pastille translucide blanche */
+.toast .material-symbols-outlined,
+.toast .material-symbols-rounded,
+.toast svg {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 19px !important;
+    border-radius: 10px !important;
+    background: rgba(255,255,255,.18);
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0 !important;
+    padding: 0;
+}
+.toast .material-symbols-outlined,
+.toast .material-symbols-rounded {
+    color: #fff !important;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+/* Toasts inline posés via style="" (legacy) : on préserve leur fond */
+.toast[style] { border-left-width: 4px; border-left-style: solid; }
+
+@media (max-width: 480px) {
+    .toast { min-width: 240px; max-width: calc(100vw - 40px); padding: 11px 13px !important; }
+    .toast .material-symbols-outlined, .toast .material-symbols-rounded, .toast svg {
+        width: 26px !important; height: 26px !important; font-size: 16px !important;
+    }
+    .ep-bandeau { padding: 12px 13px; gap: 10px; }
+    .ep-bandeau-ico { width: 36px; height: 36px; border-radius: 11px; }
+    .ep-bandeau-ico .material-symbols-outlined { font-size: 19px; }
+    .ep-bandeau-titre { font-size: 12.5px; }
+    .ep-bandeau-droite { text-align: left; margin-left: 0; flex-basis: 100%; }
+}
+
+/* ============================================================
+   8. MICRO-ANIMATIONS AU CLIC — feedback vif partout (style maquette)
+   ============================================================ */
+/* Appui physique sur les boutons */
+.btn-p:active, .btn-o:active, .btn-r:active,
+.ep-bandeau-chevron:active, .sbar-item:active {
+    transform: scale(.97);
+}
+/* Apparition des bandeaux en cascade */
+/* ============================================================
+   12 bis. DUO DE BANDEAUX (.ep-bandeaux-duo) — dashboard établissement
+   Les deux bandeaux d'identité (statut + plan) partagent la largeur
+   en deux colonnes égales, alignés sur l'horizontale.
+   ============================================================ */
+.ep-bandeaux-duo {
+    display: grid;
+    /* Deux colonnes égales quand les deux bandeaux existent ;
+       un seul bandeau occupe naturellement toute la largeur. */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: 14px;
+    align-items: stretch;
+}
+.ep-bandeaux-duo .ep-bandeau { margin-bottom: 0; height: 100%; }
+@media (max-width: 1024px) {
+    .ep-bandeaux-duo { grid-template-columns: 1fr; }
+    .ep-bandeaux-duo .ep-bandeau { margin-bottom: 0; }
+}
+/* Le bandeau suivant garde son espacement vertical normal */
+.ep-bandeaux-duo + .ep-bandeau,
+.ep-bandeaux-duo + * .ep-bandeau { margin-bottom: 14px; }
+
+/* ============================================================
+   13. ANIMATION D'APPARITION — fade-up en cascade
+   ============================================================ */
+.ep-bandeau { animation: epFadeUp .4s ease both; }
+.main-content .ep-bandeau:nth-of-type(2) { animation-delay: .06s; }
+.main-content .ep-bandeau:nth-of-type(3) { animation-delay: .12s; }

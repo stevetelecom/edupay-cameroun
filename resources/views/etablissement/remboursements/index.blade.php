@@ -135,38 +135,53 @@
 @section('content')
 
 @if(session('success'))
-<div class="epcard" style="background:#d1fae5;border-left:4px solid #059669;color:#065f46;margin-bottom:16px;padding:12px 16px;">
-  <span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px;">check_circle</span> {{ session('success') }}
+<div class="ep-bandeau succes" style="align-items:center;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">check_circle</span></div>
+  <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('success') }}</div></div>
 </div>
 @endif
 @if(session('error'))
-<div class="epcard" style="background:var(--ep-red-lt);border-left:4px solid var(--ep-red);color:#9B2C2C;margin-bottom:16px;padding:12px 16px;">
-  {{ session('error') }}
+<div class="ep-bandeau danger" style="align-items:center;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">error</span></div>
+  <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('error') }}</div></div>
 </div>
 @endif
 @if(session('info'))
-<div class="epcard" style="background:var(--ep-blue-lt);border-left:4px solid #1A4F8A;color:#1A4F8A;margin-bottom:16px;padding:12px 16px;">
-  {{ session('info') }}
+<div class="ep-bandeau info" style="align-items:center;">
+  <div class="ep-bandeau-ico"><span class="material-symbols-outlined">info</span></div>
+  <div class="ep-bandeau-corps"><div class="ep-bandeau-texte">{{ session('info') }}</div></div>
 </div>
 @endif
 
-{{-- KPIs --}}
+{{-- KPIs — pastilles + compteurs animés --}}
 <div class="g4" style="margin-bottom:20px;">
-  <div class="kpi">
-    <div class="kval">{{ $remboursements->count() }}</div>
-    <div class="klbl">{{ __('etablissement.total_demandes') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico bleu"><span class="material-symbols-outlined">inbox</span></div>
+    <div>
+      <div class="kval" data-ep-count>{{ $remboursements->count() }}</div>
+      <div class="klbl">{{ __('etablissement.total_demandes') }}</div>
+    </div>
   </div>
-  <div class="kpi">
-    <div class="kval" style="color:#E8A020;">{{ $remboursements->where('statut','en_attente')->count() }}</div>
-    <div class="klbl">{{ __('etablissement.st_en_attente') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">hourglass_top</span></div>
+    <div>
+      <div class="kval" data-ep-count>{{ $remboursements->where('statut','en_attente')->count() }}</div>
+      <div class="klbl">{{ __('etablissement.st_en_attente') }}</div>
+    </div>
   </div>
-  <div class="kpi">
-    <div class="kval" style="color:var(--ep-teal);">{{ $remboursements->where('statut','approuve')->count() }}</div>
-    <div class="klbl">{{ __('etablissement.approuves') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico vert"><span class="material-symbols-outlined">task_alt</span></div>
+    <div>
+      <div class="kval" data-ep-count>{{ $remboursements->where('statut','approuve')->count() }}</div>
+      <div class="klbl">{{ __('etablissement.approuves') }}</div>
+    </div>
   </div>
-  <div class="kpi">
-    <div class="kval">{{ number_format($remboursements->where('statut','approuve')->sum('montant'),0,',',' ') }}</div>
-    <div class="klbl">{{ __('etablissement.fcfa_rembourses') }}</div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico navy"><span class="material-symbols-outlined">payments</span></div>
+    <div>
+      <div class="kval" data-ep-count>{{ number_format($remboursements->where('statut','approuve')->sum('montant'),0,',',' ') }}</div>
+      <div class="klbl">{{ __('etablissement.fcfa_rembourses') }}</div>
+    </div>
   </div>
 </div>
 

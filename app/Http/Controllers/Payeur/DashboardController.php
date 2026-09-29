@@ -75,6 +75,9 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
+        // Compteur pour le badge de la cloche du header
+        $nbNotifsPayeur = $notifications->count();
+
         return view('payeur.dashboard', [
             'notifications' => $notifications,
             'apprenants'          => $apprenants,
@@ -88,6 +91,7 @@ class DashboardController extends Controller
             'monDossier'          => $monDossier,
             'pourcentageGlobal'   => $pourcentageGlobal,
             'premierFraisImpayeSolo' => $premierFraisImpayeSolo,
+            'nbNotifsPayeur'      => $nbNotifsPayeur,
             'pageTitle'           => 'Mon espace — EduPay',
             'etablissements'      => $etablissements,
         ]);

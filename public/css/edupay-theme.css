@@ -1,0 +1,829 @@
+/* ============================================================
+   EDUPAY CAMEROUN — THEME GLOBAL v2
+   Inspiré de la maquette admin.html (style CAM-FRET) adapté
+   aux couleurs EduPay : navy #0B2545 · teal #0D9E75 · gold #E8A020
+   Ce fichier SURCHARGE les classes existantes des layouts.
+   Aucune modification du HTML des vues n'est nécessaire.
+   ============================================================ */
+
+/* ---------- Police et icônes officielles (Google Fonts) ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,300..700,0..1');
+
+:root {
+    /* Couleurs EduPay */
+    --ep-navy:   #0B2545;
+    --ep-navy2:  #103459;
+    --ep-teal:   #0D9E75;
+    --ep-teal2:  #0A8562;
+    --ep-teal-lt:#E0F5EE;
+    --ep-teal-mid:#9FE1CB;
+    --ep-gold:   #E8A020;
+    --ep-gold-lt:#FEF3DC;
+    --ep-red:    #D94040;
+    --ep-red-lt: #FBEAEA;
+    --ep-blue-lt:#E6F0FB;
+    --ep-purple-lt:#EDE9FE;
+
+    /* Neutres */
+    --ep-fond:   #F4F6F8;
+    --ep-carte:  #FFFFFF;
+    --ep-encre:  #101A2B;
+    --ep-gris:   #5A6472;
+    --ep-bordure:#E4E9EE;
+
+    /* Statuts */
+    --ep-ok:     #0D9E75;
+    --ep-info:   #1F6FB2;
+    --ep-attente:#D98A0B;
+    --ep-danger: #B03A2E;
+
+    /* Effets */
+    --ep-ombre:  0 10px 30px rgba(11,37,69,.08);
+    --ep-ombre-hover: 0 14px 38px rgba(11,37,69,.14);
+    --ep-rayon:  14px;
+}
+
+/* ============================================================
+   13. MODE SOMBRE — palette navy profonde raffinée
+   L'attribut [data-theme="dark"] est posé sur <html> par
+   public/js/ep-theme.js (persisté en localStorage, anti-FOUC).
+   Seules les variables changent : tous les composants qui les
+   utilisent s'adaptent automatiquement.
+   ============================================================ */
+:root { --ep-trans: background-color .45s ease, color .45s ease, border-color .45s ease, box-shadow .45s ease, fill .45s ease; }
+html[data-theme="dark"] {
+    --ep-fond:   #0A1526;
+    --ep-carte:  #0E1A2E;
+    --ep-encre:  #E8EEF6;
+    --ep-gris:   #8CA0B8;
+    --ep-bordure:#1C2C45;
+
+    --ep-teal-lt:  rgba(13,158,117,.14);
+    --ep-teal-mid: #63C6A6;
+    --ep-gold-lt:  rgba(232,160,32,.12);
+    --ep-red-lt:   rgba(217,64,64,.14);
+    --ep-blue-lt:  rgba(31,111,178,.16);
+    --ep-purple-lt:rgba(139,92,246,.14);
+
+    --ep-ombre:  0 10px 30px rgba(0,0,0,.45);
+    --ep-ombre-hover: 0 14px 38px rgba(0,0,0,.55);
+}
+
+/* Transition fluide : les surfaces principales fondent d'une palette
+   à l'autre (.45s). La classe .ep-theme-switching est posée par
+   ep-theme.js pendant la bascule puis retirée pour ne pas alourdir
+   les interactions quotidiennes (hover, scroll, saisie). */
+html.ep-theme-switching body,
+html.ep-theme-switching .epcard,
+html.ep-theme-switching .panneau,
+html.ep-theme-switching .kpi,
+html.ep-theme-switching .main-content,
+html.ep-theme-switching .app-header,
+html.ep-theme-switching .sidebar,
+html.ep-theme-switching .cote,
+html.ep-theme-switching .ep-bandeau,
+html.ep-theme-switching .ep-modal,
+html.ep-theme-switching table,
+html.ep-theme-switching table th,
+html.ep-theme-switching table td,
+html.ep-theme-switching .inp,
+html.ep-theme-switching .select,
+html.ep-theme-switching .ep-lang select,
+html.ep-theme-switching .toast {
+    transition: var(--ep-trans);
+}
+/* Fondu d'apparition au chargement : jamais de FOUC brutal */
+body { animation: epThemeFade .5s ease; }
+@keyframes epThemeFade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── Surfaces et textes génériques ── */
+html[data-theme="dark"] body { background: var(--ep-fond); color: var(--ep-encre); }
+html[data-theme="dark"] .epcard,
+html[data-theme="dark"] .panneau,
+html[data-theme="dark"] .kpi,
+html[data-theme="dark"] .ep-bandeau,
+html[data-theme="dark"] .ep-modal { background: var(--ep-carte) !important; }
+html[data-theme="dark"] .main-content,
+html[data-theme="dark"] .admin-main-content { background: var(--ep-fond) !important; }
+html[data-theme="dark"] .ep-bandeau-droite,
+html[data-theme="dark"] .ep-bandeau-titre { color: var(--ep-encre); }
+html[data-theme="dark"] .ep-bandeau-badge { background: rgba(255,255,255,.09); color: var(--ep-encre); }
+html[data-theme="dark"] .ep-bandeau-chevron { background: transparent; }
+
+/* Filigrane du back-office admin : inversé pour rester discret sur fond sombre */
+html[data-theme="dark"] .admin-main-content::before { opacity: .15; filter: invert(1) brightness(1.6); }
+
+/* ── Tableaux ── */
+html[data-theme="dark"] table.ep-table th { background: #132341 !important; }
+html[data-theme="dark"] table.ep-table td { color: var(--ep-encre) !important; }
+html[data-theme="dark"] table.ep-table tr:hover td { background: rgba(13,158,117,.10) !important; }
+html[data-theme="dark"] table th,
+html[data-theme="dark"] table td { background-color: transparent; }
+html[data-theme="dark"] table.dataTable tbody tr,
+html[data-theme="dark"] table.dataTable tbody tr:hover { background-color: rgba(255,255,255,.03); }
+
+/* ── Formulaires ── */
+html[data-theme="dark"] .inp,
+html[data-theme="dark"] .select,
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+    background: #0B1628 !important;
+    color: var(--ep-encre) !important;
+    border-color: var(--ep-bordure) !important;
+}
+html[data-theme="dark"] .inp::placeholder,
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder { color: #5D7290; }
+/* Le sélecteur de langue reste sur fond navy (header) : exception */
+html[data-theme="dark"] .ep-lang select { background: rgba(255,255,255,.08) !important; color: #fff !important; border-color: rgba(255,255,255,.18) !important; }
+
+/* ── Utilitaires Tailwind les plus courants (dropdowns profil, cartes) ── */
+html[data-theme="dark"] .bg-white { background-color: var(--ep-carte) !important; }
+html[data-theme="dark"] .bg-gray-50,
+html[data-theme="dark"] .bg-gray-100 { background-color: #13203A !important; }
+html[data-theme="dark"] .border-gray-100 { border-color: #152238 !important; }
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300 { border-color: #1C2C45 !important; }
+html[data-theme="dark"] .text-gray-900 { color: #F1F5F9 !important; }
+html[data-theme="dark"] .text-gray-800 { color: #E2E8F0 !important; }
+html[data-theme="dark"] .text-gray-700 { color: #CBD5E1 !important; }
+html[data-theme="dark"] .text-gray-600 { color: #94A3B8 !important; }
+html[data-theme="dark"] .text-gray-500 { color: #8CA0B8 !important; }
+html[data-theme="dark"] .text-gray-400 { color: #64748B !important; }
+
+/* ── Chart.js : grilles, ticks, pointes et infobulles adaptés ── */
+html[data-theme="dark"] .ep-histo-lbl { color: var(--ep-gris); }
+html[data-theme="dark"] .ep-histo-bar { box-shadow: 0 0 0 1px rgba(255,255,255,.06); }
+
+/* ============================================================
+   14. BOUTON BASCULE THÈME (.ep-theme-toggle) — pastille halo,
+   icône soleil/lune en fondu + rotation fluide
+   ============================================================ */
+.ep-theme-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    transition: background .25s ease, border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+}
+.ep-theme-toggle:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.4); transform: translateY(-1px); }
+.ep-theme-toggle:active { transform: scale(.94); }
+.ep-theme-toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(13,158,117,.35); }
+.ep-theme-toggle .material-symbols-outlined {
+    font-size: 20px;
+    position: absolute;
+    transition: opacity .35s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
+}
+/* En mode clair : soleil visible, lune cachée (tournée vers le haut) */
+.ep-theme-toggle .ep-tt-soleil { opacity: 1; transform: rotate(0deg) scale(1); }
+.ep-theme-toggle .ep-tt-lune   { opacity: 0; transform: rotate(90deg) scale(.4); }
+/* En mode sombre : la lune prend la place, le soleil s'évapore */
+html[data-theme="dark"] .ep-theme-toggle .ep-tt-soleil { opacity: 0; transform: rotate(-90deg) scale(.4); }
+html[data-theme="dark"] .ep-theme-toggle .ep-tt-lune   { opacity: 1; transform: rotate(0deg) scale(1); }
+/* Halo lumineux autour de l'icône active */
+.ep-theme-toggle::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(232,160,32,.0);
+    transition: box-shadow .3s ease;
+}
+.ep-theme-toggle:hover::after { box-shadow: 0 0 18px 2px rgba(232,160,32,.25); }
+
+/* ============================================================
+   15. FONDU GLOBAL PENDANT LA BASCULE (géré par ep-theme.js)
+   ============================================================ */
+html.ep-theme-switching body { animation: epThemeFade .5s ease; }
+
+/* ============================================================
+   16. BOUTON « RENOUVELER MON ABONNEMENT » (.ep-btn-renouveler)
+   Vrai bouton doré : remplace les liens soulignés peu lisibles.
+   ============================================================ */
+.ep-btn-renouveler {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 11px;
+    border: none;
+    background: linear-gradient(135deg, #F5B93F, #C9860E);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none !important;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(201,134,14,.30);
+    transition: filter .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.ep-btn-renouveler:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 7px 18px rgba(201,134,14,.4); text-decoration: none; }
+.ep-btn-renouveler .material-symbols-outlined { font-size: 15px; }
+.ep-btn-renouveler:active { transform: translateY(0); }
+
+/* ============================================================
+   17. WIDGETS HEADER — cloche notifications, avatar, langue
+   ============================================================ */
+/* Cloche avec badge compteur */
+.ep-bell {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+.ep-bell:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.4); transform: translateY(-1px); }
+.ep-bell .material-symbols-outlined { font-size: 19px; color: #fff; }
+.ep-bell-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--ep-gold, #E8A020);
+    color: #1E2B20;
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--ep-navy, #0B2545);
+}
+/* Anneau avatar : halo teal animé au survol */
+.ep-avatar-ring {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--ep-teal, #0D9E75), var(--ep-gold, #E8A020));
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+    flex-shrink: 0;
+    border: none;
+}
+.ep-avatar-ring:hover { transform: scale(1.06); box-shadow: 0 4px 14px rgba(13,158,117,.4); }
+.ep-avatar-ring > .ep-avatar-core {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--ep-navy, #0B2545);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+/* Sélecteur de langue v2 : bouton pill soigné (fond translucide,
+   lift au survol, anneau focus, globe + chevron intégrés) */
+.ep-lang {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+.ep-lang .material-symbols-outlined {
+    position: absolute;
+    left: 12px;
+    font-size: 16px;
+    color: rgba(255,255,255,.85);
+    pointer-events: none;
+    z-index: 1;
+}
+.ep-lang select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.07));
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.28);
+    border-radius: 999px;
+    padding: 8px 30px 8px 36px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 0 2px 8px rgba(11,37,69,.22), inset 0 1px 0 rgba(255,255,255,.18);
+    transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.ep-lang select:hover {
+    background: linear-gradient(145deg, rgba(255,255,255,.22), rgba(255,255,255,.10));
+    border-color: rgba(255,255,255,.45);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(11,37,69,.3), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.ep-lang select:focus-visible { box-shadow: 0 0 0 3px rgba(13,158,117,.4); }
+.ep-lang select option { background: #fff; color: #0B2545; font-weight: 500; }
+html[data-theme="dark"] .ep-lang select option { background: #0E1A2E; color: #E8EEF6; }
+.ep-lang::after {
+    content: '';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid rgba(255,255,255,.8);
+    border-bottom: 1.5px solid rgba(255,255,255,.8);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+}
+
+/* Utilitaire responsive : cache les libellés secondaires du header
+   sur les petits écrans pour garder le header aéré */
+@media (max-width: 640px) {
+    .ep-hide-sm { display: none !important; }
+}
+
+/* ============================================================
+   18. HISTOGRAMMES DASHBOARD — barres verticales journalières
+   ============================================================ */
+.ep-histo { display: flex; align-items: flex-end; gap: 5px; height: 120px; padding-top: 6px; }
+.ep-histo-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+    cursor: default;
+}
+.ep-histo-bar {
+    width: 100%;
+    max-width: 26px;
+    border-radius: 6px 6px 2px 2px;
+    background: linear-gradient(180deg, var(--ep-teal, #0D9E75), var(--ep-teal2, #0A8562));
+    min-height: 3px;
+    transition: filter .2s ease, transform .2s ease;
+    animation: epHistoGrow .6s cubic-bezier(.4,0,.2,1) backwards;
+}
+@keyframes epHistoGrow { from { transform: scaleY(0); transform-origin: bottom; } }
+.ep-histo-col:hover .ep-histo-bar { filter: brightness(1.2); transform: scaleY(1.02); }
+.ep-histo-col:hover .ep-histo-tip { opacity: 1; transform: translate(-50%, -4px); }
+.ep-histo-tip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    background: var(--ep-navy, #0B2545);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 7px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 5;
+}
+html[data-theme="dark"] .ep-histo-tip { background: #1C2C45; box-shadow: 0 0 0 1px rgba(255,255,255,.08); }
+.ep-histo-lbl { font-size: 9.5px; color: var(--ep-gris, #5A6472); font-weight: 600; }
+/* Colonnes du jour/week-end atténuées */
+.ep-histo-col.dim .ep-histo-bar { background: rgba(13,158,117,.30); }
+
+@media (max-width: 768px) {
+    .ep-histo { height: 90px; gap: 3px; }
+    .ep-histo-lbl { font-size: 8.5px; }
+}
+
+/* ---------- Base typographique : police Poppins + tailles agrandies ---------- */
+body {
+    font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+    color: var(--ep-encre);
+    background: var(--ep-fond);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -.01em; }
+
+/* Icônes Material Symbols : style "Rounded" partout, trait renforcé
+   pour être bien visible */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+}
+
+/* Bandeaux de notification du dashboard payeur (divs inline-stylées) :
+   coins arrondis et ombre douce harmonisés avec les bandeaux v2 */
+.main-content div[style*="border-radius:10px;padding:14px 16px"] {
+    border-radius: 14px !important;
+    box-shadow: 0 4px 14px rgba(11,37,69,.08);
+}
+
+/* ============================================================
+   1. CARTES — epcard / panneau : ombre douce + hover lift
+   ============================================================ */
+.epcard,
+.panneau {
+    background: var(--ep-carte) !important;
+    border: none !important;
+    border-radius: var(--ep-rayon) !important;
+    padding: 20px !important;
+    box-shadow: var(--ep-ombre) !important;
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+.epcard:hover { box-shadow: var(--ep-ombre-hover) !important; }
+
+/* ============================================================
+   2. KPI — cartes statistiques avec pastilles colorées
+   (la structure .kpi > .kval + .klbl est conservée)
+   ============================================================ */
+.kpi {
+    background: var(--ep-carte) !important;
+    border-radius: var(--ep-rayon) !important;
+    padding: 18px 16px !important;
+    text-align: center !important;
+    box-shadow: var(--ep-ombre) !important;
+    transition: transform .25s ease, box-shadow .25s ease;
+    position: relative;
+    overflow: hidden;
+}
+.kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--ep-teal), var(--ep-teal-mid));
+    opacity: 0;
+    transition: opacity .25s ease;
+}
+.kpi:hover { transform: translateY(-3px); box-shadow: var(--ep-ombre-hover) !important; }
+.kpi:hover::before { opacity: 1; }
+
+.kval { font-size: 26px !important; font-weight: 800 !important; color: var(--ep-navy) !important; }
+.klbl { font-size: 11.5px !important; color: var(--ep-gris) !important; font-weight: 600 !important; margin-top: 5px !important; }
+
+/* ============================================================
+   3. SIDEBAR — dégradé navy → teal (style maquette)
+   ============================================================ */
+.sidebar,
+.cote {
+    background: linear-gradient(180deg, var(--ep-navy) 0%, #123B5E 55%, var(--ep-teal2) 100%) !important;
+    border-right: none !important;
+}
+
+/* Le logo/titre dans la sidebar devient blanc */
+.sidebar .logo-t,
+.sidebar b { color: #fff !important; }
+.sidebar .logo-t span { color: var(--ep-teal-mid) !important; }
+
+/* Items de menu */
+.sbar-item,
+.sidebar-link {
+    color: #D4E4EF !important;
+    border-radius: 11px !important;
+    padding: 10px 12px !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    transition: background .2s ease, color .2s ease, padding-left .2s ease;
+    position: relative;
+}
+.sbar-item svg,
+.sidebar-link svg { stroke: #9FC4DB !important; transition: stroke .2s ease; }
+
+.sbar-item:hover:not(.on):not(.active),
+.sidebar-link:hover:not(.active) {
+    background: rgba(255,255,255,.10) !important;
+    color: #fff !important;
+    padding-left: 15px;
+}
+.sbar-item:hover:not(.on):not(.active) svg,
+.sidebar-link:hover:not(.active) svg { stroke: #fff !important; }
+
+/* Item actif : pastille dorée à gauche (comme la maquette) */
+.sbar-item.on,
+.sidebar-link.active {
+    background: rgba(255,255,255,.16) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    box-shadow: inset 3px 0 0 var(--ep-gold) !important;
+}
+.sbar-item.on svg,
+.sidebar-link.active svg { stroke: var(--ep-gold) !important; }
+
+/* Badge compteur dans la sidebar */
+.badge-cnt {
+    background: var(--ep-gold) !important;
+    color: #1E2B20 !important;
+    font-weight: 800 !important;
+    border-radius: 999px !important;
+    padding: 2px 8px !important;
+    font-size: 10.5px !important;
+}
+
+/* Widget bas de sidebar (taux recouvrement / commission) */
+.sidebar > div[style*="background:var(--ep-teal-lt)"] {
+    background: rgba(255,255,255,.08) !important;
+    border: 1px solid rgba(255,255,255,.15) !important;
+    border-radius: 12px !important;
+}
+.sidebar > div[style*="background:var(--ep-teal-lt)"] div[style*="font-size:11px"] {
+    color: var(--ep-teal-mid) !important;
+}
+.sidebar > div[style*="background:var(--ep-teal-lt)"] div[style*="font-size:24px"] {
+    color: #fff !important;
+}
+.sidebar > div[style*="background:var(--ep-teal-lt)"] div[style*="font-size:10px"] {
+    color: #9FC4DB !important;
+}
+/* Barre de progression du widget */
+.sidebar .prog { background: rgba(255,255,255,.15) !important; }
+.sidebar .pfill { background: var(--ep-gold) !important; }
+
+/* ============================================================
+   4. HEADERS — barre supérieure navy avec ombre
+   ============================================================ */
+.app-header,
+body > header,
+.admin-body > header:first-of-type {
+    background: linear-gradient(90deg, var(--ep-navy) 0%, #123B5E 100%) !important;
+    box-shadow: 0 2px 16px rgba(11,37,69,.25);
+    padding: 14px 26px !important;
+}
+
+/* ============================================================
+   5. BOUTONS — arrondis, ombres, hover lift
+   ============================================================ */
+.btn-p, .bouton {
+    background: linear-gradient(135deg, var(--ep-teal) 0%, var(--ep-teal2) 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 11px !important;
+    padding: 11px 22px !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    font-family: 'Poppins', sans-serif !important;
+    cursor: pointer;
+    transition: filter .2s ease, box-shadow .2s ease, transform .2s ease !important;
+    box-shadow: 0 4px 14px rgba(13,158,117,.25);
+}
+.btn-p:hover, .bouton:hover {
+    filter: brightness(1.08) !important;
+    box-shadow: 0 8px 22px rgba(13,158,117,.35) !important;
+    transform: translateY(-1px);
+}
+.btn-o {
+    background: transparent !important;
+    color: var(--ep-teal2) !important;
+    border: 2px solid var(--ep-teal) !important;
+    border-radius: 11px !important;
+    font-weight: 600 !important;
+    font-family: 'Poppins', sans-serif !important;
+    transition: background .2s ease !important;
+}
+.btn-o:hover { background: var(--ep-teal-lt) !important; }
+.btn-r {
+    background: linear-gradient(135deg, #E05555 0%, var(--ep-red) 100%) !important;
+    border-radius: 11px !important;
+    font-weight: 600 !important;
+    font-family: 'Poppins', sans-serif !important;
+    box-shadow: 0 4px 14px rgba(217,64,64,.25);
+}
+.btn-r:hover { filter: brightness(1.08); }
+
+/* ============================================================
+   6. TABLEAUX — header coloré, hover teal clair, lignes propres
+   ============================================================ */
+table.ep-table { font-size: 13.5px !important; }
+table.ep-table th {
+    background: var(--ep-navy) !important;
+    color: #fff !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: .6px !important;
+    text-transform: uppercase !important;
+    padding: 12px 14px !important;
+    border-bottom: none !important;
+}
+table.ep-table th:first-child { border-radius: 10px 0 0 0; }
+table.ep-table th:last-child { border-radius: 0 10px 0 0; }
+table.ep-table td { padding: 12px 14px !important; color: #333 !important; }
+table.ep-table tr:hover td { background: var(--ep-teal-lt) !important; }
+table.ep-table tbody tr { transition: background .15s ease; }
+
+/* ============================================================
+   7. BADGES / PILLS — arrondis, semi-transparents
+   ============================================================ */
+.pill {
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    padding: 4px 11px !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px;
+}
+.pill::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+.pg { background: #E4F4EA !important; color: #0D7A4F !important; }
+.pa { background: #FDF3E1 !important; color: #9A6300 !important; }
+.pr { background: #F9E9E7 !important; color: #A33528 !important; }
+.pb { background: #E3F0FA !important; color: #1F6FB2 !important; }
+
+/* ============================================================
+   8. FORMULAIRES — focus teal, arrondis généreux
+   ============================================================ */
+.inp, .select {
+    border: 1.5px solid var(--ep-bordure) !important;
+    border-radius: 11px !important;
+    padding: 11px 14px !important;
+    font-size: 13.5px !important;
+    font-family: 'Poppins', sans-serif !important;
+    background: #fff !important;
+    transition: border-color .2s ease, box-shadow .2s ease !important;
+}
+.inp:focus, .select:focus {
+    border-color: var(--ep-teal) !important;
+    box-shadow: 0 0 0 3px rgba(13,158,117,.15) !important;
+}
+.lbl {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--ep-gris) !important;
+    margin-bottom: 6px !important;
+}
+
+/* ============================================================
+   9. MODALS — arrondis 20px, animation douce (déjà proches de la maquette)
+   ============================================================ */
+.ep-modal {
+    border-radius: 20px !important;
+    box-shadow: 0 24px 64px rgba(0,0,0,.18) !important;
+}
+.ep-modal-head h3 { font-size: 16px !important; font-weight: 700 !important; color: var(--ep-navy) !important; }
+
+/* ============================================================
+   10. TOASTS — coins arrondis 14px (déjà bons, on affine)
+   ============================================================ */
+.toast {
+    border-radius: 14px !important;
+    font-family: 'Poppins', sans-serif !important;
+    box-shadow: 0 14px 30px rgba(0,0,0,.25) !important;
+}
+
+/* ============================================================
+   11. TITRES DE SECTIONS — plus grands et plus visibles
+   ============================================================ */
+.seclbl {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: var(--ep-gris) !important;
+    letter-spacing: .1em !important;
+    margin: 22px 0 12px !important;
+}
+
+/* ============================================================
+   12. CONTENEUR PRINCIPAL — fond gris-bleuté clair
+   ============================================================ */
+.main-content { background: var(--ep-fond) !important; }
+
+/* ============================================================
+   16. WIDGETS HEADER — cloche notifications, avatar, langue
+   ============================================================ */
+/* Cloche avec badge compteur */
+.ep-bell {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.22);
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, transform .2s ease;
+    flex-shrink: 0;
+    text-decoration: none;
+}
+.ep-bell:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.4); transform: translateY(-1px); }
+.ep-bell .material-symbols-outlined { font-size: 19px; color: #fff; }
+.ep-bell-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--ep-gold, #E8A020);
+    color: #1E2B20;
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--ep-navy, #0B2545);
+}
+/* Anneau avatar : halo teal animé au survol */
+.ep-avatar-ring {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, var(--ep-teal, #0D9E75), var(--ep-gold, #E8A020));
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+    flex-shrink: 0;
+}
+.ep-avatar-ring:hover { transform: scale(1.06); box-shadow: 0 4px 14px rgba(13,158,117,.4); }
+.ep-avatar-ring > .ep-avatar-core {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--ep-navy, #0B2545);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+}
+/* (Sélecteur de langue v2 déplacé en section 17, avec le nouveau design pill) */
+
+/* Utilitaire responsive : cache les libellés secondaires du header
+   sur les petits écrans pour garder le header aéré */
+@media (max-width: 640px) {
+    .ep-hide-sm { display: none !important; }
+}
+
+/* ============================================================
+   17. HISTOGRAMMES DASHBOARD — barres verticales journalières
+   ============================================================ */
+.ep-histo { display: flex; align-items: flex-end; gap: 5px; height: 120px; padding-top: 6px; }
+.ep-histo-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+    cursor: default;
+}
+.ep-histo-bar {
+    width: 100%;
+    max-width: 26px;
+    border-radius: 6px 6px 2px 2px;
+    background: linear-gradient(180deg, var(--ep-teal, #0D9E75), var(--ep-teal2, #0A8562));
+    min-height: 3px;
+    transition: filter .2s ease, transform .2s ease;
+    animation: epHistoGrow .6s cubic-bezier(.4,0,.2,1) backwards;
+}
+@keyframes epHistoGrow { from { transform: scaleY(0); transform-origin: bottom; } }
+.ep-histo-col:hover .ep-histo-bar { filter: brightness(1.2); transform: scaleY(1.02); }
+.ep-histo-col:hover .ep-histo-tip { opacity: 1; transform: translate(-50%, -4px); }
+.ep-histo-tip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    background: var(--ep-navy, #0B2545);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 7px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 5;
+}
+.ep-histo-lbl { font-size: 9.5px; color: var(--ep-gris, #5A6472); font-weight: 600; }
+/* Colonnes du jour/week-end atténuées */
+.ep-histo-col.dim .ep-histo-bar { background: rgba(13,158,117,.30); }
+
+@media (max-width: 768px) {
+    .ep-histo { height: 90px; gap: 3px; }
+    .ep-histo-lbl { font-size: 8.5px; }
+}

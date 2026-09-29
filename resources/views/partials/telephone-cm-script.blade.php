@@ -1,10 +1,19 @@
 <script>
 /**
  * Restriction et aide à la saisie pour les numéros de téléphone camerounais.
- * - N'autorise que les chiffres et le "+" en tout début
+ *
+ * Principe anti-bug « +237237237 » : l'indicatif n'est JAMAIS traité comme
+ * une saisie. À chaque frappe on extrait d'abord les 9 chiffres nationaux
+ * (en retirant tout « 237 » résiduel collé par le navigateur, la
+ * restauration old() ou un collage), puis on affiche « +237 » + ces 9
+ * chiffres. L'indicatif affiché ne peut donc jamais se dupliquer.
+ *
+ * Autres comportements :
+ * - N'autorise que les chiffres et le « + » en tout début
  * - Limite à 9 chiffres après normalisation (hors indicatif 237)
- * - Affiche un compteur "X chiffres restants" en direct
+ * - Affiche un compteur « X chiffres restants » en direct
  * - Vérifie que le numéro commence par 6 (sauf si data-allow-fixe="true")
+ * - Ne réécrit la valeur QUE si elle diffère, en restaurant le curseur
  */
 function initTelephoneCm(selector) {
     document.querySelectorAll(selector).forEach(function(input) {
@@ -19,21 +28,33 @@ function initTelephoneCm(selector) {
 
         var allowFixe = input.dataset.allowFixe === 'true';
 
+        /**
+         * Extrait les 9 chiffres nationaux d'une valeur saisie.
+         * Le « 237 » (avec ou sans « + ») est retiré AVANT tout le reste :
+         * c'est ce qui empêche l'indicatif de se retrouver dans les chiffres
+         * et d'apparaître en double (« +23723761… ») à la frappe.
+         */
         function extraireChiffres(value) {
-            var digits = value.replace(/\D/g, '');
-            if (digits.startsWith('237') && digits.length > 9) {
-                digits = digits.slice(3);
+            var chiffres = String(value).replace(/\D/g, '');
+
+            // Retire TOUS les « 237 » résiduels au début (23723761, 23723723761…)
+            while (chiffres.startsWith('237')) {
+                chiffres = chiffres.slice(3);
             }
-            if (digits.length > 9) {
-                digits = digits.slice(-9);
+            // Anciens préfixes tolérés : 00237, +237 déjà géré par \D
+            chiffres = chiffres.replace(/^0+/, '');
+
+            // Jamais plus de 9 chiffres nationaux
+            if (chiffres.length > 9) {
+                chiffres = chiffres.slice(0, 9);
             }
-            return digits;
+            return chiffres;
         }
 
-        function majHint(digits) {
-            var premierValide = allowFixe ? /^[236]/.test(digits) : /^6/.test(digits);
+        function majHint(chiffres) {
+            var premierValide = allowFixe ? /^[236]/.test(chiffres) : /^6/.test(chiffres);
 
-            if (digits.length === 0) {
+            if (chiffres.length === 0) {
                 hint.textContent = allowFixe
                     ? 'Format : 6XXXXXXXX (mobile) ou 2XXXXXXXX / 3XXXXXXXX (fixe)'
                     : 'Format : 6XXXXXXXX (9 chiffres)';
@@ -43,8 +64,8 @@ function initTelephoneCm(selector) {
                     ? 'Le numéro doit commencer par 6 (mobile), 2 ou 3 (fixe)'
                     : 'Le numéro doit commencer par 6 (mobile camerounais)';
                 hint.style.color = 'var(--ep-red, #B91C1C)';
-            } else if (digits.length < 9) {
-                hint.textContent = (9 - digits.length) + ' chiffre(s) restant(s)';
+            } else if (chiffres.length < 9) {
+                hint.textContent = (9 - chiffres.length) + ' chiffre(s) restant(s)';
                 hint.style.color = '#999';
             } else {
                 hint.textContent = 'Numero valide';
@@ -52,15 +73,34 @@ function initTelephoneCm(selector) {
             }
         }
 
+        /**
+         * Affiche « +237 » + les chiffres, sans toucher au curseur inutilement.
+         * Si la valeur change, le curseur est reposé après le même nombre de
+         * chiffres nationaux (sinon il sauterait en fin de champ).
+         */
+        function normaliserAffichage(chiffres, repositionnerCurseur) {
+            var formate = chiffres.length > 0 ? '+237' + chiffres : '';
+            if (input.value !== formate) {
+                var pos = input.selectionStart ?? input.value.length;
+                // Nombre de chiffres NATIONAUX avant le curseur dans l'ancienne valeur
+                var chiffresAvant = extraireChiffres(input.value.slice(0, pos)).length;
+                input.value = formate;
+                if (repositionnerCurseur) {
+                    var nouvellePos = formate.length; // par défaut : fin du champ
+                    if (chiffresAvant < chiffres.length) {
+                        nouvellePos = 4 + chiffresAvant; // '+237' = 4 caractères
+                    }
+                    try { input.setSelectionRange(nouvellePos, nouvellePos); } catch (e) {}
+                }
+            }
+            majHint(chiffres);
+        }
+
         // Affichage initial (utile après une erreur de validation avec old())
-        majHint(extraireChiffres(input.value));
+        normaliserAffichage(extraireChiffres(input.value), false);
 
         input.addEventListener('input', function() {
-            var digits = extraireChiffres(input.value);
-            input.value = '+237' + digits;
-            // Si le champ est vidé, ne pas forcer le +237 tout seul
-            if (digits.length === 0) input.value = '';
-            majHint(digits);
+            normaliserAffichage(extraireChiffres(input.value), true);
         });
 
         // Empêcher la saisie de lettres au clavier (en plus du nettoyage ci-dessus)
@@ -68,6 +108,13 @@ function initTelephoneCm(selector) {
             if (!/[\d+]/.test(e.key)) {
                 e.preventDefault();
             }
+        });
+
+        // Collage : nettoie ce qui arrive (numéros copiés avec espaces/tirets)
+        input.addEventListener('paste', function() {
+            setTimeout(function() {
+                normaliserAffichage(extraireChiffres(input.value), false);
+            }, 0);
         });
     });
 }

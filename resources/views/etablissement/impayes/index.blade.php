@@ -21,19 +21,26 @@
 
 {{-- KPIs --}}
 <div class="g3" style="margin-bottom:16px;">
-    <div class="kpi">
-        <div class="kval" style="color:var(--ep-red);">
-            {{ number_format($totalImpaye ?? 0, 0, ',', ' ') }}
+    <div class="kpi ep-kpi">
+        <div class="ep-ico rouge"><span class="material-symbols-outlined">error</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ number_format($totalImpaye ?? 0, 0, ',', ' ') }}</div>
+            <div class="klbl">{{ __('etablissement.fcfa_total_impaye') }}</div>
         </div>
-        <div class="klbl">{{ __('etablissement.fcfa_total_impaye') }}</div>
     </div>
-    <div class="kpi">
-        <div class="kval">{{ $fraisImpayes->total() }}</div>
-        <div class="klbl">{{ __('etablissement.dossiers_concernes') }}</div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico bleu"><span class="material-symbols-outlined">folder_special</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ $fraisImpayes->total() }}</div>
+            <div class="klbl">{{ __('etablissement.dossiers_concernes') }}</div>
+        </div>
     </div>
-    <div class="kpi">
-        <div class="kval" style="color:var(--ep-gold);">{{ number_format($tauxRecouvrementDecimal ?? 0, 2, ',', '') }}%</div>
-        <div class="klbl">{{ __('etablissement.taux_recouvrement') }}</div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico or"><span class="material-symbols-outlined">track_changes</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ number_format($tauxRecouvrementDecimal ?? 0, 2, ',', '') }}%</div>
+            <div class="klbl">{{ __('etablissement.taux_recouvrement') }}</div>
+        </div>
     </div>
 </div>
 

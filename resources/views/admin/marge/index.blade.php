@@ -2,10 +2,13 @@
 @section('title', __('admin.marge_titre'))
 
 @section('content')
-<div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-    <div>
-        <h1 class="text-xl font-bold text-gray-800">{{ __('admin.marge_titre') }}</h1>
-        <p class="text-sm text-gray-500 mt-1">{{ __('admin.marge_sous_titre') }}</p>
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div class="ep-ico or ep-ico-entete"><span class="material-symbols-outlined">payments</span></div>
+        <div>
+            <h3 style="margin:0;">{{ __('admin.marge_titre') }}</h3>
+            <p class="text-sm text-gray-500 mt-1 ep-sous-titre" style="margin-top:2px;">{{ __('admin.marge_sous_titre') }}</p>
+        </div>
     </div>
 </div>
 
@@ -36,58 +39,65 @@
     </p>
 </div>
 
-{{-- Solde reel AangaraaPay : seul chiffre opposable --}}
-<div class="rounded-xl p-4 mb-5 border {{ $solde['ok'] ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200' }}">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-            <div class="text-xs font-semibold text-gray-600 uppercase tracking-wide">{{ __('admin.solde_aangaraa') }}</div>
-            @if ($solde['ok'])
-                <div class="text-2xl font-bold text-gray-800 mt-1">
-                    {{ number_format($solde['solde'], 0, ',', ' ') }} FCFA
-                </div>
-                <div class="text-xs text-gray-500 mt-1">
-                    {{ $solde['service_name'] ?? __('admin.service') }}
-                    @if ($solde['nbTransactions'] !== null)
-                        &middot; {{ number_format($solde['nbTransactions'], 0, ',', ' ') }} {{ __('admin.transactions_succes') }}
-                    @endif
-                </div>
-                <div class="text-xs text-gray-500 mt-1">
-                    MTN : {{ number_format($solde['parOperateur']['mtn'], 0, ',', ' ') }}
-                    &middot; Orange : {{ number_format($solde['parOperateur']['orange'], 0, ',', ' ') }} FCFA
-                </div>
-            @else
-                <div class="text-sm text-red-700 mt-1">{{ $solde['message'] }}</div>
-            @endif
+{{-- Solde reel AangaraaPay : seul chiffre opposable — composant ep-bandeau v2 --}}
+<div class="ep-bandeau {{ $solde['ok'] ? 'succes' : 'danger' }}">
+    <div class="ep-bandeau-ico">
+        <span class="material-symbols-outlined">account_balance</span>
+    </div>
+    <div class="ep-bandeau-corps">
+        <div class="ep-bandeau-titre">{{ __('admin.solde_aangaraa') }}</div>
+        @if ($solde['ok'])
+            <div class="ep-bandeau-texte" style="font-size:24px;font-weight:800;color:var(--ep-navy);line-height:1.2;">
+                {{ number_format($solde['solde'], 0, ',', ' ') }} FCFA
+            </div>
+            <div class="ep-bandeau-texte" style="margin-top:4px;">
+                {{ $solde['service_name'] ?? __('admin.service') }}
+                @if ($solde['nbTransactions'] !== null)
+                    · {{ number_format($solde['nbTransactions'], 0, ',', ' ') }} {{ __('admin.transactions_succes') }}
+                @endif
+            </div>
+            <div class="ep-bandeau-texte" style="opacity:.8;">
+                MTN : {{ number_format($solde['parOperateur']['mtn'], 0, ',', ' ') }}
+                · Orange : {{ number_format($solde['parOperateur']['orange'], 0, ',', ' ') }} FCFA
+            </div>
+        @else
+            <div class="ep-bandeau-texte" style="color:#991B1B;font-weight:600;">{{ $solde['message'] }}</div>
+        @endif
+        <div class="ep-bandeau-texte" style="margin-top:6px;opacity:.75;font-size:11.5px;">
+            {{ __('admin.solde_aangaraa_explication') }}
         </div>
     </div>
-    <p class="text-xs text-gray-600 mt-3">
-        {{ __('admin.solde_aangaraa_explication') }}
-    </p>
 </div>
 
 {{-- Totaux de la periode --}}
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
-    <div class="bg-white border border-gray-200 rounded-xl p-4">
-        <div class="text-xs font-medium text-gray-500">{{ __('admin.marge_eduplay') }}</div>
-        <div class="text-2xl font-bold text-[#E8A020] mt-1">{{ number_format($global->marge, 0, ',', ' ') }}</div>
-        <div class="text-xs text-gray-500 mt-1">FCFA</div>
-    </div>
-    <div class="bg-white border border-gray-200 rounded-xl p-4">
-        <div class="text-xs font-medium text-gray-500">{{ __('admin.frais_preleves') }}</div>
-        <div class="text-2xl font-bold text-gray-800 mt-1">{{ number_format($fraisPreleves, 0, ',', ' ') }}</div>
-        <div class="text-xs text-gray-500 mt-1">FCFA</div>
-    </div>
-    <div class="bg-white border border-gray-200 rounded-xl p-4">
-        <div class="text-xs font-medium text-gray-500">{{ __('admin.cout_aangaraa') }}</div>
-        <div class="text-2xl font-bold text-gray-800 mt-1">{{ number_format($global->cout, 0, ',', ' ') }}</div>
-        <div class="text-xs text-gray-500 mt-1">
-            {{ $tauxAangaraa !== null ? number_format($tauxAangaraa * 100, 2, ',', '').' %' : '' }}
+    <div class="kpi ep-kpi">
+        <div class="ep-ico or"><span class="material-symbols-outlined">payments</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ number_format($global->marge, 0, ',', ' ') }}</div>
+            <div class="klbl">{{ __('admin.marge_eduplay') }} · FCFA</div>
         </div>
     </div>
-    <div class="bg-white border border-gray-200 rounded-xl p-4">
-        <div class="text-xs font-medium text-gray-500">{{ __('admin.volume_encaisse') }}</div>
-        <div class="text-2xl font-bold text-gray-800 mt-1">{{ number_format($totalPaye, 0, ',', ' ') }}</div>
-        <div class="text-xs text-gray-500 mt-1">FCFA</div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico bleu"><span class="material-symbols-outlined">account_balance_wallet</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ number_format($fraisPreleves, 0, ',', ' ') }}</div>
+            <div class="klbl">{{ __('admin.frais_preleves') }} · FCFA</div>
+        </div>
+    </div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico rouge"><span class="material-symbols-outlined">trending_down</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ number_format($global->cout, 0, ',', ' ') }}</div>
+            <div class="klbl">{{ __('admin.cout_aangaraa') }} @if ($tauxAangaraa !== null)· {{ number_format($tauxAangaraa * 100, 2, ',', '') }} % @endif</div>
+        </div>
+    </div>
+    <div class="kpi ep-kpi">
+        <div class="ep-ico navy"><span class="material-symbols-outlined">credit_card</span></div>
+        <div>
+            <div class="kval" data-ep-count>{{ number_format($totalPaye, 0, ',', ' ') }}</div>
+            <div class="klbl">{{ __('admin.volume_encaisse') }} · FCFA</div>
+        </div>
     </div>
 </div>
 
@@ -95,7 +105,7 @@
 <div class="bg-white border border-gray-200 rounded-xl p-4 mb-5">
     <h2 class="text-sm font-bold text-gray-800 mb-3">{{ __('admin.detail_par_operateur') }}</h2>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="ep-table w-full">
             <thead>
                 <tr class="text-left text-xs text-gray-500 border-b">
                     <th class="pb-2">{{ __('admin.operateur') }}</th>
@@ -136,7 +146,7 @@
     <div class="bg-white border border-gray-200 rounded-xl p-4">
         <h2 class="text-sm font-bold text-gray-800 mb-3">{{ __('admin.detail_par_etablissement') }}</h2>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="ep-table w-full">
                 <thead>
                     <tr class="text-left text-xs text-gray-500 border-b">
                         <th class="pb-2">{{ __('admin.etablissement') }}</th>

@@ -568,4 +568,23 @@ return [
     'purger_bouton' => 'Purger définitivement',
     'purge_reussie' => ':count catégorie(s) d\'années passées supprimée(s) définitivement.',
     'purge_aucune' => 'Aucune catégorie d\'année passée à purger — tout est déjà à jour.',
+
+    // ── Dashboard v2 (graphiques) ──
+    'moyens_paiement' => 'Moyens de paiement (année active)',
+
+    // ── Exports PDF/CSV : graphiques ──
+    'venn_multi_moyens' => 'Multi-moyens',
+    'pdf_legende_attendu' => 'Attendu',
+    'pdf_legende_encaisse' => 'Encaissé',
+    'pdf_venn_titre' => 'Répartition des paiements par moyen (Venn)',
+    'pdf_venn_intro' => 'Chaque cercle compte les apprenants ayant payé uniquement avec ce moyen ; le cœur doré compte ceux ayant utilisé au moins deux moyens différents.',
+    'pdf_venn_col_apprenants' => 'Apprenants',
+    'pdf_venn_ligne_multi' => 'Multi-moyens (2 moyens ou plus)',
+
+    // ── Statistiques apprenants (bandeau KPI de la vue liste) ──
+    'kpi_filles'                => 'Filles',
+    'kpi_garcons'               => 'Garçons',
+    'kpi_classes'               => 'Classes',
+    'kpi_du_total'              => 'du total',
+    'kpi_en_attente_validation' => 'En attente de validation',
 ];

@@ -34,16 +34,21 @@
 
 @section('content')
 
+    {{-- En-tête de page aligné sur le tableau de bord (pastille dorée + Poppins) --}}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">← {{ __('payeur.retour') }}</a>
+        <a href="{{ route('payeur.dashboard') }}" class="ep-retour-lien">
+            <span class="material-symbols-outlined" style="font-size:15px;">arrow_back</span>
+            {{ __('payeur.retour') }}
+        </a>
     </div>
 
     <div style="max-width:560px;margin:0 auto;">
 
-        <div style="font-size:17px;font-weight:700;margin-bottom:4px;">
-            {{ __('payeur.modifier_titre', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]) }}
+        <div class="ep-entete">
+            <span class="material-symbols-outlined">school</span>
+            <h3>{{ __('payeur.modifier_titre', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]) }}</h3>
         </div>
-        <div style="font-size:12px;color:#888;margin-bottom:20px;">
+        <div class="ep-sous-titre" style="margin-bottom:20px;">
             {{ $apprenant->etablissement->nom ?? '—' }} · {{ $apprenant->classe }}
         </div>
 

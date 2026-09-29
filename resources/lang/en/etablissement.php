@@ -565,4 +565,23 @@ return [
     'purger_bouton' => 'Purge permanently',
     'purge_reussie' => ':count past-year categorie(s) permanently deleted.',
     'purge_aucune' => 'No past-year category to purge — everything is already up to date.',
+
+    // ── Dashboard v2 (charts) ──
+    'moyens_paiement' => 'Payment methods (active year)',
+
+    // ── PDF/CSV exports: charts ──
+    'venn_multi_moyens' => 'Multi-method',
+    'pdf_legende_attendu' => 'Expected',
+    'pdf_legende_encaisse' => 'Collected',
+    'pdf_venn_titre' => 'Payments breakdown by method (Venn)',
+    'pdf_venn_intro' => 'Each circle counts learners who paid only with that method; the golden core counts those who used at least two different methods.',
+    'pdf_venn_col_apprenants' => 'Learners',
+    'pdf_venn_ligne_multi' => 'Multi-method (2 methods or more)',
+
+    // ── Learner stats (KPI band on the list view) ──
+    'kpi_filles'                => 'Girls',
+    'kpi_garcons'               => 'Boys',
+    'kpi_classes'               => 'Classes',
+    'kpi_du_total'              => 'of total',
+    'kpi_en_attente_validation' => 'Awaiting validation',
 ];

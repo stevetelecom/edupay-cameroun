@@ -23,9 +23,17 @@
       <div class="nav-sep"></div>
       <a href="{{ route('login') }}" class="nav-btn-ghost">{{ __('messages.connexion') }}</a>
       <a href="{{ route('register.parent.step1') }}" class="nav-btn-main">{{ __('messages.s_inscrire') }}</a>
-      <form method="POST" action="{{ route('locale.switch') }}" style="display:inline-flex;align-items:center;margin-left:4px;">
+      {{-- Bascule thème clair / sombre --}}
+      <button type="button" class="ep-theme-toggle" data-action="ep-theme-toggle"
+              aria-label="{{ __('messages.theme_sombre') }}" style="margin-left:4px;">
+        <span class="material-symbols-outlined ep-tt-soleil">light_mode</span>
+        <span class="material-symbols-outlined ep-tt-lune">dark_mode</span>
+      </button>
+      {{-- Langue : pastille globe + chevron, sans emojis --}}
+      <form method="POST" action="{{ route('locale.switch') }}" class="ep-lang" style="margin-left:4px;">
         @csrf
-        <select name="locale" onchange="this.form.submit()" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 10px;font-size:12px;font-weight:500;cursor:pointer;outline:none;">
+        <span class="material-symbols-outlined">public</span>
+        <select name="locale" onchange="this.form.submit()" aria-label="Langue">
           <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
           <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
         </select>
@@ -91,11 +99,19 @@
     {{ __('messages.s_inscrire_gratuit') }}
   </a>
 
+  {{-- Bascule thème clair / sombre (mobile) --}}
+  <button type="button" class="ep-theme-toggle" data-action="ep-theme-toggle"
+          aria-label="{{ __('messages.theme_sombre') }}"
+          style="margin-top:14px;align-self:flex-start;">
+    <span class="material-symbols-outlined ep-tt-soleil">light_mode</span>
+    <span class="material-symbols-outlined ep-tt-lune">dark_mode</span>
+  </button>
+
   <form method="POST" action="{{ route('locale.switch') }}" style="margin-top:14px;">
     @csrf
     <select name="locale" onchange="this.form.submit()" style="width:100%;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:11px 14px;font-size:14px;font-weight:500;cursor:pointer;outline:none;">
-      <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 Français</option>
-      <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 English</option>
+      <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>Français</option>
+      <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>English</option>
     </select>
   </form>
 </div>

@@ -21,7 +21,8 @@
 .video-bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(11,37,69,.55) 0%, rgba(11,37,69,.45) 50%, rgba(13,158,117,.15) 100%);
+  /* Dégradé logo EduPay : navy profond vers teal, teinte gold en accent */
+  background: linear-gradient(135deg, rgba(11,37,69,.82) 0%, rgba(11,37,69,.62) 45%, rgba(10,133,98,.55) 100%);
   z-index: 1;
 }
 

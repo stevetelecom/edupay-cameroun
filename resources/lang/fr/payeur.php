@@ -380,4 +380,8 @@ return [
     'montant_echeance_deja_payee' => 'Cette tranche a deja ete payee.',
     'montant_echeance_introuvable' => "L'echeance demandee est introuvable.",
     'montant_invalide'            => 'Le montant doit etre compris entre 50 FCFA et le reste du.',
+
+    // ── Dashboard v2 (graphiques) ──
+    'situation_globale'          => 'Situation globale',
+    'par_enfant_categorie'       => 'Par enfant',
 ];

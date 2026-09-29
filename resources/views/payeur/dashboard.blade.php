@@ -83,25 +83,27 @@
 
 @section('content')
 
+{{-- Ancre du compteur header : la cloche pointe ici --}}
+<div id="ep-notifications"></div>
+
 @if(isset($notifications) && $notifications->count() > 0)
     @foreach($notifications as $notif)
-    <div style="background:{{ $notif->type === 'error' ? '#FEF2F2' : '#FFFBEB' }};
-                border:1.5px solid {{ $notif->type === 'error' ? '#D94040' : '#E8A020' }};
-                border-radius:10px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px;">
-        <span class="material-symbols-outlined" style="font-size:20px;color:{{ $notif->type === 'error' ? '#D94040' : '#E8A020' }};flex-shrink:0;">
-            {{ $notif->type === 'error' ? 'error' : 'info' }}
-        </span>
-        <div style="flex:1;">
-            <div style="font-size:13px;font-weight:700;color:{{ $notif->type === 'error' ? '#7F1D1D' : '#92400E' }};margin-bottom:2px;">
-                {{ $notif->titre }}
-            </div>
-            <div style="font-size:12px;color:{{ $notif->type === 'error' ? '#7F1D1D' : '#92400E' }};opacity:.85;">
-                {{ $notif->message }}
-            </div>
+    <div class="ep-bandeau {{ $notif->type === 'error' ? 'danger' : 'attente' }}" style="align-items:center;">
+        <div class="ep-bandeau-ico">
+            <span class="material-symbols-outlined">{{ $notif->type === 'error' ? 'error' : 'info' }}</span>
+        </div>
+        <div class="ep-bandeau-corps">
+            <div class="ep-bandeau-titre">{{ $notif->titre }}</div>
+            <div class="ep-bandeau-texte">{{ $notif->message }}</div>
         </div>
         <form method="POST" action="{{ route('payeur.notifications.lu', $notif) }}">
             @csrf @method('PATCH')
-            <button type="submit" style="background:none;border:none;cursor:pointer;color:#888;font-size:18px;line-height:1;flex-shrink:0;">×</button>
+            <button type="submit" title="Marquer comme lu"
+                    style="width:30px;height:30px;border-radius:10px;border:1.5px solid var(--ep-bordure,#E4E9EE);background:#fff;cursor:pointer;color:#8B93A1;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s ease;"
+                    onmouseover="this.style.borderColor='var(--ep-teal)';this.style.color='var(--ep-teal2)'"
+                    onmouseout="this.style.borderColor='var(--ep-bordure,#E4E9EE)';this.style.color='#8B93A1'">
+                <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+            </button>
         </form>
     </div>
     @endforeach
@@ -140,26 +142,99 @@
     </div>
   </div>
 
-  {{-- ── KPIs solo ── --}}
+@else
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <div>
+      <div style="font-size:18px;font-weight:700;">
+        {{ __('payeur.bonjour') }}, {{ Auth::user()->prenom ?? Str::of(Auth::user()->name)->explode(' ')->first() }}
+      </div>
+      <div style="font-size:13px;color:#888;">
+        @if($totalDu <= 0)
+          {{ __('payeur.aucun_frais') }}
+        @else
+          {{ $nbEnfantsDus > 0 ? $nbEnfantsDus . ' ' . __('payeur.paiements_en_attente') : __('payeur.tout_a_jour') }}
+        @endif
+        @if(Auth::user()->ville) · {{ Auth::user()->ville }} @endif
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="epModal.open('modal-rattacher')" class="btn-o" style="width:auto;padding:9px 16px;font-size:12px;">
+        + {{ __('payeur.rattacher_un_enfant') }}
+      </button>
+      @if($premierFraisImpaye)
+        <a href="{{ route('payeur.paiement.show', $premierFraisImpaye) }}" class="btn-p" style="width:auto;">
+          {{ __('payeur.payer_maintenant') }}
+        </a>
+      @endif
+    </div>
+  </div>
+@endif
+
+  {{-- ════════════════════════════════════════════════════════════
+       BLOCS COMMUNS aux deux vues (solo / famille) — dédupliqués :
+       une seule rangée de KPI et UN SEUL jeu de canvas (ids uniques
+       chart-situation / chart-enfants), plus aucun id dupliqué.
+       ════════════════════════════════════════════════════════════ --}}
+
+  {{-- ── KPIs (la 3e carte dépend de la vue) ── --}}
   <div class="g4" style="margin-bottom:18px;">
-    <div class="kpi">
-      <div class="kval" style="color:var(--ep-red);">{{ number_format($totalDu ?? 0, 0, ',', ' ') }}</div>
-      <div class="klbl">{{ __('payeur.fcfa_dus') }}</div>
+    <div class="kpi ep-kpi">
+      <div class="ep-ico rouge"><span class="material-symbols-outlined">hourglass_top</span></div>
+      <div>
+        <div class="kval" data-ep-count>{{ number_format($totalDu ?? 0, 0, ',', ' ') }}</div>
+        <div class="klbl">{{ __('payeur.fcfa_dus') }}</div>
+      </div>
     </div>
-    <div class="kpi">
-      <div class="kval" style="color:var(--ep-teal);">{{ number_format($totalPaye ?? 0, 0, ',', ' ') }}</div>
-      <div class="klbl">{{ __('payeur.fcfa_payes') }}</div>
+    <div class="kpi ep-kpi">
+      <div class="ep-ico vert"><span class="material-symbols-outlined">savings</span></div>
+      <div>
+        <div class="kval" data-ep-count>{{ number_format($totalPaye ?? 0, 0, ',', ' ') }}</div>
+        <div class="klbl">{{ __('payeur.fcfa_payes') }}</div>
+      </div>
     </div>
-    <div class="kpi">
-      <div class="kval">{{ $pourcentageGlobal ?? 0 }}%</div>
-      <div class="klbl">{{ __('payeur.solde_regle') }}</div>
+@if($estSolo)
+    <div class="kpi ep-kpi">
+      <div class="ep-ico bleu"><span class="material-symbols-outlined">pie_chart</span></div>
+      <div>
+        <div class="kval" data-ep-count>{{ $pourcentageGlobal ?? 0 }}%</div>
+        <div class="klbl">{{ __('payeur.solde_regle') }}</div>
+      </div>
     </div>
-    <div class="kpi">
-      <div class="kval">{{ $nbRecus ?? 0 }}</div>
-      <div class="klbl">{{ __('payeur.recus_pdf') }}</div>
+@else
+    <div class="kpi ep-kpi">
+      <div class="ep-ico bleu"><span class="material-symbols-outlined">family_restroom</span></div>
+      <div>
+        <div class="kval" data-ep-count>{{ $apprenants->count() }}</div>
+        <div class="klbl">{{ __('payeur.enfants_suivis') }}</div>
+      </div>
+    </div>
+@endif
+    <div class="kpi ep-kpi">
+      <div class="ep-ico or"><span class="material-symbols-outlined">receipt_long</span></div>
+      <div>
+        <div class="kval" data-ep-count>{{ $nbRecus ?? 0 }}</div>
+        <div class="klbl">{{ __('payeur.recus_pdf') }}</div>
+      </div>
     </div>
   </div>
 
+  {{-- ── Graphique : répartition payé / restant (Chart.js) — commun ── --}}
+  <div class="g2" style="margin-bottom:18px;">
+    <div class="epcard">
+      <div class="seclbl" style="margin:0 0 10px;">{{ __('payeur.situation_globale') ?? 'Situation globale' }}</div>
+      <div style="height:210px;">
+        <canvas id="chart-situation" data-ep-role="situation"></canvas>
+      </div>
+    </div>
+    <div class="epcard">
+      <div class="seclbl" style="margin:0 0 10px;">{{ __('payeur.par_enfant_categorie') ?? 'Par enfant / catégorie' }}</div>
+      <div style="height:210px;">
+        <canvas id="chart-enfants" data-ep-role="enfants"></canvas>
+      </div>
+    </div>
+  </div>
+
+@if($estSolo)
   @if(!$monDossier)
     {{-- Pas encore rattaché --}}
     <div class="epcard" style="text-align:center;color:#999;padding:40px 0;margin-bottom:18px;">
@@ -190,8 +265,8 @@
     } }};margin-bottom:18px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
         <div>
-          <div style="font-size:15px;font-weight:700;">{{ $monDossier->prenom }} {{ $monDossier->nom }}</div>
-          <div style="font-size:11px;color:#888;">
+          <div class="ep-frais-titre" style="font-size:15px;">{{ $monDossier->prenom }} {{ $monDossier->nom }}</div>
+          <div style="font-size:11.5px;color:#888;font-weight:500;">
             {{ $monDossier->etablissement->nom ?? '—' }} · {{ $monDossier->classe }}
             @if($monDossier->matricule) · Mat. {{ $monDossier->matricule }} @endif
           </div>
@@ -242,8 +317,8 @@
       } }};">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <div>
-            <div style="font-size:13px;font-weight:700;">{{ $frais->categorieFrais->nom ?? 'Frais scolaires' }}</div>
-            <div style="font-size:11px;color:#888;">{{ $frais->annee_scolaire }}</div>
+            <div class="ep-frais-titre">{{ $frais->categorieFrais->nom ?? 'Frais scolaires' }}</div>
+            <div style="font-size:11.5px;color:#888;font-weight:500;">{{ $frais->annee_scolaire }}</div>
           </div>
           <div style="text-align:right;">
             <div style="font-size:15px;font-weight:700;color:{{ $resteF > 0 ? 'var(--ep-red)' : 'var(--ep-teal)' }};">
@@ -271,92 +346,7 @@
 
   @endif
 
-  {{-- ── Derniers paiements (solo) ── --}}
-  <div class="seclbl" style="margin-top:8px;">{{ __('payeur.derniers_paiements') }}</div>
-  <div class="epcard">
-    @forelse ($derniersPaiements ?? [] as $paiement)
-      <div class="row">
-        <div>
-          <div style="font-size:13px;font-weight:600;">
-            {{ $paiement->fraisApprenant->categorieFrais->nom ?? __('payeur.paiement') }}
-          </div>
-          <div style="font-size:11px;color:#888;">
-            {{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d M Y') : '—' }}
-            · {{ match($paiement->mode_paiement) { 'mtn_momo' => 'MTN MoMo', 'orange_money' => 'Orange Money', default => $paiement->mode_paiement } }}
-          </div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-weight:600;color:{{ $paiement->statut === 'valide' ? 'var(--ep-teal)' : 'var(--ep-gold)' }};">
-            {{ number_format($paiement->montant,0,',',' ') }} {{ __('payeur.fcfa_short') }}
-          </div>
-          <span class="pill {{ match($paiement->statut) { 'valide' => 'pg', 'en_attente' => 'pa', 'echoue' => 'pr', 'annule' => 'pb', default => 'pa' } }}">
-            {{ match($paiement->statut) { 'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), default => $paiement->statut } }}
-          </span>
-        </div>
-      </div>
-    @empty
-      <div style="text-align:center;color:#999;font-size:13px;padding:20px 0;">{{ __('payeur.aucun_paiement') }}</div>
-    @endforelse
-  </div>
-  @if(($derniersPaiements ?? collect())->isNotEmpty())
-    <div style="text-align:center;margin-top:14px;">
-      <a href="{{ route('payeur.historique') }}" style="color:var(--ep-teal);text-decoration:none;font-size:13px;font-weight:500;">
-        {{ __('payeur.voir_historique') }} →
-      </a>
-    </div>
-  @endif
-
 @else
-{{-- ════════════════════════════════════════════════════════════
-     VUE FAMILLE — Parent
-     F03 Tableau de bord + F13 Multi-enfants
-     ════════════════════════════════════════════════════════════ --}}
-
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-    <div>
-      <div style="font-size:18px;font-weight:700;">
-        {{ __('payeur.bonjour') }}, {{ Auth::user()->prenom ?? Str::of(Auth::user()->name)->explode(' ')->first() }}
-      </div>
-      <div style="font-size:13px;color:#888;">
-        @if($totalDu <= 0)
-          {{ __('payeur.aucun_frais') }}
-        @else
-          {{ $nbEnfantsDus > 0 ? $nbEnfantsDus . ' ' . __('payeur.paiements_en_attente') : __('payeur.tout_a_jour') }}
-        @endif
-        @if(Auth::user()->ville) · {{ Auth::user()->ville }} @endif
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button onclick="epModal.open('modal-rattacher')" class="btn-o" style="width:auto;padding:9px 16px;font-size:12px;">
-        + {{ __('payeur.rattacher_un_enfant') }}
-      </button>
-      @if($premierFraisImpaye)
-        <a href="{{ route('payeur.paiement.show', $premierFraisImpaye) }}" class="btn-p" style="width:auto;">
-          {{ __('payeur.payer_maintenant') }}
-        </a>
-      @endif
-    </div>
-  </div>
-
-  {{-- ── KPIs famille ── --}}
-  <div class="g4" style="margin-bottom:18px;">
-    <div class="kpi">
-      <div class="kval" style="color:var(--ep-red);">{{ number_format($totalDu ?? 0, 0, ',', ' ') }}</div>
-      <div class="klbl">{{ __('payeur.fcfa_dus') }}</div>
-    </div>
-    <div class="kpi">
-      <div class="kval" style="color:var(--ep-teal);">{{ number_format($totalPaye ?? 0, 0, ',', ' ') }}</div>
-      <div class="klbl">{{ __('payeur.fcfa_payes') }}</div>
-    </div>
-    <div class="kpi">
-      <div class="kval">{{ $apprenants->count() }}</div>
-      <div class="klbl">{{ __('payeur.enfants_suivis') }}</div>
-    </div>
-    <div class="kpi">
-      <div class="kval">{{ $nbRecus ?? 0 }}</div>
-      <div class="klbl">{{ __('payeur.recus_pdf') }}</div>
-    </div>
-  </div>
 
   {{-- ── F13 : Mes enfants (aperçu dashboard) ── --}}
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -389,8 +379,8 @@
         } }};">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
             <div>
-              <div style="font-size:15px;font-weight:700;">{{ $apprenant->nom }} {{ $apprenant->prenom }}</div>
-              <div style="font-size:11px;color:#888;">
+              <div class="ep-frais-titre" style="font-size:15px;">{{ $apprenant->nom }} {{ $apprenant->prenom }}</div>
+              <div style="font-size:11.5px;color:#888;font-weight:500;">
                 {{ $apprenant->etablissement->nom ?? '—' }} · {{ $apprenant->classe }}
               </div>
             </div>
@@ -431,41 +421,84 @@
     @endif
   @endif
 
+@endif
 
-  {{-- Derniers paiements (multi-enfants) --}}
-  @if(($derniersPaiements ?? collect())->isNotEmpty())
-  <div class="seclbl" style="margin-top:18px;">{{ __('payeur.derniers_paiements') }}</div>
-  <div class="epcard">
-    @foreach($derniersPaiements as $paiement)
-    <div class="row">
-      <div>
-        <div style="font-size:13px;font-weight:600;">
-          {{ $paiement->fraisApprenant->categorieFrais->nom ?? __('payeur.paiement') }}
-          @if($paiement->apprenant) — {{ $paiement->apprenant->prenom }} @endif
-        </div>
-        <div style="font-size:11px;color:#888;">
-          {{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d M Y') : '—' }}
-          · {{ match($paiement->mode_paiement) { 'mtn_momo' => 'MTN MoMo', 'orange_money' => 'Orange Money', default => $paiement->mode_paiement } }}
-        </div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-weight:600;color:{{ $paiement->statut === 'valide' ? 'var(--ep-teal)' : ($paiement->statut === 'rembourse' ? 'var(--ep-red)' : 'var(--ep-gold)') }};">
-          {{ $paiement->statut === 'rembourse' ? '– ' : '' }}{{ number_format($paiement->montant,0,',',' ') }} {{ __('payeur.fcfa_short') }}
-        </div>
-        <span class="pill {{ match($paiement->statut) { 'valide' => 'pg', 'en_attente' => 'pa', 'echoue' => 'pr', 'rembourse' => 'pb', 'annule' => 'pb', default => 'pa' } }}">
-          {{ match($paiement->statut) { 'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), 'rembourse' => __('payeur.statut_rembourse'), 'annule' => __('payeur.statut_annule'), default => $paiement->statut } }}
-        </span>
-      </div>
+  {{-- ════════════════════════════════════════════════════════════
+       BLOCS COMMUNS (suite) : histogramme + derniers paiements.
+       Mêmes données pour solo et famille ; seules les légendes
+       changent (date en solo, prénom de l'enfant en famille).
+       ════════════════════════════════════════════════════════════ --}}
+
+  {{-- ── Histogramme des derniers paiements (montants) ── --}}
+  @if(($derniersPaiements ?? collect())->filter(fn ($p) => $p->statut === 'valide')->isNotEmpty())
+  <div class="epcard" style="margin-bottom:14px;">
+    <div class="seclbl" style="margin:0 0 12px;display:flex;align-items:center;gap:8px;">
+      <span class="material-symbols-outlined" style="color:var(--ep-gold);font-size:20px;">bar_chart</span>
+      {{ __('payeur.derniers_paiements') }}
     </div>
-    @endforeach
-  </div>
-  <div style="text-align:center;margin-top:14px;">
-    <a href="{{ route('payeur.historique') }}" style="color:var(--ep-teal);text-decoration:none;font-size:13px;font-weight:500;">{{ __('payeur.voir_historique') }} →</a>
+    @php
+      $paiementsHisto = $derniersPaiements->filter(fn ($p) => $p->statut === 'valide')->take(7)->values();
+      $maxHisto = $paiementsHisto->max('montant') ?: 1;
+    @endphp
+    <div class="ep-histo" style="height:100px;">
+      @foreach($paiementsHisto as $p)
+      @php
+        $quandH = $p->date_paiement ? \Carbon\Carbon::parse($p->date_paiement)->format('d/m') : null;
+        $quiH   = (!$estSolo && $p->apprenant) ? $p->apprenant->prenom : null;
+        // NB : conditions calculées ici en PHP pur — une directive Blade @if
+        // collée après une lettre (ex. « FCFA@if ») n'est PAS compilée (règle
+        // \B@ qui protège les adresses email) et casse l'équilibre if/endif.
+        $tipH   = number_format($p->montant, 0, ',', ' ').' FCFA'
+                . ($quiH ? ' · '.$quiH : '')
+                . ($quandH ? ' · '.$quandH : '');
+        $lblH   = $quiH ?? ($quandH ?? '—');
+      @endphp
+      <div class="ep-histo-col">
+        <div class="ep-histo-bar" style="height:{{ max(6, round(($p->montant / $maxHisto) * 100)) }}%;animation-delay:{{ $loop->index * 50 }}ms;">
+          <span class="ep-histo-tip">{{ $tipH }}</span>
+        </div>
+        <span class="ep-histo-lbl">{{ $lblH }}</span>
+      </div>
+      @endforeach
+    </div>
   </div>
   @endif
 
-
-@endif
+  {{-- ── Derniers paiements (commun : liste + état vide + lien historique) ── --}}
+  <div class="seclbl" style="margin-top:18px;">{{ __('payeur.derniers_paiements') }}</div>
+  <div class="epcard">
+    @forelse ($derniersPaiements ?? [] as $paiement)
+      <div class="row">
+        <div>
+          <div style="font-size:13px;font-weight:600;">
+            {{ $paiement->fraisApprenant->categorieFrais->nom ?? __('payeur.paiement') }}
+            @if(!$estSolo && $paiement->apprenant) — {{ $paiement->apprenant->prenom }} @endif
+          </div>
+          <div style="font-size:11px;color:#888;">
+            {{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d M Y') : '—' }}
+            · {{ match($paiement->mode_paiement) { 'mtn_momo' => 'MTN MoMo', 'orange_money' => 'Orange Money', default => $paiement->mode_paiement } }}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-weight:600;color:{{ $paiement->statut === 'valide' ? 'var(--ep-teal)' : ($paiement->statut === 'rembourse' ? 'var(--ep-red)' : 'var(--ep-gold)') }};">
+            {{ $paiement->statut === 'rembourse' ? '– ' : '' }}{{ number_format($paiement->montant,0,',',' ') }} {{ __('payeur.fcfa_short') }}
+          </div>
+          <span class="pill {{ match($paiement->statut) { 'valide' => 'pg', 'en_attente' => 'pa', 'echoue' => 'pr', 'rembourse' => 'pb', 'annule' => 'pb', default => 'pa' } }}">
+            {{ match($paiement->statut) { 'valide' => __('payeur.statut_valide'), 'en_attente' => __('payeur.statut_en_attente'), 'echoue' => __('payeur.statut_echoue'), 'rembourse' => __('payeur.statut_rembourse'), 'annule' => __('payeur.statut_annule'), default => $paiement->statut } }}
+          </span>
+        </div>
+      </div>
+    @empty
+      <div style="text-align:center;color:#999;font-size:13px;padding:20px 0;">{{ __('payeur.aucun_paiement') }}</div>
+    @endforelse
+  </div>
+  @if(($derniersPaiements ?? collect())->isNotEmpty())
+    <div style="text-align:center;margin-top:14px;">
+      <a href="{{ route('payeur.historique') }}" style="color:var(--ep-teal);text-decoration:none;font-size:13px;font-weight:500;">
+        {{ __('payeur.voir_historique') }} →
+      </a>
+    </div>
+  @endif
 
 @endsection
 
@@ -488,5 +521,162 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.disabled = !coche.checked;
     });
 });
+</script>
+
+{{-- ══ Chart.js : situation globale et par enfant (données serveur injectées) ══ --}}
+<script src="{{ asset('js/chart.umd.min.js') }}"></script>
+<script>
+(function () {
+    'use strict';
+
+    // ── Sélection des canvas PAR RÔLE (data-ep-role) : les blocs solo et
+    //    famille ont été dédupliqués, il n'existe plus qu'UNE seule paire
+    //    de canvas (ids uniques chart-situation / chart-enfants). ──
+    function canvasParRole(role) {
+        return document.querySelector('canvas[data-ep-role="' + role + '"]');
+    }
+
+    function detruire(idRole) {
+        var c = canvasParRole(idRole);
+        if (c && window.Chart && Chart.getChart(c)) Chart.getChart(c).destroy();
+    }
+
+    // ── Construction (ou re-construction) des graphiques au changement
+    //    de thème clair / sombre (événement « ep-themechange »). ──
+    function monterGraphiques() {
+
+        // Détruit les instances existantes avant re-création (bascule de thème)
+        detruire('situation');
+        detruire('enfants');
+
+    // Données injectées depuis le contrôleur — sécurité : @@json échappe correctement
+    // NB : ne JAMAIS écrire la directive @@json à l'intérieur d'un commentaire
+    // Blade la compile même dans un commentaire JS et génère un json_encode()
+    // cassé (ParseError « unexpected , »).
+    const totalDu   = @json((int) ($totalDu ?? 0));
+    const totalPaye = @json((int) ($totalPaye ?? 0));
+    const apprenants = @json($apprenants->map(function ($a) {
+        $t = $a->frais->sum('montant_total');
+        $p = $a->frais->sum('montant_paye');
+        return ['nom' => $a->prenom . ' ' . $a->nom, 'total' => (int) $t, 'paye' => (int) $p];
+    }));
+
+    const TEAL = '#0D9E75', RED = '#D94040', NAVY = '#0B2545', GOLD = '#E8A020';
+    // Thème actuel : adapte les couleurs de lecture des graphiques
+    const sombre = document.documentElement.getAttribute('data-theme') === 'dark';
+    Chart.defaults.font.family = "'Poppins', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = sombre ? '#8CA0B8' : '#5A6472';
+
+    // ══ Donut : payé vs restant ══
+    const ctxSit = canvasParRole('situation');
+    if (ctxSit) {
+        if (totalDu + totalPaye <= 0) {
+            // Aucun frais : donut neutre
+            new Chart(ctxSit, {
+                type: 'doughnut',
+                data: { labels: ['Aucun frais'], datasets: [{ data: [1], backgroundColor: [sombre ? '#1C2C45' : '#E4E9EE'], borderWidth: 0 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '70%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+        } else {
+            new Chart(ctxSit, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Déjà payé', 'Restant dû'],
+                    datasets: [{
+                        data: [totalPaye, totalDu],
+                        backgroundColor: [TEAL, RED],
+                        borderWidth: 3,
+                        borderColor: sombre ? '#0E1A2E' : '#fff',
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '70%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { usePointStyle: true, padding: 14 } },
+                        tooltip: {
+                            backgroundColor: NAVY, padding: 12, cornerRadius: 10,
+                            callbacks: {
+                                label: (ctx) => ' ' + ctx.parsed.toLocaleString('fr-FR') + ' FCFA'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // ══ Barres horizontales : total vs payé par enfant ══
+    const ctxEnf = canvasParRole('enfants');
+    if (ctxEnf && apprenants.length > 0) {
+        new Chart(ctxEnf, {
+            type: 'bar',
+            data: {
+                labels: apprenants.map(a => a.nom),
+                datasets: [
+                    {
+                        label: 'Total dû',
+                        data: apprenants.map(a => a.total),
+                        backgroundColor: 'rgba(11,37,69,.25)',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Déjà payé',
+                        data: apprenants.map(a => a.paye),
+                        backgroundColor: TEAL,
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12 } },
+                    tooltip: { backgroundColor: NAVY, padding: 12, cornerRadius: 10 }
+                },
+                scales: {
+                    x: {
+                        grid: { color: sombre ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.05)' },
+                        ticks: { callback: (v) => (v >= 1000000 ? (v/1000000) + 'M' : (v >= 1000 ? (v/1000) + 'k' : v)) }
+                    },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    } else if (ctxEnf) {
+        // Aucun enfant : on masque la carte graphique proprement
+        ctxEnf.closest('.epcard').style.display = 'none';
+        var sitCard = ctxSit ? ctxSit.closest('.epcard') : null;
+        if (sitCard) sitCard.style.gridColumn = '1 / -1';
+    }
+
+    } // ── fin monterGraphiques ──
+
+    // Premier rendu : double requestAnimationFrame — garantit que les
+    // canvas sont PEINTS (les animations d'entrée posent opacity:0 au
+    // premier frame, ce qui donnait des graphiques vides).
+    // IMPORTANT : ce premier rendu est déclenché UNE SEULE FOIS, en dehors
+    // de monterGraphiques(). Placé À L'INTÉRIEUR, l'appel se re-planifiait
+    // lui-même toutes les 2 frames : boucle infinie — les graphiques étaient
+    // détruits/reconstruits en permanence (donut et barres apparemment vides,
+    // CPU saturé) et les écouteurs ep-themechange s'accumulaient à chaque
+    // passage. Le rendu au changement de thème passe par l'écouteur ci-dessous.
+    requestAnimationFrame(function () {
+        requestAnimationFrame(monterGraphiques);
+    });
+
+    // Re-rendu en fondu à chaque bascule clair/sombre (un seul écouteur).
+    var epTimerTheme = null;
+    document.addEventListener('ep-themechange', function () {
+        clearTimeout(epTimerTheme);
+        epTimerTheme = setTimeout(monterGraphiques, 350);
+    });
+})();
 </script>
 @endpush

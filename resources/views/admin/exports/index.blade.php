@@ -4,9 +4,12 @@
 
 @section('content')
 
-    <div class="mb-5">
-        <h1 class="text-xl font-bold text-gray-900">{{ __('messages.exports_reglementaires') }} COBAC / BEAC</h1>
-        <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.generation_rapports_conformes') }}</p>
+    <div class="ep-entete ep-entete-page" style="justify-content:flex-start;margin-bottom:18px;">
+        <div class="ep-ico bleu ep-ico-entete"><span class="material-symbols-outlined">description</span></div>
+        <div>
+            <h3 style="margin:0;">{{ __('messages.exports_reglementaires') }} COBAC / BEAC</h3>
+            <p class="text-sm text-gray-500 mt-0.5 ep-sous-titre" style="margin-top:2px;">{{ __('admin.generation_rapports_conformes') }}</p>
+        </div>
     </div>
 
     <div class="space-y-4 max-w-3xl">

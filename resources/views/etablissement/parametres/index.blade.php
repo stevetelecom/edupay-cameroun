@@ -4,8 +4,12 @@
 
 @section('content')
 
-    <div style="font-size:17px;font-weight:700;margin-bottom:4px;">{{ __('etablissement.parametres_etab') }}</div>
-    <div style="font-size:12px;color:#888;margin-bottom:18px;">{{ __('etablissement.params_sous_titre') }}</div>
+    {{-- En-tête de page style tableau de bord (pastille dorée + Poppins) --}}
+    <div class="ep-entete" style="margin-bottom:2px;">
+        <span class="material-symbols-outlined">settings</span>
+        <h3>{{ __('etablissement.parametres_etab') }}</h3>
+    </div>
+    <div class="ep-sous-titre" style="margin-bottom:18px;">{{ __('etablissement.params_sous_titre') }}</div>
 
     @php($etab = $etablissement ?? Auth::user()->etablissement)
 
@@ -13,7 +17,10 @@
 
         {{-- ── Informations établissement ── --}}
         <div class="epcard">
-            <div style="font-size:14px;font-weight:700;margin-bottom:14px;">{{ __('etablissement.infos_generales') }}</div>
+            <div class="ep-entete" style="margin-bottom:14px;">
+                <span class="material-symbols-outlined">apartment</span>
+                <h3>{{ __('etablissement.infos_generales') }}</h3>
+            </div>
 
             <form method="POST" action="{{ route('etablissement.parametres.update') }}" enctype="multipart/form-data">
                 @csrf
@@ -98,7 +105,7 @@
                     </div>
                 </div>
 
-                <div style="font-size:13px;font-weight:700;color:#0B2545;margin:16px 0 10px;padding-top:12px;border-top:1px solid #f0f0f0;">{{ __('etablissement.contact_localisation') }}</div>
+                <div class="ep-para-titre" style="margin-top:16px;">{{ __('etablissement.contact_localisation') }}</div>
 
                 <div class="inp-row">
                     <div>
@@ -144,7 +151,7 @@
                 <div class="lbl">{{ __('etablissement.description') }}</div>
                 <textarea name="description" class="inp" rows="3" style="resize:vertical;" placeholder="{{ __('etablissement.description_ph') }}">{{ old('description', $etab->description ?? '') }}</textarea>
 
-                <div style="font-size:13px;font-weight:700;color:#0B2545;margin:16px 0 10px;padding-top:12px;border-top:1px solid #f0f0f0;">{{ __('etablissement.config_paiement') }}</div>
+                <div class="ep-para-titre" style="margin-top:16px;">{{ __('etablissement.config_paiement') }}</div>
 
                 <div class="lbl">{{ __('etablissement.momo_principal') }}</div>
                 <select name="mobile_money_principal" class="select" required>
@@ -162,7 +169,7 @@
                 </div>
                 @error('numero_momo_reversement')<div style="color:var(--ep-red);font-size:11px;margin-top:-8px;margin-bottom:8px;">{{ $message }}</div>@enderror
 
-                <div style="font-size:13px;font-weight:700;color:#0B2545;margin:16px 0 10px;padding-top:12px;border-top:1px solid #f0f0f0;">{{ __('etablissement.doc_agrement') }}</div>
+                <div class="ep-para-titre" style="margin-top:16px;">{{ __('etablissement.doc_agrement') }}</div>
 
                 @if($etab->document_agrement)
                 <div style="background:#FEF3DC;border:1.5px solid #E8A020;border-radius:10px;padding:14px 16px;margin-bottom:14px;">
@@ -193,7 +200,10 @@
         {{-- ── Statut & infos lecture seule ── --}}
         <div>
             <div class="epcard" style="margin-bottom:14px;">
-                <div style="font-size:14px;font-weight:700;margin-bottom:12px;">{{ __('etablissement.statut_compte') }}</div>
+                <div class="ep-entete" style="margin-bottom:12px;">
+                    <span class="material-symbols-outlined">verified_user</span>
+                    <h3>{{ __('etablissement.statut_compte') }}</h3>
+                </div>
                 <div class="row">
                     <span style="font-size:13px;color:#666;">{{ __('etablissement.code_etab') }}</span>
                     <strong style="font-size:13px;">{{ $etab->code_etablissement ?? '—' }}</strong>
@@ -216,10 +226,11 @@
 
             {{-- ── Catégories de frais ── --}}
             <div class="epcard">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                    <div style="font-size:14px;font-weight:700;">{{ __('etablissement.categories_frais') }}</div>
+                <div class="ep-entete" style="justify-content:space-between;margin-bottom:12px;">
+                    <span class="material-symbols-outlined">category</span>
+                    <h3>{{ __('etablissement.categories_frais') }}</h3>
                     @if(Route::has('etablissement.categories-frais.create'))
-                        <a href="{{ route('etablissement.categories-frais.create') }}" style="font-size:11px;color:var(--ep-teal);text-decoration:none;">{{ __('etablissement.ajouter') }}</a>
+                        <a href="{{ route('etablissement.categories-frais.create') }}" class="ep-lien-action">{{ __('etablissement.ajouter') }}</a>
                     @endif
                 </div>
                 @forelse (($categoriesFrais ?? []) as $cat)

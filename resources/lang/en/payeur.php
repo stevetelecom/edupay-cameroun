@@ -381,4 +381,8 @@ return [
     'montant_echeance_deja_payee' => 'This instalment has already been paid.',
     'montant_echeance_introuvable' => 'The requested instalment was not found.',
     'montant_invalide'            => 'The amount must be between 50 FCFA and the outstanding balance.',
+
+    // ── Dashboard v2 (charts) ──
+    'situation_globale'          => 'Overall situation',
+    'par_enfant_categorie'       => 'Per child',
 ];

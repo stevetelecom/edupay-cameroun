@@ -60,56 +60,51 @@
 
 @section('content')
 
-<div class="flex items-center justify-between mb-5">
-  <div>
-    <h1 class="text-xl font-bold text-gray-900">
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="ep-ico rouge ep-ico-entete"><span class="material-symbols-outlined">forum</span></div>
+    <div>
+    <h3 style="margin:0;">
       {{ __('messages.reclamations') }}
       @if($stats['ouvertes'] > 0)
       <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:#dc2626;color:#fff;border-radius:50%;font-size:11px;font-weight:700;margin-left:6px;">
         {{ $stats['ouvertes'] }}
       </span>
       @endif
-    </h1>
-    <p class="text-sm text-gray-500 mt-0.5">{{ __('admin.gestion_reclamations_clients') }}</p>
+    </h3>
+    <p class="text-sm text-gray-500 mt-0.5 ep-sous-titre" style="margin-top:2px;">{{ __('admin.gestion_reclamations_clients') }}</p>
+    </div>
   </div>
 </div>
 
 {{-- KPIs --}}
 <div class="grid grid-cols-4 gap-4 mb-6">
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico bleu"><span class="material-symbols-outlined">mark_email_unread</span></div>
     <div>
-      <div class="text-xl font-bold text-blue-700">{{ $stats['ouvertes'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.ouvertes') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['ouvertes'] }}</div>
+      <div class="klbl">{{ __('admin.ouvertes') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-yellow-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-yellow-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico or"><span class="material-symbols-outlined">hourglass_top</span></div>
     <div>
-      <div class="text-xl font-bold text-yellow-700">{{ $stats['en_cours'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.en_cours') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['en_cours'] }}</div>
+      <div class="klbl">{{ __('admin.en_cours') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico vert"><span class="material-symbols-outlined">task_alt</span></div>
     <div>
-      <div class="text-xl font-bold text-green-700">{{ $stats['resolues'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.resolues') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['resolues'] }}</div>
+      <div class="klbl">{{ __('admin.resolues') }}</div>
     </div>
   </div>
-  <div class="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3">
-    <div class="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center shrink-0">
-      <svg class="w-4 h-4 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-    </div>
+  <div class="kpi ep-kpi">
+    <div class="ep-ico rouge"><span class="material-symbols-outlined">do_not_disturb_on</span></div>
     <div>
-      <div class="text-xl font-bold text-red-700">{{ $stats['rejetees'] }}</div>
-      <div class="text-xs text-gray-400">{{ __('admin.rejetees') }}</div>
+      <div class="kval" data-ep-count>{{ $stats['rejetees'] }}</div>
+      <div class="klbl">{{ __('admin.rejetees') }}</div>
     </div>
   </div>
 </div>

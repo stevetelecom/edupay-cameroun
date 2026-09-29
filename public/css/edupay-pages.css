@@ -1,0 +1,397 @@
+/* ============================================================
+   EDUPAY CAMEROUN — HARMONISATION DES PAGES SECONDAIRES
+   Titres de page, sous-titres et liens de retour avec la même
+   police et le même style que le tableau de bord (maquette
+   admin.html) : mini-pastille dorée, Poppins, gris-bleu doux.
+   Composants utilisables dans TOUTES les vues (payeur,
+   établissement, admin) : aucune règle destructive.
+   ============================================================ */
+
+/* ============================================================
+   EN-TÊTES DE PAGES SUPER ADMIN (.ep-entete-page)
+   Grande pastille époxy Material Symbols (style dashboard admin.html)
+   + animation d'apparition douce au chargement.
+   ============================================================ */
+.ep-ico-entete {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 13px !important;
+    animation: epEntetePop .45s cubic-bezier(.34,1.4,.64,1) backwards;
+}
+.ep-ico-entete .material-symbols-outlined {
+    font-size: 25px !important;
+}
+/* Légère pulsation lumineuse au survol de la carte d'en-tête */
+.ep-entete-page .ep-ico-entete { transition: transform .3s ease, box-shadow .3s ease; }
+.ep-entete-page:hover .ep-ico-entete {
+    transform: scale(1.07) rotate(-3deg);
+    box-shadow: 0 6px 18px rgba(11,37,69,.30);
+}
+@keyframes epEntetePop {
+    from { opacity: 0; transform: scale(.55) rotate(-8deg); }
+    to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+/* Titre h3 de page : Poppins 18px navy (au-dessus des .ep-entete de cartes) */
+.ep-entete-page h3 {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 18.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: -.01em;
+    color: var(--ep-navy, #0B2545);
+}
+/* Sous-titre page un peu plus grand que les sous-titres de cartes */
+.ep-entete-page .ep-sous-titre { font-size: 12.5px; }
+html[data-theme="dark"] .ep-entete-page h3 { color: var(--ep-encre, #E8EEF6); }
+@media (prefers-reduced-motion: reduce) {
+    .ep-ico-entete { animation: none !important; }
+}
+
+/* Titre de page avec mini-pastille dorée (comme .ep-entete du dashboard) */
+.ep-entete h3,
+.ep-entete h2 {
+    margin: 0 !important;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    letter-spacing: -.01em;
+    color: var(--ep-navy, #0B2545);
+}
+
+/* Sous-titre gris-bleu doux (méta : école · classe · matricule...) */
+.ep-sous-titre {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ep-gris, #5A6472);
+}
+
+/* Lien de retour « ← Retour » : pill discrète, hover teal */
+.ep-retour-lien {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: var(--ep-gris, #5A6472) !important;
+    text-decoration: none !important;
+    padding: 7px 14px 7px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--ep-bordure, #E4E9EE);
+    background: var(--ep-carte, #fff);
+    transition: color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
+}
+.ep-retour-lien:hover {
+    color: var(--ep-teal2, #0A8562) !important;
+    border-color: rgba(13,158,117,.35);
+    background: var(--ep-teal-lt, #E0F5EE);
+    transform: translateX(-2px);
+}
+.ep-retour-lien .material-symbols-outlined { font-size: 15px; }
+
+/* Mode sombre : déclinaisons automatiques via variables */
+html[data-theme="dark"] .ep-entete h3,
+html[data-theme="dark"] .ep-entete h2 { color: var(--ep-encre, #E8EEF6); }
+
+/* ── Textes du guide/aide (police dashboard agrandie) ── */
+.ep-guide-titre {
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: var(--ep-navy, #0B2545);
+    margin-bottom: 4px;
+}
+.ep-guide-texte {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.7;
+    color: var(--ep-gris, #5A6472);
+}
+html[data-theme="dark"] .ep-guide-titre { color: var(--ep-encre, #E8EEF6); }
+
+/* ============================================================
+   MODALS EP — débordement vertical corrigé + police agrandie
+   Quand le formulaire est l'enfant direct de .ep-modal (head +
+   body + foot DANS le form), il échappait au max-height:90vh et
+   débordait de la carte. On le contraint en colonne flexible.
+   ============================================================ */
+.ep-modal > form {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+}
+/* Contenus des modals : Poppins, tailles lisibles (style dashboard) */
+.ep-modal .ep-modal-head h3 {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 16px !important;
+}
+.ep-modal-body .lbl {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: .01em;
+}
+.ep-modal-body .inp,
+.ep-modal-body .select {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 14px !important;
+}
+.ep-modal-body p,
+.ep-modal-body .ep-modal-note {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.7;
+}
+
+/* ── Responsive modals : plus de débordement sur petits écrans ──
+   max-width seule laissait la carte à 420/560/720px sur mobile ;
+   on force la largeur fluide + marges de sécurité. */
+@media (max-width: 640px) {
+    .ep-modal.ep-modal-sm  { max-width: calc(100vw - 24px) !important; }
+    .ep-modal.ep-modal-md  { max-width: calc(100vw - 24px) !important; }
+    .ep-modal.ep-modal-lg  { max-width: calc(100vw - 24px) !important; }
+    .ep-modal.ep-modal-xl  { max-width: calc(100vw - 24px) !important; }
+    .ep-modal { margin: 12px !important; }
+    .ep-modal-body { padding: 16px !important; }
+    .ep-modal-foot { flex-wrap: wrap; }
+    .ep-modal-foot .btn-p,
+    .ep-modal-foot .btn-o,
+    .ep-modal-foot .btn-r { flex: 1 1 auto; }
+}
+
+/* ── Titres de section para (paramètres, formulaires longs) ── */
+.ep-para-titre {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    color: var(--ep-navy, #0B2545);
+    margin: 16px 0 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--ep-bordure, #f0f0f0);
+}
+html[data-theme="dark"] .ep-para-titre { color: var(--ep-encre, #E8EEF6); }
+
+/* Lien d'action discret « Ajouter » (pills de section) */
+.ep-lien-action {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ep-teal2, #0A8562) !important;
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    transition: background .2s ease;
+}
+.ep-lien-action:hover { background: var(--ep-teal-lt, #E0F5EE); }
+
+/* ============================================================
+   DOSSIERS FRAIS PAYEUR — design/animations (dashboard)
+   Cartes de frais (dashboard solo, dossiers par enfant) : hover lift
+   + accent latéral animé + polices agrandies.
+   ============================================================ */ .epcard[style*="border-left:3px solid"] {
+     transition: transform .25s ease, box-shadow .25s ease;
+     animation: epDossierIn .45s ease backwards;
+ }
+ .epcard[style*="border-left:3px solid"]:hover {
+     transform: translateY(-3px);
+     box-shadow: var(--ep-ombre-hover, 0 14px 38px rgba(11,37,69,.14)) !important;
+ }
+ /* Apparition en cascade : chaque dossier de frais entre avec un léger
+    décalage (nth-child) pour un effet « vague » comme la maquette */
+ @keyframes epDossierIn {
+     from { opacity: 0; transform: translateY(10px); }
+     to   { opacity: 1; transform: translateY(0); }
+ }
+ .epcard[style*="border-left:3px solid"]:nth-child(1) { animation-delay: .03s; }
+ .epcard[style*="border-left:3px solid"]:nth-child(2) { animation-delay: .08s; }
+ .epcard[style*="border-left:3px solid"]:nth-child(3) { animation-delay: .13s; }
+ .epcard[style*="border-left:3px solid"]:nth-child(4) { animation-delay: .18s; }
+ .epcard[style*="border-left:3px solid"]:nth-child(5) { animation-delay: .23s; }
+ .epcard[style*="border-left:3px solid"]:nth-child(n+6) { animation-delay: .28s; } /* Titres de catégorie de frais et noms d'enfants : Poppins plus grands */
+ .epcard .ep-frais-titre {
+     font-family: 'Poppins', sans-serif;
+     font-size: 15px;
+     font-weight: 700;
+     letter-spacing: -.01em;
+     color: var(--ep-navy, #0B2545);
+ }
+ /* Tout le corps des cartes dossier : Poppins lisible (dashboard payeur) */
+ .epcard[style*="border-left:3px solid"] {
+     font-family: 'Poppins', sans-serif;
+ }
+ .epcard[style*="border-left:3px solid"] .pill { font-weight: 600; }
+/* Barres de progression : animation de remplissage douce */
+.prog .pfill {
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+    animation: epProgIn 1s cubic-bezier(.4,0,.2,1) backwards;
+}
+@keyframes epProgIn {
+    from { width: 0 !important; }
+} html[data-theme="dark"] .epcard .ep-frais-titre { color: var(--ep-encre, #E8EEF6); }
+ @media (prefers-reduced-motion: reduce) {
+     .epcard[style*="border-left:3px solid"] { animation: none; }
+     .epcard[style*="border-left:3px solid"]:hover { transform: none; }
+     .prog .pfill { animation: none; }
+ }
+
+/* ============================================================
+   TABLEAU APPRENANTS — style épuré, police agrandie (dashboard)
+   Cible le DataTables #dt-apprenants sans toucher à la logique.
+   ============================================================ */
+table#dt-apprenants {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 14px !important;
+}
+table#dt-apprenants thead th {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 11.5px !important;
+    letter-spacing: .05em;
+}
+table#dt-apprenants tbody td {
+    font-size: 14px !important;
+    padding: 11px 14px !important;
+    color: var(--ep-encre, #1a1a2e);
+}
+table#dt-apprenants tbody td .pill { font-size: 12px !important; }
+/* Badges DataTables + nom complet agrandis */
+table#dt-apprenants .ep-badge { font-size: 12px !important; padding: 4px 11px !important; }
+table#dt-apprenants .ep-dt-name {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--ep-navy, #0B2545) !important;
+}
+table#dt-apprenants .ep-dt-sub { font-size: 12px !important; }
+html[data-theme="dark"] table#dt-apprenants .ep-dt-name { color: var(--ep-encre, #E8EEF6) !important; }
+html[data-theme="dark"] table#dt-apprenants tbody td { color: var(--ep-encre, #E8EEF6); }
+
+/* ── Header de page avec bouton à droite (comme utilisateurs) ── */
+.ep-entete .ep-sous-titre { font-size: 12px; }
+@media (max-width: 640px) {
+    .ep-entete { flex-direction: column; align-items: flex-start; }
+    .ep-entete .btn-p { width: 100% !important; }
+}
+
+/* ============================================================
+   MODALS LEGACY (Tailwind brut) — style unifié admin.html
+   Les vues plus anciennes (admins, abonnements, utilisateurs
+   internes, payeurs...) utilisent des modals .fixed.inset-0 avec
+   cartes .bg-white.rounded-xl : on leur applique le même style que
+   .ep-modal (coins 20px, ombre profonde, Poppins, pastille d'accent).
+   ============================================================ */
+[id^="modal-"] > .bg-white.rounded-xl {
+    border-radius: 20px !important;
+    box-shadow: 0 24px 64px rgba(0,0,0,.18) !important;
+    overflow: hidden;
+}
+[id^="modal-"] > .bg-white.rounded-xl > div:first-child {
+    padding: 18px 22px !important;
+    border-bottom: 1px solid var(--ep-bordure, #f0f0f0);
+}
+[id^="modal-"] > .bg-white.rounded-xl > div:first-child h3 {
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: var(--ep-navy, #0B2545) !important;
+}
+/* Bouton × des modals legacy : pastille grise au survol teal */
+[id^="modal-"] > .bg-white.rounded-xl > div:first-child button {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #9CA3AF;
+    background: transparent;
+    transition: background .2s ease, color .2s ease;
+}
+[id^="modal-"] > .bg-white.rounded-xl > div:first-child button:hover {
+    background: var(--ep-red-lt, #FBEAEA);
+    color: var(--ep-red, #D94040);
+}
+/* Mode sombre : les modals legacy suivent la carte sombre */
+html[data-theme="dark"] [id^="modal-"] > .bg-white.rounded-xl {
+    background: var(--ep-carte, #0E1A2E) !important;
+}
+html[data-theme="dark"] [id^="modal-"] > .bg-white.rounded-xl h3 { color: var(--ep-encre, #E8EEF6) !important; }
+
+/* ============================================================
+   HISTORIQUE PAYEUR — boutons d'action icônes + export PDF vert
+   Boutons ronds pastilles (Material Symbols) : plus lisibles que
+   du texte dans un tableau dense. aria-label conserve l'accès.
+   ============================================================ */
+.ep-act-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+.ep-act-btn .material-symbols-outlined { font-size: 17px; font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20; }
+.ep-act-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 14px rgba(11,37,69,.18); }
+.ep-act-btn:active { transform: translateY(0) scale(.97); }
+.ep-act-btn-bleu { background: var(--ep-blue-lt, #E6F0FB); color: #1A4F8A; }
+.ep-act-btn-bleu:hover { background: #D5E4F7; }
+.ep-act-btn-or   { background: var(--ep-gold-lt, #FEF3DC); color: #854F0B; }
+.ep-act-btn-or:hover { background: #FCE9BF; }
+.ep-act-btn-vert { background: var(--ep-teal-lt, #E0F5EE); color: #085041; }
+.ep-act-btn-vert:hover { background: #CBEEDF; }
+.ep-act-btn-rouge { background: var(--ep-red-lt, #FBEAEA); color: #9B2C2C; }
+
+/* Export PDF : bouton vert pleine forme (dégradé teal) */
+.ep-btn-pdf-vert {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--ep-teal, #0D9E75), #0A8562);
+    color: #fff !important;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(13,158,117,.28);
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+.ep-btn-pdf-vert:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(13,158,117,.38); filter: brightness(1.05); color: #fff !important; }
+.ep-btn-pdf-vert:active { transform: translateY(0); }
+.ep-btn-pdf-vert .material-symbols-outlined { font-size: 17px; }
+html[data-theme="dark"] .ep-btn-pdf-vert { box-shadow: 0 4px 14px rgba(13,158,117,.18); }
+
+/* ── Modals legacy : contenu en Poppins lisible (payeur + admin) ── */
+[id^="modal-"] .bg-gray-50.rounded-lg,
+[id^="modal-"] .p-6 p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.7;
+}
+[id^="modal-"] label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ep-gris, #5A6472);
+}
+[id^="modal-"] input,
+[id^="modal-"] select {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+}
+[id^="modal-"] .bg-gray-50.rounded-lg span { color: var(--ep-gris, #5A6472) !important; }
+html[data-theme="dark"] [id^="modal-"] .bg-gray-50.rounded-lg { background: rgba(255,255,255,.05) !important; }

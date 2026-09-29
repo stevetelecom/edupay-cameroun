@@ -340,10 +340,13 @@
 @section('content')
 
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-  <div>
-    <div style="font-size:17px;font-weight:700;">{{ __('etablissement.categories_titre', ['annee' => \App\Support\AnneeScolaire::active($etablissement)]) }}</div>
-    <div style="font-size:12px;color:#888;">{{ __('etablissement.nb_categories', ['count' => $categories->count()]) }}</div>
+<div class="ep-entete" style="justify-content:space-between;margin-bottom:16px;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="material-symbols-outlined">request_quote</span>
+    <div>
+      <h3>{{ __('etablissement.categories_titre', ['annee' => \App\Support\AnneeScolaire::active($etablissement)]) }}</h3>
+      <div class="ep-sous-titre" style="margin-top:2px;">{{ __('etablissement.nb_categories', ['count' => $categories->count()]) }}</div>
+    </div>
   </div>
   <div style="display:flex;gap:8px;">
     @php
@@ -371,8 +374,8 @@
   @forelse($categories as $cat)
   <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #f5f5f5;flex-wrap:wrap;gap:10px;">
     <div style="flex:1;min-width:200px;">
-      <div style="font-weight:600;font-size:14px;">{{ $cat->nom }}</div>
-      <div style="font-size:12px;color:#888;margin-top:2px;">{{ $cat->description ?? '' }}</div>
+      <div style="font-weight:700;font-size:15.5px;font-family:'Poppins',sans-serif;color:var(--ep-navy);">{{ $cat->nom }}</div>
+      <div style="font-size:13px;color:var(--ep-gris);margin-top:2px;font-family:'Poppins',sans-serif;">{{ $cat->description ?? '' }}</div>
       <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center;">
         <span class="pill pb">{{ $cat->annee_scolaire }}</span>
         <span class="pill {{ $cat->actif ? 'pg' : 'pr' }}">{{ $cat->actif ? __('etablissement.active') : __('etablissement.inactive') }}</span>
@@ -390,27 +393,27 @@
         @endif
       </div>
     </div>
-    <div style="font-size:16px;font-weight:700;color:#085041;margin:0 16px;white-space:nowrap;">
+    <div style="font-size:17.5px;font-weight:800;color:#085041;margin:0 16px;white-space:nowrap;font-family:'Poppins',sans-serif;">
       {{ number_format($cat->montant_total, 0, ',', ' ') }} FCFA
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;">
       <button onclick="affecterFrais({{ $cat->id }}, '{{ addslashes($cat->nom) }}')"
-              class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;">
+              class="btn-o" style="width:auto;padding:7px 13px;font-size:12.5px;font-family:'Poppins',sans-serif;font-weight:600;">
         @lang('etablissement.affecter_btn')
       </button>
       @if($cat->fractionnable)
         <button onclick="ajouterTranche({{ $cat->id }}, '{{ addslashes($cat->nom) }}', {{ $cat->echeanciers->count() + 1 }})"
-                class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;">
+                class="btn-o" style="width:auto;padding:7px 13px;font-size:12.5px;font-family:'Poppins',sans-serif;font-weight:600;">
           @lang('etablissement.ajouter_tranche_btn')
         </button>
       @endif
       <button onclick="dupliquerFrais({{ $cat->id }}, '{{ addslashes($cat->nom) }}')"
-              class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;" title="@lang('etablissement.dupliquer_vers_nouvelle_annee')">
+              class="btn-o" style="width:auto;padding:7px 13px;font-size:12.5px;font-family:'Poppins',sans-serif;font-weight:600;" title="@lang('etablissement.dupliquer_vers_nouvelle_annee')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         @lang('etablissement.dupliquer')
       </button>
       <button onclick="modifierFrais({{ $cat->id }}, '{{ addslashes($cat->nom) }}', '{{ addslashes($cat->description ?? '') }}', {{ $cat->montant_total }}, {{ $cat->nb_tranches_max }}, {{ $cat->fractionnable ? 'true' : 'false' }}, {{ $cat->actif ? 'true' : 'false' }}, '{{ $cat->annee_scolaire }}')"
-              class="btn-o" style="width:auto;padding:6px 12px;font-size:12px;">
+              class="btn-o" style="width:auto;padding:7px 13px;font-size:12.5px;font-family:'Poppins',sans-serif;font-weight:600;">
         @lang('etablissement.modifier_btn')
       </button>
       <button onclick="supprimerFrais({{ $cat->id }}, '{{ addslashes($cat->nom) }}')"
@@ -491,13 +494,13 @@ function affecterFrais(id, nom) {
 
 function voirEcheancier(id, nom, echeances) {
     document.getElementById('voir-frais-titre').textContent = EP_FRAIS.echeancier_prefix + ' — ' + nom;
-  var html = '<table class="ep-table"><thead><tr><th>' + EP_FRAIS.col_tranche + '</th><th>' + EP_FRAIS.col_libelle + '</th><th>' + EP_FRAIS.col_montant + '</th><th>' + EP_FRAIS.col_echeance + '</th><th>' + EP_FRAIS.col_actions + '</th></tr></thead><tbody>';
+  var html = '<table class="ep-table" style="font-size:14px;"><thead><tr><th style="font-size:11.5px;">' + EP_FRAIS.col_tranche + '</th><th style="font-size:11.5px;">' + EP_FRAIS.col_libelle + '</th><th style="font-size:11.5px;">' + EP_FRAIS.col_montant + '</th><th style="font-size:11.5px;">' + EP_FRAIS.col_echeance + '</th><th style="font-size:11.5px;">' + EP_FRAIS.col_actions + '</th></tr></thead><tbody>';
   echeances.forEach(function(e) {
     html += '<tr>'
-      + '<td><span class="pill pb">T' + e.numero_tranche + '</span></td>'
-      + '<td>' + (e.libelle || EP_FRAIS.tranche_word + ' ' + e.numero_tranche) + '</td>'
-      + '<td style="font-weight:600;">' + Number(e.montant).toLocaleString('fr-FR') + ' FCFA</td>'
-      + '<td>' + (e.date_echeance ? new Date(e.date_echeance).toLocaleDateString('fr-FR') : '—') + '</td>'
+      + '<td><span class="pill pb" style="font-size:12px;">T' + e.numero_tranche + '</span></td>'
+      + '<td style="font-family:\'Poppins\',sans-serif;font-size:14px;">' + (e.libelle || EP_FRAIS.tranche_word + ' ' + e.numero_tranche) + '</td>'
+      + '<td style="font-weight:700;font-family:\'Poppins\',sans-serif;font-size:14px;">' + Number(e.montant).toLocaleString('fr-FR') + ' FCFA</td>'
+      + '<td style="font-family:\'Poppins\',sans-serif;font-size:13.5px;">' + (e.date_echeance ? new Date(e.date_echeance).toLocaleDateString('fr-FR') : '—') + '</td>'
       + '<td style="white-space:nowrap;">'
       + '<button class="btn-o" style="padding:6px 10px;margin-right:6px;font-size:12px;display:inline-flex;align-items:center;" onclick="editTranche(' + id + ',' + e.id + ',' + e.numero_tranche + ', \'' + (e.libelle ? addslashes(e.libelle) : '') + '\',' + e.montant + ', \'' + (e.date_echeance ? e.date_echeance : '') + '\')"><span class="material-symbols-outlined" style="font-size:14px;color:var(--ep-teal);">edit</span></button>'
       + '<button class="btn-r" style="padding:6px 10px;font-size:12px;display:inline-flex;align-items:center;" onclick="deleteTranche(' + id + ',' + e.id + ', \'' + (e.libelle ? addslashes(e.libelle) : '') + '\')"><span class="material-symbols-outlined" style="font-size:14px;color:#fff;">delete</span></button>'
