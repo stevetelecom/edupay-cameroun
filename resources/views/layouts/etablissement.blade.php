@@ -270,8 +270,8 @@
                 @csrf
                 <span class="material-symbols-outlined">public</span>
                 <select name="locale" onchange="this.form.submit()" aria-label="Langue">
-                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>FR</option>
-                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>EN</option>
+                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
+                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
                 </select>
             </form>
             <div style="position:relative;">
