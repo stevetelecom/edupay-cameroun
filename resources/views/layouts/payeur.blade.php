@@ -13,14 +13,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     {{-- Google Fonts : Poppins (identité visuelle EduPay v2) --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
-
     {{-- Material Symbols (icones utilisees dans les notifications) --}}
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-
     {{-- Thème global EduPay v2 : Poppins + Material Rounded + sidebars dégradées (chargé AVANT les styles inline) --}}
+    {{-- Polices auto-hébergées : Poppins + Material Symbols (remplace les CDN Google Fonts) --}}
+    <link rel="stylesheet" href="{{ asset('css/ep-fonts.css') }}">
     <link rel="stylesheet" href="{{ asset('css/edupay-theme.css') }}">
     {{-- Thème dashboards v2.1 : pastilles icônes KPI, cases de sélection, animations --}}
     <link rel="stylesheet" href="{{ asset('css/edupay-dashboards.css') }}">
@@ -213,6 +209,8 @@
   <script src="{{ asset('js/ep-bandeaux.js') }}" defer></script>
   <script src="{{ asset('js/ep-compteurs.js') }}" defer></script>
   {{-- Thème clair / sombre : initialisation + bascule fluide --}}
+    {{-- Vérification des polices d'icônes : révèle les icônes quand les ligatures sont prêtes --}}
+    <script src="{{ asset('js/ep-fonts.js') }}" defer></script>
   <script src="{{ asset('js/ep-theme.js') }}" defer></script>
   <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
   <link rel="apple-touch-icon" href="{{ asset('images/logo.jpeg') }}">
@@ -251,8 +249,8 @@
                 @csrf
                 <span class="material-symbols-outlined">public</span>
                 <select name="locale" onchange="this.form.submit()" aria-label="Langue">
-                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
-                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
+                    <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>FR</option>
+                    <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>EN</option>
                 </select>
             </form>
             <div class="relative" style="position:relative;">

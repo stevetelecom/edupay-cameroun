@@ -11,8 +11,8 @@
       <form method="POST" action="{{ route('locale.switch') }}" style="display:inline-flex;align-items:center;">
         @csrf
         <select name="locale" onchange="this.form.submit()" style="background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:6px 10px;font-size:12px;font-weight:500;cursor:pointer;outline:none;">
-          <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>🇫🇷 FR</option>
-          <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>🇬🇧 EN</option>
+          <option value="fr" {{ app()->getLocale()==='fr' ? 'selected' : '' }}>FR</option>
+          <option value="en" {{ app()->getLocale()==='en' ? 'selected' : '' }}>EN</option>
         </select>
       </form>
     </div>

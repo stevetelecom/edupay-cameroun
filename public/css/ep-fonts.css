@@ -1,0 +1,120 @@
+/* ============================================================
+   EDUPAY CAMEROUN — POLICES AUTO-HÉBERGÉES
+   Remplace les CDN Google Fonts (fonts.googleapis.com /
+   fonts.gstatic.com) qui peuvent être bloqués, lents ou
+   indisponibles (réseaux d'entreprise, pare-feux, coupures).
+   Avantage bonus : zéro requête tierce → chargement plus rapide
+   et meilleure conformité vie privée.
+
+   Contenu :
+   1. Poppins 400 → 800 (identité visuelle EduPay)
+   2. Material Symbols Outlined (icônes .material-symbols-outlined)
+   3. Material Symbols Rounded  (icônes .material-symbols-rounded)
+
+   Ces @font-face déclarent la même famille que les anciens liens
+   CDN : aucun autre fichier n'a besoin de changer.
+   ============================================================ */
+
+/* ---------- 1. Poppins (latin) ---------- */
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/poppins-400.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../fonts/poppins-500.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../fonts/poppins-600.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('../fonts/poppins-700.woff2') format('woff2');
+}
+@font-face {
+    font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('../fonts/poppins-800.woff2') format('woff2');
+}
+
+/* ---------- 2. Material Symbols Outlined ---------- */
+/* La police contient les icônes sous forme de ligatures : le texte
+   « home » rend l'icône maison. font-variation-settings permet
+   FILL (0 = contour, 1 = plein), wght, GRAD et opsz. */
+@font-face {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: block;
+    src: url('../fonts/material-symbols-outlined.woff2') format('woff2');
+}
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ---------- 3. Material Symbols Rounded ---------- */
+@font-face {
+    font-family: 'Material Symbols Rounded';
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: block;
+    src: url('../fonts/material-symbols-rounded.woff2') format('woff2');
+}
+.material-symbols-rounded {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ---------- Garde-fou : icône non chargée ---------- */
+/* Si malgré tout la police manque, on masque le texte brut du nom
+   d'icône pour ne jamais afficher « arrow_forward » en clair.
+   (Caché par défaut ; révélé par la classe .ep-fonts-ok posée sur
+   <html> par ep-fonts.js une fois la police vérifiée.) */
+.material-symbols-outlined,
+.material-symbols-rounded {
+    visibility: hidden;
+}
+html.ep-fonts-ok .material-symbols-outlined,
+html.ep-fonts-ok .material-symbols-rounded {
+    visibility: visible;
+}

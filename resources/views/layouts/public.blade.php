@@ -9,11 +9,9 @@
      premier rendu (anti-FOUC), sans aucune dépendance externe --}}
 <script>(function(){try{var t=localStorage.getItem('ep-theme');if(t!=='dark'&&t!=='light'){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <!-- Google Fonts : Poppins (identité visuelle EduPay v2) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0" />
 {{-- Thème global EduPay v2 : Poppins + Material Rounded (chargé AVANT les styles inline) --}}
+    {{-- Polices auto-hébergées : Poppins + Material Symbols (remplace les CDN Google Fonts) --}}
+    <link rel="stylesheet" href="{{ asset('css/ep-fonts.css') }}">
 <link rel="stylesheet" href="{{ asset('css/edupay-theme.css') }}">
 <style>
 :root{--ep-navy:#0B2545;--ep-teal:#0D9E75;--ep-teal2:#0A8562;--ep-teal-lt:#E0F5EE;--ep-teal-mid:#9FE1CB;--ep-gold:#E8A020;--ep-gold-lt:#FEF3DC;--ep-red:#D94040;--ep-red-lt:#FBEAEA;--ep-blue-lt:#E6F0FB;--ep-purple-lt:#EDE9FE;--border:rgba(0,0,0,0.09);--radius-md:8px;--radius-lg:12px;}
@@ -277,6 +275,8 @@ body{font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI'
   {{-- Styles additionnels par page (ex. edupay-landing.css sur la landing) --}}
   @stack('styles')
   {{-- Thème clair / sombre : initialisation + bascule fluide --}}
+    {{-- Vérification des polices d'icônes : révèle les icônes quand les ligatures sont prêtes --}}
+    <script src="{{ asset('js/ep-fonts.js') }}" defer></script>
   <script src="{{ asset('js/ep-theme.js') }}" defer></script>
   <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">
   <link rel="apple-touch-icon" href="{{ asset('images/logo.jpeg') }}">
