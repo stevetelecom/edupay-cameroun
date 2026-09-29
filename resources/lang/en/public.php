@@ -289,10 +289,12 @@ return [
     'mission_lbl'                   => 'Our purpose',
     'mission_conclusion'            => 'EduPay Cameroon: the school fintech designed by Cameroonians, for Cameroonians.',
     'valeurs_sub'                   => 'Four principles guide every decision we make.',
+    /* ── Pricing v3 ── */
+    'plan_populaire'                => 'Popular',
     'informations_contact'          => 'Contact information',
     'inscription_gratuite_desc'     => 'Free registration · 24h onboarding · Dedicated support · No commitment',
     'inscription_gratuite_support'  => 'Free registration · Dedicated support',
-    'inscrire_etablissement_lien'   => 'Register my school →',
+    'inscrire_etablissement_lien'   => 'Register my school',
     'landing_title'                 => 'EduPay Cameroon — School Fee Payment',
     'message_label'                 => 'Message',
     'message_placeholder'           => 'Describe your request...',

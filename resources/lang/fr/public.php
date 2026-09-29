@@ -289,10 +289,12 @@ return [
     'mission_lbl'                   => 'Notre raison d’être',
     'mission_conclusion'            => 'EduPay Cameroun : la fintech scolaire pensée par des Camerounais, pour les Camerounais.',
     'valeurs_sub'                   => 'Quatre principes guident chaque décision que nous prenons.',
+    /* ── Tarifs v3 ── */
+    'plan_populaire'                => 'Populaire',
     'informations_contact'          => 'Informations de contact',
     'inscription_gratuite_desc'     => 'Inscription gratuite · Onboarding en 24h · Support dédié · Aucun engagement',
     'inscription_gratuite_support'  => 'Inscription gratuite · Support dédié',
-    'inscrire_etablissement_lien'   => 'Inscrire mon établissement →',
+    'inscrire_etablissement_lien'   => 'Inscrire mon établissement',
     'landing_title'                 => 'EduPay Cameroun — Paiement des frais scolaires',
     'message_label'                 => 'Message',
     'message_placeholder'           => 'Décrivez votre demande...',
