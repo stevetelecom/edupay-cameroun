@@ -274,6 +274,8 @@ body{font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI'
   <link rel="stylesheet" href="{{ asset('css/video-bg.css') }}">
   <link rel="stylesheet" href="{{ asset('css/buttons-enhanced.css') }}">
   <link rel="stylesheet" href="{{ asset('css/forms-enhanced.css') }}">
+  {{-- Styles additionnels par page (ex. edupay-landing.css sur la landing) --}}
+  @stack('styles')
   {{-- Thème clair / sombre : initialisation + bascule fluide --}}
   <script src="{{ asset('js/ep-theme.js') }}" defer></script>
   <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpeg') }}">

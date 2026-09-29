@@ -1,0 +1,1194 @@
+/* ============================================================
+   EDUPAY CAMEROUN — LANDING PAGE v3
+   Design de référence : maquette admin.html (CAM-FRET) transposée
+   aux couleurs du logo EduPay (navy #0B2545 · teal #0D9E75 ·
+   or #E8A020), enrichie des patterns UX fintech 2026
+   (Wise · Monzo · Stripe · N26) :
+   - hero à 2 colonnes avec preuve chiffrée flottante
+   - barre de confiance partenaires près du CTA
+   - régulateur (COBAC/BEAC) en copie produit, pas en footer
+   - mouvement mesuré (motion restraint), respects reduced-motion
+   Chargée UNIQUEMENT par la landing (layouts.public + @stack).
+   Tout est piloté par variables : le mode sombre [data-theme="dark"]
+   ne change que les variables (voir ep-theme.js).
+   ============================================================ */
+
+/* ---------- Icônes officielles : Material Symbols Rounded ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL@20..48,300..700,0..1');
+
+/* ---------- Variables locales (héritent du thème global) ---------- */
+.lp {
+    --lp-navy:   var(--ep-navy, #0B2545);
+    --lp-navy2:  var(--ep-navy2, #103459);
+    --lp-teal:   var(--ep-teal, #0D9E75);
+    --lp-teal2:  var(--ep-teal2, #0A8562);
+    --lp-teal-lt: var(--ep-teal-lt, #E0F5EE);
+    --lp-gold:   var(--ep-gold, #E8A020);
+    --lp-gold-lt: var(--ep-gold-lt, #FEF3DC);
+    --lp-red:    var(--ep-red, #D94040);
+    --lp-carte:  var(--ep-carte, #FFFFFF);
+    --lp-encre:  var(--ep-encre, #101A2B);
+    --lp-gris:   var(--ep-gris, #5A6472);
+    --lp-bord:   var(--ep-bordure, #E4E9EE);
+    --lp-fond:   var(--ep-fond, #F4F6F8);
+    --lp-ombre:  var(--ep-ombre, 0 10px 30px rgba(11,37,69,.08));
+    --lp-ombre-hover: var(--ep-ombre-hover, 0 14px 38px rgba(11,37,69,.14));
+    --lp-rayon:  var(--ep-rayon, 14px);
+}
+
+/* ============================================================
+   1. HERO — grille 2 colonnes + scène 3D flottante
+   ============================================================ */
+.lp-hero {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0B2545 0%, #103459 45%, #0A8562 100%);
+    color: #fff;
+}
+
+/* Vidéo de fond : gérée localement (le conteneur partagé video-bg.css
+   imposerait position:relative à TOUS les enfants directs, ce qui
+   casserait les orbes absolus). Ici on maîtrise les z-index :
+   vidéo 0 < orbes/grille 1 < contenu 2. */
+.lp-hero > .lp-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: .40;
+}
+.lp-hero > .lp-video-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(135deg, rgba(11,37,69,.84) 0%, rgba(11,37,69,.64) 45%, rgba(10,133,98,.58) 100%);
+}
+/* Économie de données + accessibilité : pas de vidéo sur mobile
+   ni quand le mouvement réduit est demandé (le dégradé suffit). */
+@media (max-width: 480px), (prefers-reduced-motion: reduce) {
+    .lp-hero > .lp-video { display: none; }
+    .lp-hero > .lp-video-overlay {
+        background: linear-gradient(135deg, rgba(11,37,69,.94) 0%, rgba(11,37,69,.88) 55%, rgba(10,133,98,.72) 100%);
+    }
+}
+
+/* Orbes de gravitation : halos flous animés, très lents (25 s et 32 s).
+   Ils restent derrière la vidéo (z-index) et ne captent jamais la souris. */
+.lp-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    pointer-events: none;
+    will-change: transform;
+    z-index: 1;
+}
+.lp-orb-a {
+    width: 560px; height: 560px;
+    top: -200px; right: -140px;
+    background: radial-gradient(circle, rgba(232,160,32,.22), transparent 62%);
+    animation: lpOrbeA 25s ease-in-out infinite alternate;
+}
+.lp-orb-b {
+    width: 460px; height: 460px;
+    bottom: -160px; left: -120px;
+    background: radial-gradient(circle, rgba(13,158,117,.30), transparent 62%);
+    animation: lpOrbeB 32s ease-in-out infinite alternate;
+}
+/* Troisième orbe, plus petit, doré, au centre droit : profondeur */
+.lp-orb-c {
+    width: 260px; height: 260px;
+    top: 42%; left: 46%;
+    background: radial-gradient(circle, rgba(93,202,165,.16), transparent 60%);
+    animation: lpOrbeA 21s ease-in-out infinite alternate-reverse;
+}
+@keyframes lpOrbeA {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(-70px, 50px) scale(1.12); }
+}
+@keyframes lpOrbeB {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(60px, -55px) scale(1.10); }
+}
+
+/* Trame de points discrète par-dessus les orbes (profondeur "tech") */
+.lp-grille {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size: 34px 34px;
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, #000 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, #000 30%, transparent 75%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.lp-hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 64px 28px 48px;
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    gap: 40px;
+    align-items: center;
+}
+.lp-hero-copy { text-align: left; }
+.lp-hero-copy.center-mobile { text-align: center; }
+
+/* Badge d'annonce en haut du hero */
+.lp-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(232,160,32,.12);
+    border: 1px solid rgba(232,160,32,.40);
+    border-radius: 999px;
+    padding: 7px 16px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #F5C86A;
+    margin-bottom: 20px;
+    letter-spacing: .02em;
+}
+.lp-tag .material-symbols-rounded {
+    font-size: 15px;
+    color: #F5C86A;
+}
+/* Point pulsant du badge (transaction en direct) */
+.lp-tag .lp-pulse {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #5DCAA5;
+    display: inline-block;
+    animation: lpPulse 1.6s ease infinite;
+}
+@keyframes lpPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: .35; transform: scale(.72); }
+}
+
+.lp-h1 {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.16;
+    letter-spacing: -.015em;
+    margin: 0 0 18px;
+}
+.lp-h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, #5DCAA5, #9FE1CB);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+/* Soulignement ondulé doré sous un mot clé (SVG animé) */
+.lp-souligne {
+    position: relative;
+    white-space: nowrap;
+}
+.lp-souligne svg {
+    position: absolute;
+    left: 0; bottom: -10px;
+    width: 100%;
+    height: 10px;
+    overflow: visible;
+}
+.lp-souligne path {
+    fill: none;
+    stroke: var(--lp-gold);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 220;
+    stroke-dashoffset: 220;
+    animation: lpDessin 1.1s ease .45s forwards;
+}
+@keyframes lpDessin { to { stroke-dashoffset: 0; } }
+
+.lp-sub {
+    font-size: 15.5px;
+    color: rgba(255,255,255,.68);
+    max-width: 470px;
+    line-height: 1.75;
+    margin-bottom: 28px;
+}
+
+.lp-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.lp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 14.5px;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease,
+                background .2s ease, border-color .2s ease;
+}
+.lp-btn .material-symbols-rounded { font-size: 19px; transition: transform .25s ease; }
+.lp-btn:hover .material-symbols-rounded { transform: translateX(4px); }
+.lp-btn-main {
+    background: linear-gradient(135deg, #0D9E75, #0A8562);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(13,158,117,.40);
+}
+.lp-btn-main:hover {
+    filter: brightness(1.10);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 26px rgba(13,158,117,.50);
+    color: #fff;
+}
+.lp-btn-ghost {
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,.25);
+    backdrop-filter: blur(6px);
+}
+.lp-btn-ghost:hover {
+    background: rgba(255,255,255,.15);
+    border-color: rgba(255,255,255,.45);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Micro-foire aux questions de confiance sous les CTA */
+.lp-confiance {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+    font-size: 12px;
+    color: rgba(255,255,255,.60);
+}
+.lp-confiance span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.lp-confiance .material-symbols-rounded {
+    font-size: 16px;
+    color: #5DCAA5;
+}
+
+/* ── Scène 3D : carte de paiement flottante ── */
+.lp-scene {
+    position: relative;
+    min-height: 420px;
+    perspective: 1100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.lp-tilt {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform .18s ease-out;
+    will-change: transform;
+    /* La scène pilote la largeur : les enfants absolus ne débordent plus */
+    width: min(400px, 88%);
+}
+/* La carte bancaire EduPay : dégradé logo + pastille gold */
+.lp-carte-visa {
+    width: 100%;
+    aspect-ratio: 1.586;
+    border-radius: 22px;
+    background: linear-gradient(130deg, #103459 0%, #0B2545 40%, #0A8562 100%);
+    border: 1px solid rgba(255,255,255,.16);
+    box-shadow: 0 30px 70px rgba(4,12,24,.55), inset 0 1px 0 rgba(255,255,255,.14);
+    padding: 24px 26px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transform: translateZ(46px);
+    position: relative;
+    overflow: hidden;
+    animation: lpFlotte 6.5s ease-in-out infinite;
+}
+/* Reflet diagonal qui balaie la carte */
+.lp-carte-visa::after {
+    content: '';
+    position: absolute;
+    top: -60%; left: -80%;
+    width: 55%; height: 220%;
+    transform: rotate(22deg);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.09), transparent);
+    animation: lpBrille 5.2s ease infinite;
+}
+@keyframes lpBrille {
+    0%, 55%  { left: -80%; }
+    85%,100% { left: 150%; }
+}
+@keyframes lpFlotte {
+    0%, 100% { transform: translateZ(46px) translateY(0) rotateX(0deg) rotateY(0deg); }
+    50%      { transform: translateZ(46px) translateY(-13px) rotateX(1.6deg) rotateY(-2deg); }
+}
+.lp-carte-haut {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.lp-carte-puce {
+    width: 44px; height: 33px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #F5C86A, #C9860E);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 2px;
+    padding: 5px;
+}
+.lp-carte-puce i { background: rgba(0,0,0,.14); border-radius: 2px; }
+.lp-carte-marque {
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: .16em;
+    color: rgba(255,255,255,.92);
+    text-align: right;
+}
+.lp-carte-marque small {
+    display: block;
+    font-size: 8.5px;
+    font-weight: 600;
+    letter-spacing: .28em;
+    color: rgba(255,255,255,.55);
+}
+.lp-carte-num {
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: .17em;
+    color: rgba(255,255,255,.94);
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+}
+.lp-carte-bas {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    font-size: 10.5px;
+    color: rgba(255,255,255,.62);
+    letter-spacing: .06em;
+}
+.lp-carte-bas b { display: block; color: #fff; font-size: 12px; letter-spacing: .1em; }
+
+/* Toast de confirmation qui apparaît sur la carte */
+.lp-toast-paiement {
+    position: absolute;
+    right: 0;
+    bottom: -8%;
+    transform: translateZ(90px);
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    background: rgba(255,255,255,.97);
+    color: #101A2B;
+    border-radius: 14px;
+    padding: 12px 18px 12px 13px;
+    box-shadow: 0 18px 44px rgba(4,12,24,.42);
+    animation: lpFlotteSuivante 6.5s ease-in-out infinite;
+    animation-delay: .55s;
+    max-width: 250px;
+}
+@keyframes lpFlotteSuivante {
+    0%, 100% { transform: translateZ(90px) translateY(0); }
+    50%      { transform: translateZ(90px) translateY(-13px); }
+}
+.lp-toast-ico {
+    width: 38px; height: 38px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #10B981, #0A8562);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 5px 14px rgba(13,158,117,.4);
+}
+.lp-toast-ico .material-symbols-rounded {
+    font-size: 21px;
+    color: #fff;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+.lp-toast-paiement b {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #101A2B;
+}
+.lp-toast-paiement small {
+    display: block;
+    font-size: 10.5px;
+    color: #5A6472;
+    margin-top: 1px;
+}
+
+/* Badge MTN MoMo flottant, coin haut */
+.lp-badge-momo {
+    position: absolute;
+    top: -7%;
+    left: 0;
+    transform: translateZ(65px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,.97);
+    border-radius: 12px;
+    padding: 9px 15px;
+    box-shadow: 0 14px 34px rgba(4,12,24,.36);
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #101A2B;
+    animation: lpFlotteSuivante 6.5s ease-in-out infinite;
+    animation-delay: 1.15s;
+}
+.lp-badge-momo i {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.lp-badge-momo i .material-symbols-rounded {
+    font-size: 16px;
+    color: #fff;
+    font-variation-settings: 'FILL' 1, 'wght' 500;
+}
+.lp-badge-momo .i-mtn   { background: #FFCC00; }
+.lp-badge-momo .i-orange{ background: #FF6600; }
+
+/* ── Bandeau stats : barre glassmorphism sous le hero ── */
+.lp-stats {
+    position: relative;
+    z-index: 2;
+    max-width: 1180px;
+    margin: -2px auto 0;
+    padding: 0 28px 34px;
+}
+.lp-stats-inner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow: hidden;
+}
+.lp-stat {
+    padding: 20px 18px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,.10);
+    transition: background .25s ease;
+}
+.lp-stat:last-child { border-right: none; }
+.lp-stat:hover { background: rgba(255,255,255,.05); }
+.lp-stat .material-symbols-rounded {
+    font-size: 22px;
+    color: #5DCAA5;
+    margin-bottom: 6px;
+    font-variation-settings: 'FILL' 1, 'wght' 500;
+    display: inline-block;
+}
+.lp-stat-v {
+    font-size: 25px;
+    font-weight: 800;
+    color: #5DCAA5;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+.lp-stat-l {
+    font-size: 11.5px;
+    color: rgba(255,255,255,.58);
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* ── Barre de confiance : partenaires de paiement ── */
+.lp-partenaires {
+    background: var(--lp-fond);
+    border-bottom: 1px solid var(--lp-bord);
+    padding: 18px 28px;
+}
+.lp-partenaires-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px 42px;
+    flex-wrap: wrap;
+}
+.lp-partenaires-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--lp-gris);
+}
+.lp-partenaire {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--lp-gris);
+    opacity: .62;
+    transition: opacity .25s ease, transform .25s ease;
+}
+.lp-partenaire:hover { opacity: 1; transform: translateY(-2px); }
+.lp-partenaire i {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.lp-partenaire i .material-symbols-rounded {
+    font-size: 15px;
+    color: #fff;
+    font-variation-settings: 'FILL' 1, 'wght' 600;
+}
+.lp-partenaire .p-mtn    { background: #FFCC00; }
+.lp-partenaire .p-orange { background: #FF6600; }
+.lp-partenaire .p-aang   { background: #0B2545; }
+.lp-partenaire .p-coleac { background: #1F6FB2; }
+.lp-partenaire .p-secure { background: #0D9E75; }
+
+/* ============================================================
+   2. SECTIONS COMMUNES
+   ============================================================ */
+.lp-section { padding: 54px 0 8px; }
+.lp-seclbl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--lp-gris);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin: 0 0 8px;
+    justify-content: center;
+}
+.lp-seclbl .material-symbols-rounded {
+    font-size: 16px;
+    color: var(--lp-gold);
+}
+.lp-sectitre {
+    font-size: 27px;
+    font-weight: 800;
+    color: var(--lp-encre);
+    text-align: center;
+    letter-spacing: -.01em;
+    margin: 0 0 10px;
+}
+.lp-sectitre em {
+    font-style: normal;
+    color: var(--lp-teal);
+}
+.lp-secsub {
+    font-size: 13.5px;
+    color: var(--lp-gris);
+    text-align: center;
+    max-width: 560px;
+    margin: 0 auto 30px;
+    line-height: 1.7;
+}
+
+/* ---------- Cartes fonctionnalités : Material Symbols animées ---------- */
+.lp-feats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+.lp-feat {
+    position: relative;
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: var(--lp-rayon);
+    padding: 22px;
+    overflow: hidden;
+    box-shadow: var(--lp-ombre);
+    transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+.lp-feat::before {
+    /* Liseré coloré gauche, présent au repos, s'intensifie au survol */
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--lp-couleur, var(--lp-teal));
+    opacity: .55;
+    transition: opacity .28s ease, width .28s ease;
+}
+.lp-feat:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--lp-ombre-hover);
+    border-color: transparent;
+}
+.lp-feat:hover::before { opacity: 1; width: 4px; }
+/* Halo coloré doux qui s'allume derrière l'icône au survol */
+.lp-feat::after {
+    content: '';
+    position: absolute;
+    top: -46px; right: -46px;
+    width: 132px; height: 132px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--lp-couleur-halo, rgba(13,158,117,.14)), transparent 68%);
+    opacity: 0;
+    transition: opacity .3s ease;
+    pointer-events: none;
+}
+.lp-feat:hover::after { opacity: 1; }
+
+/* Pastille icône : style admin.html (époxy foncée, icône blanche remplie)
+   qui pivote légèrement au survol de la carte. */
+.lp-feat-ico {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, var(--lp-couleur, #0D9E75), var(--lp-couleur2, #0A8562));
+    box-shadow: 0 5px 14px rgba(11,37,69,.20);
+    transition: transform .3s ease;
+}
+.lp-feat:hover .lp-feat-ico {
+    transform: scale(1.07) rotate(-6deg);
+}
+.lp-feat-ico .material-symbols-rounded {
+    font-size: 25px;
+    color: #fff;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+.lp-feat-titre {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--lp-encre);
+    margin-bottom: 8px;
+}
+.lp-feat-desc {
+    font-size: 13px;
+    color: var(--lp-gris);
+    line-height: 1.7;
+}
+
+/* ---------- Cartes types d'établissement (bandeau 4 colonnes) ---------- */
+.lp-types {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+.lp-type {
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: var(--lp-rayon);
+    padding: 20px 16px;
+    text-align: center;
+    border-top: 3px solid var(--lp-couleur, var(--lp-teal));
+    box-shadow: var(--lp-ombre);
+    transition: transform .28s ease, box-shadow .28s ease;
+}
+.lp-type:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--lp-ombre-hover);
+}
+.lp-type-ico {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    background: var(--lp-couleur-halo, var(--lp-teal-lt));
+    transition: transform .3s ease;
+}
+.lp-type:hover .lp-type-ico { transform: scale(1.1) rotate(-5deg); }
+.lp-type-ico .material-symbols-rounded {
+    font-size: 23px;
+    color: var(--lp-couleur, #0D9E75);
+    font-variation-settings: 'FILL' 1, 'wght' 500;
+}
+.lp-type b {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--lp-encre);
+}
+.lp-type small {
+    display: block;
+    font-size: 11px;
+    color: var(--lp-gris);
+    margin-top: 5px;
+    line-height: 1.55;
+}
+
+/* ============================================================
+   3. ANNUAIRE ÉTABLISSEMENTS — cartes style admin.html
+   ============================================================ */
+.lp-etabs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    gap: 16px;
+}
+.lp-etab {
+    position: relative;
+    display: block;
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: var(--lp-rayon);
+    padding: 20px 16px 16px;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    box-shadow: var(--lp-ombre);
+    transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+/* Bande teal qui descend du haut au survol (signature admin.html) */
+.lp-etab::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, var(--lp-teal), var(--lp-gold));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .3s ease;
+}
+.lp-etab:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--lp-ombre-hover);
+    border-color: rgba(13,158,117,.30);
+}
+.lp-etab:hover::before { transform: scaleX(1); }
+
+.lp-etab-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    object-fit: cover;
+    margin: 0 auto 12px;
+    display: block;
+    border: 1px solid var(--lp-bord);
+    box-shadow: 0 4px 12px rgba(11,37,69,.10);
+    transition: transform .3s ease;
+}
+.lp-etab:hover .lp-etab-logo { transform: scale(1.06); }
+/* Avatar initiale quand pas de logo : dégradé teal, initiale blanche */
+.lp-etab-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0D9E75, #0A8562);
+    box-shadow: 0 5px 14px rgba(13,158,117,.28);
+    font-size: 24px;
+    font-weight: 800;
+    color: #fff;
+    transition: transform .3s ease;
+}
+.lp-etab:hover .lp-etab-avatar { transform: scale(1.06) rotate(-4deg); }
+
+.lp-etab-nom {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--lp-encre);
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.lp-etab-ville {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 11.5px;
+    color: var(--lp-gris);
+    margin-bottom: 10px;
+}
+.lp-etab-ville .material-symbols-rounded { font-size: 14px; color: var(--lp-gold); }
+
+/* Pastille type : style pastille admin.html avec point coloré */
+.lp-etab-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: var(--lp-teal-lt);
+    color: #085041;
+}
+.lp-etab-type .point {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--lp-teal);
+}
+/* Mini-badge « payer en ligne » au survol, en bas de carte */
+.lp-etab-payer {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--lp-teal);
+    margin-top: 10px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .25s ease, transform .25s ease;
+}
+.lp-etab-payer .material-symbols-rounded { font-size: 14px; }
+.lp-etab:hover .lp-etab-payer {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* État vide : illustration de recherche */
+.lp-vide {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 46px 0;
+    color: var(--lp-gris);
+    font-size: 13.5px;
+}
+.lp-vide .material-symbols-rounded {
+    font-size: 46px;
+    color: var(--lp-bord);
+    display: block;
+    margin: 0 auto 12px;
+}
+
+/* ---------- Barre de filtres de l'annuaire ---------- */
+.lp-filtres {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+.lp-filtre-champ {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    max-width: 430px;
+}
+.lp-filtre-champ .material-symbols-rounded {
+    position: absolute;
+    left: 13px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 19px;
+    color: var(--lp-gris);
+    pointer-events: none;
+    transition: color .2s ease;
+}
+.lp-filtre-champ:focus-within .material-symbols-rounded { color: var(--lp-teal); }
+.lp-input {
+    width: 100%;
+    padding: 12px 14px 12px 42px;
+    border: 1.5px solid var(--lp-bord);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: var(--lp-encre);
+    background: var(--lp-carte);
+    outline: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+.lp-input::placeholder { color: #9AA7B5; }
+.lp-input:focus {
+    border-color: var(--lp-teal);
+    box-shadow: 0 0 0 3px rgba(13,158,117,.14);
+}
+.lp-select {
+    padding: 12px 14px;
+    border: 1.5px solid var(--lp-bord);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: var(--lp-encre);
+    background: var(--lp-carte);
+    outline: none;
+    cursor: pointer;
+    min-width: 170px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+.lp-select:focus {
+    border-color: var(--lp-teal);
+    box-shadow: 0 0 0 3px rgba(13,158,117,.14);
+}
+.lp-btn-filtre {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #0D9E75, #0A8562);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(13,158,117,.28);
+    transition: filter .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.lp-btn-filtre:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 7px 18px rgba(13,158,117,.36);
+}
+.lp-btn-filtre .material-symbols-rounded { font-size: 18px; }
+.lp-btn-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 18px;
+    border: 1.5px solid var(--lp-bord);
+    border-radius: 12px;
+    background: var(--lp-carte);
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--lp-gris);
+    text-decoration: none;
+    transition: border-color .2s ease, color .2s ease, background .2s ease;
+}
+.lp-btn-reset:hover { border-color: var(--lp-gris); color: var(--lp-encre); }
+.lp-btn-reset .material-symbols-rounded { font-size: 17px; }
+.lp-compteur {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--lp-gris);
+    margin-bottom: 14px;
+}
+.lp-compteur .material-symbols-rounded { font-size: 16px; color: var(--lp-teal); }
+
+/* ---------- Pagination style unifié ---------- */
+.lp-pagination {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+.lp-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; height: 40px;
+    border: 1.5px solid var(--lp-bord);
+    border-radius: 11px;
+    background: var(--lp-carte);
+    color: var(--lp-teal);
+    text-decoration: none;
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+.lp-page-btn:hover {
+    border-color: var(--lp-teal);
+    background: var(--lp-teal-lt);
+    transform: translateY(-2px);
+}
+.lp-page-btn.disabled {
+    color: #B9C4CF;
+    border-color: var(--lp-bord);
+    pointer-events: none;
+}
+.lp-page-infos { font-size: 12.5px; color: var(--lp-gris); font-weight: 500; }
+
+/* ============================================================
+   4. CTA FINAL + RÉGULATEUR
+   ============================================================ */
+.lp-cta-final {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(130deg, #0B2545 0%, #103459 55%, #0A8562 115%);
+    border-radius: 20px;
+    padding: 40px 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 0 18px 44px rgba(11,37,69,.30);
+}
+/* Orbe décoratif interne */
+.lp-cta-final::before {
+    content: '';
+    position: absolute;
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,160,32,.20), transparent 62%);
+    top: -130px; right: -80px;
+    pointer-events: none;
+}
+.lp-cta-final h3 {
+    font-size: 21px;
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 6px;
+    letter-spacing: -.01em;
+}
+.lp-cta-final p {
+    font-size: 13px;
+    color: rgba(255,255,255,.62);
+    margin: 0;
+    line-height: 1.65;
+    max-width: 480px;
+}
+.lp-cta-final .lp-btn { position: relative; z-index: 1; }
+
+/* Bandeau régulateur : licence + conformité, copie produit près du CTA */
+.lp-regulateur {
+    display: flex;
+    gap: 12px 26px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid var(--lp-bord);
+}
+.lp-regulateur span {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--lp-gris);
+}
+.lp-regulateur .material-symbols-rounded {
+    font-size: 17px;
+    color: var(--lp-teal);
+}
+
+/* ============================================================
+   5. RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+    .lp-hero-inner { grid-template-columns: 1fr; gap: 30px; padding-top: 46px; }
+    .lp-hero-copy { text-align: center; }
+    .lp-hero-copy .lp-sub { margin-left: auto; margin-right: auto; }
+    .lp-ctas { justify-content: center; }
+    .lp-confiance { justify-content: center; }
+    .lp-scene { min-height: 360px; margin-top: 6px; }
+    .lp-feats { grid-template-columns: 1fr 1fr; }
+    .lp-types { grid-template-columns: 1fr 1fr; }
+    .lp-h1 { font-size: 36px; }
+}
+@media (max-width: 640px) {
+    .lp-hero-inner { padding: 38px 18px 34px; }
+    .lp-h1 { font-size: 27px; }
+    .lp-sub { font-size: 13.5px; }
+    .lp-btn { width: 100%; }
+    .lp-ctas { flex-direction: column; }
+    .lp-scene { min-height: 300px; }
+    .lp-tilt { width: 92%; }
+    .lp-carte-visa { padding: 18px 20px; }
+    .lp-carte-num { font-size: 17px; }
+    .lp-badge-momo { top: -4%; left: 0; }
+    .lp-toast-paiement { right: 0; bottom: -6%; }
+    .lp-stats { padding: 0 18px 26px; }
+    .lp-stats-inner { grid-template-columns: 1fr 1fr; }
+    .lp-stat { border-bottom: 1px solid rgba(255,255,255,.10); }
+    .lp-stat:nth-child(2n) { border-right: none; }
+    .lp-stat:nth-child(3), .lp-stat:nth-child(4) { border-bottom: none; }
+    .lp-feats { grid-template-columns: 1fr; }
+    .lp-types { grid-template-columns: 1fr; }
+    .lp-etabs { grid-template-columns: 1fr 1fr; gap: 11px; }
+    .lp-etab { padding: 15px 11px 12px; }
+    .lp-etab-logo, .lp-etab-avatar { width: 48px; height: 48px; }
+    .lp-cta-final { padding: 30px 22px; }
+    .lp-sectitre { font-size: 21px; }
+    .lp-partenaires { padding: 15px 18px; }
+    .lp-partenaires-inner { gap: 10px 24px; }
+}
+@media (max-width: 380px) {
+    .lp-etabs { grid-template-columns: 1fr; }
+    .lp-h1 { font-size: 23px; }
+}
+
+/* ============================================================
+   6. ACCESSIBILITÉ : mouvement réduit
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    .lp-orb, .lp-carte-visa, .lp-toast-paiement, .lp-badge-momo,
+    .lp-carte-visa::after, .lp-tag .lp-pulse {
+        animation: none !important;
+    }
+    .lp-souligne path { animation: none; stroke-dashoffset: 0; }
+    .lp-feat, .lp-type, .lp-etab, .lp-btn, .lp-page-btn {
+        transition: none !important;
+    }
+}
+
+/* ============================================================
+   7. MODE SOMBRE — seules les variables changent
+   ============================================================ */
+html[data-theme="dark"] .lp-feat,
+html[data-theme="dark"] .lp-type,
+html[data-theme="dark"] .lp-etab {
+    background: var(--ep-carte);
+    border-color: var(--ep-bordure);
+}
+html[data-theme="dark"] .lp-feat-titre,
+html[data-theme="dark"] .lp-type b,
+html[data-theme="dark"] .lp-etab-nom {
+    color: var(--ep-encre);
+}
+html[data-theme="dark"] .lp-feat-desc,
+html[data-theme="dark"] .lp-type small,
+html[data-theme="dark"] .lp-secsub,
+html[data-theme="dark"] .lp-seclbl,
+html[data-theme="dark"] .lp-etab-ville,
+html[data-theme="dark"] .lp-compteur,
+html[data-theme="dark"] .lp-page-infos {
+    color: var(--ep-gris);
+}
+html[data-theme="dark"] .lp-sectitre { color: var(--ep-encre); }
+html[data-theme="dark"] .lp-input,
+html[data-theme="dark"] .lp-select,
+html[data-theme="dark"] .lp-btn-reset,
+html[data-theme="dark"] .lp-page-btn {
+    background: var(--ep-carte);
+    border-color: var(--ep-bordure);
+    color: var(--ep-encre);
+}
+html[data-theme="dark"] .lp-input::placeholder { color: var(--ep-gris); }
+html[data-theme="dark"] .lp-btn-reset { color: var(--ep-gris); }
+html[data-theme="dark"] .lp-page-btn.disabled { color: var(--ep-bordure); }
+html[data-theme="dark"] .lp-partenaires {
+    background: var(--ep-fond);
+    border-bottom-color: var(--ep-bordure);
+}
+html[data-theme="dark"] .lp-partenaires-label,
+html[data-theme="dark"] .lp-partenaire { color: var(--ep-gris); }
+html[data-theme="dark"] .lp-partenaire:hover { color: var(--ep-encre); }
+html[data-theme="dark"] .lp-regulateur { border-top-color: var(--ep-bordure); }
+html[data-theme="dark"] .lp-regulateur span { color: var(--ep-gris); }
+html[data-theme="dark"] .lp-etab-type { background: var(--ep-teal-lt); color: var(--ep-teal-mid); }
+html[data-theme="dark"] .lp-toast-paiement { background: var(--ep-carte); }
+html[data-theme="dark"] .lp-toast-paiement b { color: var(--ep-encre); }
+html[data-theme="dark"] .lp-toast-paiement small { color: var(--ep-gris); }
+html[data-theme="dark"] .lp-badge-momo { background: var(--ep-carte); color: var(--ep-encre); }
+/* Hero : inchangé en sombre (déjà navy profond), la vidéo et les orbes font le travail */

@@ -252,6 +252,36 @@ return [
     'hero_h1_line3'                 => 'from your phone.',
     'hero_sub'                      => 'EduPay Cameroon connects schools to families via MTN MoMo, Orange Money, and bank card. No lines. Instant PDF receipt.',
     'hero_tag'                      => '100% Cameroonian platform · EdTech × FinTech',
+    /* ── Hero v3: trust micro-signals under the CTAs ── */
+    'hero_confiance_1'              => 'TLS 1.3 encrypted payments',
+    'hero_confiance_2'              => 'Instant PDF receipt',
+    'hero_confiance_3'              => 'Dedicated support 7/7',
+    /* ── Hero v3: floating payment card ── */
+    'hero_carte_beneficiaire'       => 'School',
+    'hero_carte_ecole'              => 'NZOAH HIGH SCHOOL',
+    'hero_carte_montant'            => '65,000 FCFA paid',
+    'hero_carte_statut'             => 'Term 1 fees confirmed',
+    'hero_carte_ref'                => 'Ref EP-2026-0841',
+    'hero_badge_momo'               => 'MTN MoMo',
+    'hero_badge_om'                 => 'Orange Money',
+    /* ── Stats v3: animated counter labels ── */
+    'stat_lbl_etablissements'       => 'Partner schools',
+    'stat_lbl_apprenants'           => 'Active learners',
+    'stat_lbl_paiements'            => 'Validated payments',
+    'stat_lbl_uptime'               => 'Guaranteed uptime',
+    'stats_marche_note'             => 'Target market: :etabs schools and :appr learners in Cameroon · :momo mobile money subscribers.',
+    /* ── Payment channels trust bar ── */
+    'partenaires_titre'             => 'Integrated payment channels:',
+    /* ── Directory v3 ── */
+    'etabs_annuaire_sub'            => 'Find your school, review its fees and pay online safely.',
+    'etab_payer_en_ligne'           => 'Pay online',
+    /* ── Why section v3 ── */
+    'why_titre_section'             => 'Modern technology serving <em>families and schools</em>',
+    /* ── Regulator: compliance shown near the final CTA ── */
+    'regulateur_loi'                => 'Compliant with e-commerce law No. 2010/021',
+    'regulateur_cobac'              => 'Under COBAC supervision',
+    'regulateur_beac'               => 'BEAC payment standards',
+    'regulateur_donnees'            => 'AES-256 encrypted data',
     'informations_contact'          => 'Contact information',
     'inscription_gratuite_desc'     => 'Free registration · 24h onboarding · Dedicated support · No commitment',
     'inscription_gratuite_support'  => 'Free registration · Dedicated support',

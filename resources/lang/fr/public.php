@@ -252,6 +252,36 @@ return [
     'hero_h1_line3'                 => 'depuis votre téléphone.',
     'hero_sub'                      => 'EduPay Cameroun connecte les établissements scolaires aux familles via MTN MoMo, Orange Money et carte bancaire. Zéro file d\'attente. Reçu PDF immédiat.',
     'hero_tag'                      => 'Plateforme 100% camerounaise · EdTech × FinTech',
+    /* ── Hero v3 : micro-signaux de confiance sous les CTA ── */
+    'hero_confiance_1'              => 'Paiement chiffré TLS 1.3',
+    'hero_confiance_2'              => 'Reçu PDF instantané',
+    'hero_confiance_3'              => 'Support dédié 7j/7',
+    /* ── Hero v3 : carte de paiement flottante ── */
+    'hero_carte_beneficiaire'       => 'Établissement',
+    'hero_carte_ecole'              => 'LYCÉE DE NZOAH',
+    'hero_carte_montant'            => '65 000 FCFA payés',
+    'hero_carte_statut'             => 'Scolarité T1 confirmée',
+    'hero_carte_ref'                => 'Réf EP-2026-0841',
+    'hero_badge_momo'               => 'MTN MoMo',
+    'hero_badge_om'                 => 'Orange Money',
+    /* ── Stats v3 : libellés des compteurs animés ── */
+    'stat_lbl_etablissements'       => 'Établissements partenaires',
+    'stat_lbl_apprenants'           => 'Apprenants actifs',
+    'stat_lbl_paiements'            => 'Paiements validés',
+    'stat_lbl_uptime'               => 'Disponibilité garantie',
+    'stats_marche_note'             => 'Le marché visé : :etabs établissements et :appr apprenants au Cameroun · :momo abonnés mobile money.',
+    /* ── Barre de confiance partenaires ── */
+    'partenaires_titre'             => 'Canaux de paiement intégrés :',
+    /* ── Annuaire v3 ── */
+    'etabs_annuaire_sub'            => 'Retrouvez votre établissement, consultez ses frais et payez en ligne en toute sécurité.',
+    'etab_payer_en_ligne'           => 'Payer en ligne',
+    /* ── Section Pourquoi v3 ── */
+    'why_titre_section'             => 'La modernité au service des <em>familles et des écoles</em>',
+    /* ── Régulateur : conformité affichée près du CTA final ── */
+    'regulateur_loi'                => "Conforme à la loi n° 2010/021 sur le e-commerce",
+    'regulateur_cobac'              => "Sous surveillance COBAC",
+    'regulateur_beac'               => "Normes BEAC des paiements",
+    'regulateur_donnees'            => "Données chiffrées AES-256",
     'informations_contact'          => 'Informations de contact',
     'inscription_gratuite_desc'     => 'Inscription gratuite · Onboarding en 24h · Support dédié · Aucun engagement',
     'inscription_gratuite_support'  => 'Inscription gratuite · Support dédié',

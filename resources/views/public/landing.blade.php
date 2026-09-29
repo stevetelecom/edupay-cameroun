@@ -2,198 +2,275 @@
 
 @section('title', __('public.landing_title'))
 
+{{-- Styles spécifiques à la landing (v3) : chargés via @stack('styles')
+     déclaré dans layouts/public.blade.php --}}
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/edupay-landing.css') }}">
+<style>
+/* Corps de la landing : suit le thème clair/sombre (le layout
+   fixe .ep-body2 en clair ; ici on laisse la variable décider) */
+.lp .ep-body2 { background: transparent; }
+</style>
+@endpush
+
 @section('content')
 
-{{-- ══ HERO BAND ══ --}}
 @include('layouts._navbar_public')
-<div class="hero-band video-bg-container">
-  <video class="video-bg" autoplay muted loop playsinline>
+
+{{-- ════════════════════════════════════════════════════════════
+     HERO — grille 2 colonnes : copie + scène 3D flottante.
+     Vidéo de fond + orbes de gravitation + carte bancaire animée.
+     Patterns fintech 2026 : preuve chiffrée, confiance sous CTA.
+     Le wrapper .lp expose les variables locales du thème landing.
+     ════════════════════════════════════════════════════════════ --}}
+<div class="lp">
+<div class="lp-hero">
+  {{-- Vidéo de fond (masquée sur mobile / reduced-motion via CSS) --}}
+  <video class="lp-video" autoplay muted loop playsinline preload="metadata"
+         aria-hidden="true" tabindex="-1">
     <source src="{{ asset('videos/hero-payment.mp4') }}" type="video/mp4">
   </video>
-  <div class="video-bg-overlay"></div>
-  <div class="hero-main">
-    <div class="hero-tag">
-      <span style="width:7px;height:7px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span>
-      {{ __('public.hero_tag') }}
+  <div class="lp-video-overlay"></div>
+
+  {{-- Orbes de gravitation (décor pur, jamais cliquables) --}}
+  <div class="lp-orb lp-orb-a" aria-hidden="true"></div>
+  <div class="lp-orb lp-orb-b" aria-hidden="true"></div>
+  <div class="lp-orb lp-orb-c" aria-hidden="true"></div>
+  <div class="lp-grille" aria-hidden="true"></div>
+
+  <div class="lp-hero-inner">
+
+    {{-- ── Colonne copie ── --}}
+    <div class="lp-hero-copy">
+      <div class="lp-tag">
+        <span class="lp-pulse" aria-hidden="true"></span>
+        <span class="material-symbols-rounded" aria-hidden="true">bolt</span>
+        {{ __('public.hero_tag') }}
+      </div>
+
+      <h1 class="lp-h1">
+        {{ __('public.hero_h1_line1') }} {{ __('public.hero_h1_connector') }}
+        <em class="lp-souligne">{{ __('public.hero_h1_line2_em') }}
+          <svg viewBox="0 0 220 10" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M2 7 Q 30 2, 60 6 T 118 6 T 176 5 T 218 6"/>
+          </svg>
+        </em><br>
+        {{ __('public.hero_h1_line3') }}
+      </h1>
+
+      <p class="lp-sub">{{ __('public.hero_sub') }}</p>
+
+      <div class="lp-ctas">
+        <a href="{{ route('register.parent.step1') }}" class="lp-btn lp-btn-main">
+          {{ __('public.cta_creer_compte_payeur') }}
+          <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+        </a>
+        <a href="{{ route('register.ecole.step1') }}" class="lp-btn lp-btn-ghost">
+          {{ __('public.cta_inscrire_etablissement') }}
+        </a>
+      </div>
+
+      {{-- Micro-signaux de confiance, juste sous les CTA --}}
+      <div class="lp-confiance">
+        <span><span class="material-symbols-rounded" aria-hidden="true">lock</span>{{ __('public.hero_confiance_1') }}</span>
+        <span><span class="material-symbols-rounded" aria-hidden="true">description</span>{{ __('public.hero_confiance_2') }}</span>
+        <span><span class="material-symbols-rounded" aria-hidden="true">support_agent</span>{{ __('public.hero_confiance_3') }}</span>
+      </div>
     </div>
-    <div class="hero-h1">{{ __('public.hero_h1_line1') }} {{ __('public.hero_h1_connector') }} <em>{{ __('public.hero_h1_line2_em') }}</em><br>{{ __('public.hero_h1_line3') }}</div>
-    <div class="hero-sub">{{ __('public.hero_sub') }}</div>
-    <div class="hero-btns">
-      <a href="{{ route('register.parent.step1') }}" class="hbtn-main">{{ __('public.cta_creer_compte_payeur') }}</a>
-      <a href="{{ route('register.ecole.step1') }}" class="hbtn-ghost">{{ __('public.cta_inscrire_etablissement') }}</a>
+
+    {{-- ── Colonne scène 3D : carte + badges flottants (tilt souris) ── --}}
+    <div class="lp-scene" aria-hidden="true">
+      <div class="lp-tilt">
+
+        {{-- Carte de paiement EduPay (dégradé logo) --}}
+        <div class="lp-carte-visa">
+          <div class="lp-carte-haut">
+            <div class="lp-carte-puce">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <span class="material-symbols-rounded" style="font-size:22px;color:rgba(255,255,255,.85);">contactless</span>
+          </div>
+
+          <div class="lp-carte-num">5321&nbsp;&nbsp;••••&nbsp;&nbsp;••••&nbsp;&nbsp;2026</div>
+
+          <div class="lp-carte-bas">
+            <div>
+              {{ __('public.hero_carte_beneficiaire') }}
+              <b>{{ __('public.hero_carte_ecole') }}</b>
+            </div>
+            <div class="lp-carte-marque">
+              EDUPAY
+              <small>CAMEROUN</small>
+            </div>
+          </div>
+        </div>
+
+        {{-- Badge MTN MoMo / Orange Money flottant --}}
+        <div class="lp-badge-momo">
+          <i class="i-mtn"><span class="material-symbols-rounded">smartphone</span></i>
+          {{ __('public.hero_badge_momo') }}
+          <i class="i-orange"><span class="material-symbols-rounded">account_balance_wallet</span></i>
+          {{ __('public.hero_badge_om') }}
+        </div>
+
+        {{-- Toast de paiement confirmé --}}
+        <div class="lp-toast-paiement">
+          <div class="lp-toast-ico">
+            <span class="material-symbols-rounded">check_circle</span>
+          </div>
+          <div>
+            <b>{{ __('public.hero_carte_montant') }}</b>
+            <small>{{ __('public.hero_carte_statut') }} · {{ __('public.hero_carte_ref') }}</small>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
-  <div class="hero-stats" data-stats-container>
-    <div class="hstat">
-      <div class="hstat-v stat-counter" data-count="{{ $stats['nb_etablissements'] }}">0</div>
-      <div class="hstat-l">{{ __('public.stat_etablissements_partenaires') }}</div>
+
+  {{-- ── Compteurs animés : barre glassmorphism ── --}}
+  <div class="lp-stats">
+    <div class="lp-stats-inner" data-stats-container>
+      <div class="lp-stat">
+        <span class="material-symbols-rounded" aria-hidden="true">school</span>
+        <div class="lp-stat-v stat-counter" data-count="{{ $stats['nb_etablissements'] }}">0</div>
+        <div class="lp-stat-l">{{ __('public.stat_lbl_etablissements') }}</div>
+      </div>
+      <div class="lp-stat">
+        <span class="material-symbols-rounded" aria-hidden="true">groups</span>
+        <div class="lp-stat-v stat-counter" data-count="{{ $stats['nb_apprenants'] }}">0</div>
+        <div class="lp-stat-l">{{ __('public.stat_lbl_apprenants') }}</div>
+      </div>
+      <div class="lp-stat">
+        <span class="material-symbols-rounded" aria-hidden="true">task_alt</span>
+        <div class="lp-stat-v stat-counter" data-count="{{ $stats['nb_paiements'] }}">0</div>
+        <div class="lp-stat-l">{{ __('public.stat_lbl_paiements') }}</div>
+      </div>
+      <div class="lp-stat">
+        <span class="material-symbols-rounded" aria-hidden="true">cloud_done</span>
+        <div class="lp-stat-v stat-counter" data-count="99.5" data-decimals="1" data-suffix="%">0%</div>
+        <div class="lp-stat-l">{{ __('public.stat_lbl_uptime') }}</div>
+      </div>
     </div>
-    <div class="hstat">
-      <div class="hstat-v stat-counter" data-count="{{ $stats['nb_apprenants'] }}">0</div>
-      <div class="hstat-l">{{ __('public.stat_apprenants_inscrits') }}</div>
-    </div>
-    <div class="hstat">
-      <div class="hstat-v stat-counter" data-count="{{ $stats['nb_paiements'] }}">0</div>
-      <div class="hstat-l">{{ __('public.stat_paiements_valides') }}</div>
-    </div>
-    <div class="hstat">
-      <div class="hstat-v stat-counter" data-count="99.5" data-decimals="1" data-suffix="%">0%</div>
-      <div class="hstat-l">{{ __('public.stat_uptime') }}</div>
-    </div>
+    {{-- Preuve de marché (chiffres du CDC : 30 000 écoles, 6M apprenants) --}}
+    <p style="text-align:center;font-size:11px;color:rgba(255,255,255,.45);margin:12px 0 0;">
+      {{ __('public.stats_marche_note', [
+          'etabs' => __('public.stat_etablissements_partenaires'),
+          'appr'  => __('public.stat_apprenants_inscrits'),
+          'momo'  => __('public.stat_paiements_valides'),
+      ]) }}
+    </p>
+  </div>{{-- /.lp-stats --}}
+</div>{{-- /.lp-hero --}}
+
+{{-- ── Barre de confiance : canaux de paiement intégrés ── --}}
+<div class="lp-partenaires">{{-- (reste dans .lp, fermé plus bas) --}}
+  <div class="lp-partenaires-inner">
+    <span class="lp-partenaires-label">{{ __('public.partenaires_titre') }}</span>
+    <span class="lp-partenaire"><i class="p-mtn"><span class="material-symbols-rounded">smartphone</span></i>MTN MoMo</span>
+    <span class="lp-partenaire"><i class="p-orange"><span class="material-symbols-rounded">account_balance_wallet</span></i>Orange Money</span>
+    <span class="lp-partenaire"><i class="p-aang"><span class="material-symbols-rounded">hub</span></i>AangaraaPay</span>
+    <span class="lp-partenaire"><i class="p-coleac"><span class="material-symbols-rounded">credit_card</span></i>Visa · Mastercard</span>
+    <span class="lp-partenaire"><i class="p-secure"><span class="material-symbols-rounded">verified_user</span></i>TLS 1.3</span>
   </div>
 </div>
 
-<style>
-.hstat {
-  transition: transform .25s ease, box-shadow .25s ease;
-  border-radius: 12px;
-  padding: 8px;
-  cursor: default;
-}
-.hstat:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 28px rgba(93,202,165,.18);
-}
-.etab-card-pub {
-  transition: box-shadow .25s ease, transform .25s ease !important;
-}
-.testi-card {
-  transition: box-shadow .25s ease, transform .25s ease;
-}
-.testi-card:hover {
-  box-shadow: 0 10px 28px rgba(13,158,117,.12);
-  transform: translateY(-4px);
-}
-</style>
-
-{{-- ══ BODY ══ --}}
+{{-- ══ CORPS DE PAGE ══ --}}
 <div class="ep-body2">
 
-
-  {{-- ══ SECTION : Établissements partenaires ══ --}}
-  <div id="etablissements" style="margin-bottom:32px;scroll-margin-top:20px;">
-    <div class="seclbl reveal-on-scroll">{{ __('public.nos_etablissements_partenaires') }}</div>
-    <div style="font-size:13px;color:#888;margin-bottom:20px;text-align:center;">
-      {{ __('public.etablissements_nous_f_confiance', ['count' => $stats['nb_etablissements']]) }}
+  {{-- ══ SECTION : annuaire des établissements partenaires ══ --}}
+  <div id="etablissements" class="lp-section" style="scroll-margin-top:20px;">
+    <div class="lp-seclbl reveal-on-scroll">
+      <span class="material-symbols-rounded" aria-hidden="true">location_city</span>
+      {{ __('public.nos_etablissements_partenaires') }}
     </div>
+    <h2 class="lp-sectitre reveal-on-scroll">
+      {{ __('public.etablissements_nous_f_confiance', ['count' => $stats['nb_etablissements']]) }}
+    </h2>
+    <p class="lp-secsub reveal-on-scroll">{{ __('public.etabs_annuaire_sub') }}</p>
 
-    {{-- Filtre rapide — filtrage serveur + pagination : le filtre JavaScript
-         ne portait que sur les 12 premières cartes rendues, donc toute école
-         au-delà de la 12e était introuvable. --}}
+    {{-- Filtre rapide — filtrage SERVEUR + pagination (les écoles au-delà
+         de la 12e carte doivent rester trouvables) --}}
     <form method="GET" action="{{ route('landing') }}#etablissements" id="etab-filtre-form"
-          style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
-      <div style="position:relative;flex:1;min-width:250px;">
-        <span class="material-symbols-outlined" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:#999;pointer-events:none;">search</span>
+          class="lp-filtres">
+      <div class="lp-filtre-champ">
+        <span class="material-symbols-rounded" aria-hidden="true">search</span>
         <input type="text" id="etab-filter" name="q" value="{{ $q }}"
-               placeholder="{{ __('public.rechercher_placeholder') }}"
-               style="width:100%;padding:11px 14px 11px 40px;border:1px solid #ddd;
-                      border-radius:8px;font-size:13px;outline:none;
-                      transition:all 0.15s;"
-               onfocus="this.style.borderColor='var(--ep-teal)';this.style.boxShadow='0 0 0 3px rgba(13,158,117,0.1)'"
-               onblur="this.style.borderColor='#ddd';this.style.boxShadow='none'" />
+               class="lp-input" placeholder="{{ __('public.rechercher_placeholder') }}"
+               autocomplete="off" aria-label="{{ __('public.rechercher_placeholder') }}" />
       </div>
 
-      <select id="type-filter" name="type"
-              style="padding:11px 14px;border:1px solid #ddd;border-radius:8px;
-                     font-size:13px;background:#fff;outline:none;cursor:pointer;
-                     transition:all 0.15s;min-width:160px;"
-              onfocus="this.style.borderColor='var(--ep-teal)';this.style.boxShadow='0 0 0 3px rgba(13,158,117,0.1)'"
-              onblur="this.style.borderColor='#ddd';this.style.boxShadow='none'">
+      <select id="type-filter" name="type" class="lp-select"
+              aria-label="{{ __('public.type_tous') }}">
         <option value="">{{ __('public.type_tous') }}</option>
         @foreach($types as $type_valeur => $type_libelle)
         <option value="{{ $type_valeur }}" @selected($type === $type_valeur)>{{ __($type_libelle) }}</option>
         @endforeach
       </select>
 
-      <button type="submit" id="filter-btn"
-              style="padding:11px 20px;border:none;border-radius:8px;
-                     background:var(--ep-teal);font-size:13px;font-weight:600;
-                     cursor:pointer;color:#fff;transition:all 0.15s;
-                     box-shadow:0 2px 4px rgba(13,158,117,0.2);display:inline-flex;
-                     align-items:center;gap:6px;"
-              onmouseover="this.style.background='#0B8A62';this.style.transform='translateY(-1px)';this.style.boxShadow='0 4px 8px rgba(13,158,117,0.3)'"
-              onmouseout="this.style.background='var(--ep-teal)';this.style.transform='translateY(0)';this.style.boxShadow='0 2px 4px rgba(13,158,117,0.2)'">
-        <span class="material-symbols-outlined" style="font-size:18px;">search</span>
+      <button type="submit" id="filter-btn" class="lp-btn-filtre">
+        <span class="material-symbols-rounded" aria-hidden="true">search</span>
         {{ __('public.btn_rechercher') }}
       </button>
 
       @if($q !== '' || $type !== '')
-      <a href="{{ route('landing') }}" id="reset-filter-btn"
-         style="padding:11px 18px;border:1px solid #ddd;border-radius:8px;
-                background:#fff;font-size:13px;font-weight:500;cursor:pointer;
-                color:#666;display:inline-flex;transition:all 0.15s;
-                align-items:center;gap:6px;text-decoration:none;"
-         onmouseover="this.style.background='#f8f8f8';this.style.borderColor='#999'"
-         onmouseout="this.style.background='#fff';this.style.borderColor='#ddd'">
-        <span class="material-symbols-outlined" style="font-size:16px;color:#666;">close</span>
+      <a href="{{ route('landing') }}" id="reset-filter-btn" class="lp-btn-reset">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
         {{ __('public.btn_reinitialiser') }}
       </a>
       @endif
     </form>
 
-    {{-- Compteur de résultats --}}
-    <div id="results-counter" style="font-size:12px;color:#666;margin-bottom:12px;{{ ($q === '' && $type === '') ? 'display:none;' : '' }}">
-      <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;color:var(--ep-teal);">filter_alt</span>
+    {{-- Compteur de résultats (affiché seulement quand un filtre est actif) --}}
+    <div id="results-counter" class="lp-compteur" style="{{ ($q === '' && $type === '') ? 'display:none;' : '' }}">
+      <span class="material-symbols-rounded" aria-hidden="true">filter_alt</span>
       <span id="results-count">{{ $etablissements->total() }}</span> {{ __('public.resultats_etabs') }}
     </div>
 
-    {{-- Grille établissements --}}
-    <div id="etabs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;" data-reveal-stagger="60">
+    {{-- Grille des cartes établissements (style admin.html : pastille,
+         bande colorée au survol, badge « Payer en ligne ») --}}
+    <div id="etabs-grid" class="lp-etabs" data-reveal-stagger="60">
       @forelse($etablissements as $etab)
       <a href="{{ route('etablissement.show', $etab->code_etablissement) }}"
-           class="etab-card-pub reveal-on-scroll"
-           data-nom="{{ e(strtolower($etab->nom)) }}"
-           data-ville="{{ e(strtolower($etab->ville ?? '')) }}"
-           data-type="{{ e(strtolower($etab->type ?? '')) }}"
-           style="background:#fff;border:1px solid #eee;border-radius:12px;
-                  padding:16px;text-align:center;transition:box-shadow .2s,transform .2s;
-                  cursor:pointer;text-decoration:none;color:inherit;display:block;"
-           onmouseover="this.style.boxShadow='0 8px 20px rgba(13,158,117,.15)';this.style.transform='translateY(-3px)'"
-           onmouseout="this.style.boxShadow='none';this.style.transform='translateY(0)'">
-        {{-- Logo ou avatar --}}
+         class="lp-etab reveal-on-scroll"
+         data-nom="{{ e(strtolower($etab->nom)) }}"
+         data-ville="{{ e(strtolower($etab->ville ?? '')) }}"
+         data-type="{{ e(strtolower($etab->type ?? '')) }}">
         @if($etab->logo)
-          <img src="{{ asset('storage/'.$etab->logo) }}"
-               alt="{{ $etab->nom }}"
-               style="width:56px;height:56px;border-radius:10px;object-fit:cover;
-                      margin:0 auto 10px;display:block;border:1px solid #eee;" />
+          <img class="lp-etab-logo" src="{{ asset('storage/'.$etab->logo) }}" alt="{{ $etab->nom }}" loading="lazy" />
         @else
-          <div style="width:56px;height:56px;border-radius:10px;
-                      background:var(--ep-teal-lt);display:flex;align-items:center;
-                      justify-content:center;margin:0 auto 10px;
-                      font-size:22px;font-weight:700;color:var(--ep-teal);">
-            {{ strtoupper(substr($etab->nom, 0, 1)) }}
-          </div>
+          <div class="lp-etab-avatar" aria-hidden="true">{{ strtoupper(substr($etab->nom, 0, 1)) }}</div>
         @endif
 
-        <div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px;
-                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-             title="{{ $etab->nom }}">
-          {{ $etab->nom }}
-        </div>
-        <div style="font-size:11px;color:#888;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:4px;">
-          <span class="material-symbols-outlined" style="font-size:14px;color:#888;">location_on</span>
+        <div class="lp-etab-nom" title="{{ $etab->nom }}">{{ $etab->nom }}</div>
+        <div class="lp-etab-ville">
+          <span class="material-symbols-rounded" aria-hidden="true">location_on</span>
           {{ $etab->ville ?? '—' }}
         </div>
-        <span style="font-size:10px;padding:3px 8px;border-radius:20px;
-                     background:var(--ep-teal-lt);color:#085041;font-weight:500;">
+        <span class="lp-etab-type">
+          <span class="point" aria-hidden="true"></span>
           {{ ucfirst(str_replace('_', ' ', $etab->type ?? 'Établissement')) }}
+        </span>
+
+        <span class="lp-etab-payer">
+          <span class="material-symbols-rounded" aria-hidden="true">bolt</span>
+          {{ __('public.etab_payer_en_ligne') }}
         </span>
       </a>
       @empty
-      <div style="grid-column:1/-1;text-align:center;color:#aaa;padding:40px 0;font-size:13px;">
+      <div class="lp-vide">
+        <span class="material-symbols-rounded" aria-hidden="true">search_off</span>
         @if($q !== '' || $type !== '')
           {{ __('public.aucun_etab_trouve') }}
-          <div style="margin-top:12px;">
-            <a href="{{ route('landing') }}" class="hbtn-main"
-               style="font-size:13px;padding:10px 20px;">
+          <div style="margin-top:14px;">
+            <a href="{{ route('landing') }}" class="lp-btn lp-btn-main" style="font-size:13px;padding:10px 20px;">
               {{ __('public.btn_reinitialiser') }}
             </a>
           </div>
         @else
           {{ __('public.aucun_etab_partenaire') }}
-          <div style="margin-top:12px;">
-            <a href="{{ route('register.ecole.step1') }}" class="hbtn-main"
-               style="font-size:13px;padding:10px 20px;">
+          <div style="margin-top:14px;">
+            <a href="{{ route('register.ecole.step1') }}" class="lp-btn lp-btn-main" style="font-size:13px;padding:10px 20px;">
               {{ __('public.cta_inscrire_maintenant') }}
             </a>
           </div>
@@ -202,133 +279,143 @@
       @endforelse
     </div>
 
-    {{-- Pagination : la liste est paginée côté serveur (12 par page) --}}
+    {{-- Pagination serveur --}}
     @if($etablissements->hasPages())
-    <nav style="display:flex;gap:8px;justify-content:center;align-items:center;margin-top:20px;flex-wrap:wrap;"
-         aria-label="{{ __('public.resultats_etabs') }}">
+    <nav class="lp-pagination" aria-label="{{ __('public.resultats_etabs') }}">
       @if($etablissements->onFirstPage())
-        <span style="padding:9px 16px;border:1px solid #eee;border-radius:8px;color:#ccc;font-size:13px;">&larr;</span>
+        <span class="lp-page-btn disabled"><span class="material-symbols-rounded">chevron_left</span></span>
       @else
-        <a href="{{ $etablissements->previousPageUrl() }}" rel="prev"
-           style="padding:9px 16px;border:1px solid #ddd;border-radius:8px;color:var(--ep-teal);font-size:13px;text-decoration:none;">&larr;</a>
+        <a href="{{ $etablissements->previousPageUrl() }}" rel="prev" class="lp-page-btn">
+          <span class="material-symbols-rounded">chevron_left</span>
+        </a>
       @endif
 
-      <span style="font-size:13px;color:#666;">
+      <span class="lp-page-infos">
         {{ __('public.page_sur', ['page' => $etablissements->currentPage(), 'total' => $etablissements->lastPage()]) }}
       </span>
 
       @if($etablissements->hasMorePages())
-        <a href="{{ $etablissements->nextPageUrl() }}" rel="next"
-           style="padding:9px 16px;border:1px solid #ddd;border-radius:8px;color:var(--ep-teal);font-size:13px;text-decoration:none;">&rarr;</a>
+        <a href="{{ $etablissements->nextPageUrl() }}" rel="next" class="lp-page-btn">
+          <span class="material-symbols-rounded">chevron_right</span>
+        </a>
       @else
-        <span style="padding:9px 16px;border:1px solid #eee;border-radius:8px;color:#ccc;font-size:13px;">&rarr;</span>
+        <span class="lp-page-btn disabled"><span class="material-symbols-rounded">chevron_right</span></span>
       @endif
     </nav>
     @endif
   </div>
 
-  <div class="seclbl reveal-on-scroll" style="margin-top:4px;">{{ __('public.pourquoi_edupay') }}</div>
-  <div class="feat-grid" style="margin-bottom:24px;" data-reveal-stagger="70">
+  {{-- ══ SECTION : pourquoi EduPay — 6 cartes Material Symbols animées ══ --}}
+  <div class="lp-section">
+    <div class="lp-seclbl reveal-on-scroll">
+      <span class="material-symbols-rounded" aria-hidden="true">auto_awesome</span>
+      {{ __('public.pourquoi_edupay') }}
+    </div>
+    <h2 class="lp-sectitre reveal-on-scroll">{!! __('public.why_titre_section') !!}</h2>
 
-    <div class="feat-card reveal-on-scroll">
-      <div class="feat-line" style="background:var(--ep-teal);"></div>
-      <div class="feat-icon" style="background:var(--ep-teal-lt);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+    <div class="lp-feats" data-reveal-stagger="70">
+      {{-- 1 · Mobile Money natif --}}
+      <div class="lp-feat reveal-on-scroll" style="--lp-couleur:#0D9E75;--lp-couleur2:#0A8562;--lp-couleur-halo:rgba(13,158,117,.14);">
+        <div class="lp-feat-ico"><span class="material-symbols-rounded">smartphone</span></div>
+        <div class="lp-feat-titre">{{ __('public.feat_mobile_money_titre') }}</div>
+        <div class="lp-feat-desc">{{ __('public.feat_mobile_money_desc') }}</div>
       </div>
-      <div class="feat-title">{{ __('public.feat_mobile_money_titre') }}</div>
-      <div class="feat-desc">{{ __('public.feat_mobile_money_desc') }}</div>
-    </div>
 
-    <div class="feat-card reveal-on-scroll">
-      <div class="feat-line" style="background:var(--ep-gold);"></div>
-      <div class="feat-icon" style="background:var(--ep-gold-lt);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      {{-- 2 · Reçu PDF instantané --}}
+      <div class="lp-feat reveal-on-scroll" style="--lp-couleur:#E8A020;--lp-couleur2:#C9860E;--lp-couleur-halo:rgba(232,160,32,.15);">
+        <div class="lp-feat-ico"><span class="material-symbols-rounded">receipt_long</span></div>
+        <div class="lp-feat-titre">{{ __('public.feat_recu_titre') }}</div>
+        <div class="lp-feat-desc">{{ __('public.feat_recu_desc') }}</div>
       </div>
-      <div class="feat-title">{{ __('public.feat_recu_titre') }}</div>
-      <div class="feat-desc">{{ __('public.feat_recu_desc') }}</div>
-    </div>
 
-    <div class="feat-card reveal-on-scroll">
-      <div class="feat-line" style="background:#185FA5;"></div>
-      <div class="feat-icon" style="background:var(--ep-blue-lt);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      {{-- 3 · Dashboard temps réel --}}
+      <div class="lp-feat reveal-on-scroll" style="--lp-couleur:#1F6FB2;--lp-couleur2:#185FA5;--lp-couleur-halo:rgba(31,111,178,.14);">
+        <div class="lp-feat-ico"><span class="material-symbols-rounded">bar_chart</span></div>
+        <div class="lp-feat-titre">{{ __('public.feat_dashboard_titre') }}</div>
+        <div class="lp-feat-desc">{{ __('public.feat_dashboard_desc') }}</div>
       </div>
-      <div class="feat-title">{{ __('public.feat_dashboard_titre') }}</div>
-      <div class="feat-desc">{{ __('public.feat_dashboard_desc') }}</div>
-    </div>
 
-    <div class="feat-card reveal-on-scroll">
-      <div class="feat-line" style="background:#7C3AED;"></div>
-      <div class="feat-icon" style="background:var(--ep-purple-lt);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      {{-- 4 · Sécurité --}}
+      <div class="lp-feat reveal-on-scroll" style="--lp-couleur:#7C3AED;--lp-couleur2:#6D28D9;--lp-couleur-halo:rgba(139,92,246,.14);">
+        <div class="lp-feat-ico"><span class="material-symbols-rounded">security</span></div>
+        <div class="lp-feat-titre">{{ __('public.feat_securite_titre') }}</div>
+        <div class="lp-feat-desc">{{ __('public.feat_securite_desc') }}</div>
       </div>
-      <div class="feat-title">{{ __('public.feat_securite_titre') }}</div>
-      <div class="feat-desc">{{ __('public.feat_securite_desc') }}</div>
-    </div>
 
-    <div class="feat-card reveal-on-scroll">
-      <div class="feat-line" style="background:var(--ep-red);"></div>
-      <div class="feat-icon" style="background:var(--ep-red-lt);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#D94040" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      {{-- 5 · Paiement fractionné --}}
+      <div class="lp-feat reveal-on-scroll" style="--lp-couleur:#D94040;--lp-couleur2:#B03A2E;--lp-couleur-halo:rgba(217,64,64,.13);">
+        <div class="lp-feat-ico"><span class="material-symbols-rounded">date_range</span></div>
+        <div class="lp-feat-titre">{{ __('public.feat_fractionne_titre') }}</div>
+        <div class="lp-feat-desc">{{ __('public.feat_fractionne_desc') }}</div>
       </div>
-      <div class="feat-title">{{ __('public.feat_fractionne_titre') }}</div>
-      <div class="feat-desc">{{ __('public.feat_fractionne_desc') }}</div>
-    </div>
 
-    <div class="feat-card reveal-on-scroll">
-      <div class="feat-line" style="background:var(--ep-teal);"></div>
-      <div class="feat-icon" style="background:var(--ep-teal-lt);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      {{-- 6 · Multi-établissements --}}
+      <div class="lp-feat reveal-on-scroll" style="--lp-couleur:#0D9E75;--lp-couleur2:#085041;--lp-couleur-halo:rgba(13,158,117,.14);">
+        <div class="lp-feat-ico"><span class="material-symbols-rounded">device_hub</span></div>
+        <div class="lp-feat-titre">{{ __('public.feat_multi_titre') }}</div>
+        <div class="lp-feat-desc">{{ __('public.feat_multi_desc') }}</div>
       </div>
-      <div class="feat-title">{{ __('public.feat_multi_titre') }}</div>
-      <div class="feat-desc">{{ __('public.feat_multi_desc') }}</div>
-    </div>
-
-  </div>
-
-  <div class="seclbl reveal-on-scroll">{{ __('public.concu_systeme_edu') }}</div>
-  <div class="g4" style="margin-bottom:24px;" data-reveal-stagger="70">
-    <div class="epcard reveal-on-scroll" style="text-align:center;border-top:3px solid var(--ep-teal);">
-      <div style="width:36px;height:36px;background:var(--ep-teal-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </div>
-      <div style="font-weight:600;font-size:13px;">{!! __('public.card_mat_prim_titre') !!}</div>
-      <div style="font-size:11px;color:#888;margin-top:4px;">{{ __('public.card_mat_prim_desc') }}</div>
-    </div>
-    <div class="epcard reveal-on-scroll" style="text-align:center;border-top:3px solid var(--ep-gold);">
-      <div style="width:36px;height:36px;background:var(--ep-gold-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </div>
-      <div style="font-weight:600;font-size:13px;">{!! __('public.card_coll_lyc_titre') !!}</div>
-      <div style="font-size:11px;color:#888;margin-top:4px;">{{ __('public.card_coll_lyc_desc') }}</div>
-    </div>
-    <div class="epcard reveal-on-scroll" style="text-align:center;border-top:3px solid #185FA5;">
-      <div style="width:36px;height:36px;background:var(--ep-blue-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><rect x="2" y="7" width="20" height="15"/><polyline points="16 2 12 7 8 2"/></svg>
-      </div>
-      <div style="font-weight:600;font-size:13px;">{!! __('public.card_univ_inst_titre') !!}</div>
-      <div style="font-size:11px;color:#888;margin-top:4px;">{{ __('public.card_univ_inst_desc') }}</div>
-    </div>
-    <div class="epcard reveal-on-scroll" style="text-align:center;border-top:3px solid #7C3AED;">
-      <div style="width:36px;height:36px;background:var(--ep-purple-lt);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-      </div>
-      <div style="font-weight:600;font-size:13px;">{!! __('public.card_par_etud_titre') !!}</div>
-      <div style="font-size:11px;color:#888;margin-top:4px;">{{ __('public.card_par_etud_desc') }}</div>
     </div>
   </div>
 
-  <div style="background:var(--ep-navy);border-radius:var(--radius-lg);padding:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:4px;">
-    <div>
-      <div style="font-size:18px;font-weight:600;color:#fff;margin-bottom:5px;">{{ __('public.etab_pas_encore') }}</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.55);">{{ __('public.inscription_gratuite_desc') }}</div>
+  {{-- ══ SECTION : conçu pour tout le système éducatif ══ --}}
+  <div class="lp-section">
+    <div class="lp-seclbl reveal-on-scroll">
+      <span class="material-symbols-rounded" aria-hidden="true">school</span>
+      {{ __('public.concu_systeme_edu') }}
     </div>
-    <a href="{{ route('register.ecole.step1') }}" style="background:var(--ep-teal);color:#fff;border:none;padding:13px 26px;border-radius:var(--radius-md);font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;">{{ __('public.cta_inscrire_etablissement') }} →</a>
+
+    <div class="lp-types" data-reveal-stagger="70">
+      <div class="lp-type reveal-on-scroll" style="--lp-couleur:#0D9E75;--lp-couleur-halo:var(--ep-teal-lt);">
+        <div class="lp-type-ico"><span class="material-symbols-rounded">child_care</span></div>
+        <b>{!! __('public.card_mat_prim_titre') !!}</b>
+        <small>{{ __('public.card_mat_prim_desc') }}</small>
+      </div>
+      <div class="lp-type reveal-on-scroll" style="--lp-couleur:#E8A020;--lp-couleur-halo:var(--ep-gold-lt);">
+        <div class="lp-type-ico"><span class="material-symbols-rounded">menu_book</span></div>
+        <b>{!! __('public.card_coll_lyc_titre') !!}</b>
+        <small>{{ __('public.card_coll_lyc_desc') }}</small>
+      </div>
+      <div class="lp-type reveal-on-scroll" style="--lp-couleur:#1F6FB2;--lp-couleur-halo:var(--ep-blue-lt);">
+        <div class="lp-type-ico"><span class="material-symbols-rounded">account_balance</span></div>
+        <b>{!! __('public.card_univ_inst_titre') !!}</b>
+        <small>{{ __('public.card_univ_inst_desc') }}</small>
+      </div>
+      <div class="lp-type reveal-on-scroll" style="--lp-couleur:#7C3AED;--lp-couleur-halo:var(--ep-purple-lt);">
+        <div class="lp-type-ico"><span class="material-symbols-rounded">groups</span></div>
+        <b>{!! __('public.card_par_etud_titre') !!}</b>
+        <small>{{ __('public.card_par_etud_desc') }}</small>
+      </div>
+    </div>
   </div>
 
-</div>
+  {{-- ══ CTA FINAL : appel à l'inscription établissement ══ --}}
+  <div class="lp-section" style="padding-bottom:40px;">
+    <div class="lp-cta-final reveal-on-scroll">
+      <div>
+        <h3>{{ __('public.etab_pas_encore') }}</h3>
+        <p>{{ __('public.inscription_gratuite_desc') }}</p>
+      </div>
+      <a href="{{ route('register.ecole.step1') }}" class="lp-btn lp-btn-main">
+        {{ __('public.cta_inscrire_etablissement') }}
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+      </a>
+    </div>
 
-{{-- ══ FOOTER ══ --}}
+    {{-- Bandeau régulateur : confiance réglementaire près du CTA
+         (pattern N26 — pas relégué au footer) --}}
+    <div class="lp-regulateur reveal-on-scroll">
+      <span><span class="material-symbols-rounded" aria-hidden="true">gavel</span>{{ __('public.regulateur_loi') }}</span>
+      <span><span class="material-symbols-rounded" aria-hidden="true">account_balance</span>{{ __('public.regulateur_cobac') }}</span>
+      <span><span class="material-symbols-rounded" aria-hidden="true">verified_user</span>{{ __('public.regulateur_beac') }}</span>
+      <span><span class="material-symbols-rounded" aria-hidden="true">enhanced_encryption</span>{{ __('public.regulateur_donnees') }}</span>
+    </div>
+  </div>
+
+</div>{{-- /.ep-body2 --}}
+</div>{{-- /.lp : fin du wrapper de variables --}}
+
+{{-- ══ FOOTER (inchangé, partagé avec les pages publiques) ══ --}}
 <div class="ep-footer">
   <div class="footer-grid">
     <div>
@@ -373,57 +460,6 @@
 
 @endsection
 
-@push('styles')
-<style>
-.etab-card-pub:hover {
-    box-shadow: 0 4px 20px rgba(13,158,117,.12);
-    border-color: var(--ep-teal-mid) !important;
-    transform: translateY(-2px);
-}
-</style>
-@endpush
-
 @push('scripts')
-<script>
-// ── Filtre établissements publics ──
-// Le filtrage est fait par le serveur (formulaire GET + pagination) : le
-// filtre JavaScript ne voyait que les 12 premières cartes rendues, donc
-// toute école au-delà de la 12e était impossible à trouver. On garde la
-// saisie instantanée en soumettant le formulaire après un court délai.
-(function () {
-    var form = document.getElementById('etab-filtre-form');
-    var champ = document.getElementById('etab-filter');
-    var selecteur = document.getElementById('type-filter');
-    if (!form) return;
-
-    var minuteur = null;
-    var derniereValeur = champ ? champ.value : '';
-
-    function soumettre() {
-        form.submit();
-    }
-
-    if (champ) {
-        champ.addEventListener('input', function () {
-            clearTimeout(minuteur);
-            minuteur = setTimeout(function () {
-                if (champ.value !== derniereValeur) {
-                    derniereValeur = champ.value;
-                    soumettre();
-                }
-            }, 600);
-        });
-    }
-
-    if (selecteur) {
-        selecteur.addEventListener('change', soumettre);
-    }
-})();
-
-// Animation fadeIn
-var style = document.createElement('style');
-style.innerHTML = '@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }';
-document.head.appendChild(style);
-</script>
+<script src="{{ asset('js/ep-landing.js') }}" defer></script>
 @endpush
-
