@@ -2,243 +2,455 @@
 
 @section('title', __('public.contact_title'))
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/edupay-landing.css') }}">
+<style>
+/* Corps des pages secondaires : suit le thème clair/sombre */
+.lp-page .ep-body2 { background: transparent; }
+
+/* ============================================================
+   CONTACT v3 — styles locaux (grille 2 colonnes, coordonnées,
+   formulaire). Tout via variables --lp-* : le mode sombre
+   [data-theme="dark"] est hérité automatiquement.
+   ============================================================ */
+
+/* Grille 2 colonnes : coordonnées à gauche, formulaire à droite */
+.lp-contact-g {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 22px;
+    max-width: 1120px;
+    margin: 0 auto;
+    align-items: start;
+}
+@media (max-width: 900px) {
+    .lp-contact-g { grid-template-columns: 1fr; }
+}
+
+/* Cartes de la page contact */
+.lp-carte-contact {
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: var(--lp-rayon);
+    box-shadow: var(--lp-ombre);
+    padding: 22px;
+}
+.lp-carte-contact-titre {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--lp-encre);
+    margin-bottom: 16px;
+}
+.lp-carte-contact-titre .material-symbols-rounded {
+    font-size: 19px;
+    color: var(--lp-teal);
+}
+
+/* Ligne de coordonnée : pastille dégradée + texte (pattern lp-valeur) */
+.lp-coord {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+    padding: 14px 15px;
+    border-radius: 12px;
+    background: var(--lp-fond);
+    border: 1px solid var(--lp-bord);
+}
+.lp-coord + .lp-coord { margin-top: 12px; }
+.lp-coord-ico {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--lp-couleur, var(--lp-teal)), var(--lp-couleur2, var(--lp-teal2)));
+    color: #fff;
+}
+.lp-coord-ico .material-symbols-rounded { font-size: 19px; }
+.lp-coord b {
+    display: block;
+    font-size: 12.5px;
+    color: var(--lp-encre);
+}
+.lp-coord small {
+    display: block;
+    font-size: 12.5px;
+    color: var(--lp-gris);
+    line-height: 1.6;
+    margin-top: 2px;
+}
+.lp-coord-desc {
+    font-size: 12.5px;
+    color: var(--lp-gris);
+    line-height: 1.75;
+    margin: 0 0 4px;
+}
+
+/* Champs du formulaire : label avec pastille icône colorée */
+.lp-champs {
+    display: grid;
+    gap: 17px;
+    margin-top: 14px;
+}
+.lp-lbl {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--lp-encre);
+    margin-bottom: 7px;
+    letter-spacing: .02em;
+}
+.lp-lbl .material-symbols-rounded { font-size: 17px; color: var(--lp-lbl-c, var(--lp-teal)); }
+.lp-textarea {
+    width: 100%;
+    min-height: 130px;
+    resize: vertical;
+    padding: 12px 14px;
+    border: 1.5px solid var(--lp-bord);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: var(--lp-encre);
+    background: var(--lp-carte);
+    outline: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+.lp-textarea:focus {
+    border-color: var(--lp-teal);
+    box-shadow: 0 0 0 3px rgba(13,158,117,.14);
+}
+.lp-err { font-size: 12px; color: var(--lp-red); margin-top: 6px; }
+
+/* Select sujet personnalisé : déclencheur + menu déroulant v3 */
+.lp-select-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--lp-bord);
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    color: var(--lp-encre);
+    background: var(--lp-carte);
+    cursor: pointer;
+    user-select: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.lp-select-trigger svg { transition: transform .2s ease; flex-shrink: 0; stroke: var(--lp-gris); }
+.lp-select-dd {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(11,37,69,.16);
+    z-index: 100;
+    overflow: hidden;
+}
+.select-opt {
+    padding: 12px 15px;
+    font-size: 13px;
+    color: var(--lp-encre);
+    cursor: pointer;
+    border-bottom: 1px solid var(--lp-bord);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background .15s ease;
+}
+.select-opt:last-child { border-bottom: none; }
+.select-opt:hover { background: var(--lp-fond); }
+.select-opt .opt-check {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid var(--lp-bord);
+    background: var(--lp-carte);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+/* Ajustements mode sombre des détails non variables */
+html[data-theme="dark"] .lp-carte-contact { box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+html[data-theme="dark"] .lp-select-dd { box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+</style>
+@endpush
+
 @section('content')
 
 @include('layouts._navbar_public')
-<div class="hero-band">
-  <div class="hero-main">
-    <div class="hero-tag" style="justify-content:center;display:inline-flex;"> <span style="width:7px;height:7px;border-radius:50%;background:#5DCAA5;display:inline-block;"></span> {{ __('public.contact_hero_tag') }}</div>
-    <div class="hero-h1">{{ __('public.contact_hero_h1_line1') }}<br><span style="color:#5DCAA5;">{{ __('public.contact_hero_h1_line2') }}</span></div>
-    <div class="hero-sub" style="margin:0 auto;max-width:560px;">{{ __('public.contact_hero_sub') }}</div>
+
+<div class="lp lp-page">
+{{-- ══ HERO SECONDAIRE v3 ══ --}}
+<div class="lp-hero-sec">
+  <div class="lp-orb lp-orb-a" aria-hidden="true"></div>
+  <div class="lp-orb lp-orb-b" aria-hidden="true"></div>
+  <div class="lp-hero-sec-inner">
+    <div class="lp-tag" style="justify-content:center;">
+      <span class="lp-pulse" aria-hidden="true"></span>
+      <span class="material-symbols-rounded" aria-hidden="true">support_agent</span>
+      {{ __('public.contact_hero_tag') }}
+    </div>
+    <h1 class="lp-h1" style="font-size:34px;">
+      {{ __('public.contact_hero_h1_line1') }}<br><em>{{ __('public.contact_hero_h1_line2') }}</em>
+    </h1>
+    <p class="lp-sub" style="margin-left:auto;margin-right:auto;max-width:560px;">{{ __('public.contact_hero_sub') }}</p>
   </div>
 </div>
 
 <div class="ep-body2">
-  <form method="POST" action="{{ route('contact.submit') }}">
-    @csrf
-    <div class="g2" style="gap:24px;align-items:flex-start;">
-      <div style="display:grid;gap:18px;">
-        <div class="epcard" style="padding:24px;">
-          <div style="font-size:14px;font-weight:700;color:#0B2545;margin-bottom:10px;">{{ __('public.informations_contact') }}</div>
-          <div style="display:grid;gap:14px;">
-            <div style="background:#E0F5EE;border-radius:16px;padding:18px;display:flex;gap:14px;align-items:flex-start;">
-              <span class="icon-round" style="background:var(--ep-teal);">
-                <span class="material-symbols-outlined">place</span>
-              </span>
-              <div>
-                <div style="font-size:13px;font-weight:700;color:#0B2545;">{{ __('public.adresse') }}</div>
-                <div style="font-size:13px;color:#555;line-height:1.6;">{!! __('public.adresse_val') !!}</div>
-              </div>
-            </div>
-            <div style="background:#E8F1FC;border-radius:16px;padding:18px;display:flex;gap:14px;align-items:flex-start;">
-              <span class="icon-round" style="background:#185FA5;">
-                <span class="material-symbols-outlined">call</span>
-              </span>
-              <div>
-                <div style="font-size:13px;font-weight:700;color:#0B2545;">{{ __('public.telephone_label') }}</div>
-                <div style="font-size:13px;color:#555;line-height:1.6;">+237 654 862 989<br>+237 688 462 229</div>
-              </div>
-            </div>
-            <div style="background:#EFF8F0;border-radius:16px;padding:18px;display:flex;gap:14px;align-items:flex-start;">
-              <span class="icon-round" style="background:var(--ep-teal);">
-                <span class="material-symbols-outlined">email</span>
-              </span>
-              <div>
-                <div style="font-size:13px;font-weight:700;color:#0B2545;">{{ __('public.email_label') }}</div>
-                <div style="font-size:13px;color:#555;line-height:1.6;">{{ __('public.email_val') }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="epcard" style="padding:24px;">
-          <div style="font-size:14px;font-weight:700;color:#0B2545;margin-bottom:10px;">{{ __('public.pourquoi_nous_contacter') }}</div>
-          <div style="font-size:13px;color:#555;line-height:1.8;">
-            {{ __('public.pourquoi_nous_desc') }}
-          </div>
-        </div>
-      </div>
+  <div class="lp-section" style="padding-top:44px;">
+    <form method="POST" action="{{ route('contact.submit') }}">
+      @csrf
+      <div class="lp-contact-g">
 
-      <div class="epcard" style="padding:28px;">
-        <div style="font-size:18px;font-weight:700;color:#0B2545;margin-bottom:12px;">{{ __('public.envoyez_message') }}</div>
-        <div style="font-size:13px;color:#555;line-height:1.75;margin-bottom:24px;">{{ __('public.formulaire_desc') }}</div>
+        {{-- ══ Colonne gauche : coordonnées + pourquoi ══ --}}
         <div style="display:grid;gap:18px;">
-          <div style="display:grid;gap:8px;">
-            <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#0B2545;">
-              <span class="icon-round icon-sm" style="background:var(--ep-teal);">
-                <span class="material-symbols-outlined">person</span>
-              </span>
-              {{ __('public.nom_complet') }}
+          <div class="lp-carte-contact reveal-on-scroll">
+            <div class="lp-carte-contact-titre">
+              <span class="material-symbols-rounded" aria-hidden="true">contacts</span>
+              {{ __('public.informations_contact') }}
             </div>
-            <input class="inp" type="text" name="name" value="{{ old('name') }}" placeholder="{{ __('public.votre_nom') }}" />
-            @error('name')<div style="font-size:12px;color:#d94040;">{{ $message }}</div>@enderror
-          </div>
-          <div style="display:grid;gap:8px;">
-            <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#0B2545;">
-              <span class="icon-round icon-sm" style="background:#185FA5;">
-                <span class="material-symbols-outlined">email</span>
-              </span>
-              {{ __('public.email_label') }}
-            </div>
-            <input class="inp" type="email" name="email" value="{{ old('email') }}" placeholder="{{ __('public.votre_email') }}" />
-            @error('email')<div style="font-size:12px;color:#d94040;">{{ $message }}</div>@enderror
-          </div>
-          <div style="display:grid;gap:8px;">
-            <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#0B2545;">
-              <span class="icon-round icon-sm" style="background:var(--ep-gold);">
-                <span class="material-symbols-outlined">phone</span>
-              </span>
-              {{ __('public.telephone_label') }}
-            </div>
-            <input class="inp" type="tel" name="phone" value="{{ old('phone') }}" placeholder="+237 6XX XXX XXX" />
-            @error('phone')<div style="font-size:12px;color:#d94040;">{{ $message }}</div>@enderror
-          </div>
-          <div style="display:grid;gap:8px;">
-            <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#0B2545;">
-              <span class="icon-round icon-sm" style="background:var(--ep-red);">
-                <span class="material-symbols-outlined">flag</span>
-              </span>
-              {{ __('public.sujet') }}
-            </div>
-            {{-- Custom select responsive --}}
-            <input type="hidden" name="subject" id="subject-input" value="{{ old('subject') }}" />
-            <div id="custom-select" style="position:relative;user-select:none;">
-              <div id="select-trigger"
-                   style="display:flex;justify-content:space-between;align-items:center;
-                          padding:11px 14px;border:1px solid #ddd;border-radius:8px;
-                          font-size:13px;color:#555;background:#fff;cursor:pointer;
-                          transition:border .15s;"
-                   onclick="toggleSelect()">
-                <span id="select-label">
-                  {{ old('subject') ?: __('public.select_sujet') }}
-                </span>
-                <svg id="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                     stroke="#888" stroke-width="2" style="transition:transform .2s;flex-shrink:0;">
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </div>
-              <div id="select-dropdown"
-                   style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;
-                          background:#fff;border:1px solid #ddd;border-radius:10px;
-                          box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;overflow:hidden;">
-                @foreach([
-                  'Intégration établissement' => __('public.sujet_integration'),
-                  'Problème de paiement' => __('public.sujet_paiement'),
-                  'Partenariat' => __('public.sujet_partenariat'),
-                  'Autre question' => __('public.sujet_autre'),
-                ] as $val => $opt)
-                <div class="select-opt"
-                     data-value="{{ $val }}"
-                     onclick="selectOption(this)"
-                     style="padding:13px 16px;font-size:13px;color:#333;cursor:pointer;
-                            border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:10px;
-                            {{ old('subject') === $val ? 'background:#E0F5EE;color:#085041;font-weight:600;' : '' }}
-                            transition:background .15s;">
-                  <span class="opt-check" style="width:16px;height:16px;border-radius:50%;
-                        border:2px solid {{ old('subject') === $val ? '#0D9E75' : '#ddd' }};
-                        background:{{ old('subject') === $val ? '#0D9E75' : '#fff' }};
-                        display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    @if(old('subject') === $val)
-                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    @endif
-                  </span>
-                  {{ $opt }}
-                </div>
-                @endforeach
+            <div class="lp-coord" style="--lp-couleur:#0D9E75;--lp-couleur2:#0A8562;">
+              <span class="lp-coord-ico"><span class="material-symbols-rounded" aria-hidden="true">place</span></span>
+              <div>
+                <b>{{ __('public.adresse') }}</b>
+                <small>{!! __('public.adresse_val') !!}</small>
               </div>
             </div>
-            @error('subject')<div style="font-size:12px;color:#d94040;">{{ $message }}</div>@enderror
+            <div class="lp-coord" style="--lp-couleur:#1F6FB2;--lp-couleur2:#123C66;">
+              <span class="lp-coord-ico"><span class="material-symbols-rounded" aria-hidden="true">call</span></span>
+              <div>
+                <b>{{ __('public.telephone_label') }}</b>
+                <small>+237 654 862 989<br>+237 688 462 229</small>
+              </div>
+            </div>
+            <div class="lp-coord" style="--lp-couleur:#E8A020;--lp-couleur2:#C9860E;">
+              <span class="lp-coord-ico"><span class="material-symbols-rounded" aria-hidden="true">email</span></span>
+              <div>
+                <b>{{ __('public.email_label') }}</b>
+                <small>{{ __('public.email_val') }}</small>
+              </div>
+            </div>
           </div>
 
-          <script>
-          function toggleSelect() {
-            var dd = document.getElementById('select-dropdown');
-            var arrow = document.getElementById('select-arrow');
-            var trigger = document.getElementById('select-trigger');
-            var open = dd.style.display === 'block';
-            dd.style.display = open ? 'none' : 'block';
-            arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
-            trigger.style.borderColor = open ? '#ddd' : '#0D9E75';
-          }
-          function selectOption(el) {
-            var val = el.getAttribute('data-value');
-            document.getElementById('subject-input').value = val;
-            document.getElementById('select-label').textContent = val;
-            document.getElementById('select-dropdown').style.display = 'none';
-            document.getElementById('select-arrow').style.transform = 'rotate(0deg)';
-            document.getElementById('select-trigger').style.borderColor = '#0D9E75';
-            // Reset all options
-            document.querySelectorAll('.select-opt').forEach(function(opt) {
-              opt.style.background = '';
-              opt.style.color = '#333';
-              opt.style.fontWeight = '';
-              opt.querySelector('.opt-check').style.borderColor = '#ddd';
-              opt.querySelector('.opt-check').style.background = '#fff';
-              opt.querySelector('.opt-check').innerHTML = '';
-            });
-            // Highlight selected
-            el.style.background = '#E0F5EE';
-            el.style.color = '#085041';
-            el.style.fontWeight = '600';
-            el.querySelector('.opt-check').style.borderColor = '#0D9E75';
-            el.querySelector('.opt-check').style.background = '#0D9E75';
-            el.querySelector('.opt-check').innerHTML = '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
-          }
-          // Fermer si clic ailleurs
-          document.addEventListener('click', function(e) {
-            var cs = document.getElementById('custom-select');
-            if (cs && !cs.contains(e.target)) {
-              document.getElementById('select-dropdown').style.display = 'none';
-              document.getElementById('select-arrow').style.transform = 'rotate(0deg)';
-            }
-          });
-          </script>
-          <div style="display:grid;gap:8px;">
-            <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#0B2545;">
-              <span class="icon-round icon-sm" style="background:#7C3AED;">
-                <span class="material-symbols-outlined">chat_bubble</span>
-              </span>
-              {{ __('public.message_label') }}
+          <div class="lp-carte-contact reveal-on-scroll">
+            <div class="lp-carte-contact-titre">
+              <span class="material-symbols-rounded" aria-hidden="true">help</span>
+              {{ __('public.pourquoi_nous_contacter') }}
             </div>
-            <textarea class="textarea" name="message" placeholder="{{ __('public.message_placeholder') }}">{{ old('message') }}</textarea>
-            @error('message')<div style="font-size:12px;color:#d94040;">{{ $message }}</div>@enderror
+            <p class="lp-coord-desc">{{ __('public.pourquoi_nous_desc') }}</p>
           </div>
-          <button class="btn-p" style="width:auto;padding:13px 24px;">{{ __('public.envoyer_message') }}</button>
+        </div>
+
+        {{-- ══ Colonne droite : formulaire v3 ══ --}}
+        <div class="lp-carte-contact reveal-on-scroll">
+          <div class="lp-carte-contact-titre" style="font-size:17px;">
+            <span class="material-symbols-rounded" aria-hidden="true">forward_to_inbox</span>
+            {{ __('public.envoyez_message') }}
+          </div>
+          <p class="lp-coord-desc">{{ __('public.formulaire_desc') }}</p>
+
+          <div class="lp-champs">
+            <div>
+              <div class="lp-lbl" style="--lp-lbl-c:#0D9E75;">
+                <span class="material-symbols-rounded" aria-hidden="true">person</span>
+                {{ __('public.nom_complet') }}
+              </div>
+              <input class="lp-input" style="padding-left:14px;" type="text" name="name" value="{{ old('name') }}" placeholder="{{ __('public.votre_nom') }}" />
+              @error('name')<div class="lp-err">{{ $message }}</div>@enderror
+            </div>
+
+            <div>
+              <div class="lp-lbl" style="--lp-lbl-c:#185FA5;">
+                <span class="material-symbols-rounded" aria-hidden="true">mail</span>
+                {{ __('public.email_label') }}
+              </div>
+              <input class="lp-input" style="padding-left:14px;" type="email" name="email" value="{{ old('email') }}" placeholder="{{ __('public.votre_email') }}" />
+              @error('email')<div class="lp-err">{{ $message }}</div>@enderror
+            </div>
+
+            <div>
+              <div class="lp-lbl" style="--lp-lbl-c:#E8A020;">
+                <span class="material-symbols-rounded" aria-hidden="true">phone</span>
+                {{ __('public.telephone_label') }}
+              </div>
+              <input class="lp-input" style="padding-left:14px;" type="tel" name="phone" value="{{ old('phone') }}" placeholder="+237 6XX XXX XXX" />
+              @error('phone')<div class="lp-err">{{ $message }}</div>@enderror
+            </div>
+
+            <div>
+              <div class="lp-lbl" style="--lp-lbl-c:#D94040;">
+                <span class="material-symbols-rounded" aria-hidden="true">flag</span>
+                {{ __('public.sujet') }}
+              </div>
+              {{-- Select personnalisé responsive (fonctionne sur mobile) --}}
+              <input type="hidden" name="subject" id="subject-input" value="{{ old('subject') }}" />
+              <div id="custom-select" style="position:relative;">
+                <div id="select-trigger" class="lp-select-trigger" onclick="toggleSelect()" role="button" tabindex="0"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleSelect();}">
+                  <span id="select-label">{{ old('subject') ?: __('public.select_sujet') }}</span>
+                  <svg id="select-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                       stroke-width="2" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+                <div id="select-dropdown" class="lp-select-dd">
+                  @foreach([
+                    'Intégration établissement' => __('public.sujet_integration'),
+                    'Problème de paiement' => __('public.sujet_paiement'),
+                    'Partenariat' => __('public.sujet_partenariat'),
+                    'Autre question' => __('public.sujet_autre'),
+                  ] as $val => $opt)
+                  <div class="select-opt"
+                       data-value="{{ $val }}"
+                       onclick="selectOption(this)">
+                    <span class="opt-check" style="{{ old('subject') === $val ? 'border-color:#0D9E75;background:#0D9E75;' : '' }}">
+                      @if(old('subject') === $val)
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      @endif
+                    </span>
+                    <span style="{{ old('subject') === $val ? 'font-weight:600;' : '' }}">{{ $opt }}</span>
+                  </div>
+                  @endforeach
+                </div>
+              </div>
+              @error('subject')<div class="lp-err">{{ $message }}</div>@enderror
+            </div>
+
+            <div>
+              <div class="lp-lbl" style="--lp-lbl-c:#7C3AED;">
+                <span class="material-symbols-rounded" aria-hidden="true">chat_bubble</span>
+                {{ __('public.message_label') }}
+              </div>
+              <textarea class="lp-textarea" name="message" placeholder="{{ __('public.message_placeholder') }}">{{ old('message') }}</textarea>
+              @error('message')<div class="lp-err">{{ $message }}</div>@enderror
+            </div>
+
+            <button type="submit" class="lp-btn lp-btn-main" style="width:100%;justify-content:center;padding:13px 20px;">
+              {{ __('public.envoyer_message') }}
+              <span class="material-symbols-rounded" aria-hidden="true">send</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>{{-- /.ep-body2 --}}
+</div>{{-- /.lp --}}
+
+{{-- ══ FOOTER PRO v3 (identique aux autres pages publiques) ══ --}}
+<footer class="ep-footer lp-footer">
+  <div class="lp-footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-logo" style="display:flex;align-items:center;gap:10px;">
+          <span style="width:46px;height:46px;border-radius:13px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.2);">
+            <img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" />
+          </span>
+          <span>Edu<span style="color:#5DCAA5;">Pay</span></span>
+        </div>
+        <div class="footer-desc">{{ __('public.footer_school_brief') }}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+          <span class="footer-badge"><span class="material-symbols-rounded" style="font-size:13px;color:#5DCAA5;">lock</span>TLS 1.3</span>
+          <span class="footer-badge"><span class="material-symbols-rounded" style="font-size:13px;color:#5DCAA5;">verified_user</span>PCI-DSS</span>
+          <span class="footer-badge"><span class="material-symbols-rounded" style="font-size:13px;color:#5DCAA5;">account_balance</span>COBAC</span>
         </div>
       </div>
+      <div>
+        <div class="footer-col-title">{{ __('public.footer_col_produit') }}</div>
+        <a class="footer-link" href="{{ route('landing') }}">{{ __('public.footer_accueil') }}</a>
+        <a class="footer-link" href="{{ route('about') }}">{{ __('public.footer_a_propos') }}</a>
+        <a class="footer-link" href="{{ route('temoignages') }}">{{ __('public.footer_temoignages') }}</a>
+        <a class="footer-link" href="{{ route('tarifs') }}">{{ __('public.footer_tarifs') }}</a>
+      </div>
+      <div>
+        <div class="footer-col-title">{{ __('public.footer_col_etablissements') }}</div>
+        <a class="footer-link" href="{{ route('register.ecole.step1') }}">{{ __('public.footer_inscription') }}</a>
+        <a class="footer-link" href="{{ route('guide') }}">{{ __('public.footer_guide') }}</a>
+        <a class="footer-link" href="{{ route('support') }}">{{ __('public.footer_support') }}</a>
+      </div>
+      <div>
+        <div class="footer-col-title">{{ __('public.footer_col_contact') }}</div>
+        <a class="footer-link" href="mailto:{{ config('mail.contact_address', 'contact@edupay.cm') }}" style="text-transform:none;letter-spacing:0;">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">mail</span>
+          {{ config('mail.contact_address', 'contact@edupay.cm') }}
+        </a>
+        <a class="footer-link" href="{{ route('confidentialite') }}">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">policy</span>
+          {{ __('public.footer_confidentialite') }}
+        </a>
+        <a class="footer-link" href="{{ route('cgu') }}">
+          <span class="material-symbols-rounded" style="font-size:15px;color:#5DCAA5;margin-right:2px;">description</span>
+          {{ __('public.footer_conditions') }}
+        </a>
+      </div>
     </div>
-  </form>
-</div>
+    <div class="footer-bottom">
+      <div class="footer-legal">{{ __('public.footer_legal_brief') }}</div>
+      @include('partials.footer-socials')
+    </div>
+  </div>
+</footer>
 
-<div class="ep-footer">
-  <div class="footer-grid">
-    <div><div class="footer-logo" style="display:flex;align-items:center;gap:10px;"><span style="width:44px;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);"><img src="{{ asset('images/logo.jpeg') }}" alt="EduPay Cameroun" style="width:100%;height:100%;object-fit:cover;" /></span>EduPay Cameroun</div>
-      <div class="footer-desc">{{ __('public.footer_school_brief') }}</div>
-      <div><span class="footer-badge">TLS 1.3</span><span class="footer-badge">PCI-DSS</span><span class="footer-badge">COBAC</span></div>
-    </div>
-    <div>
-      <div class="footer-col-title">{{ __('public.footer_col_produit') }}</div>
-      <a class="footer-link" href="{{ route('landing') }}">{{ __('public.footer_accueil') }}</a>
-      <a class="footer-link" href="{{ route('about') }}">{{ __('public.footer_a_propos') }}</a>
-      <a class="footer-link" href="{{ route('temoignages') }}">{{ __('public.footer_temoignages') }}</a>
-      <a class="footer-link" href="{{ route('tarifs') }}">{{ __('public.footer_tarifs') }}</a>
-    </div>
-    <div>
-      <div class="footer-col-title">{{ __('public.footer_col_etablissements') }}</div>
-      <a class="footer-link" href="{{ route('register.ecole.step1') }}">{{ __('public.footer_inscription') }}</a>
-      <a class="footer-link" href="{{ route('guide') }}">{{ __('public.footer_guide') }}</a>
-      <a class="footer-link" href="{{ route('support') }}">{{ __('public.footer_support') }}</a>
-    </div>
-    <div>
-      <div class="footer-col-title">{{ __('public.footer_col_informations') }}</div>
-      <a class="footer-link" href="{{ route('contact') }}">{{ __('public.footer_contact') }}</a>
-      <a class="footer-link" href="{{ route('confidentialite') }}">{{ __('public.footer_confidentialite') }}</a>
-      <a class="footer-link" href="{{ route('cgu') }}">{{ __('public.footer_conditions') }}</a>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <div class="footer-legal">{{ __('public.footer_legal') }}</div>
-    @include('partials.footer-socials')
-  </div>
-</div>
+{{-- ══ JS du select sujet personnalisé (ouvrir/fermer/choisir) ══ --}}
+<script>
+function toggleSelect() {
+  var dd = document.getElementById('select-dropdown');
+  var arrow = document.getElementById('select-arrow');
+  var trigger = document.getElementById('select-trigger');
+  var open = dd.style.display === 'block';
+  dd.style.display = open ? 'none' : 'block';
+  arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+  trigger.style.borderColor = open ? '' : 'var(--lp-teal)';
+  trigger.style.boxShadow = open ? '' : '0 0 0 3px rgba(13,158,117,.14)';
+}
+function selectOption(el) {
+  var val = el.getAttribute('data-value');
+  document.getElementById('subject-input').value = val;
+  document.getElementById('select-label').textContent = val;
+  document.getElementById('select-dropdown').style.display = 'none';
+  document.getElementById('select-arrow').style.transform = 'rotate(0deg)';
+  document.getElementById('select-trigger').style.borderColor = 'var(--lp-teal)';
+  document.getElementById('select-trigger').style.boxShadow = '';
+  // Réinitialiser toutes les options
+  document.querySelectorAll('.select-opt').forEach(function(opt) {
+    opt.querySelector('.opt-check').style.borderColor = '';
+    opt.querySelector('.opt-check').style.background = '';
+    opt.querySelector('.opt-check').innerHTML = '';
+    opt.lastElementChild.style.fontWeight = '';
+  });
+  // Surligner l'option choisie
+  var chk = el.querySelector('.opt-check');
+  chk.style.borderColor = '#0D9E75';
+  chk.style.background = '#0D9E75';
+  chk.innerHTML = '<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+  el.lastElementChild.style.fontWeight = '600';
+}
+// Fermer si clic ailleurs
+document.addEventListener('click', function(e) {
+  var cs = document.getElementById('custom-select');
+  if (cs && !cs.contains(e.target)) {
+    document.getElementById('select-dropdown').style.display = 'none';
+    document.getElementById('select-arrow').style.transform = 'rotate(0deg)';
+  }
+});
+</script>
 
 @endsection

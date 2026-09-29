@@ -222,6 +222,7 @@
     justify-content: center;
     gap: 9px;
     padding: 14px 28px;
+    border: none; /* reset UA <button> ; .lp-btn-ghost redéfinit le sien */
     border-radius: 12px;
     font-size: 14.5px;
     font-weight: 700;
