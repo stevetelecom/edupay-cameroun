@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\NotifierReponseReclamation;
 use App\Models\Reclamation;
 use App\Models\AuditLog;
 use App\Support\TexteLibre;
@@ -80,6 +81,12 @@ class ReclamationAdminController extends Controller
             ['statut' => $avant],
             ['statut' => $request->statut]
         );
+
+        // Avant ce dispatch, la reponse restait dans la base : le payeur n'etait
+        // prevenu ni par email ni sur la cloche de son tableau de bord. Le job
+        // est en file et apres commit — l'administrateur ne voit donc jamais
+        // d'echec SMTP a la validation du formulaire.
+        NotifierReponseReclamation::dispatch($reclamation->fresh());
 
         return back()->with('success', "Reclamation {$reclamation->numero_ticket} mise a jour.");
     }

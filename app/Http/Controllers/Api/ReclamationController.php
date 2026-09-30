@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ReclamationRequest;
 use App\Http\Resources\ReclamationResource;
+use App\Jobs\NotifierNouvelleReclamation;
 use App\Models\Paiement;
 use App\Models\Reclamation;
 use App\Support\TexteLibre;
@@ -58,6 +59,13 @@ class ReclamationController extends Controller
             'sujet'       => TexteLibre::normaliser($valid['sujet']),
             'description' => TexteLibre::normaliser($valid['description'], multiligne: true),
         ]);
+
+        // Avant ce dispatch, une reclamation n'ecrivait aucun email et n'alerte
+        // personne : le payeur n'avait aucune trace d'avoir ete entendu et le
+        // ticket dormait dans le back-office jusqu'a une visite manuelle. Le
+        // job est en file et apres commit : la reponse 201 ci-dessous ne
+        // depend pas du SMTP, et l'echec d'envoi n'annule pas le ticket.
+        NotifierNouvelleReclamation::dispatch($reclamation);
 
         return response()->json([
             'message' => 'Votre réclamation a été enregistrée.',

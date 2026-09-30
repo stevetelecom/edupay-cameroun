@@ -111,6 +111,11 @@ class PaymentFlowTest extends TestCase
             'reference' => 'REV123',
         ]);
 
+        // ReverserEtablissementJob detecte l'operateur depuis le prefixe du
+        // numero de reversement avant d'appeler reverserEtablissement. Sans
+        // ce stub, le mock strict leve « no expectations were specified ».
+        $mock->shouldReceive('detecterOperateur')->andReturn('MTN_Cameroon');
+
         $this->app->instance(AangaraaPayService::class, $mock);
 
         // Exécuter l'initiation de paiement en tant que payeur
@@ -221,6 +226,9 @@ class PaymentFlowTest extends TestCase
             'succes' => true,
             'reference' => 'REVHOOK123',
         ]);
+
+        // Idem : le job detecte l'operateur avant de reverser.
+        $mock->shouldReceive('detecterOperateur')->andReturn('MTN_Cameroon');
 
         $this->app->instance(AangaraaPayService::class, $mock);
 

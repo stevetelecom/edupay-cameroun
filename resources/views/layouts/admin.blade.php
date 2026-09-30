@@ -93,6 +93,17 @@
             <span class="text-xs px-2.5 py-1 rounded-full bg-[#E8A020]/15 text-[#E8A020] border border-[#E8A020]/30 font-medium hidden sm:inline-flex">
                 {{ __('messages.admin_systeme') }}
             </span>
+            {{-- Cloche notifications : badge alimenté par AdminSidebarComposer
+                 (une requête `exists` par page). Mêmes classes .ep-bell que
+                 l'espace payeur, donc aucun CSS à ajouter. --}}
+            <a href="{{ route('admin.notifications.index') }}"
+               class="ep-bell" title="{{ __('admin.notifications_titre') }}"
+               aria-label="{{ __('admin.notifications_titre') }}">
+                <span class="material-symbols-outlined">notifications</span>
+                @if(($nbNotificationsAdmin ?? 0) > 0)
+                <span class="ep-bell-badge">{{ $nbNotificationsAdmin > 99 ? '99+' : $nbNotificationsAdmin }}</span>
+                @endif
+            </a>
             {{-- Bascule thème clair / sombre : soleil en clair, lune en sombre --}}
             <button type="button" class="ep-theme-toggle" data-action="ep-theme-toggle"
                     aria-label="{{ __('messages.theme_sombre') }}">

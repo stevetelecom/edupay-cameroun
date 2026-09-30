@@ -385,4 +385,14 @@ return [
     // ── Dashboard v2 (charts) ──
     'situation_globale'          => 'Overall situation',
     'par_enfant_categorie'       => 'Per child',
+
+    // ── Complaints: acknowledgement and reply ──
+    'em_accuse_rec_titre'        => 'Complaint received',
+    'em_accuse_rec_bonjour'      => 'Hello :prenom,',
+    'em_accuse_rec_intro'        => 'we have recorded your complaint. Here is your ticket number:',
+    'em_accuse_rec_delai'        => 'Our team is reviewing your request and will reply by email. You can follow its status from your space.',
+    'em_voir_mes_reclamations'   => 'View my complaints',
+    'em_reponse_rec_titre'       => 'Reply to your complaint',
+    'em_reponse_rec_bonjour'     => 'Hello :prenom,',
+    'em_reponse_rec_replyto'     => 'To continue the exchange, reply directly to this email: your message will reach us.',
 ];

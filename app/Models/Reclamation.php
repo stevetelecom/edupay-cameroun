@@ -44,4 +44,23 @@ class Reclamation extends Model
     {
         return $this->belongsTo(Paiement::class);
     }
+
+    /**
+     * Libellé traduit du statut.
+     *
+     * Les clés sont listées ici plutôt que construites dans les vues
+     * (`__('admin.statut_'.$statut)`) : une clé concaténée échappe au contrôle
+     * de traductions et s'affiche en clair si elle manque. Réutilise les clés
+     * `ouvert` / `en_cours` / `resolu` / `rejete` déjà présentes.
+     */
+    public function statutLibelle(): string
+    {
+        return match ($this->statut) {
+            'ouvert'   => __('admin.ouvert'),
+            'en_cours' => __('admin.en_cours'),
+            'resolu'   => __('admin.resolu'),
+            'rejete'   => __('admin.rejete'),
+            default    => (string) $this->statut,
+        };
+    }
 }

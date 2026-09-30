@@ -95,7 +95,40 @@ class ReverserEtablissementJob implements ShouldQueue
             return;
         }
 
-        $operateurRevers = $etablissement->operateur_momo_reversement ?? 'mtn';
+        // Opérateur : détecté automatiquement depuis le préfixe du numéro
+        // (même logique que pour l'encaissement). Le préfixe fait foi sur la
+        // valeur saisie en back-office, qui peut être vide ou erronée.
+        $detecte = strtolower((string) $aangaraa->detecterOperateur(
+            preg_replace('/\D/', '', (string) $numeroReversement)
+        ));
+        $operateurDetecte = str_contains($detecte, 'orange') ? 'orange'
+            : (str_contains($detecte, 'mtn') ? 'mtn' : null);
+
+        $operateurSaisi = $etablissement->operateur_momo_reversement;
+
+        if ($operateurDetecte === null && $operateurSaisi === null) {
+            $this->mettreEnEchec(
+                $commission,
+                'Operateur du numero de reversement indeterminable (' . $numeroReversement . ') : '
+                .'verifier le numero dans les parametres de l\'etablissement.'
+            );
+            return;
+        }
+
+        $operateurRevers = $operateurDetecte ?? $operateurSaisi;
+
+        if ($operateurSaisi !== null && $operateurDetecte !== null && $operateurSaisi !== $operateurDetecte) {
+            Log::warning('Reversement : operateur saisi != operateur detecte, le prefixe fait foi', [
+                'etablissement_id' => $etablissement->id,
+                'saisi'            => $operateurSaisi,
+                'detecte'          => $operateurDetecte,
+            ]);
+        }
+
+        // On mémorise la valeur détectée pour que le back-office soit à jour.
+        if ($operateurDetecte !== null && $operateurSaisi !== $operateurDetecte) {
+            $etablissement->update(['operateur_momo_reversement' => $operateurDetecte]);
+        }
 
         // Garde de sécurité : on ne reverse jamais vers un numéro invalide.
         if (! preg_match('/^6\d{8}$/', preg_replace('/\D/', '', $numeroReversement))) {
@@ -174,7 +207,7 @@ class ReverserEtablissementJob implements ShouldQueue
         if (($resultat['outcome'] ?? 'refuse') === 'indetermine') {
             $this->mettreEnAttenteDeVerification(
                 $commission,
-                'Reponse AangaraaPay deeeu... (timeout ou erreur serveur) : le virement est peut-etre deja parti. '
+                'Reponse AangaraaPay perdue (timeout ou erreur serveur) : le virement est peut-etre deja parti. '
                 .'Verification manuelle obligatoire avant tout nouvel envoi. Motif : ' . ($resultat['message'] ?? '?')
             );
             return;

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CommissionController;
 use App\Http\Controllers\Admin\MargeReportController;
 use App\Http\Controllers\Admin\LogSecuriteController;
 use App\Http\Controllers\Admin\ReclamationAdminController;
+use App\Http\Controllers\Admin\NotificationAdminController;
 use App\Http\Controllers\Admin\ParametreSystemeController;
 use App\Http\Controllers\Admin\ExportController;
 use Illuminate\Support\Facades\Route;
@@ -130,6 +131,13 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
         Route::get('/',                            [ReclamationAdminController::class, 'index'])->name('index');
         Route::get('/{reclamation}',               [ReclamationAdminController::class, 'show'])->name('show');
         Route::patch('/{reclamation}/repondre',    [ReclamationAdminController::class, 'repondre'])->name('repondre');
+    });
+
+    // Notifications admin (cloche du header)
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/',                      [NotificationAdminController::class, 'index'])->name('index');
+        Route::patch('/{notification}/lu',   [NotificationAdminController::class, 'lu'])->name('lu');
+        Route::patch('/tout-lu',             [NotificationAdminController::class, 'toutLu'])->name('toutLu');
     });
 
     // Logs de securite

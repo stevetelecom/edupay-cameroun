@@ -520,4 +520,24 @@ return [
 
     // ── Dashboard v2 (KPI variations) ──
     'mois_precedent'            => 'vs last month',
+
+    // ── Admin notifications (header bell) ──
+    'acces_refuse'              => 'Access denied.',
+    'statut_col'                 => 'Status',
+    'notifications_titre'          => 'Notifications',
+    'sous_titre_notifications'     => 'Complaint alerts and replies to handle',
+    'aucune_notification'          => 'No notification',
+    'aucune_notification_desc'     => 'New complaints will appear here automatically.',
+    'notif_col'                    => 'Type',
+    'marquer_lu'                   => 'Mark as read',
+    'tout_marquer_lu'              => 'Mark all as read',
+    'non_lue'                      => 'Unread',
+
+    // ── Complaint emails ──
+    'em_nouvelle_rec_titre'        => 'New complaint',
+    'em_nouvelle_rec_intro'        => 'A complaint was opened by :nom.',
+    'em_nouvelle_rec_replyto'      => 'Reply directly to this email: your answer goes to the payer.',
+    'em_voir_reclamations'         => 'Open complaints',
+    'em_utilisateur_fallback'      => 'a payer',
+    'em_footer_scolaire_simplifie' => 'EduPay Cameroun — School fee payments',
 ];

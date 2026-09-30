@@ -3,6 +3,8 @@
 namespace App\View\Composers;
 
 use App\Services\AangaraaPayService;
+use App\Models\NotificationAdmin;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 /**
@@ -19,6 +21,12 @@ use Illuminate\View\View;
  *   - $tauxAangaraaPct : coût AangaraaPay (2,2 % par défaut)
  *   - $margeEdupayPct  : marge EduPay   (0,1 % par défaut)
  *   - $tauxCommission  : taux global = somme des deux (2,3 % par défaut)
+ *   - $nbNotificationsAdmin : pastille de la cloche du header admin
+ *
+ * Le compteur est resolu ici et non dans un controleur parce que le layout
+ * admin est partage par tous les controleurs de l'espace : passer par une
+ * variable de vue obligerait chacun d'eux a la fournir. Une seule requete
+ * `exists`, par page, pour un badge.
  */
 class AdminSidebarComposer
 {
@@ -31,6 +39,20 @@ class AdminSidebarComposer
 
         $view->with('tauxAangaraaPct', round($tauxAangaraa * 100, 2))
              ->with('margeEdupayPct', round($margeEdupay * 100, 2))
-             ->with('tauxCommission', $tauxAangaraa + $margeEdupay);
+             ->with('tauxCommission', $tauxAangaraa + $margeEdupay)
+             ->with('nbNotificationsAdmin', $this->notificationsNonLues());
+    }
+
+    private function notificationsNonLues(): int
+    {
+        $adminId = Auth::guard('admin')->id();
+
+        if (! $adminId) {
+            return 0;
+        }
+
+        return NotificationAdmin::where('admin_id', $adminId)
+            ->whereNull('lu_at')
+            ->count();
     }
 }

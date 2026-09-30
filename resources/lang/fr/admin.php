@@ -520,4 +520,24 @@ return [
 
     // ── Dashboard v2 (variations KPI) ──
     'mois_precedent'            => 'mois précédent',
+
+    // ── Notifications admin (cloche du header) ──
+    'acces_refuse'              => 'Accès refusé.',
+    'statut_col'                 => 'Statut',
+    'notifications_titre'          => 'Notifications',
+    'sous_titre_notifications'     => 'Alertes de réclamations et réponses à traiter',
+    'aucune_notification'          => 'Aucune notification',
+    'aucune_notification_desc'     => 'Les nouvelles réclamations apparaîtront ici automatiquement.',
+    'notif_col'                    => 'Type',
+    'marquer_lu'                   => 'Marquer comme lue',
+    'tout_marquer_lu'              => 'Tout marquer comme lu',
+    'non_lue'                      => 'Non lue',
+
+    // ── Emails réclamations ──
+    'em_nouvelle_rec_titre'        => 'Nouvelle réclamation',
+    'em_nouvelle_rec_intro'        => 'Une réclamation a été ouverte par :nom.',
+    'em_nouvelle_rec_replyto'      => 'Répondez directement à cet email : votre réponse partira au payeur.',
+    'em_voir_reclamations'         => 'Ouvrir les réclamations',
+    'em_utilisateur_fallback'      => 'un payeur',
+    'em_footer_scolaire_simplifie' => 'EduPay Cameroun — Paiement de frais scolaires',
 ];

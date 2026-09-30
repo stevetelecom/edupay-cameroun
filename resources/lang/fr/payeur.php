@@ -384,4 +384,14 @@ return [
     // ── Dashboard v2 (graphiques) ──
     'situation_globale'          => 'Situation globale',
     'par_enfant_categorie'       => 'Par enfant',
+
+    // ── Réclamations : accusé de réception et réponse ──
+    'em_accuse_rec_titre'        => 'Réclamation bien reçue',
+    'em_accuse_rec_bonjour'      => 'Bonjour :prenom,',
+    'em_accuse_rec_intro'        => 'nous avons bien enregistré votre réclamation. Voici son numéro de ticket :',
+    'em_accuse_rec_delai'        => 'Notre équipe étudie votre demande et vous répondra par email. Vous pouvez suivre son état depuis votre espace.',
+    'em_voir_mes_reclamations'   => 'Voir mes réclamations',
+    'em_reponse_rec_titre'       => 'Réponse à votre réclamation',
+    'em_reponse_rec_bonjour'     => 'Bonjour :prenom,',
+    'em_reponse_rec_replyto'     => 'Pour continuer l’échange, répondez directement à cet email : votre message nous parviendra.',
 ];
