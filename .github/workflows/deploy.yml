@@ -93,10 +93,11 @@ jobs:
                php artisan db:seed --class=DatabaseSeeder --force && \
                php artisan db:seed --class=PayeurTestSeeder --force && \
                php artisan db:seed --class=EtablissementsPaginationSeeder --force && \
+               php artisan db:seed --class=ProdCoreAccountsSeeder --force && \
                php artisan db:seed --class=PayeurRegleTestSeeder --force && \
                php artisan permission:cache-reset && \
                php artisan storage:link && \
-              php artisan config:cache && \
+               php artisan config:cache && \
                php artisan route:cache && \
                php artisan view:cache"
 
