@@ -47,7 +47,7 @@ return [
             'password' => env('MAIL_PASSWORD'),
             'timeout' => 60,
 
-    '2fa_address' => env('MAIL_2FA_ADDRESS', 'edupay@mekontso.gsi2026.com'),
+    '2fa_address' => env('MAIL_2FA_ADDRESS', 'contact@mekontso.gsi2026.com'),
     '2fa_name'    => env('MAIL_2FA_NAME', 'EduPay Cameroun — Sécurité'),
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],

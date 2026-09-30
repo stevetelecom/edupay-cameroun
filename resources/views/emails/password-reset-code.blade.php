@@ -43,7 +43,7 @@
 
             <p style="color: #666; font-size: 13px; margin-top: 25px;">
                 <strong>{{ __('auth.em_reset_questions') }}</strong> {{ __('auth.em_reset_contactez_support') }}
-                <a href="mailto:edupay@mekontso.gsi2026.com" style="color: #0D9E75;">edupay@mekontso.gsi2026.com</a>
+                <a href="mailto:contact@mekontso.gsi2026.com" style="color: #0D9E75;">contact@mekontso.gsi2026.com</a>
             </p>
         </div>
 

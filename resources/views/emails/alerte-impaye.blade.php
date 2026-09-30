@@ -101,7 +101,7 @@
 
     <div class="tip">
       <strong>{{ __('payeur.em_besoin_aide') }}</strong><br>
-      {{ __('payeur.em_contacter_support') }} : <a href="mailto:edupay@mekontso.gsi2026.com" style="color:#D94040;">edupay@mekontso.gsi2026.com</a>
+      {{ __('payeur.em_contacter_support') }} : <a href="mailto:contact@mekontso.gsi2026.com" style="color:#D94040;">contact@mekontso.gsi2026.com</a>
     </div>
 
     <div class="text" style="color:#999; font-size:12px; margin-top:20px;">
