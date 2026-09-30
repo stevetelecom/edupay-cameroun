@@ -58,7 +58,14 @@ Schedule::call(function () {
 // Sur hébergement mutualisé (o2switch), pas de worker permanent possible :
 // on traite les jobs en attente chaque minute via le scheduler déjà actif,
 // avec --stop-when-empty pour ne pas laisser tourner un process indéfiniment.
+//
+// `withoutOverlapping(2)` et non le défaut (1440 minutes = 24 h) : sur mutualisé,
+// un `queue:work` tué en cours de route laisse le mutex posé, et le défaut
+// bloquait alors la file EN SILENCE pendant 24 h. Constat réel le 30/09/2026 :
+// 2 reversements ont attendu 1 h 45 sans traitement, sans une seule erreur,
+// `php artisan schedule:list` affichant « Has Mutex ». Deux minutes suffisent
+// car le process se termine de lui-même après --max-time=50.
 Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')
     ->everyMinute()
-    ->withoutOverlapping()
+    ->withoutOverlapping(2)
     ->name('queue-worker-minute');

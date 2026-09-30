@@ -259,8 +259,22 @@ class ReverserEtablissementJob implements ShouldQueue
             return;
         }
 
-        // ── Refus net (« solde insuffisant », cle invalide...) : rien n'est parti,
-        //    on peut reessayer sans risque.
+        // ── Refus net (« solde insuffisant », cle invalide...) : rien n'est parti.
+        //
+        // 30/09/2026 : ce chemin déclenchait jusqu'à 3 nouvel essai. Chaque échec
+        // remettait la commission à `calculee` (voir mettreAJourEchecTemporaire),
+        // donc la rendait à nouveau réservable : le job suivant de la file
+        // repartait, et `aangaraa:reversements:rejouer` en rajoutait un toutes
+        // les 10 minutes. Un seul paiement a produit 5 appels AangaraaPay en 1 s.
+        //
+        // Aucun 4xx ne se résout tout seul : le solde AangaraaPay reste vide, le
+        // numéro reste invalide, le montant reste hors limites. Réessayer toutes
+        // les 5 minutes n'a jamais rien réglé — et chaque tentative rouvrait une
+        // fenêtre de double virement si le paiement était remboursé entre-temps,
+        // ce qui est le risque financier réel ici.
+        //
+        // Le refus devient donc un état TERMINAL. La reprise est une décision
+        // humaine, explicite et tracée, après correction de la cause.
         Log::error('Reversement établissement refusé', [
             'commission_id' => $commission->id,
             'message'       => $resultat['message'] ?? null,
@@ -268,18 +282,10 @@ class ReverserEtablissementJob implements ShouldQueue
             'tries'         => $this->tries,
         ]);
 
-        $this->mettreAJourEchecTemporaire($commission);
-
-        if ($this->attempts() < $this->tries) {
-            $this->release($this->backoff[$this->attempts() - 1] ?? 300);
-            return;
-        }
-
-        // Dernière tentative : on rend la main explicitement, sinon la commission
-        // reste 'calculee' sans trace et sans aucune alerte.
         $this->mettreEnEchec($commission, sprintf(
-            'Echec definitif apres %d tentatives (refus AangaraaPay) : %s',
-            $this->tries,
+            'Refus AangaraaPay, aucun virement envoyé : %s. '
+            .'Corriger la cause puis relancer « aangaraa:reversements:rejouer --retablir-echec ». '
+            .'Aucun nouvel essai automatique : un 4xx ne se résout pas seul.',
             $resultat['message'] ?? 'raison inconnue'
         ));
     }
