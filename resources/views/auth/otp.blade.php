@@ -12,9 +12,8 @@
     <div style="width:100%;max-width:420px;">
       <div class="form-card">
         <div style="text-align:center;margin-bottom:22px;">
-          <div style="width:48px;height:48px;background:var(--ep-teal-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
+          {{-- Pastille dégradée v3 (cf. .auth-ico du layout) --}}
+          <div class="auth-ico"><span class="material-symbols-rounded" aria-hidden="true">sms</span></div>
           <div class="form-title">{{ __('auth.otp_titre') }}</div>
           <div class="form-sub">{{ __('auth.otp_sub') }}</div>
         </div>
@@ -39,7 +38,8 @@
         <div style="font-size:12px;color:#888;text-align:center;">{{ __('auth.pas_encore_compte') }} <a href="{{ route('register.parent.step1') }}" style="color:var(--ep-teal);font-weight:600;">{{ __('auth.creer_compte_parent') }}</a></div>
       </div>
 
-      <div class="epcard" style="background:#f8f9fa;margin-top:10px;">
+      {{-- Carte secondaire : suit le thème clair/sombre --}}
+      <div class="epcard" style="background:var(--ep-fond,#f8f9fa);margin-top:10px;">
         <div style="font-size:12px;color:#888;text-align:center;margin-bottom:10px;">{{ __('auth.representez_etablissement') }}</div>
         <a href="{{ route('login', ['role' => 'etablissement']) }}" class="btn-o">{{ __('auth.acces_backoffice') }}</a>
         <div style="font-size:12px;color:#888;text-align:center;margin-top:10px;">{{ __('auth.pas_encore_inscrit') }} <a href="{{ route('register.ecole.step1') }}" style="color:var(--ep-teal);font-weight:600;">{{ __('auth.inscrire_etablissement') }}</a></div>

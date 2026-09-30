@@ -12,9 +12,8 @@
     <div style="width:100%;max-width:420px;">
       <div class="form-card">
         <div style="text-align:center;margin-bottom:22px;">
-          <div style="width:48px;height:48px;background:var(--ep-teal-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          </div>
+          {{-- Pastille dégradée v3 (cf. .auth-ico du layout) --}}
+          <div class="auth-ico"><span class="material-symbols-rounded" aria-hidden="true">lock_reset</span></div>
           <div class="form-title">{{ __('auth.forgot_titre') }}</div>
           <div class="form-sub">{{ __('auth.forgot_sub') }}</div>
         </div>

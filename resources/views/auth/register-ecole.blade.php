@@ -33,16 +33,16 @@
             <div style="font-size:11px;font-weight:{{ $step >= $n ? '600' : '400' }};color:{{ $step >= $n ? 'var(--ep-teal)' : '#aaa' }};">{{ $label }}</div>
           </div>
           @if (!$loop->last)
-            <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+            <div class="steps-line"></div>
           @endif
         @endforeach
       </div>
 
       @if (session('error'))
-        <div id="edupay-error-box" style="background:#FEE2E2;color:#7F1D1D;border:2px solid #B91C1C;border-left-width:6px;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;font-weight:500;line-height:1.6;">{{ session('error') }}</div>
+        <div id="edupay-error-box" style="background:rgba(217,64,64,.10);color:#B91C1C;border:1.5px solid rgba(217,64,64,.35);border-left-width:6px;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:13px;font-weight:500;line-height:1.6;">{{ session('error') }}</div>
       @endif
       @if ($errors->any())
-        <div id="edupay-error-box" style="background:#FEE2E2;color:#7F1D1D;border:2px solid #B91C1C;border-left-width:6px;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;font-weight:500;line-height:1.6;">
+        <div id="edupay-error-box" style="background:rgba(217,64,64,.10);color:#B91C1C;border:1.5px solid rgba(217,64,64,.35);border-left-width:6px;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:13px;font-weight:500;line-height:1.6;">
           <strong style="font-size:14px;">{{ __('auth.merci_corriger') }}</strong>
           <ul style="margin:6px 0 0 18px;">
             @foreach ($errors->all() as $error)

@@ -12,9 +12,8 @@
     <div style="width:100%;max-width:420px;">
       <div class="form-card">
         <div style="text-align:center;margin-bottom:22px;">
-          <div style="width:48px;height:48px;background:var(--ep-teal-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D9E75" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 9h6M9 15h6"/></svg>
-          </div>
+          {{-- Pastille dégradée v3 (cf. .auth-ico du layout) --}}
+          <div class="auth-ico"><span class="material-symbols-rounded" aria-hidden="true">mark_email_read</span></div>
           <div class="form-title">{{ __('auth.verify_titre') }}</div>
           <div class="form-sub">{{ __('auth.verify_sub') }}<br><strong style="color:#0B2545;">{{ $email }}</strong></div>
         </div>

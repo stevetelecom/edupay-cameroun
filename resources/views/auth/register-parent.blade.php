@@ -35,12 +35,12 @@
           <div style="width:30px;height:30px;border-radius:50%;background:var(--ep-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">1</div>
           <div style="font-size:11px;font-weight:600;color:var(--ep-teal);">{{ __('auth.etape_compte') }}</div>
         </div>
-        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div class="steps-line"></div>
         <div style="flex:1;text-align:center;">
           <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">2</div>
           <div style="font-size:11px;color:#aaa;" id="step2-label">{{ __('auth.etape_etablissement') }}</div>
         </div>
-        <div style="flex:1;height:2px;background:#e0e0e0;margin-top:-16px;"></div>
+        <div class="steps-line"></div>
         <div style="flex:1;text-align:center;">
           <div style="width:30px;height:30px;border-radius:50%;border:2px solid #ddd;color:#ccc;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 5px;">3</div>
           <div style="font-size:11px;color:#aaa;">{{ __('auth.etape_confirmation') }}</div>
@@ -49,7 +49,7 @@
 
       {{-- ERREURS --}}
       @if($errors->any())
-        <div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:8px;padding:12px 16px;margin-bottom:18px;">
+        <div style="background:rgba(217,64,64,.10);border:1.5px solid rgba(217,64,64,.35);border-left-width:6px;border-radius:12px;padding:12px 16px;margin-bottom:18px;">
           <div style="font-size:13px;font-weight:600;color:#991B1B;margin-bottom:6px;">{{ __('auth.corrigez_erreurs') }}</div>
           <ul style="margin:0;padding-left:18px;">
             @foreach($errors->all() as $error)
@@ -188,7 +188,7 @@
             </div>
           </div>
         </div>
-        <div style="background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:16px;font-size:12px;color:#666;">
+        <div style="background:var(--ep-fond,#f8f9fa);border:1px solid var(--ep-bordure,#e4e9ee);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--ep-gris,#666);">
           <div style="font-weight:600;margin-bottom:4px;">{{ __('auth.mdp_doit_contenir') }}</div>
           <div style="display:flex;gap:16px;flex-wrap:wrap;">
             <span>{{ __('auth.mdp_8_min') }}</span>
@@ -236,10 +236,12 @@
 
 <script>
 function switchProfil(val) {
+  // Encodage JSON des traductions : les apostrophes ne doivent pas
+  // etre echappees en entites HTML dans un script.
   var configs = {
-    parent:   { border: 'var(--ep-teal)', bg: 'var(--ep-teal-lt)', stroke: '#0D9E75', titre: '{{ __('auth.profil_titre_parent') }}',   sub: '{{ __('auth.profil_sub_parent') }}', step2: '{{ __('auth.profil_etape2_parent') }}' },
-    eleve:    { border: '#185FA5',         bg: '#EFF6FF',           stroke: '#185FA5', titre: '{{ __('auth.profil_titre_eleve') }}',    sub: '{{ __('auth.profil_sub_eleve') }}',  step2: '{{ __('auth.profil_etape2_eleve') }}' },
-    etudiant: { border: '#7C3AED',         bg: '#F5F3FF',           stroke: '#7C3AED', titre: '{{ __('auth.profil_titre_etudiant') }}', sub: '{{ __('auth.profil_sub_etudiant') }}', step2: '{{ __('auth.profil_etape2_etudiant') }}' }
+    parent:   { border: 'var(--ep-teal)', bg: 'var(--ep-teal-lt)', stroke: '#0D9E75', titre: @json(__('auth.profil_titre_parent')),   sub: @json(__('auth.profil_sub_parent')), step2: @json(__('auth.profil_etape2_parent')) },
+    eleve:    { border: '#185FA5',         bg: '#EFF6FF',           stroke: '#185FA5', titre: @json(__('auth.profil_titre_eleve')),    sub: @json(__('auth.profil_sub_eleve')),  step2: @json(__('auth.profil_etape2_eleve')) },
+    etudiant: { border: '#7C3AED',         bg: '#F5F3FF',           stroke: '#7C3AED', titre: @json(__('auth.profil_titre_etudiant')), sub: @json(__('auth.profil_sub_etudiant')), step2: @json(__('auth.profil_etape2_etudiant')) }
   };
 
   ['parent','eleve','etudiant'].forEach(function(p) {

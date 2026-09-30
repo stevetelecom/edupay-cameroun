@@ -29,14 +29,14 @@ body{font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI'
 .kval{font-size:22px;font-weight:700;color:#1a1a2e;}
 .klbl{font-size:11px;color:#888;margin-top:4px;}
 .seclbl{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px;}
-.btn-p{background:var(--ep-teal);color:#fff;border:none;padding:11px 20px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;width:100%;transition:background .15s;text-decoration:none;display:block;text-align:center;}
-.btn-p:hover{background:var(--ep-teal2);}
-.btn-o{background:transparent;color:var(--ep-teal);border:2px solid var(--ep-teal);padding:9px 18px;border-radius:var(--radius-md);font-size:13px;font-weight:500;cursor:pointer;width:100%;transition:all .15s;text-decoration:none;display:block;text-align:center;}
-.btn-o:hover{background:var(--ep-teal-lt);}
-.inp{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:var(--radius-md);font-size:13px;margin-bottom:12px;outline:none;transition:border .15s;}
-.inp:focus{border-color:var(--ep-teal);}
-.lbl{font-size:11px;color:#666;margin-bottom:5px;font-weight:500;}
-.divider{height:1px;background:#f0f0f0;margin:14px 0;}
+.btn-p{background:linear-gradient(135deg,#0D9E75,#0A8562);color:#fff;border:none;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;width:100%;transition:filter .2s,box-shadow .2s,transform .15s;text-decoration:none;display:block;text-align:center;box-shadow:0 4px 12px rgba(13,158,117,.25);}
+.btn-p:hover{filter:brightness(1.08);box-shadow:0 7px 18px rgba(13,158,117,.34);}
+.btn-o{background:transparent;color:var(--ep-teal);border:1.5px solid var(--ep-teal);padding:10px 18px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;width:100%;transition:all .2s;text-decoration:none;display:block;text-align:center;}
+.btn-o:hover{background:var(--ep-teal-lt);transform:translateY(-1px);}
+.inp{width:100%;padding:11px 13px;border:1.5px solid #E4E9EE;border-radius:12px;font-size:13px;margin-bottom:12px;outline:none;transition:border .2s,box-shadow .2s;background:var(--ep-carte,#fff);color:var(--ep-encre,#1a1a2e);}
+.inp:focus{border-color:var(--ep-teal);box-shadow:0 0 0 3px rgba(13,158,117,.13);}
+.lbl{font-size:11.5px;color:var(--ep-gris,#666);margin-bottom:6px;font-weight:600;}
+.divider{height:1px;background:var(--ep-bordure,#f0f0f0);margin:14px 0;}
 .ep-body2{padding:24px 28px;background:#f1f3f5;}
 /* HERO — dégradé logo EduPay : navy profond vers teal, avec accents gold */
 .hero-band{background:linear-gradient(135deg,#0B2545 0%,#103459 45%,#0A8562 100%);color:#fff;position:relative;overflow:hidden;}
@@ -178,20 +178,28 @@ body{font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI'
 
 /* ───────────────────────── FIN MEDIA QUERIES ───────────────────────── */
 
+/* ── Écrans auth (login, OTP, inscriptions) — style v3 ── */
 .form-header{background:var(--ep-navy);color:#fff;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
 .form-body{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 20px;}
-.form-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:520px;}
-.form-card-wide{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:720px;}
-.form-title{font-size:20px;font-weight:800;margin-bottom:6px;}
-.form-sub{font-size:14px;color:#888;margin-bottom:22px;}
-.form-section{font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.07em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0;}
-.select{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:var(--radius-md);font-size:13px;margin-bottom:12px;background:#fff;outline:none;}
-.select:focus{border-color:var(--ep-teal);}
-.check-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;font-size:12px;color:#555;line-height:1.5;}
+.form-card{background:var(--ep-carte,#fff);border:1px solid var(--ep-bordure,#E4E9EE);border-radius:16px;padding:28px;width:100%;max-width:520px;box-shadow:0 14px 38px rgba(11,37,69,.14);}
+.form-card-wide{background:var(--ep-carte,#fff);border:1px solid var(--ep-bordure,#E4E9EE);border-radius:16px;padding:28px;width:100%;max-width:720px;box-shadow:0 14px 38px rgba(11,37,69,.14);}
+.form-title{font-size:20px;font-weight:800;margin-bottom:6px;color:var(--ep-encre,#0B2545);letter-spacing:-.01em;}
+.form-sub{font-size:14px;color:var(--ep-gris,#888);margin-bottom:22px;}
+.form-section{font-size:11px;font-weight:700;color:var(--ep-teal,#0D9E75);text-transform:uppercase;letter-spacing:.09em;margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--ep-bordure,#f0f0f0);}
+.select{width:100%;padding:11px 13px;border:1.5px solid #E4E9EE;border-radius:12px;font-size:13px;margin-bottom:12px;background:var(--ep-carte,#fff);color:var(--ep-encre,#1a1a2e);outline:none;transition:border .2s,box-shadow .2s;}
+.select:focus{border-color:var(--ep-teal);box-shadow:0 0 0 3px rgba(13,158,117,.13);}
+.check-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;font-size:12px;color:var(--ep-gris,#555);line-height:1.5;}
 .check-row input{margin-top:2px;flex-shrink:0;}
 .inp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:var(--radius-md);font-size:13px;margin-bottom:12px;resize:vertical;min-height:80px;outline:none;font-family:inherit;}
-.textarea:focus{border-color:var(--ep-teal);}
+.textarea{width:100%;padding:11px 13px;border:1.5px solid #E4E9EE;border-radius:12px;font-size:13px;margin-bottom:12px;resize:vertical;min-height:80px;outline:none;font-family:inherit;background:var(--ep-carte,#fff);color:var(--ep-encre,#1a1a2e);}
+.textarea:focus{border-color:var(--ep-teal);box-shadow:0 0 0 3px rgba(13,158,117,.13);}
+/* Pastille icône d'entête des cartes auth (cadlock, sms...) */
+.auth-ico{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;margin:0 auto 13px;background:linear-gradient(135deg,#0D9E75,#0A8562);box-shadow:0 6px 16px rgba(13,158,117,.30);}
+.auth-ico .material-symbols-rounded{font-size:26px;color:#fff;font-variation-settings:'FILL' 1;}
+/* Barre d'étapes (inscriptions) : connecteurs + pastilles */
+.steps-line{flex:1;height:2px;background:var(--ep-bordure,#e0e0e0);margin-top:-16px;}
+/* Dark mode des écrans auth : la carte et les champs suivent le thème */
+html[data-theme="dark"] .epcard{background:var(--ep-carte);border-color:var(--ep-bordure);}
 /* APP LAYOUT */
 .app-header{background:var(--ep-navy);color:#fff;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;}
 .app-body{display:flex;min-height:calc(100vh - 58px);}
