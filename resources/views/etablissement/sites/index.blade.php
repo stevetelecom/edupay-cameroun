@@ -186,9 +186,9 @@
 </div>
 @endif
 
-<div class="ep-entete" style="justify-content:space-between;margin-bottom:16px;">
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:16px;">
   <div style="display:flex;align-items:center;gap:10px;">
-    <span class="material-symbols-outlined">domain</span>
+    <div class="ep-ico bleu ep-ico-entete"><span class="material-symbols-outlined">domain</span></div>
     <div>
       <h3>{{ __('etablissement.gestion_groupe') }}</h3>
       <div class="ep-sous-titre" style="margin-top:2px;">{{ __('etablissement.sites_rattaches', ['nom' => $sitePrincipal->nom]) }}</div>

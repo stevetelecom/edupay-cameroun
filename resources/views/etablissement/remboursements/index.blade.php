@@ -153,6 +153,12 @@
 </div>
 @endif
 
+{{-- En-tête de page --}}
+<div class="ep-entete ep-entete-page" style="margin-bottom:16px;">
+    <div class="ep-ico purple ep-ico-entete"><span class="material-symbols-outlined">assignment_return</span></div>
+    <h3 style="margin:0;">{{ __('etablissement.demandes_remboursement') }}</h3>
+</div>
+
 {{-- KPIs — pastilles + compteurs animés --}}
 <div class="g4" style="margin-bottom:20px;">
   <div class="kpi ep-kpi">

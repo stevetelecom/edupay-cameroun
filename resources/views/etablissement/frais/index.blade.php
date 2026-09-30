@@ -340,9 +340,9 @@
 @section('content')
 
 
-<div class="ep-entete" style="justify-content:space-between;margin-bottom:16px;">
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:16px;">
   <div style="display:flex;align-items:center;gap:10px;">
-    <span class="material-symbols-outlined">request_quote</span>
+    <div class="ep-ico or ep-ico-entete"><span class="material-symbols-outlined">request_quote</span></div>
     <div>
       <h3>{{ __('etablissement.categories_titre', ['annee' => \App\Support\AnneeScolaire::active($etablissement)]) }}</h3>
       <div class="ep-sous-titre" style="margin-top:2px;">{{ __('etablissement.nb_categories', ['count' => $categories->count()]) }}</div>

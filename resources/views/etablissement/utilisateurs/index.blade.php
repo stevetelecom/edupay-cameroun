@@ -108,9 +108,9 @@
 </div>
 @endif
 
-<div class="ep-entete" style="justify-content:space-between;margin-bottom:16px;">
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:16px;">
   <div style="display:flex;align-items:center;gap:10px;">
-    <span class="material-symbols-outlined">badge</span>
+    <div class="ep-ico purple ep-ico-entete"><span class="material-symbols-outlined">badge</span></div>
     <div>
       <h3>{{ __('messages.utilisateurs_internes') }}</h3>
       <div class="ep-sous-titre" style="margin-top:2px;">{{ __('etablissement.utilisateurs_motif') }}</div>

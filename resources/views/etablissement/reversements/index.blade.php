@@ -4,10 +4,13 @@
 
 @section('content')
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-        <div>
-            <div style="font-size:17px;font-weight:700;">{{ __('etablissement.rev_titre') }}</div>
-            <div style="font-size:12px;color:#888;">{{ __('etablissement.rev_sous_titre') }}</div>
+    <div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div class="ep-ico bleu ep-ico-entete"><span class="material-symbols-outlined">currency_exchange</span></div>
+            <div>
+                <h3 style="margin:0;">{{ __('etablissement.rev_titre') }}</h3>
+                <div class="ep-sous-titre" style="margin-top:2px;">{{ __('etablissement.rev_sous_titre') }}</div>
+            </div>
         </div>
     </div>
 

@@ -206,9 +206,14 @@
     </div>
     @endif
 
-    <div style="font-size:17px;font-weight:700;margin-bottom:4px;">{{ __('etablissement.tdb_financier') }}</div>
-    <div style="font-size:12px;color:#888;margin-bottom:16px;">
-        {{ __('etablissement.annee_scolaire_valeur', ['annee' => $anneeScolaire ?? \App\Support\AnneeScolaire::active($etablissement ?? null)]) }} · {{ \Carbon\Carbon::now()->locale(app()->getLocale())->isoFormat('MMMM YYYY') }}
+    <div class="ep-entete ep-entete-page" style="margin-bottom:16px;">
+        <div class="ep-ico or ep-ico-entete"><span class="material-symbols-outlined">insights</span></div>
+        <div>
+            <h3 style="margin:0;">{{ __('etablissement.tdb_financier') }}</h3>
+            <div class="ep-sous-titre" style="margin-top:2px;">
+                {{ __('etablissement.annee_scolaire_valeur', ['annee' => $anneeScolaire ?? \App\Support\AnneeScolaire::active($etablissement ?? null)]) }} · {{ \Carbon\Carbon::now()->locale(app()->getLocale())->isoFormat('MMMM YYYY') }}
+            </div>
+        </div>
     </div>
 
     {{-- ── KPIs ── --}}

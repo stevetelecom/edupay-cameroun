@@ -4,11 +4,14 @@
 
 @section('content')
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-    <div>
-        <div style="font-size:17px;font-weight:700;">{{ __('etablissement.dossiers_impayes') }}</div>
-        <div style="font-size:12px;color:#888;">
-            {{ __('etablissement.dossiers_attente', ['count' => $fraisImpayes->total()]) }}
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div class="ep-ico rouge ep-ico-entete"><span class="material-symbols-outlined">error</span></div>
+        <div>
+            <h3 style="margin:0;">{{ __('etablissement.dossiers_impayes') }}</h3>
+            <div class="ep-sous-titre" style="margin-top:2px;">
+                {{ __('etablissement.dossiers_attente', ['count' => $fraisImpayes->total()]) }}
+            </div>
         </div>
     </div>
     <button type="button" class="btn-p" style="width:auto;display:inline-flex;align-items:center;gap:6px;"

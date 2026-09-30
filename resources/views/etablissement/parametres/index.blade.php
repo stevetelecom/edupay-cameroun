@@ -5,8 +5,8 @@
 @section('content')
 
     {{-- En-tête de page style tableau de bord (pastille dorée + Poppins) --}}
-    <div class="ep-entete" style="margin-bottom:2px;">
-        <span class="material-symbols-outlined">settings</span>
+    <div class="ep-entete ep-entete-page" style="margin-bottom:2px;">
+        <div class="ep-ico navy ep-ico-entete"><span class="material-symbols-outlined">settings</span></div>
         <h3>{{ __('etablissement.parametres_etab') }}</h3>
     </div>
     <div class="ep-sous-titre" style="margin-bottom:18px;">{{ __('etablissement.params_sous_titre') }}</div>

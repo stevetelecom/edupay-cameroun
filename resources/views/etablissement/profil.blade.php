@@ -3,6 +3,11 @@
 
 @section('content')
 
+<div class="ep-entete ep-entete-page" style="margin-bottom:16px;">
+    <div class="ep-ico navy ep-ico-entete"><span class="material-symbols-outlined">person</span></div>
+    <h3 style="margin:0;">{{ __('etablissement.mon_profil') }}</h3>
+</div>
+
 <div style="max-width:640px;">
 
   {{-- ── Informations personnelles ── --}}

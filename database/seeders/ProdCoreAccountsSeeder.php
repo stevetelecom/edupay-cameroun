@@ -61,9 +61,13 @@ class ProdCoreAccountsSeeder extends Seeder
             $etablissement = Etablissement::create([
                 'code_etablissement' => 'UD-2026',
                 'nom'                 => 'Université de Douala',
+                'type'                => 'universite',
+                'statut_juridique'    => 'public',
                 'statut'              => 'actif',
+                'region'              => 'littoral',
                 'ville'               => 'Douala',
                 'telephone'           => $telephoneEtablissement,
+                'email'               => 'contact@univ-douala.cm',
             ]);
             $this->command->info('Établissement créé : ' . $etablissement->nom . ' (id ' . $etablissement->id . ')');
         } else {
@@ -88,6 +92,7 @@ class ProdCoreAccountsSeeder extends Seeder
                 'montant_mensuel'     => Abonnement::PLANS['standard']['montant'] ?? 10000,
                 'date_debut'          => now(),
                 'date_fin'            => now()->addMonth(),
+                'grace_period_fin'   => now()->addMonth()->addDays(7),
                 'statut'              => 'actif',
                 'reference_paiement'  => 'SEED-PROD-STANDARD',
                 'notes'               => 'Créé automatiquement par ProdCoreAccountsSeeder',

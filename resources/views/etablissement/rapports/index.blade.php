@@ -5,8 +5,8 @@
 @section('content')
 
     {{-- En-tête de page style tableau de bord (pastille dorée + Poppins) --}}
-    <div class="ep-entete" style="margin-bottom:2px;">
-        <span class="material-symbols-outlined">monitoring</span>
+    <div class="ep-entete ep-entete-page" style="margin-bottom:2px;">
+        <div class="ep-ico bleu ep-ico-entete"><span class="material-symbols-outlined">monitoring</span></div>
         <h3>{{ __('etablissement.rapports_financiers') }}</h3>
     </div>
     <div class="ep-sous-titre" style="margin-bottom:18px;">{{ __('etablissement.rapports_sous_titre', ['annee' => $anneeScolaire ?? \App\Support\AnneeScolaire::active()]) }}</div>
