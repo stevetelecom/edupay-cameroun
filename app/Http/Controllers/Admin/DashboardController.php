@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Apprenant;
 use App\Models\Commission;
 use App\Models\Etablissement;
 use App\Models\FraisApprenant;
 use App\Models\Paiement;
 use App\Models\Reclamation;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -128,6 +130,43 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // ────────────────────────────────────────────
+        // 6. Couverture de la relation payeur ↔ apprenant (diagramme de Venn)
+        //    Compte les comptes payeurs et les apprenants selon leur
+        //    rattachement (table pivot user_apprenant) : seul un payeur
+        //    rattaché peut recevoir des relances SMS/email.
+        // ────────────────────────────────────────────
+        $payeurIdsRattaches = DB::table('user_apprenant')->distinct()->pluck('user_id');
+        $apprenantIdsRattaches = DB::table('user_apprenant')->distinct()->pluck('apprenant_id');
+        $payeursRattaches = $payeurIdsRattaches->count();
+        $apprenantsRattaches = $apprenantIdsRattaches->count();
+        $payeursSeuls = \App\Models\User::whereIn('profil', ['parent', 'eleve', 'etudiant'])
+            ->whereNotIn('id', $payeurIdsRattaches)->count();
+        $apprenantsSeuls = Apprenant::whereNotIn('id', $apprenantIdsRattaches)->count();
+
+        // ────────────────────────────────────────────
+        // 7. Répartition des apprenants par statut de paiement
+        //    (pictogrammes : 1 icône = 1 apprenant, cf. guide ultime)
+        // ────────────────────────────────────────────
+        $statutsApprenants = Apprenant::selectRaw('statut_paiement, COUNT(*) as total')
+            ->groupBy('statut_paiement')
+            ->pluck('total', 'statut_paiement');
+
+        // ────────────────────────────────────────────
+        // 8. Volume encaissé par jour de la semaine courante
+        //    (histogramme hebdo, mois en cours)
+        // ────────────────────────────────────────────
+        $volumeParJour = collect([]);
+        for ($j = 6; $j >= 0; $j--) {
+            $jour = Carbon::now()->subDays($j);
+            $volumeParJour->push([
+                'jour' => $jour->translatedFormat('D'),
+                'volume' => (int) Paiement::where('statut', 'valide')
+                    ->whereDate('created_at', $jour->toDateString())
+                    ->sum('montant'),
+            ]);
+        }
+
         return view('admin.dashboard', [
             'volumeMois'                 => $volumeMois,
             'variationVolume'            => $variationVolume,
@@ -143,6 +182,12 @@ class DashboardController extends Controller
             'reclamationsMois'           => $reclamationsMois,
             'derniersEtablissements'     => $derniersEtablissements,
             'dernieresTransactions'      => $dernieresTransactions,
+            'payeursRattaches'           => $payeursRattaches,
+            'apprenantsRattaches'        => $apprenantsRattaches,
+            'payeursSeuls'               => $payeursSeuls,
+            'apprenantsSeuls'            => $apprenantsSeuls,
+            'statutsApprenants'          => $statutsApprenants,
+            'volumeParJour'              => $volumeParJour,
             // tauxCommission + composantes (tauxAangaraaPct/margeEdupayPct) sont
             // fournis par AdminSidebarComposer : plus de valeur figée à 2,5 %.
             'pageTitle'                  => 'Tableau de bord — Super Admin EduPay',

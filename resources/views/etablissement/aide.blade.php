@@ -81,22 +81,54 @@
 </div>
 
 <div class="seclbl">{{ __('etablissement.faq') }}</div>
-<div style="display:grid;gap:10px;margin-bottom:24px;">
+{{-- FAQ accordéon v3 : <details> natif (accessible, sans JS) + pastille
+     « ? » dorée + chevron rotatif, motif validé par l'utilisateur --}}
+<div style="max-width:760px;margin-bottom:24px;">
 
-  <div class="epcard">
-    <div class="ep-guide-titre">{{ __('etablissement.faq1_titre') }}</div>
-    <div class="ep-guide-texte">{{ __('etablissement.faq1_desc') }}</div>
-  </div>
+  <details class="ep-faq-item">
+    <summary class="ep-faq-q">
+      <span class="ep-faq-ico" aria-hidden="true">?</span>
+      {{ __('etablissement.faq1_titre') }}
+      <span class="material-symbols-outlined ep-faq-chev" aria-hidden="true">expand_more</span>
+    </summary>
+    <div class="ep-faq-r">{{ __('etablissement.faq1_desc') }}</div>
+  </details>
 
-  <div class="epcard">
-    <div class="ep-guide-titre">{{ __('etablissement.faq2_titre') }}</div>
-    <div class="ep-guide-texte">{{ __('etablissement.faq2_desc') }}</div>
-  </div>
+  <details class="ep-faq-item">
+    <summary class="ep-faq-q">
+      <span class="ep-faq-ico" aria-hidden="true">?</span>
+      {{ __('etablissement.faq2_titre') }}
+      <span class="material-symbols-outlined ep-faq-chev" aria-hidden="true">expand_more</span>
+    </summary>
+    <div class="ep-faq-r">{{ __('etablissement.faq2_desc') }}</div>
+  </details>
 
-  <div class="epcard">
-    <div class="ep-guide-titre">{{ __('etablissement.faq3_titre') }}</div>
-    <div class="ep-guide-texte">{{ __('etablissement.faq3_desc') }}</div>
-  </div>
+  <details class="ep-faq-item">
+    <summary class="ep-faq-q">
+      <span class="ep-faq-ico" aria-hidden="true">?</span>
+      {{ __('etablissement.faq3_titre') }}
+      <span class="material-symbols-outlined ep-faq-chev" aria-hidden="true">expand_more</span>
+    </summary>
+    <div class="ep-faq-r">{{ __('etablissement.faq3_desc') }}</div>
+  </details>
+
+  <details class="ep-faq-item">
+    <summary class="ep-faq-q">
+      <span class="ep-faq-ico" aria-hidden="true">?</span>
+      {{ __('etablissement.faq4_titre') }}
+      <span class="material-symbols-outlined ep-faq-chev" aria-hidden="true">expand_more</span>
+    </summary>
+    <div class="ep-faq-r">{{ __('etablissement.faq4_desc') }}</div>
+  </details>
+
+  <details class="ep-faq-item">
+    <summary class="ep-faq-q">
+      <span class="ep-faq-ico" aria-hidden="true">?</span>
+      {{ __('etablissement.faq5_titre') }}
+      <span class="material-symbols-outlined ep-faq-chev" aria-hidden="true">expand_more</span>
+    </summary>
+    <div class="ep-faq-r">{{ __('etablissement.faq5_desc') }}</div>
+  </details>
 
 </div>
 

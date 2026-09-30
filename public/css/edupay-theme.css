@@ -102,6 +102,10 @@ html[data-theme="dark"] .panneau,
 html[data-theme="dark"] .kpi,
 html[data-theme="dark"] .ep-bandeau,
 html[data-theme="dark"] .ep-modal { background: var(--ep-carte) !important; }
+/* Valeurs KPI : la base force var(--ep-navy) (invisible sur carte
+   navy en sombre) => couleur d'encre en mode sombre */
+html[data-theme="dark"] .kval,
+html[data-theme="dark"] .kpi .kval { color: var(--ep-encre) !important; }
 html[data-theme="dark"] .main-content,
 html[data-theme="dark"] .admin-main-content { background: var(--ep-fond) !important; }
 html[data-theme="dark"] .ep-bandeau-droite,

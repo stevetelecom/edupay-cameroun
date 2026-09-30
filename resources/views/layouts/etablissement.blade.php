@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="{{ asset('css/edupay-sidebar.css') }}">
     {{-- Harmonisation des titres/liens de retour des pages secondaires --}}
     <link rel="stylesheet" href="{{ asset('css/edupay-pages.css') }}">
+    {{-- Composants v3 partagés (FAQ accordéon .ep-faq-*) : bibliothèque sans règle destructive --}}
+    <link rel="stylesheet" href="{{ asset('css/edupay-landing.css') }}">
 
     {{-- DataTables CSS --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css"/>

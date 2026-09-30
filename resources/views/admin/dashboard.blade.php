@@ -96,23 +96,20 @@
     {{-- ══ GRAPHIQUES — évolution mensuelle + répartition moyens (Chart.js) ══ --}}
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
 
-        {{-- Courbe : évolution mensuelle des encaissements --}}
+        {{-- Barres + ligne : détail mensuel des montants encaissés et du taux --}}
+        {{-- (fusion : remplace la courbe redondante et l'ancienne section pleine largeur) --}}
         <div class="bg-white rounded-xl p-5 xl:col-span-2 ep-shadow">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined" style="color:#E8A020;font-size:22px;">query_stats</span>
+                    <span class="material-symbols-outlined" style="color:#E8A020;font-size:22px;">bar_chart</span>
                     <div>
                         <h2 class="text-sm font-bold text-gray-900">{{ __('admin.evolution_mensuelle_taux') }}</h2>
-                        <p class="text-xs text-gray-500 mt-0.5">12 derniers mois</p>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ __('admin.calcul_taux') }}</p>
                     </div>
                 </div>
-                <span class="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full font-medium">
-                    <span class="material-symbols-outlined" style="font-size:14px;">trending_up</span>
-                    {{ __('admin.taux_global') }}
-                </span>
             </div>
             <div style="height:300px;">
-                <canvas id="chart-evolution"></canvas>
+                <canvas id="chart-evolution-detail"></canvas>
             </div>
         </div>
 
@@ -144,59 +141,106 @@
                             <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:{{ $info['couleur'] }}"></span>
                             <span class="text-gray-600 font-medium">{{ $info['label'] }}</span>
                         </div>
-                        <span class="font-bold text-gray-800">{{ $pctL }}%</span>
+                        <span class="font-bold text-gray-800">{{ $pctL }}% <span class="text-gray-400 font-medium ml-1">{{ number_format($rowL->volume ?? 0, 0, ',', ' ') }} FCFA</span></span>
                     </div>
                 @endforeach
             </div>
         </div>
     </div>
 
-    {{-- ── Grille secondaire ── --}}
-    <div class="grid grid-cols-2 gap-5 mb-5">
+    {{-- ══ VISUELS D'ANALYSE : Venn payeurs/apprenants · pictogrammes statuts ·
+         histogramme hebdomadaire (grille 3 colonnes, comme la maquette) ══ --}}
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
 
-        {{-- Répartition par moyen de paiement --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-5">
-            <h2 class="text-sm font-bold text-gray-900 mb-4">{{ __('admin.repartition_paiements') }}</h2>
-
+        {{-- 1. Diagramme de Venn SVG : couverture de la relation payeur ↔ apprenant --}}
+        <div class="bg-white rounded-xl p-5 ep-shadow">
+            <div class="ep-entete">
+                <span class="material-symbols-outlined">join_inner</span>
+                <h3>{{ __('admin.couverture_rattachement') }}</h3>
+            </div>
+            <p class="text-xs text-gray-500 mb-2">{{ __('admin.couverture_rattachement_sub') }}</p>
             @php
-                $moyens = [
-                    'mtn_momo'     => ['label' => 'MTN Mobile Money', 'couleur' => '#FFCC00', 'bg' => '#FFFBE6'],
-                    'orange_money' => ['label' => 'Orange Money',     'couleur' => '#FF6600', 'bg' => '#FFF0E6'],
-                    'carte'        => ['label' => __('admin.carte_bancaire'), 'couleur' => '#185FA5', 'bg' => '#E6F0FB'],
-                ];
-                $totalTx = $repartitionMoyens->sum('total') ?: 1;
+                // Proportions du Venn : rayons liés au volume de chaque population,
+                // intersection au centre (rattachements réels)
+                $vennPayeurs = max($payeursRattaches + $payeursSeuls, 1);
+                $vennApprenants = max($apprenantsRattaches + $apprenantsSeuls, 1);
+                $rP = 44 + 26 * min($vennPayeurs / max($vennPayeurs + $vennApprenants, 1), 1);
+                $rA = 44 + 26 * min($vennApprenants / max($vennPayeurs + $vennApprenants, 1), 1);
             @endphp
+            <div style="display:flex;justify-content:center;">
+                <svg width="230" height="190" viewBox="0 0 230 190" role="img" aria-label="{{ __('admin.couverture_rattachement') }}">
+                    {{-- Cercle payeurs (or) --}}
+                    <circle cx="88" cy="85" r="{{ $rP }}" fill="rgba(232,160,32,.32)" stroke="#E8A020" stroke-width="2"/>
+                    {{-- Cercle apprenants (bleu) --}}
+                    <circle cx="142" cy="85" r="{{ $rA }}" fill="rgba(31,111,178,.30)" stroke="#1F6FB2" stroke-width="2"/>
+                    {{-- Intersection : ellipse au centre, teinte teal --}}
+                    <ellipse cx="115" cy="85" rx="{{ min($rP, $rA) * 0.62 }}" ry="{{ min($rP, $rA) * 0.9 }}" fill="rgba(13,158,117,.38)"/>
+                    {{-- Libellés et valeurs : intersection décalée sous les cercles pour
+                         éviter le chevauchement des petits cercles (données faibles) --}}
+                    <text x="55" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#B4780E">{{ __('admin.payeurs') }}</text>
+                    <text x="55" y="58" text-anchor="middle" font-size="15" font-weight="800" fill="#8B5E10">{{ $payeursSeuls }}</text>
+                    <text x="175" y="42" text-anchor="middle" font-size="11" font-weight="700" fill="#1F6FB2">{{ __('admin.apprenants') }}</text>
+                    <text x="175" y="58" text-anchor="middle" font-size="15" font-weight="800" fill="#123C66">{{ $apprenantsSeuls }}</text>
+                    <text x="115" y="178" text-anchor="middle" font-size="10.5" font-weight="700" fill="#0D9E75">{{ __('admin.rattaches') }} : {{ $payeursRattaches }} ↔ {{ $apprenantsRattaches }}</text>
+                </svg>
+            </div>
+            <div class="text-xs text-center text-gray-500 mt-1">
+                {{ __('admin.venn_legend', ['p' => $payeursSeuls, 'a' => $apprenantsSeuls]) }}
+            </div>
+        </div>
 
-            <div class="space-y-3">
-                @foreach ($moyens as $key => $info)
-                    @php
-                        $row  = $repartitionMoyens->get($key);
-                        $pct  = $row ? round(($row->total / $totalTx) * 100, 1) : 0;
-                        $vol  = $row ? number_format($row->volume, 0, ',', ' ') : '0';
-                    @endphp
+        {{-- 2. Pictogrammes : 1 icône = 1 apprenant, par statut de paiement --}}
+        <div class="bg-white rounded-xl p-5 ep-shadow">
+            <div class="ep-entete">
+                <span class="material-symbols-outlined">emoji_people</span>
+                <h3>{{ __('admin.statuts_apprenants') }}</h3>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">{{ __('admin.picto_legende') }}</p>
+            @php
+                $pictoConfig = [
+                    'regle'   => ['ico' => 'sentiment_satisfied', 'couleur' => '#0D9E75', 'label' => __('admin.statut_regle')],
+                    'partiel' => ['ico' => 'sentiment_neutral',  'couleur' => '#E8A020', 'label' => __('admin.statut_partiel')],
+                    'impaye'  => ['ico' => 'sentiment_dissatisfied', 'couleur' => '#D94040', 'label' => __('admin.statut_impaye')],
+                ];
+            @endphp
+            <div style="display:grid;gap:12px;">
+                @foreach ($pictoConfig as $statut => $cfg)
+                    @php $nb = (int) ($statutsApprenants[$statut] ?? 0); @endphp
                     <div>
-                        <div class="flex items-center justify-between text-sm mb-1.5">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:{{ $info['couleur'] }}"></span>
-                                <span class="text-gray-700">{{ $info['label'] }}</span>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-semibold text-gray-900">{{ $pct }}%</span>
-                                <span class="text-xs text-gray-400 ml-2">{{ $vol }} FCFA</span>
-                            </div>
+                        <div class="flex items-center justify-between text-xs mb-1">
+                            <span class="font-semibold" style="color:{{ $cfg['couleur'] }}">{{ $cfg['label'] }}</span>
+                            <span class="font-bold text-gray-700">{{ $nb }}</span>
                         </div>
-                        <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div class="h-full rounded-full transition-all duration-500"
-                                 style="width:{{ $pct }}%; background:{{ $info['couleur'] }}">
-                            </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:3px;">
+                            {{-- 1 pictogramme = 1 apprenant (max 24 affichés, +N au-delà) --}}
+                            @for ($i = 0; $i < min($nb, 24); $i++)
+                                <span class="material-symbols-outlined" style="font-size:19px;color:{{ $cfg['couleur'] }};font-variation-settings:'FILL' 1;">{{ $cfg['ico'] }}</span>
+                            @endfor
+                            @if ($nb > 24)
+                                <span class="text-[11px] font-bold" style="color:{{ $cfg['couleur'] }};align-self:center;">+{{ $nb - 24 }}</span>
+                            @elseif ($nb === 0)
+                                <span class="text-[11px] text-gray-300">—</span>
+                            @endif
                         </div>
                     </div>
                 @endforeach
             </div>
         </div>
 
-        {{-- Derniers établissements inscrits --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-5">
+        {{-- 3. Histogramme : volume encaissé sur les 7 derniers jours (Chart.js) --}}
+        <div class="bg-white rounded-xl p-5 ep-shadow">
+            <div class="ep-entete">
+                <span class="material-symbols-outlined">calendar_view_week</span>
+                <h3>{{ __('admin.volume_semaine') }}</h3>
+            </div>
+            <div style="height:240px;">
+                <canvas id="chart-semaine"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Derniers établissements inscrits (pleine largeur) ── --}}
+    <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined" style="color:#E8A020;font-size:20px;">apartment</span>
@@ -226,7 +270,6 @@
                 @endforelse
             </div>
         </div>
-    </div>
 
     {{-- ── Taux de recouvrement GLOBAL ── --}}
     <div class="bg-white border border-gray-200 rounded-xl p-5 mb-5">
@@ -309,22 +352,6 @@
         </div>
     </div>
 
-    {{-- ── Évolution mensuelle du taux de recouvrement : barres + ligne (Chart.js) ── --}}
-    <div class="bg-white rounded-xl p-5 mb-5 ep-shadow">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined" style="color:#E8A020;font-size:22px;">bar_chart</span>
-                <div>
-                    <h2 class="text-sm font-bold text-gray-900">{{ __('admin.evolution_mensuelle_taux') }}</h2>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ __('admin.calcul_taux') }}</p>
-                </div>
-            </div>
-        </div>
-        <div style="height:320px;">
-            <canvas id="chart-evolution-detail"></canvas>
-        </div>
-    </div>
-
     {{-- Bandeau taux commission — composant ep-bandeau v2 --}}
     <div class="ep-bandeau attente" style="align-items:center;">
         <div class="ep-bandeau-ico">
@@ -362,7 +389,7 @@
     function monterGraphiques() {
 
         // Détruit les instances existantes avant re-création (bascule de thème)
-        ['chart-evolution', 'chart-moyens', 'chart-evolution-detail'].forEach(function (id) {
+        ['chart-evolution', 'chart-moyens', 'chart-evolution-detail', 'chart-semaine'].forEach(function (id) {
             var c = document.getElementById(id);
             if (c && window.Chart && Chart.getChart(c)) Chart.getChart(c).destroy();
         });
@@ -559,6 +586,48 @@
             }
         });
     }
+
+    // ══ 4. Histogramme : volume encaissé des 7 derniers jours ══
+    const ctxSem = document.getElementById('chart-semaine');
+    if (ctxSem) {
+        const semaine = @json($volumeParJour);
+        new Chart(ctxSem, {
+            type: 'bar',
+            data: {
+                labels: semaine.map(j => j.jour),
+                datasets: [{
+                    label: 'Volume (FCFA)',
+                    data: semaine.map(j => j.volume),
+                    backgroundColor: semaine.map(j => j.volume > 0 ? 'rgba(13,158,117,.80)' : (sombre ? 'rgba(255,255,255,.10)' : 'rgba(0,0,0,.07)')),
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: NAVY,
+                        padding: 12,
+                        cornerRadius: 10,
+                        callbacks: { label: (c) => ' ' + c.parsed.y.toLocaleString('fr-FR') + ' FCFA' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: sombre ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.05)' },
+                        ticks: { callback: (v) => (v >= 1000000 ? (v/1000000) + 'M' : (v >= 1000 ? (v/1000) + 'k' : v)) }
+                    }
+                }
+            }
+        });
+    }
+
+    } // ── ferme monterGraphiques() : cette accolade manquait, le bloc entier
+      //    mourait en SyntaxError et AUCUN graphique ne se montait
 
     // Premier rendu, puis re-rendu en fondu à chaque bascule clair/sombre
     monterGraphiques();

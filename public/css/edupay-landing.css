@@ -1173,6 +1173,71 @@
 }
 
 /* Pages légales (confidentialité, CGU) : notes, sections, avis */
+
+/* ── FAQ accordéon v3 (aide back-office, page publique future) ──
+   Motif de la capture utilisateur (AangaraaPay) : rangée arrondie,
+   pastille « ? » dorée, chevron rotatif ; panneau dépliable.
+   Double fallback : --lp-* (pages publiques .lp) puis --ep-* (partout). */
+.ep-faq-item {
+    background: var(--lp-carte, var(--ep-carte, #fff));
+    border: 1px solid var(--lp-bord, var(--ep-bordure, #E4E9EE));
+    border-radius: 14px;
+    box-shadow: var(--lp-ombre, var(--ep-ombre, 0 10px 30px rgba(11,37,69,.08)));
+    overflow: hidden;
+    transition: box-shadow .2s ease, border-color .2s ease;
+}
+.ep-faq-item + .ep-faq-item { margin-top: 10px; }
+.ep-faq-item[open] { border-color: rgba(13,158,117,.35); box-shadow: var(--lp-ombre-hover, var(--ep-ombre-hover, 0 14px 38px rgba(11,37,69,.14))); }
+.ep-faq-q {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--lp-encre, var(--ep-encre, #101A2B));
+    list-style: none; /* masque le triangle natif <details> */
+}
+.ep-faq-q::-webkit-details-marker { display: none; }
+.ep-faq-q:hover { color: var(--lp-teal, var(--ep-teal, #0D9E75)); }
+.ep-faq-ico {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--lp-gold, var(--ep-gold, #E8A020)), #C9860E);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 3px 8px rgba(232,160,32,.35);
+}
+.ep-faq-chev {
+    margin-left: auto;
+    font-size: 22px;
+    color: var(--lp-gris, var(--ep-gris, #5A6472));
+    transition: transform .25s ease;
+}
+.ep-faq-item[open] .ep-faq-chev { transform: rotate(180deg); color: var(--lp-teal, var(--ep-teal, #0D9E75)); }
+.ep-faq-r {
+    padding: 0 16px 15px 53px;
+    font-size: 12.5px;
+    color: var(--lp-gris, var(--ep-gris, #5A6472));
+    line-height: 1.7;
+    animation: epFaqOuvre .25s ease;
+}
+@keyframes epFaqOuvre { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .ep-faq-r { animation: none; }
+    .ep-faq-chev { transition: none; }
+}
+
+/* Pages légales (confidentialité, CGU) : notes, sections, avis */
 /* Note encadrée : intro (teal par défaut) ou avis (.note-or) */
 .lp-legal-note {
     max-width: 780px;
