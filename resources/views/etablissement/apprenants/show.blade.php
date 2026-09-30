@@ -108,13 +108,16 @@
 </div>
 @endif
 
-<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
-    <div>
-        <div style="font-size:19px;font-weight:700;">{{ $apprenant->nom }} {{ $apprenant->prenom }}</div>
-        <div style="font-size:13px;color:#888;margin-top:2px;">
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;align-items:flex-start;margin-bottom:18px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div class="ep-ico navy ep-ico-entete"><span class="material-symbols-outlined">face</span></div>
+        <div>
+            <h3 style="margin:0;">{{ $apprenant->nom }} {{ $apprenant->prenom }}</h3>
+            <div class="ep-sous-titre" style="margin-top:2px;">
             {{ $apprenant->classe }}
             @if($apprenant->matricule) {{ __('etablissement.matricule_apos', ['matricule' => $apprenant->matricule]) }} @endif
             @if($apprenant->sexe) · {{ $apprenant->sexe === 'M' ? __('etablissement.masculin') : __('etablissement.feminin') }} @endif
+            </div>
         </div>
     </div>
     <div style="display:flex;gap:8px;align-items:center;">

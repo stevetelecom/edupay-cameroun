@@ -36,7 +36,23 @@ class ProdCoreAccountsSeeder extends Seeder
         // ────────────────────────────────────────────
         // 1. ÉTABLISSEMENT — Université de Douala
         // ────────────────────────────────────────────
-        $etablissement = Etablissement::where('code_etablissement', 'UD-2026')->first();
+        // `withTrashed` est indispensable : `Etablissement` utilise SoftDeletes,
+        // donc un etablissement supprime logiquement reste invisible a
+        // `where(...)->first()` tout en continuant d'occuper son code dans
+        // l'index UNIQUE `etablissements_code_etablissement_unique`. Sans ce
+        // `withTrashed`, le seeder tente l'INSERT et echoue en SQLSTATE 1062
+        // « Duplicate entry 'UD-2026' », ce qui empechait le deploiement du
+        // 30/09/2026 alors que la ligne existe bel et bien en base.
+        $etablissement = Etablissement::withTrashed()->where('code_etablissement', 'UD-2026')->first();
+
+        if ($etablissement && $etablissement->trashed()) {
+            // Un etablissement de demonstration supprime logiquement n'a pas
+            // vocation a disparaitre : le compte de direction qui y est rattache
+            // ne fonctionnerait plus. On le restaure plutot que de tenter un
+            // INSERT, que l'index unique refuserait.
+            $etablissement->restore();
+            $this->command->warn('Établissement UD-2026 supprimé logiquement — restauré.');
+        }
 
         if (! $etablissement) {
             // La colonne `telephone` est NOT NULL sans valeur par defaut

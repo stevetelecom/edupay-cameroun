@@ -4,13 +4,21 @@
 
 @section('content')
 
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-        <a href="{{ route('etablissement.apprenants.show', $apprenant) }}" style="color:#888;text-decoration:none;font-size:13px;">{{ __('etablissement.retour_fiche') }}</a>
+    <div style="margin-bottom:18px;">
+        <a href="{{ route('etablissement.apprenants.show', $apprenant) }}" style="color:#888;text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:4px;">
+            <span class="material-symbols-outlined" style="font-size:15px;">arrow_back</span> {{ __('etablissement.retour_fiche') }}
+        </a>
+    </div>
+
+    <div class="ep-entete ep-entete-page" style="margin-bottom:18px;">
+        <div class="ep-ico navy ep-ico-entete"><span class="material-symbols-outlined">manage_accounts</span></div>
+        <div>
+            <h3 style="margin:0;">{{ __('etablissement.modifier_apprenant') }}</h3>
+            <div class="ep-sous-titre" style="margin-top:2px;">{{ $apprenant->nom }} {{ $apprenant->prenom }} · {{ $apprenant->classe }}</div>
+        </div>
     </div>
 
     <div class="epcard" style="max-width:640px;">
-        <div style="font-size:16px;font-weight:700;margin-bottom:4px;">{{ __('etablissement.modifier_apprenant') }}</div>
-        <div style="font-size:12px;color:#888;margin-bottom:20px;">{{ $apprenant->nom }} {{ $apprenant->prenom }} · {{ $apprenant->classe }}</div>
 
         <form method="POST" action="{{ route('etablissement.apprenants.update', $apprenant) }}">
             @csrf

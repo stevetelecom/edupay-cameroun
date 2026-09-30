@@ -4,12 +4,20 @@
 
 @section('content')
 
-<div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:13px;">
-    <a href="{{ route('etablissement.frais.index') }}" style="color:#888;text-decoration:none;">
-        ← {{ __('etablissement.frais_echeanciers_titre') }}
+<div style="margin-bottom:16px;font-size:13px;">
+    <a href="{{ route('etablissement.frais.index') }}" style="color:#888;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+        <span class="material-symbols-outlined" style="font-size:15px;">arrow_back</span> {{ __('etablissement.frais_echeanciers_titre') }}
     </a>
     <span style="color:#ddd;">/</span>
     <span style="font-weight:600;">{{ __('etablissement.modifier_frais_bread', ['nom' => $frais->nom]) }}</span>
+</div>
+
+<div class="ep-entete ep-entete-page" style="margin-bottom:18px;">
+    <div class="ep-ico or ep-ico-entete"><span class="material-symbols-outlined">edit_note</span></div>
+    <div>
+        <h3 style="margin:0;">{{ __('etablissement.modifier_frais_titre', ['nom' => $frais->nom]) }}</h3>
+        <div class="ep-sous-titre" style="margin-top:2px;">{{ __('etablissement.frais_echeanciers_titre') }}</div>
+    </div>
 </div>
 
 @if($errors->any())

@@ -108,6 +108,27 @@ class SeederEtablissementViergeTest extends TestCase
     }
 
     /**
+     * UD-2026 supprimé logiquement : invisible à `where(...)->first()` mais
+     * toujours présent dans l'index UNIQUE. Sans `withTrashed`, le seeder
+     * échouait en 1062 « Duplicate entry » et le déploiement échouait avec.
+     */
+    public function test_le_seeder_restaure_un_etablissement_supprime_logiquement(): void
+    {
+        $this->executerSeeder();
+
+        Etablissement::where('code_etablissement', 'UD-2026')->first()->delete();
+        $this->assertSoftDeleted('etablissements', ['code_etablissement' => 'UD-2026']);
+
+        $this->executerSeeder();
+
+        $etablissement = Etablissement::where('code_etablissement', 'UD-2026')->first();
+
+        $this->assertNotNull($etablissement, 'UD-2026 doit être restauré, pas dupliqué');
+        $this->assertNull($etablissement->deleted_at);
+        $this->assertSame(1, Etablissement::withTrashed()->where('code_etablissement', 'UD-2026')->count());
+    }
+
+    /**
      * Un second passage ne doit rien dupliquer : le seeder tourne à chaque
      * déploiement via GitHub Actions.
      */
