@@ -97,6 +97,21 @@ class SeederEtablissementViergeTest extends TestCase
         $this->assertSame('654862989', $carine->telephone);
         $this->assertTrue($carine->hasRole('eleve'));
 
+        // `profil` et non le role Spatie : c'est lui qui choisit la vue Solo
+        // ou Famille du dashboard. Un profil `parent` sur un compte eleve
+        // atterrit sur le mauvais tableau de bord sans aucun message d'erreur.
+        $this->assertSame('etudiant', $carine->profil);
+
+        // Le lien pivot est indispensable : sans lui la vue Solo s'affiche sans
+        // aucun dossier a payer.
+        $this->assertCount(1, $carine->apprenants);
+        $this->assertSame('Master 1 Informatique', $carine->apprenants->first()->classe);
+        $this->assertDatabaseHas('user_apprenant', [
+            'user_id'      => $carine->id,
+            'apprenant_id' => $carine->apprenants->first()->id,
+            'lien'         => 'soi-meme',
+        ]);
+
         $directeur = User::where('email', 'bebewandji2@gmail.com')->first();
         $this->assertNotNull($directeur, 'Paul ATEBA doit être créé sur une base vierge');
         $this->assertTrue($directeur->hasRole('directeur'));
@@ -132,6 +147,26 @@ class SeederEtablissementViergeTest extends TestCase
      * Un second passage ne doit rien dupliquer : le seeder tourne à chaque
      * déploiement via GitHub Actions.
      */
+    /**
+     * Compte deja cree avec le profil par defaut `parent` — c'est l'etat dans
+     * lequel la production se trouvait. Le seeder doit le reparer.
+     */
+    public function test_le_seeder_repare_un_profil_parent_hors_service(): void
+    {
+        $this->executerSeeder();
+
+        $carine = User::where('email', 'bebemakany@gmail.com')->first();
+        $carine->forceFill(['profil' => 'parent'])->save();
+        $carine->apprenants()->detach();
+
+        $this->executerSeeder();
+
+        $carine = User::where('email', 'bebemakany@gmail.com')->first();
+
+        $this->assertSame('etudiant', $carine->profil);
+        $this->assertCount(1, $carine->apprenants, 'Le dossier apprenant doit être rattiché');
+    }
+
     public function test_le_seeder_est_idempotent(): void
     {
         $this->executerSeeder();

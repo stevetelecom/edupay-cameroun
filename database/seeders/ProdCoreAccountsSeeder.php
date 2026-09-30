@@ -132,6 +132,7 @@ class ProdCoreAccountsSeeder extends Seeder
                 'telephone'        => '654862989',
                 'ville'            => 'Douala',
                 'password'         => Hash::make($motDePasseDemo),
+                'profil'           => 'etudiant',
                 'etablissement_id' => $etablissement->id,
             ]);
             $carine->assignRole('eleve');
@@ -140,8 +141,23 @@ class ProdCoreAccountsSeeder extends Seeder
             $this->command->info('Payeur déjà présent (id ' . $carine->id . ') — mot de passe et rôle non modifiés');
         }
 
+        // Le dashboard ne decide pas de la vue a partir du role Spatie mais de
+        // `users.profil` : `in_array($user->profil, ['eleve', 'etudiant'])`
+        // (DashboardController:54 et MesEnfantsController:33). La colonne est un
+        // enum dont le defaut est `parent`, et ce seeder ne la renseignait pas :
+        // le compte creat par cette commande avec le role `eleve` atterrissait
+        // neanmoins sur le dashboard PARENT. C'est ce qui est arrive en
+        // production le 30/09/2026.
+        //
+        // On repare aussi les comptes deja crees plutot que de laisser diverger :
+        // l'omission vient de ce seeder, c'est donc a lui de la corriger.
+        if ($carine->profil !== 'etudiant') {
+            $this->command->warn('Profil « ' . $carine->profil . ' » au lieu de « etudiant » — corrigé (le dashboard affichait la vue parent).');
+            $carine->forceFill(['profil' => 'etudiant'])->save();
+        }
+
         // Apprenant lié (non sensible — mise à jour sans risque)
-        Apprenant::updateOrCreate(
+        $apprenant = Apprenant::updateOrCreate(
             [
                 'nom'              => 'FONO',
                 'prenom'           => 'Carine',
@@ -151,6 +167,15 @@ class ProdCoreAccountsSeeder extends Seeder
                 'classe' => 'Master 1 Informatique',
             ]
         );
+
+        // Sans ce lien, `$user->apprenants()` renvoie une collection vide et le
+        // dashboard affiche une vue Solo sans aucun dossier. La table pivot
+        // `user_apprenant` porte un champ `lien`, a « soi-meme » pour l'eleve
+        // qui est son propre dossier (et non « parent »).
+        if (! $carine->apprenants()->where('apprenants.id', $apprenant->id)->exists()) {
+            $carine->apprenants()->attach($apprenant->id, ['lien' => 'soi-meme']);
+            $this->command->info('Dossier apprenant rattaché : apprenant #' . $apprenant->id);
+        }
 
         // ────────────────────────────────────────────
         // 4. RESPONSABLE ÉTABLISSEMENT — Paul ATEBA (directeur)
