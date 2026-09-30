@@ -213,7 +213,7 @@ class ApprenantController extends Controller
 
         $premierFraisImpaye = null;
         foreach ($apprenants as $apprenant) {
-            $fraisImpaye = $apprenant->frais->first(fn ($f) => $f->statut !== 'regle');
+            $fraisImpaye = $apprenant->fraisAnneeActive()->first(fn ($f) => $f->statut !== 'regle');
             if ($fraisImpaye) {
                 $premierFraisImpaye = $fraisImpaye;
                 break;
@@ -241,9 +241,9 @@ class ApprenantController extends Controller
                         'ville'=> $a->etablissement?->ville,
                         'logo' => $a->etablissement?->logo ? asset('storage/' . $a->etablissement->logo) : null,
                     ],
-                    'total_du'           => $a->frais->sum(fn ($f) => $f->montant_total - $f->montant_paye),
-                    'total_paye'         => $a->frais->sum('montant_paye'),
-                    'premier_frais_impaye' => $this->fraisImpayeApercu($a->frais->first(fn ($f) => $f->statut !== 'regle')),
+                    'total_du'           => $a->fraisAnneeActive()->sum(fn ($f) => $f->montant_total - $f->montant_paye),
+                    'total_paye'         => $a->fraisAnneeActive()->sum('montant_paye'),
+                    'premier_frais_impaye' => $this->fraisImpayeApercu($a->fraisAnneeActive()->first(fn ($f) => $f->statut !== 'regle')),
                 ]),
                 'premier_frais_impaye' => $this->fraisImpayeApercu($premierFraisImpaye),
                 'mon_dossier'          => $monDossier ? $this->fraisImpayeApercu($monDossier->frais->first(fn ($f) => $f->statut !== 'regle')) : null,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Payeur;
 use App\Http\Controllers\Controller;
 use App\Models\Apprenant;
 use App\Models\Paiement;
+use App\Support\AnneeScolaire;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -72,10 +73,12 @@ class RecuController extends Controller
         // Aucun frais assigné → pas d'attestation possible
         abort_if($apprenant->frais->isEmpty(), 422, 'Aucun frais n\'est assigné à cet apprenant. L\'attestation est impossible.');
 
-        $anneeScolaire = $apprenant->frais->first()->annee_scolaire ?? (now()->year . '-' . (now()->year + 1));
-
-        // On se limite à l'année scolaire du dossier courant pour la cohérence de l'attestation
-        $fraisAnnee = $apprenant->frais->where('annee_scolaire', $anneeScolaire);
+        // L'annee etait deduite du PREMIER frais du dossier, sans tri : sur un
+        // apprenant ayant des frais de plusieurs annees, l'attestation pouvait
+        // porter sur une annee close. On passe par l'annee active de
+        // l'etablissement, comme tous les autres ecrans.
+        $fraisAnnee = $apprenant->fraisAnneeActive();
+        $anneeScolaire = $fraisAnnee->first()?->annee_scolaire ?? AnneeScolaire::active($apprenant->etablissement);
         $montantTotal = $fraisAnnee->sum('montant_total');
         $montantPaye  = $fraisAnnee->sum('montant_paye');
         $reste        = $montantTotal - $montantPaye;

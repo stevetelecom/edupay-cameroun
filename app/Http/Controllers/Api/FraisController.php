@@ -34,7 +34,10 @@ class FraisController extends Controller
         }
 
         return response()->json([
-            'data' => FraisResource::collection($apprenant->frais),
+            // Meme annee scolaire active que le back-office et que les dashboards :
+            // sans ce filtre, l'eleve voyait et pouvait payer des frais
+            // rattaches a une annee close.
+            'data' => FraisResource::collection($apprenant->fraisAnneeActive()),
         ]);
     }
 

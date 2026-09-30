@@ -28,6 +28,31 @@ class Apprenant extends Model
     }
 
     public function frais() { return $this->hasMany(FraisApprenant::class); }
+
+    /**
+     * Frais de l'annee scolaire ACTIVE de l'etablissement de l'apprenant.
+     *
+     * Le cote etablissement (back-office) filtre deja ses indicateurs sur
+     * `AnneeScolaire::active()`. Le cote payeur, lui, additionnait
+     * `$apprenant->frais` sans aucun filtre d'annee : un frais rattache a une
+     * annee close restait affiche comme du et payable, alors que le back-office
+     * ne le voyait plus. Les deux ecrans divergeaient donc sur le meme dossier.
+     *
+     * Cette methode filtres la collection deja chargee (pas de requete
+     * supplementaire) et sert de source unique de verite pour tous les ecrans
+     * payeur : web et API.
+     *
+     * Ce n'est PAS une relation Eloquent : elle renvoie une Collection. Le nom
+     * reste voluntarily distinct de `frais()` pour eviter qu'un `with()` ne la
+     * traite par erreur comme une relation a charger.
+     */
+    public function fraisAnneeActive()
+    {
+        return $this->frais->where(
+            'annee_scolaire',
+            \App\Support\AnneeScolaire::active($this->etablissement)
+        );
+    }
     public function paiements() { return $this->hasMany(Paiement::class); }
 
     /**

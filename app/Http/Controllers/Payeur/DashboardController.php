@@ -24,20 +24,20 @@ class DashboardController extends Controller
             ->get();
 
         $totalDu = $apprenants->sum(function ($apprenant) {
-            return $apprenant->frais->sum(fn ($f) => $f->montant_total - $f->montant_paye);
+            return $apprenant->fraisAnneeActive()->sum(fn ($f) => $f->montant_total - $f->montant_paye);
         });
 
         $totalPaye = $apprenants->sum(function ($apprenant) {
-            return $apprenant->frais->sum('montant_paye');
+            return $apprenant->fraisAnneeActive()->sum('montant_paye');
         });
 
         $nbEnfantsDus = $apprenants->filter(function ($apprenant) {
-            return $apprenant->frais->sum(fn ($f) => $f->montant_total - $f->montant_paye) > 0;
+            return $apprenant->fraisAnneeActive()->sum(fn ($f) => $f->montant_total - $f->montant_paye) > 0;
         })->count();
 
         // Premier frais impayé tous enfants confondus — utilisé par le bouton "Payer maintenant"
         $premierFraisImpaye = $apprenants
-            ->flatMap(fn ($apprenant) => $apprenant->frais)
+            ->flatMap(fn ($apprenant) => $apprenant->fraisAnneeActive())
             ->first(fn ($frais) => $frais->statut !== 'regle');
 
         $derniersPaiements = Paiement::with(['apprenant', 'fraisApprenant.categorieFrais'])
@@ -62,7 +62,7 @@ class DashboardController extends Controller
 
         // F05 — Premier frais impayé du dossier solo
         $premierFraisImpayeSolo = $monDossier
-            ? $monDossier->frais->first(fn ($f) => $f->statut !== 'regle')
+            ? $monDossier->fraisAnneeActive()->first(fn ($f) => $f->statut !== 'regle')
             : null;
 
         

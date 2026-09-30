@@ -17,7 +17,7 @@ class MesEnfantsController extends Controller
 
         $premierFraisImpaye = null;
         foreach ($apprenants as $apprenant) {
-            $fraisImpaye = $apprenant->frais->first(fn($f) => $f->statut !== 'regle');
+            $fraisImpaye = $apprenant->fraisAnneeActive()->first(fn($f) => $f->statut !== 'regle');
             if ($fraisImpaye) {
                 $premierFraisImpaye = $fraisImpaye;
                 break;

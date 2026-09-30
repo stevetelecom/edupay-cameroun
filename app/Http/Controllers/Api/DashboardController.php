@@ -21,12 +21,12 @@ class DashboardController extends Controller
             ->with(['frais.categorieFrais', 'etablissement'])
             ->get();
 
-        $totalDu = $apprenants->sum(fn ($a) => $a->frais->sum(fn ($f) => $f->montant_total - $f->montant_paye));
-        $totalPaye = $apprenants->sum(fn ($a) => $a->frais->sum('montant_paye'));
-        $nbEnfantsDus = $apprenants->filter(fn ($a) => $a->frais->sum(fn ($f) => $f->montant_total - $f->montant_paye) > 0)->count();
+        $totalDu = $apprenants->sum(fn ($a) => $a->fraisAnneeActive()->sum(fn ($f) => $f->montant_total - $f->montant_paye));
+        $totalPaye = $apprenants->sum(fn ($a) => $a->fraisAnneeActive()->sum('montant_paye'));
+        $nbEnfantsDus = $apprenants->filter(fn ($a) => $a->fraisAnneeActive()->sum(fn ($f) => $f->montant_total - $f->montant_paye) > 0)->count();
 
         $premierFraisImpaye = $apprenants
-            ->flatMap(fn ($a) => $a->frais)
+            ->flatMap(fn ($a) => $a->fraisAnneeActive())
             ->first(fn ($f) => $f->statut !== 'regle');
 
         $derniersPaiements = Paiement::with(['apprenant', 'fraisApprenant.categorieFrais'])
@@ -41,7 +41,7 @@ class DashboardController extends Controller
         $monDossier = $estSolo ? $apprenants->first() : null;
         $totalGlobal = $totalDu + $totalPaye;
         $pourcentageGlobal = $totalGlobal > 0 ? round(($totalPaye / $totalGlobal) * 100) : 0;
-        $premierFraisImpayeSolo = $monDossier ? $monDossier->frais->first(fn ($f) => $f->statut !== 'regle') : null;
+        $premierFraisImpayeSolo = $monDossier ? $monDossier->fraisAnneeActive()->first(fn ($f) => $f->statut !== 'regle') : null;
 
         $etablissements = \App\Models\Etablissement::where('statut', 'actif')
             ->orderBy('nom')
@@ -69,9 +69,9 @@ class DashboardController extends Controller
                         'ville'     => $a->etablissement?->ville,
                         'logo'      => $a->etablissement?->logo ? asset('storage/' . $a->etablissement->logo) : null,
                     ],
-                    'total_du'           => $a->frais->sum(fn ($f) => $f->montant_total - $f->montant_paye),
-                    'total_paye'         => $a->frais->sum('montant_paye'),
-                    'a_impayes'          => $a->frais->sum(fn ($f) => $f->montant_total - $f->montant_paye) > 0,
+                    'total_du'           => $a->fraisAnneeActive()->sum(fn ($f) => $f->montant_total - $f->montant_paye),
+                    'total_paye'         => $a->fraisAnneeActive()->sum('montant_paye'),
+                    'a_impayes'          => $a->fraisAnneeActive()->sum(fn ($f) => $f->montant_total - $f->montant_paye) > 0,
                 ]),
                 'total_du'               => $totalDu,
                 'total_paye'             => $totalPaye,
