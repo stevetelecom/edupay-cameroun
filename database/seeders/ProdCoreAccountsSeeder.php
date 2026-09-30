@@ -39,11 +39,27 @@ class ProdCoreAccountsSeeder extends Seeder
         $etablissement = Etablissement::where('code_etablissement', 'UD-2026')->first();
 
         if (! $etablissement) {
+            // La colonne `telephone` est NOT NULL sans valeur par defaut
+            // (migration create_etablissements_table). Sans elle, l'INSERT
+            // echoue en SQLSTATE 1364 et tout le seeder s'arrete : c'est ce
+            // qui est arrive en production le 30/09/2026 a 08:01 et 08:15,
+            // empechant la creation de ce compte. Valeur lue dans .env pour
+            // ne pas figer un numero reel dans le depot, comme
+            // SEED_DEMO_PASSWORD.
+            $telephoneEtablissement = (string) env('SEED_ETABLISSEMENT_TELEPHONE', '');
+
+            if (! preg_match('/^[236]\d{8}$/', $telephoneEtablissement)) {
+                $this->command->error('SEED_ETABLISSEMENT_TELEPHONE absent ou invalide (9 chiffres, debutant par 2, 3 ou 6) — etablissement NON cree. Renseignez-le dans .env.');
+
+                return;
+            }
+
             $etablissement = Etablissement::create([
                 'code_etablissement' => 'UD-2026',
                 'nom'                 => 'Université de Douala',
                 'statut'              => 'actif',
                 'ville'               => 'Douala',
+                'telephone'           => $telephoneEtablissement,
             ]);
             $this->command->info('Établissement créé : ' . $etablissement->nom . ' (id ' . $etablissement->id . ')');
         } else {
