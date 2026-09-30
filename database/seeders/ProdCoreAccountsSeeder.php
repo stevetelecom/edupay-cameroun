@@ -42,16 +42,20 @@ class ProdCoreAccountsSeeder extends Seeder
             // La colonne `telephone` est NOT NULL sans valeur par defaut
             // (migration create_etablissements_table). Sans elle, l'INSERT
             // echoue en SQLSTATE 1364 et tout le seeder s'arrete : c'est ce
-            // qui est arrive en production le 30/09/2026 a 08:01 et 08:15,
-            // empechant la creation de ce compte. Valeur lue dans .env pour
-            // ne pas figer un numero reel dans le depot, comme
-            // SEED_DEMO_PASSWORD.
-            $telephoneEtablissement = (string) env('SEED_ETABLISSEMENT_TELEPHONE', '');
+            // qui est arrive en production le 30/09/2026 a 08:01 et 08:15, ou
+            // UD-2026 n'a jamais ete cree et le compte de direction non plus.
+            //
+            // La valeur par defaut est celle du local (699401234) pour que la
+            // production obtienne le MEME etablissement que le developpement.
+            // Elle reste surchargeable par .env si un vrai numero doit etre
+            // pose. Le seeder ne bloque plus le deploiement sur une valeur
+            // manquante : il retombe sur cette valeur en signalant l'ecart.
+            $defaut = '699401234';
+            $telephoneEtablissement = (string) env('SEED_ETABLISSEMENT_TELEPHONE', $defaut);
 
             if (! preg_match('/^[236]\d{8}$/', $telephoneEtablissement)) {
-                $this->command->error('SEED_ETABLISSEMENT_TELEPHONE absent ou invalide (9 chiffres, debutant par 2, 3 ou 6) — etablissement NON cree. Renseignez-le dans .env.');
-
-                return;
+                $this->command->warn('SEED_ETABLISSEMENT_TELEPHONE invalide (9 chiffres, debutant par 2, 3 ou 6) — valeur par defaut utilisee : ' . $defaut);
+                $telephoneEtablissement = $defaut;
             }
 
             $etablissement = Etablissement::create([
