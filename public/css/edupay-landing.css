@@ -1172,6 +1172,62 @@
     .lp-faq { grid-template-columns: 1fr; }
 }
 
+/* Pages légales (confidentialité, CGU) : notes, sections, avis */
+/* Note encadrée : intro (teal par défaut) ou avis (.note-or) */
+.lp-legal-note {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 15px 18px;
+    border-radius: 12px;
+    border: 1px solid var(--lp-note-b, rgba(13,158,117,.28));
+    background: var(--lp-note-bg, var(--lp-teal-lt));
+    color: var(--lp-note-c, #0F6E56);
+    font-size: 12.5px;
+    line-height: 1.75;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+.lp-legal-note .material-symbols-rounded {
+    font-size: 18px;
+    color: var(--lp-note-c, #0F6E56);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.lp-legal-note.note-or {
+    --lp-note-b: rgba(232,160,32,.30);
+    --lp-note-bg: var(--lp-gold-lt);
+    --lp-note-c: #854F0B;
+}
+/* Section légale : titre à pastille dégradée + carte de contenu */
+.lp-legal-sec {
+    max-width: 780px;
+    margin: 0 auto;
+}
+.lp-legal-sec + .lp-legal-sec { margin-top: 20px; }
+.lp-legal-titre {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--lp-encre);
+    margin-bottom: 9px;
+}
+.lp-legal-titre .lp-coord-ico { width: 30px; height: 30px; border-radius: 9px; }
+.lp-legal-titre .lp-coord-ico .material-symbols-rounded { font-size: 16px; }
+.lp-legal-carte {
+    background: var(--lp-carte);
+    border: 1px solid var(--lp-bord);
+    border-radius: var(--lp-rayon);
+    box-shadow: var(--lp-ombre);
+    padding: 18px 20px;
+    font-size: 13px;
+    color: var(--lp-gris);
+    line-height: 1.8;
+}
+.lp-legal-carte a { color: var(--lp-teal); font-weight: 600; }
+
 /* Champs du formulaire : label avec pastille icône colorée */
 .lp-champs {
     display: grid;
@@ -1397,6 +1453,9 @@ html[data-theme="dark"] .lp-regulateur span { color: var(--ep-gris); }
 /* Contact & support : ombres renforcées sur cartes + menu déroulant */
 html[data-theme="dark"] .lp-carte-contact { box-shadow: 0 10px 30px rgba(0,0,0,.35); }
 html[data-theme="dark"] .lp-select-dd { box-shadow: 0 12px 32px rgba(0,0,0,.5); }
+/* Pages légales : textes des notes éclaircis sur fonds translucides */
+html[data-theme="dark"] .lp-legal-note { --lp-note-c: #7DD8BC; }
+html[data-theme="dark"] .lp-legal-note.note-or { --lp-note-c: #F0C060; }
 html[data-theme="dark"] .lp-etab-avatar { box-shadow: 0 5px 16px rgba(0,0,0,.45); }
 html[data-theme="dark"] .lp-etab-type { background: var(--ep-teal-lt); color: var(--ep-teal-mid); }
 html[data-theme="dark"] .lp-toast-paiement { background: var(--ep-carte); }
