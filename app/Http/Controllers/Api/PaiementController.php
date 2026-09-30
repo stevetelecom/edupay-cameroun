@@ -314,9 +314,16 @@ class PaiementController extends Controller
                 $frais->increment('montant_paye', $paiement->montant);
                 $frais->refresh();
 
-                $statutApprenant = $frais->montant_paye >= $frais->montant_total ? 'regle'
-                                 : ($frais->montant_paye > 0 ? 'partiel' : 'impaye');
-                $frais->apprenant->update(['statut_paiement' => $statutApprenant]);
+                // Le statut du FRAIS doit suivre le montant, pas seulement celui
+                // de l'apprenant. La liste des impayes filtre sur
+                // FraisApprenant.statut != 'regle' : sans cette ecriture, un
+                // apprenant entierement solde restait liste comme impaye avec
+                // 0 FCFA restant du.
+                $statutFrais = $frais->montant_paye >= $frais->montant_total ? 'regle'
+                              : ($frais->montant_paye > 0 ? 'partiel' : 'impaye');
+
+                $frais->update(['statut' => $statutFrais]);
+                $frais->apprenant->update(['statut_paiement' => $statutFrais]);
             } else {
                 $frais = null;
             }
@@ -332,7 +339,11 @@ class PaiementController extends Controller
                         'montant_transaction'       => $paiement->montant,
                         'taux'                      => $etablissement->taux_commission,
                         'montant_commission'        => $paiement->marge_edupay,
-                        'montant_net_etablissement' => $paiement->montant,
+                        // Le net reverse est le montant MOINS la commission
+                        // EduPay. Mettre montant - commission ici eviterait de
+                        // reverser 100 sur un paiement de 100 et de perdre la
+                        // commission : c'etait le cas avant.
+                        'montant_net_etablissement' => max(0, $paiement->montant - $paiement->marge_edupay),
                         'frais_aangaraa'            => $paiement->frais_aangaraa,
                         'statut'                    => 'calculee',
                     ]);

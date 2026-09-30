@@ -312,17 +312,29 @@ class ReversementEtablissementTest extends TestCase
         Mail::assertSent(AlerteReversementManquantMail::class);
     }
 
-    public function test_2xx_sans_reference_est_traite_comme_indetermine(): void
+    public function test_2xx_sans_reference_est_traite_comme_un_succes(): void
     {
+        // AangaraaPay repond 201 {"message":"Payment request successful","data":{"message":...}}
+        // sur ses retraits, SANS transaction_id. Exiger la reference classait
+        // tout reversement reussi en 'a_verifier' : l'argent partait mais la
+        // commission restait bloquee (150 XAF perdus le 30/09/2026).
         Http::fake([
-            '*/withdrawal' => Http::response(['status' => 'SUCCESS', 'data' => []], 200),
+            '*/withdrawal' => Http::response([
+                'message' => 'Payment request successful',
+                'data'    => ['message' => 'Payment request successful'],
+            ], 201),
         ]);
 
         $commission = $this->commission();
 
         (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
 
-        $this->assertSame(Commission::STATUT_A_VERIFIER, $commission->fresh()->statut);
+        $commission->refresh();
+
+        $this->assertSame(Commission::STATUT_PRELEVEE, $commission->statut);
+        $this->assertNotNull($commission->reversed_at);
+        // Reference synthetique, identifiable comme generee localement.
+        $this->assertStringStartsWith('WITHDRAWAL-SANS-REF-', (string) $commission->reference_reversement);
     }
 
     public function test_reversement_orphelin_en_cours_passe_en_a_verifier_sans_rappel(): void

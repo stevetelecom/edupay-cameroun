@@ -231,7 +231,7 @@ class AangaraaPayService
                 ]);
 
             $data = $response->json();
-            $reference = $data['data']['transaction_id'] ?? null;
+            $reference = $this->extraireReferenceWithdrawal($data);
 
             Log::info('AangaraaPay withdrawal', [
                 'telephone'          => LogMasking::telephone($numero),
@@ -243,9 +243,9 @@ class AangaraaPayService
                 'response'           => LogMasking::payloadReduit($data),
             ]);
 
-            // 5xx ou 2xx sans reference : AangaraaPay n'a pas tranche, l'argent
-            // peut avoir ete engage ou non. On ne suppose rien.
-            if ($response->serverError() || ($response->successful() && ! $reference)) {
+            // 5xx : AangaraaPay n'a pas tranche, l'argent peut avoir ete engage
+            // ou non. On ne suppose rien, verification humaine.
+            if ($response->serverError()) {
                 return [
                     'succes'    => false,
                     'outcome'   => 'indetermine',
@@ -255,11 +255,29 @@ class AangaraaPayService
                 ];
             }
 
+            // 2xx sans reference n'est plus un cas d'indetermine. AangaraaPay
+            // repond 201 {"message":"Payment request successful","data":{"message":...}}
+            // SANS transaction_id sur ses retraits : exiger la reference
+            // classait TOUT reversement reussi en "a_verifier" et bloquait les
+            // fonds alors que l'argent etait bien parti.
+            if ($response->successful()) {
+                return [
+                    'succes'    => true,
+                    'outcome'   => 'succes',
+                    // Reference synthetique : elle n'existe pas chez
+                    // AangaraaPay, mais la commission en a besoin pour etre
+                    // tracee. Le prefixe la rend identifiable comme generate.
+                    'reference' => $reference ?? 'WITHDRAWAL-SANS-REF-'.now()->format('YmdHis'),
+                    'message'   => $data['message'] ?? 'Retrait enregistré par AangaraaPay',
+                    'raw'       => $data,
+                ];
+            }
+
             return [
-                'succes'    => $response->successful() && (bool) $reference,
-                'outcome'   => $response->successful() && $reference ? 'succes' : 'refuse',
+                'succes'    => false,
+                'outcome'   => 'refuse',
                 'reference' => $reference,
-                'message'   => $data['message'] ?? 'Erreur inconnue',
+                'message'   => $this->extraireMessageErreur($data, 'FAILED'),
                 'raw'       => $data,
             ];
 
@@ -314,6 +332,31 @@ class AangaraaPayService
         }
 
         return '237' . $numero;
+    }
+
+    /**
+     * AangaraaPay n'est pas homogene sur la forme de ses reponses de retrait :
+     * certains appels renvoient data.transaction_id, d'autres (201 "Payment
+     * request successful") ne renvoient qu'un message. On essaie les formes
+     * connues plutot que d'en supposer une seule.
+     */
+    private function extraireReferenceWithdrawal(array $data): ?string
+    {
+        $candidats = [
+            $data['data']['transaction_id']  ?? null,
+            $data['data']['transactionId']   ?? null,
+            $data['data']['reference']       ?? null,
+            $data['transaction_id']          ?? null,
+            $data['reference']               ?? null,
+        ];
+
+        foreach ($candidats as $candidat) {
+            if (is_scalar($candidat) && trim((string) $candidat) !== '') {
+                return (string) $candidat;
+            }
+        }
+
+        return null;
     }
 
     private function extraireMessageErreur(array $data, string $statutApi): string

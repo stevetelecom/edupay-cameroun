@@ -317,9 +317,14 @@ class PaiementController extends Controller
             $frais->increment('montant_paye', $paiement->montant);
             $frais->refresh();
 
-            $statutApprenant = $frais->montant_paye >= $frais->montant_total ? 'regle'
-                             : ($frais->montant_paye > 0 ? 'partiel' : 'impaye');
-            $frais->apprenant->update(['statut_paiement' => $statutApprenant]);
+            // Le statut du FRAIS doit suivre le montant, pas seulement celui de
+            // l'apprenant : la liste des impayes filtre sur
+            // FraisApprenant.statut != 'regle' (cf. ImpayeController).
+            $statutFrais = $frais->montant_paye >= $frais->montant_total ? 'regle'
+                          : ($frais->montant_paye > 0 ? 'partiel' : 'impaye');
+
+            $frais->update(['statut' => $statutFrais]);
+            $frais->apprenant->update(['statut_paiement' => $statutFrais]);
 
             SendConfirmationPaiement::dispatch($paiement);
 
@@ -333,7 +338,8 @@ class PaiementController extends Controller
                     'montant_transaction'       => $paiement->montant,
                     'taux'                      => $etablissement->taux_commission,
                     'montant_commission'        => $paiement->marge_edupay,
-                    'montant_net_etablissement' => $paiement->montant,
+                    // Net = montant - commission EduPay (cf. Api\PaiementController)
+                    'montant_net_etablissement' => max(0, $paiement->montant - $paiement->marge_edupay),
                     'frais_aangaraa'            => $paiement->frais_aangaraa,
                     'statut'                    => 'calculee',
                 ]);
