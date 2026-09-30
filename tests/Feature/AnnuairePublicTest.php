@@ -44,7 +44,7 @@ class AnnuairePublicTest extends TestCase
         ]);
     }
 
-    public function test_la_page_s_affiche_12_etablissements_maximum()
+    public function test_l_annuaire_public_est_pagene_mais_pas_au_dela_d_un_annuaire_courant()
     {
         for ($i = 1; $i <= 15; $i++) {
             $this->creerEtablissement(sprintf('Ecole %02d', $i));
@@ -54,13 +54,17 @@ class AnnuairePublicTest extends TestCase
 
         $reponse->assertOk();
         $reponse->assertViewHas('etablissements', function ($paginator) {
-            return $paginator->count() === 12 && $paginator->total() === 15;
+            // Le plafond de 12/page cachait la 14e école (ex. Université de
+            // Douala) hors de la page d'accueil. Un annuaire courant (15
+            // écoles) doit tenir sur une seule page.
+            return $paginator->count() === 15 && $paginator->total() === 15;
         });
     }
 
     public function test_la_pagination_propose_la_page_suivante_avec_le_filtre()
     {
-        for ($i = 1; $i <= 15; $i++) {
+        // Au-dela du plafond (60/page) la pagination doit reapparaitre.
+        for ($i = 1; $i <= 65; $i++) {
             $this->creerEtablissement(sprintf('Ecole %02d', $i));
         }
 
@@ -68,7 +72,7 @@ class AnnuairePublicTest extends TestCase
 
         $reponse->assertOk();
         $reponse->assertSee('Ecole 01', false);
-        $reponse->assertDontSee('Ecole 13', false);
+        $reponse->assertDontSee('Ecole 65', false);
         $reponse->assertSee('page=2', false);
     }
 

@@ -22,6 +22,7 @@ return [
 
     'reconnexion_requise'        => 'Your password has been changed. Please sign in again on your other devices.',
 
+    'paiement_en_cours'         => 'A payment is already in progress for these fees. Confirm it on your phone or wait 5 minutes.',
     'relance_anti_spam'          => 'A reminder was already sent to these parents in the last :heures hours.',
     'relance_force'              => 'Use force=true to send it anyway.',
 

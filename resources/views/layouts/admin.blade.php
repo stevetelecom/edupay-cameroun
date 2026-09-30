@@ -651,6 +651,13 @@
     table.ep-dt tbody tr { border-bottom: 1px solid #f3f4f6; transition: background .1s; }
     table.ep-dt tbody tr:hover { background: #f9fafb; }
     table.ep-dt tbody td { padding: 10px 14px; color: #374151; vertical-align: middle; }
+    /* Variante opt-in « une ligne par enregistrement » : le `nowrap` laisse le
+       plugin Responsive de DataTables mesurer la largeur naturelle des cellules
+       pour choisir quelles colonnes replier (il ne peut pas le faire sur un
+       texte deja replie). Le defilement horizontal est assure par l'enveloppe
+       `.overflow-x-auto` de la page, comme `.tableau-enveloppe` sur la maquette. */
+    table.ep-dt-nowrap tbody td { white-space: nowrap; }
+    table.ep-dt-nowrap thead th { white-space: nowrap; }
     /* Toolbar (search + length) */
     .ep-dt-toolbar {
         display: flex;

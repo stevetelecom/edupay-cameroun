@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Etablissement;
 use App\Models\AuditLog;
+use App\Support\SuppressionEtablissement;
 use Illuminate\Http\Request;
 use App\Mail\EtablissementActiveMail;
 use App\Mail\EtablissementSuspenduMail;
@@ -226,22 +227,27 @@ class EtablissementAdminController extends Controller
         return back()->with('success', $message);
     }
 
+    /**
+     * Suppression d'un etablissement.
+     *
+     * Deux comportements distincts, decides par l'activite reelle de l'ecole
+     * (voir App\Support\SuppressionEtablissement) :
+     *   - zero activite (aucun eleve, aucun paiement, aucune commission) ->
+     *     suppression REELLE de la ligne `etablissements` ;
+     *   - sinon -> archivage (soft delete), l'historique comptable etant
+     *     preserve comme l'exige le CDC §3.2. Le message de retour le dit
+     *     explicitement, pour ne pas laisser croire a une suppression effective.
+     */
     public function destroy(Request $request, Etablissement $etablissement)
     {
-        $nom = $etablissement->nom;
-        $responsable = \App\Models\User::where('etablissement_id', $etablissement->id)
+        $nom     = $etablissement->nom;
+        $id      = $etablissement->id;
+        $analyse = SuppressionEtablissement::analyser($etablissement);
+
+        $responsable = \App\Models\User::where('etablissement_id', $id)
             ->whereHas('roles', fn($q) => $q->where('name', 'directeur'))
             ->first();
-        $etablissement->delete();
 
-        AuditLog::enregistrer(
-            Auth::guard('admin')->user(),
-            'ETABLISSEMENT_SUPPRIME',
-            "Etablissement #{$etablissement->id} — {$nom} supprime (soft delete)",
-            $request, 'CRITICAL'
-        );
-
-        // Notifier le responsable par email (avant suppression du compte)
         if ($responsable) {
             try {
                 Mail::to($responsable->email)
@@ -251,7 +257,30 @@ class EtablissementAdminController extends Controller
             }
         }
 
-        $message = "L'etablissement « {$nom} » a ete supprime. Le responsable a ete notifie.";
+        if ($analyse['autorise']) {
+            $etablissement->forceDelete();
+
+            AuditLog::enregistrer(
+                Auth::guard('admin')->user(),
+                'ETABLISSEMENT_SUPPRIME',
+                "Etablissement #{$id} — {$nom} supprimé définitivement (aucune activité)",
+                $request, 'CRITICAL'
+            );
+
+            $message = __('admin.suppr_etab_definitif', ['nom' => $nom]);
+        } else {
+            $etablissement->delete();
+
+            AuditLog::enregistrer(
+                Auth::guard('admin')->user(),
+                'ETABLISSEMENT_ARCHIVE',
+                "Etablissement #{$id} — {$nom} archivé (soft delete) : {$analyse['motif']}",
+                $request, 'CRITICAL'
+            );
+
+            $message = __('admin.suppr_etab_archive', ['nom' => $nom]) . ' ' . $analyse['motif'];
+        }
+
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => $message]);
         }
@@ -308,43 +337,73 @@ class EtablissementAdminController extends Controller
     /**
      * Suppression groupée d'établissements (sélection multiple).
      * Body : { "ids": [1,2,3] }
+     *
+     * Meme regle que la suppression unitaire : chaque etablissement est archive
+     * s'il a de l'activite, efface s'il n'en a pas. Le message de retour
+     * distingue les deux.
      */
     public function bulkDestroy(Request $request)
     {
         $ids = $this->normaliserIds($request);
 
         if (empty($ids)) {
-            return back()->with('error', 'Aucun établissement sélectionné à supprimer.');
+            return back()->with('error', __('admin.aucun_etab_selectionne'));
         }
 
         $etablissements = Etablissement::whereIn('id', $ids)->get();
 
         $noms = $etablissements->pluck('nom')->implode(', ');
+        $supprimes = 0;
+        $archives = 0;
 
         foreach ($etablissements as $etablissement) {
-            AuditLog::enregistrer(
-                Auth::guard('admin')->user(),
-                'ETABLISSEMENT_SUPPRIME',
-                "Etablissement #{$etablissement->id} — {$etablissement->nom} supprime (soft delete) [groupé]",
-                $request, 'CRITICAL'
-            );
+            $id      = $etablissement->id;
+            $nom     = $etablissement->nom;
+            $analyse = SuppressionEtablissement::analyser($etablissement);
 
-            $responsable = \App\Models\User::where('etablissement_id', $etablissement->id)
+            $responsable = \App\Models\User::where('etablissement_id', $id)
                 ->whereHas('roles', fn($q) => $q->where('name', 'directeur'))
                 ->first();
             if ($responsable) {
                 try {
                     Mail::to($responsable->email)
-                        ->send(new EtablissementSupprimeMail($etablissement->nom, $responsable));
+                        ->send(new EtablissementSupprimeMail($nom, $responsable));
                 } catch (\Throwable $e) {
                     \Illuminate\Support\Facades\Log::error('Échec email suppression (groupée) : ' . $e->getMessage());
                 }
             }
 
+            if ($analyse['autorise']) {
+                $etablissement->forceDelete();
+                $supprimes++;
+
+                AuditLog::enregistrer(
+                    Auth::guard('admin')->user(),
+                    'ETABLISSEMENT_SUPPRIME',
+                    "Etablissement #{$id} — {$nom} supprimé définitivement (aucune activité) [groupé]",
+                    $request, 'CRITICAL'
+                );
+
+                continue;
+            }
+
             $etablissement->delete();
+            $archives++;
+
+            AuditLog::enregistrer(
+                Auth::guard('admin')->user(),
+                'ETABLISSEMENT_ARCHIVE',
+                "Etablissement #{$id} — {$nom} archivé (soft delete) [groupé] : {$analyse['motif']}",
+                $request, 'CRITICAL'
+            );
         }
 
-        $message = $etablissements->count() . ' établissement(s) supprimé(s) : ' . $noms;
+        $message = __('admin.suppr_etab_lot', [
+            'supprimes' => $supprimes,
+            'archives'  => $archives,
+            'noms'      => $noms,
+        ]);
+
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => $message]);
         }

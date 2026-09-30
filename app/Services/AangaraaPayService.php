@@ -18,22 +18,89 @@ class AangaraaPayService
      * Valeur de repli : le taux reel est un parametre systeme, modifiable
      * depuis Admin > Parametres systeme, pour ne pas redemarrer l'application
      * quand la grille du prestataire change.
+     *
+     * ─────────────────────────────────────────────────────────────────────
+     * A VERIFIER AVEC AANGARAAPAY — le modele de cout est peut-etre incomplet
+     * ─────────────────────────────────────────────────────────────────────
+     * Les 2,2 % ont ete MESURES sur un retrait, et c'est la seule donnee
+     * verifiee dont on dispose. Mais la grille publiee sur
+     * aangaraa-pay.com (rubrique Tarifs, consultee le 30/09/2026) annonce
+     * DEUX frais, pas un seul :
+     *
+     *     reseau            Payin (encaissement)   Payout (retrait)
+     *     MTN_Cameroon            1,70 %               1,30 %
+     *     Orange_Cameroon         1,50 %               2,10 %
+     *
+     * et les CGU du prestataire confirment : « Les pourcentages de frais
+     * applicables aux transactions (payin et payout) sont ceux en vigueur
+     * affiches sur la Plateforme ».
+     *
+     * Or ce modele n'AUDITE QUE LE RETRAIT. Aucun frais d'encaissement
+     * (payin) n'est retranche dans les calculs : si AangaraaPay le preleve
+     * reellement sur chaque depot, la plateforme est a perte a chaque
+     * encaissement, de l'ordre de 0,6 % a 1,2 % du montant collecte
+     * (MTN ~ -0,62 %, Orange ~ -1,20 % sur un frais de scolarite de 50 000).
+     *
+     * Deux points restent a clarifier avec le prestataire, et ils ne se
+     * devinent pas depuis la doc publique :
+     *   1. le fee payin est-il oui ou non debite du solde a chaque depot ?
+     *   2. le fee payout est-il ajoute au cout, ou deduit du montant recu
+     *      par l'etablissement ?
+     *
+     * NE PAS CORRIGER LE TAUX SANS CONFIRMATION : le taux facture au payeur
+     * decoule de cette valeur, donc le modifier change ce que paient les
+     * familles. Verifier d'abord le taux negocie reel du compte, puis la
+     * structure payin + payout.
      */
     public const TAUX_AANGARAA_DEFAUT = 0.022;
 
     /**
      * Marge que preleve EduPay sur chaque transaction, par defaut.
      *
-     * Modele retenu : le payeur regle « frais de scolarite + frais de
-     * paiement », l'etablissement recoit exactement les frais de scolarite
-     * (ReverserEtablissementJob reverse `montant_net_etablissement`, qui vaut
-     * le montant des frais de scolarite), et la difference reste sur le
-     * compte AangaraaPay. Les frais visibles doivent donc couvrir le cout
-     * AangaraaPay PLUS cette marge, sinon la plateforme est a perte sur
-     * chaque encaissement — ce que faisait le barème figé de 200/400/800/
-     * 1500/2500 FCFA.
+     * ── Modele RETENU, confirm�� par le metier le 30/09/2026 ──────────────
+     * Le payeur regle « frais de scolarite + frais de service ». Ce qui part
+     * reellement a l'etablissement est le NET, c'est-a-dire les frais de
+     * scolarite MOINS la marge EduPay :
+     *
+     *     montant_net_etablissement = montant - marge_edupay
+     *
+     * (ecrit dans Commission par Payeur\PaiementController et
+     * Api\PaiementController::traiterPaiementValide, puis reverse par
+     * ReverserEtablissementJob — c'est cette colonne, et non
+     * `montant_transaction`, qui est le montant du virement.)
+     *
+     * Attention : une version anterieure de ce fichier affirmait que
+     * l'etablissement recevait « exactement les frais de scolarite ». Ce
+     * n'est plus le modele en vigueur, et ce texte a deja induit en erreur.
+     * Ne pas « corriger » le calcul du net sans decision metier explicite :
+     * cela changerait le montant de tous les virements aux etablissements.
+     *
+     * Les frais visibles doivent rester >= cout AangaraaPay + marge, sinon la
+     * plateforme est a perte sur chaque encaissement — ce que faisait le bareme
+     * fige de 200/400/800/1500/2500 FCFA.
      */
     public const MARGE_EDUPAY_DEFAUT = 0.001;
+
+    /**
+     * Taux de commission par profil d'abonnement (CDC S0 #3 : « Configuration
+     * du taux de commission preleve par transaction selon le profil
+     * d'abonnement »).
+     *
+     * Chaque plan porte son propre taux dans `parametres_systeme` sous la
+     * cle `taux_commission_<plan>`, ce qui rend le taux configurable depuis
+     * l'admin sans redemarrage. Ces constantes ne sont que le repli quand la
+     * cle est absente : un nouveau plan ajoute ici reste configurable meme si
+     * personne n'a encore saisi son taux.
+     *
+     * Garde-fou applique partout : le taux d'un plan ne peut pas descendre
+     * sous le cout AangaraaPay, sinon chaque reversement fait perdre de
+     * l'argent a la plateforme.
+     */
+    public const TAUX_COMMISSION_PLANS = [
+        'basique'  => 0.023,
+        'standard' => 0.023,
+        'premium'  => 0.023,
+    ];
 
     private string $apiUrl;
     private string $appKey;
@@ -140,6 +207,10 @@ class AangaraaPayService
     /**
      * Taux global des frais de service : cout du prestataire + marge EduPay.
      * C'est ce taux unique, et non un bareme, qui est affiche au payeur.
+     *
+     * Taux de REPLI, utilise quand aucun plan n'est connu (paiement sans
+     * etablissement resolu, appel de test, preview). Le taux effectif d'un
+     * etablissement donne est celui de son plan : voir tauxCommissionPlan().
      */
     public function tauxFraisService(): float
     {
@@ -147,28 +218,113 @@ class AangaraaPayService
     }
 
     /**
+     * Taux de commission applicable au plan donne (CDC S0 #3).
+     *
+     * Le taux est configurable par plan dans `parametres_systeme`. Deux
+     * garde-fous :
+     *   - jamais sous le cout AangaraaPay, sinon la plateforme est a perte a
+     *     chaque transaction (le reversement coute plus que ce qui est encaisse) ;
+     *   - jamais au-dela de 100 %, sinon les frais Absurdes.
+     * Un taux hors bornes est signale : c'est une erreur de configuration,
+     * pas une valeur a appliquer silencieusement.
+     */
+    public function tauxCommissionPlan(?string $plan): float
+    {
+        $tauxDefaut = $this->tauxFraisService();
+
+        if (! $plan || ! array_key_exists($plan, self::TAUX_COMMISSION_PLANS)) {
+            return $tauxDefaut;
+        }
+
+        $taux = (float) ParametreSysteme::obtenir(
+            'taux_commission_'.$plan,
+            self::TAUX_COMMISSION_PLANS[$plan]
+        );
+
+        $plancher = $this->tauxAangaraa();
+        $borneHaute = 1.0;
+
+        if ($taux < $plancher || $taux > $borneHaute) {
+            Log::warning('Taux de commission de plan hors bornes, repli sur le taux global', [
+                'plan'              => $plan,
+                'taux_parametre'    => $taux,
+                'taux_repli'        => $tauxDefaut,
+                'plancher_aangaraa' => $plancher,
+            ]);
+
+            return $tauxDefaut;
+        }
+
+        return $taux;
+    }
+
+    /**
+     * Taux de commission de l'etablissement, deduit de son abonnement courant.
+     *
+     * Resout le plan sans charger la relation pour rien : `abonnementCourant`
+     * trie sur date_debut puis id, la colonne denormalisee `plan_abonnement`
+     * n'est pas fiee (elle peut differer de l'abonnement le plus recent).
+     */
+    public function tauxCommissionEtablissement($etablissement): float
+    {
+        if (! $etablissement) {
+            return $this->tauxFraisService();
+        }
+
+        $plan = null;
+
+        if (method_exists($etablissement, 'abonnementCourant')) {
+            $plan = $etablissement->abonnementCourant()?->plan;
+        }
+
+        return $this->tauxCommissionPlan($plan);
+    }
+
+    /**
+     * Taux de commission des trois plans, pour l'ecran de configuration.
+     * Exposes sous forme de tableau pret a afficher.
+     */
+    public function tauxParPlan(): array
+    {
+        $taux = [];
+
+        foreach (array_keys(self::TAUX_COMMISSION_PLANS) as $plan) {
+            $taux[$plan] = $this->tauxCommissionPlan($plan);
+        }
+
+        return $taux;
+    }
+
+    /**
      * Calcule les frais de service visibles par le payeur.
      *
      * Modele : le payeur regle « frais de scolarite + frais de paiement », le
-     * total debite entre sur le compte AangaraaPay, l'etablissement recoit
-     * exactement les frais de scolarite (ReverserEtablissementJob) et la
-     * difference reste sur le compte. Les frais doivent donc couvrir le cout
-     * du reversement PLUS la marge EduPay.
+     * total debite entre sur le compte AangaraaPay, et l'etablissement est
+     * reverse du NET (frais de scolarite - marge EduPay). Les frais visibles
+     * doivent donc couvrir le cout du reversement PLUS la marge EduPay.
+     * Voir la note de modele sur MARGE_EDUPAY_DEFAUT.
      *
-     * AangaraaPay preleve 2,2 % sur le RETRAIT (le reversement vaut les frais
+     * AangaraaPay preleve 2,2 % sur le RETRAIT (proche du montant des frais
      * de scolarite), pas sur le depot : le cout porte donc bien sur $montant.
+     * Comme le net vire est legerement inferieur au montant, le cout reel
+     * du retrait est legerement inferieur a `frais_aangaraa` : la marge
+     * reelle reste donc positive, ce que controle le garde-fou plus bas.
      *
      * Arrondis : frais arrondis au franc SUPERIEUR et cout arrondi au franc
      * INFERIEUR, pour que l'arrondi ne puisse jamais faire passer la marge
      * sous zero. Le controle ci-dessous reste une garde-fou.
      */
-    public function calculerFrais(int $montant): array
+    public function calculerFrais(int $montant, $etablissement = null): array
     {
         $tauxAangaraa = $this->tauxAangaraa();
-        $margeEdupay   = $this->margeEdupay();
-        $tauxGlobal    = $tauxAangaraa + $margeEdupay;
 
-        // Frais visibles = part AangaraaPay + part EduPay.
+        // Le taux depend du profil d'abonnement de l'etablissement (CDC S0 #3).
+        // Sans etablissement resolu, on retombe sur le taux global.
+        $tauxGlobal = $etablissement
+            ? $this->tauxCommissionEtablissement($etablissement)
+            : $this->tauxFraisService();
+
+        // Frais visibles = taux de commission du plan.
         $fraisVisibles = (int) ceil($montant * $tauxGlobal);
 
         // Cout reel du reversement, mesure chez AangaraaPay (2,2 % du retrait).
@@ -192,9 +348,8 @@ class AangaraaPayService
             'frais_service'       => $fraisVisibles,                             // Ce que voit le payeur
             'frais_aangaraa'      => $fraisAangaraa,                             // Cout reel du reversement
             'marge_edupay'        => $margeReelle,                               // Gain EduPay
-            'taux_frais'          => $tauxGlobal,                                // Taux global applique
+            'taux_frais'          => $tauxGlobal,                                // Taux du plan applique
             'taux_aangaraa'       => $tauxAangaraa,
-            'taux_marge_edupay'   => $margeEdupay,
             'montant_total_paye'  => $montant + $fraisVisibles,                  // Total debite
         ];
     }
@@ -221,27 +376,75 @@ class AangaraaPayService
             $numero = $this->normaliserNumero($telephone);
             $operateurApi = $operateur === 'orange' ? 'Orange_Cameroon' : 'MTN_Cameroon';
 
+            // Contrat reel de l'API (corrige le 30/09/2026) : /withdrawal attend
+            // `payment_method` (operateur) et `username` (libelle), PAS `operator`
+            // ni `description`. Avec les mauvais noms, l'API repondait par un
+            // message generique 201 sans `status` ni `reference_id` et TOUT les
+            // retraits partaient en 'indetermine', meme reussis.
             $response = Http::timeout(30)
                 ->post($this->apiUrl . '/aangaraa-pay/withdrawal', [
-                    'phone_number' => $numero,
-                    'amount'       => (string) $montant,
-                    'description'  => $description,
-                    'app_key'      => $this->appKey,
-                    'operator'     => $operateurApi,
+                    'app_key'        => $this->appKey,
+                    'phone_number'   => $numero,
+                    'amount'         => (string) $montant,
+                    'payment_method' => $operateurApi,
+                    'username'       => $description,
                 ]);
 
-            $data = $response->json();
+            $data      = $response->json() ?? [];
+            $statutApi = strtoupper((string) ($data['data']['status'] ?? $data['status'] ?? ''));
             $reference = $this->extraireReferenceWithdrawal($data);
 
             Log::info('AangaraaPay withdrawal', [
-                'telephone'          => LogMasking::telephone($numero),
-                'montant'            => $montant,
-                'operateur_demande'  => $operateurApi,
-                'operateur_repondu'  => $data['data']['operator'] ?? null,
-                'http'               => $response->status(),
-                'reference'          => $reference,
-                'response'           => LogMasking::payloadReduit($data),
+                'telephone'         => LogMasking::telephone($numero),
+                'montant'           => $montant,
+                'operateur_demande' => $operateurApi,
+                'http'              => $response->status(),
+                'statut_api'        => $statutApi,
+                'reference'         => $reference,
+                'response'          => LogMasking::payloadReduit($data),
+                // Les NOMS de tous les champs recus, y compris ceux que le
+                // masquage retire. AangaraaPay a repondu 201 avec un format
+                // non documente : sans cette liste, impossible de savoir si la
+                // reference etait presente sous un nom inconnu. C'est ce que
+                // ce dernier test doit reveler.
+                'cles_reponse'      => LogMasking::clesReponse($data),
             ]);
+
+            // SUCCESSFUL + reference : retrait confirme, on enregistre.
+            // On tolere 'SUCCESS' : la doc officielle utilise 'SUCCESSFUL'
+            // mais certaines reponses utilisees en phase de test emploient 'SUCCESS'.
+            if (str_starts_with($statutApi, 'SUCCESS') && $reference) {
+                return [
+                    'succes'    => true,
+                    'outcome'   => 'succes',
+                    'reference' => $reference,
+                    'message'   => $data['message'] ?? 'Retrait effectue avec succes',
+                    'raw'       => $data,
+                ];
+            }
+
+            // PENDING : accepte mais pas encore confirme. On ne rejoue JAMAIS
+            // automatiquement : seule verifierStatutRetrait() (/check_withdrawal_status)
+            // pourra trancher plus tard sans risque de double virement.
+            if ($statutApi === 'PENDING') {
+                return [
+                    'succes'    => false,
+                    'outcome'   => 'indetermine',
+                    'reference' => $reference,
+                    'message'   => "Retrait en cours de traitement par l'operateur (PENDING).",
+                    'raw'       => $data,
+                ];
+            }
+
+            if ($statutApi === 'FAILED') {
+                return [
+                    'succes'    => false,
+                    'outcome'   => 'refuse',
+                    'reference' => $reference,
+                    'message'   => $data['data']['details']['reason'] ?? ($data['message'] ?? 'Retrait refuse'),
+                    'raw'       => $data,
+                ];
+            }
 
             // 5xx : AangaraaPay n'a pas tranche, l'argent peut avoir ete engage
             // ou non. On ne suppose rien, verification humaine.
@@ -255,29 +458,52 @@ class AangaraaPayService
                 ];
             }
 
-            // 2xx sans reference n'est plus un cas d'indetermine. AangaraaPay
-            // repond 201 {"message":"Payment request successful","data":{"message":...}}
-            // SANS transaction_id sur ses retraits : exiger la reference
-            // classait TOUT reversement reussi en "a_verifier" et bloquait les
-            // fonds alors que l'argent etait bien parti.
-            if ($response->successful()) {
+            // 2xx sans champ `status` exploitable.
+            //
+            // BUG CORRIGE 30/09/2026 : le vrai endpoint /withdrawal repond
+            // HTTP 201 avec {"message":"Payment request successful","data":{...}}
+            // SANS champ `status` ni `reference_id`. Cette reponse etait
+            // classee `refuse`, ce qui est doublement faux :
+            //   1. l'argent est REELLEMENT engage par l'operateur ;
+            //   2. `refuse` declenche un nouvel essai du job, donc un
+            //      DEUXIEME virement reel a l'etablissement.
+            // Constat en test reel : commission 8, deux virements de 49 CFA
+            // envoyes a 07:07:52 et 07:08:32, tous deux rejetes a tort, et le
+            // statut `calculee` faisait repartir une 3e tentative.
+            //
+            // On ne peut pas affirmer le succes (aucune preuve de confirmation)
+            // mais on ne doit SURTOUT pas pretendre que l'argent n'est pas
+            // parti. `indetermine` place la commission en `a_verifier` : aucun
+            // rejeu automatique, verification humaine obligatoire. C'est le
+            // meme traitement que les 5xx et les timeouts, pour la meme raison.
+            //
+            // Seule une erreur documentee (statusCode / message d'erreur explicite
+            // d'AangaraaPay) reste un refus.
+            $messageApi = (string) ($data['message'] ?? '');
+
+            // Un 4xx est un refus definitif d'AangaraaPay (solde insuffisant,
+            // operateur inconnu, montant hors limites...). Aucun argent n'a
+            // pu partir : la commission doit rester rejouable apres delai.
+            $estErreurDocumentee = $response->clientError()
+                || $statutApi !== ''
+                || $messageApi === ''
+                || preg_match('/invalid|erreur|error|failed|rejected|insufficient|insuffisant|refus|excede|limite/i', $messageApi) === 1;
+
+            if ($estErreurDocumentee) {
                 return [
-                    'succes'    => true,
-                    'outcome'   => 'succes',
-                    // Reference synthetique : elle n'existe pas chez
-                    // AangaraaPay, mais la commission en a besoin pour etre
-                    // tracee. Le prefixe la rend identifiable comme generate.
-                    'reference' => $reference ?? 'WITHDRAWAL-SANS-REF-'.now()->format('YmdHis'),
-                    'message'   => $data['message'] ?? 'Retrait enregistré par AangaraaPay',
+                    'succes'    => false,
+                    'outcome'   => 'refuse',
+                    'reference' => $reference,
+                    'message'   => $this->extraireMessageErreur($data, 'FAILED'),
                     'raw'       => $data,
                 ];
             }
 
             return [
                 'succes'    => false,
-                'outcome'   => 'refuse',
+                'outcome'   => 'indetermine',
                 'reference' => $reference,
-                'message'   => $this->extraireMessageErreur($data, 'FAILED'),
+                'message'   => 'AangaraaPay a accepte la demande (HTTP ' . $response->status() . ') sans confirmation exploitable. Verification manuelle obligatoire : le virement peut deja etre parti.',
                 'raw'       => $data,
             ];
 
@@ -291,6 +517,40 @@ class AangaraaPayService
                 'message'   => 'Erreur : ' . $e->getMessage(),
                 'raw'       => [],
             ];
+        }
+    }
+
+    /**
+     * Interroge le statut REEL d'un retrait deja initie (transaction_id =
+     * reference_id retourne par /withdrawal). Seule source fiable pour lever
+     * une commission 'a_verifier' sans jamais renvoyer l'argent a l'aveugle.
+     */
+    public function verifierStatutRetrait(string $transactionId, string $operateur): array
+    {
+        $operateurApi = $operateur === 'orange' ? 'Orange_Cameroon' : 'MTN_Cameroon';
+
+        try {
+            $response = Http::timeout(20)->get(
+                $this->apiUrl . '/check_withdrawal_status/' . urlencode($transactionId),
+                ['payment_method' => $operateurApi]
+            );
+
+            $data   = $response->json() ?? [];
+            $statut = strtoupper((string) ($data['status'] ?? ''));
+
+            Log::info('AangaraaPay check_withdrawal_status', [
+                'transaction_id' => $transactionId,
+                'operateur'      => $operateurApi,
+                'http'           => $response->status(),
+                'statut'         => $statut,
+                'response'       => LogMasking::payloadReduit($data),
+            ]);
+
+            // SUCCESSFUL | PENDING | FAILED | NOT_FOUND | INCONNU
+            return ['statut' => $statut ?: 'INCONNU', 'raw' => $data];
+        } catch (\Throwable $e) {
+            Log::error('AangaraaPay check_withdrawal_status exception', ['error' => $e->getMessage()]);
+            return ['statut' => 'INCONNU', 'raw' => []];
         }
     }
 
@@ -343,6 +603,7 @@ class AangaraaPayService
     private function extraireReferenceWithdrawal(array $data): ?string
     {
         $candidats = [
+            $data['data']['reference_id']    ?? null,
             $data['data']['transaction_id']  ?? null,
             $data['data']['transactionId']   ?? null,
             $data['data']['reference']       ?? null,

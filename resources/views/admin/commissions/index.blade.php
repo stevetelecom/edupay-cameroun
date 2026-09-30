@@ -2,45 +2,54 @@
 @section('title', __('messages.commissions'))
 
 @push('modals')
-{{-- MODAL MODIFIER TAUX --}}
+{{-- MODAL TAUX PAR PROFIL D'ABONNEMENT — CDC S0 #3. Un champ par plan, avec
+     pour chacun le pourcentage converti en direct. Le plancher AangaraaPay est
+     pose sur le HTML ET revalide cote serveur : le cout du prestataire ne peut
+     pas etre depasse. --}}
 <div id="modal-modifier-taux" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3>{{ __('admin.modifier_taux_commission') }}</h3>
+      <h3>{{ __('admin.taux_par_profil') }}</h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-modifier-taux')">x</button>
     </div>
     <div class="ep-modal-body">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
         <div style="width:40px;height:40px;background:#FEF3DC;border-radius:50%;display:flex;align-items:center;justify-content:center;shrink:0;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8A020" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span class="material-symbols-outlined" style="font-size:20px;color:#E8A020;" aria-hidden="true">percent</span>
         </div>
         <div>
-          <div style="font-size:13px;font-weight:600;color:#111;">{{ __('admin.nouveau_taux') }}</div>
-          <div style="font-size:12px;color:#888;" id="modifier-taux-etab-nom"></div>
+          <div style="font-size:13px;font-weight:600;color:#111;">{{ __('admin.taux_par_profil') }}</div>
+          <div style="font-size:12px;color:#888;">{{ __('admin.taux_par_profil_aide') }}</div>
         </div>
       </div>
-      <form id="form-modifier-taux" method="POST">
+
+      <form method="POST" action="{{ route('admin.commissions.taux-plans') }}">
         @csrf @method('PATCH')
-        <div style="margin-bottom:16px;">
-          <label style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">
-            {{ __('admin.taux_commission_ex') }}
-          </label>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <input type="number" name="taux_commission" id="input-taux"
-                   step="0.001" min="0" max="0.1" required
-                   style="flex:1;padding:10px 12px;font-size:14px;font-weight:600;border:2px solid #E8A020;border-radius:8px;outline:none;text-align:center;" />
-            <span style="font-size:13px;color:#888;">= <span id="taux-pct">0%</span></span>
+
+        @foreach($tauxParPlan as $plan => $taux)
+          <div style="margin-bottom:14px;">
+            <label for="taux-{{ $plan }}"
+                   style="font-size:12px;font-weight:500;color:#555;display:block;margin-bottom:6px;">
+              {{ \App\Models\Abonnement::PLANS[$plan]['nom'] ?? ucfirst($plan) }}
+            </label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" name="taux_{{ $plan }}" id="taux-{{ $plan }}"
+                     step="0.001" min="{{ $tauxAangaraa }}" max="1" required
+                     value="{{ number_format($taux, 4, '.', '') }}"
+                     data-taux="{{ $plan }}"
+                     style="flex:1;padding:10px 12px;font-size:14px;font-weight:600;border:2px solid #E8A020;border-radius:8px;outline:none;text-align:center;" />
+              <span style="font-size:13px;color:#888;">= <span id="pct-{{ $plan }}">{{ number_format($taux * 100, 1) }}%</span></span>
+            </div>
           </div>
-          <div style="font-size:11px;color:#aaa;margin-top:6px;">{{ __('admin.taux_0_10') }}</div>
-        </div>
-        <div style="background:#FEF3DC;border-left:3px solid #E8A020;border-radius:6px;padding:10px 12px;margin-bottom:8px;">
-          <div style="font-size:12px;color:#854F0B;">
-            {!! __('admin.taux_actuel_plateforme', ['pct' => e(number_format($tauxActuel * 100, 2) . '%')]) !!}
+        @endforeach
+
+        <div style="background:#F2F7FC;border-left:3px solid #1E5A8A;border-radius:6px;padding:10px 12px;margin-bottom:16px;">
+          <div style="font-size:11px;color:#1E5A8A;display:flex;align-items:center;gap:6px;">
+            <span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">info</span>
+            <span>{{ __('admin.taux_plancher_aangaraa', ['pct' => number_format($tauxAangaraa * 100, 2, ',', '')]) }}</span>
           </div>
         </div>
-        <div style="background:#FEF2F2;border-left:3px solid #DC2626;border-radius:6px;padding:10px 12px;margin-bottom:16px;">
-          <div style="font-size:11px;color:#991B1B;">{!! __('admin.taux_etablissement_libelle') !!}</div>
-        </div>
+
         <div style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" onclick="epModal.close('modal-modifier-taux')"
                   style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
@@ -161,22 +170,33 @@
 </div>
 @endif
 
-{{-- Bandeau taux global — composant ep-bandeau v2 --}}
-<div class="ep-bandeau attente" style="align-items:center;">
+{{-- Taux par profil d'abonnement — CDC S0 #3 : « Configuration du taux de
+     commission preleve par transaction selon le profil d'abonnement ».
+     Le taux affich dans le tableau est celui fige sur la commission au moment
+     du prelevement, pas le taux global. --}}
+<div class="ep-bandeau attente" style="align-items:center;flex-wrap:wrap;gap:12px;">
   <div class="ep-bandeau-ico">
     <span class="material-symbols-outlined">percent</span>
   </div>
   <div class="ep-bandeau-corps">
-    <div class="ep-bandeau-titre">{{ __('admin.taux_global_config') }}</div>
-    <div class="ep-bandeau-texte">
-      <strong style="font-size:14px;color:#854F0B;">{{ number_format($tauxActuel * 100, 1, ',', '') }}%</strong>
-      {{ __('admin.par_transaction_profil') }}
+    <div class="ep-bandeau-titre">{{ __('admin.taux_par_profil') }}</div>
+    <div class="ep-bandeau-texte" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:2px;">
+      @foreach($tauxParPlan as $plan => $taux)
+        <span>
+          <span class="text-xs" style="color:#854F0B;">{{ \App\Models\Abonnement::PLANS[$plan]['nom'] ?? ucfirst($plan) }}</span>
+          &nbsp;<strong style="font-size:14px;color:#854F0B;">{{ number_format($taux * 100, 2, ',', '') }}%</strong>
+        </span>
+      @endforeach
     </div>
   </div>
-  <button onclick="ouvrirModifierTauxGlobal()" class="btn-p" style="width:auto;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:12px;flex-shrink:0;">
+  <button onclick="ouvrirModifierTauxParPlan()" class="btn-p" style="width:auto;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:12px;flex-shrink:0;">
     <span class="material-symbols-outlined" style="font-size:15px;">edit</span>
     {{ __('admin.modifier_taux') }}
   </button>
+  <div style="width:100%;font-size:11px;color:#92400E;display:flex;align-items:center;gap:5px;">
+    <span class="material-symbols-outlined" style="font-size:14px;">info</span>
+    {{ __('admin.taux_plancher_aangaraa', ['pct' => number_format($tauxAangaraa * 100, 2, ',', '')]) }}
+  </div>
 </div>
 
 {{-- Filtres --}}
@@ -219,6 +239,10 @@
         <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.montant_tx') }}</th>
         <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.taux') }}</th>
         <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.commission') }}</th>
+        {{-- Colonne NET : c'est ce montant que ReverserEtablissementJob vire
+             reellement a l'etablissement (montant tx - commission). Sans elle,
+             l'admin rapprochait des commissions sans jamais voir le virement. --}}
+        <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('admin.net_reverse') }}</th>
         <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('messages.statut') }}</th>
         <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{{ __('messages.actions') }}</th>
       </tr>
@@ -237,12 +261,17 @@
           {{ number_format($c->montant_transaction, 0, ',', ' ') }} FCFA
         </td>
         <td class="px-4 py-3 text-center">
-          <span class="text-xs font-semibold text-[#E8A020]">
+          {{-- Taux FIGE au moment du prelevement : c'est celui-la qui a ete
+               preleve, pas le taux configure aujourd'hui. --}}
+          <span class="text-xs font-semibold text-[#E8A020]" title="{{ __('admin.taux_preleve_fige') }}">
             {{ number_format($c->taux * 100, 1) }}%
           </span>
         </td>
         <td class="px-4 py-3 text-right font-bold text-[#E8A020]">
           {{ number_format($c->montant_commission, 0, ',', ' ') }} FCFA
+        </td>
+        <td class="px-4 py-3 text-right font-semibold text-gray-700">
+          {{ number_format($c->montant_net_etablissement, 0, ',', ' ') }} FCFA
         </td>
         <td class="px-4 py-3">
           @if($c->statut === 'prelevee')
@@ -267,11 +296,6 @@
         </td>
         <td class="px-4 py-3">
           <div class="flex items-center justify-center gap-1.5">
-            {{-- Modifier taux etablissement --}}
-            <button onclick="ouvrirModifierTaux({{ $c->etablissement_id }}, {{ json_encode($c->etablissement->nom ?? '') }}, {{ $c->taux }})"
-                    class="w-7 h-7 flex items-center justify-center rounded-lg bg-[#FEF3DC] hover:bg-[#fde68a] text-[#E8A020] transition-colors" title="{{ __('admin.modifier_taux') }}">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
             {{-- Marquer prelevee --}}
             @if($c->statut === 'calculee')
             <button onclick="ouvrirPrelever({{ $c->id }})"
@@ -312,27 +336,24 @@
 
 @push('scripts')
 <script>
-function ouvrirModifierTaux(etablissementId, nom, tauxActuel) {
-    document.getElementById('modifier-taux-etab-nom').textContent = nom;
-    document.getElementById('input-taux').value = tauxActuel;
-    document.getElementById('taux-pct').textContent = (tauxActuel * 100).toFixed(1) + '%';
-    document.getElementById('form-modifier-taux').action = '/admin-ep2026/commissions/' + etablissementId + '/modifier';
-    epModal.open('modal-modifier-taux');
-}
-function ouvrirModifierTauxGlobal() {
-    document.getElementById('modifier-taux-etab-nom').textContent = @json(__('admin.taux_global_plat'));
-    document.getElementById('input-taux').value = {{ $tauxActuel }};
-    document.getElementById('taux-pct').textContent = '{{ number_format($tauxActuel * 100, 1) }}%';
-    document.getElementById('form-modifier-taux').action = '/admin-ep2026/commissions/global/modifier';
+// Un taux par profil d'abonnement (CDC S0 #3). Le formulaire est rendu avec
+// ses valeurs : la modale ne fait que l'ouvrir, plus de copie de valeur a
+// synchroniser, donc plus d.ecart possible entre l'ecran et la validation.
+function ouvrirModifierTauxParPlan() {
     epModal.open('modal-modifier-taux');
 }
 function ouvrirPrelever(id) {
     document.getElementById('form-prelever').action = '/admin-ep2026/commissions/' + id + '/prelever';
     epModal.open('modal-prelever');
 }
-// Mise a jour pourcentage en temps reel
-document.getElementById('input-taux').addEventListener('input', function() {
-    document.getElementById('taux-pct').textContent = (parseFloat(this.value || 0) * 100).toFixed(1) + '%';
+// Pourcentage en direct, un par plan.
+document.querySelectorAll('[data-taux]').forEach(function (input) {
+    var plan = input.getAttribute('data-taux');
+    var sortie = document.getElementById('pct-' + plan);
+    if (!sortie) return;
+    input.addEventListener('input', function () {
+        sortie.textContent = (parseFloat(this.value || 0) * 100).toFixed(1) + '%';
+    });
 });
 </script>
 @endpush

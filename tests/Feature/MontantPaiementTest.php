@@ -115,6 +115,14 @@ class MontantPaiementTest extends TestCase
             fn (string $telephone) => (new AangaraaPayService())->normaliserNumero($telephone)
         );
 
+        // tauxCommissionEtablissement est appele a la creation de la
+        // commission pour y figer le taux reellement preleve. Le mock doit
+        // donc le repondre, sinon Mockery leve sur une expectation non
+        // declaree et le webhook tombe en 500.
+        $mock->shouldReceive('tauxCommissionEtablissement')->andReturnUsing(
+            fn ($etablissement = null) => (new AangaraaPayService())->tauxCommissionEtablissement($etablissement)
+        );
+
         $mock->shouldReceive('calculerFrais')->andReturnUsing(function ($montant) {
             $fraisVisibles = 200;
 

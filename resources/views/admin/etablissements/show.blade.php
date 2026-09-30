@@ -44,7 +44,10 @@
 
     {{-- ── Informations établissement ── --}}
     <div>
-        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ __('admin.infos_etablissement') }}</h4>
+        <h4 class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-2">
+            <span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">domain</span>
+            <span class="uppercase tracking-wide">{{ __('admin.infos_etablissement') }}</span>
+        </h4>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
             <div class="bg-gray-50 rounded-lg p-3">
                 <div class="text-xs text-gray-400 mb-1">{{ __('admin.type_col') }}</div>
@@ -94,7 +97,10 @@
 
     {{-- ── Contact établissement ── --}}
     <div>
-        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ __('admin.contact_etablissement') }}</h4>
+        <h4 class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-2">
+            <span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">contact_phone</span>
+            <span class="uppercase tracking-wide">{{ __('admin.contact_etablissement') }}</span>
+        </h4>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
             <div class="bg-gray-50 rounded-lg p-3">
                 <div class="text-xs text-gray-400 mb-1">{{ __('messages.telephone') }}</div>
@@ -115,23 +121,22 @@
 
     {{-- ── Document d'agrément ── --}}
     <div>
-        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ __('admin.document_agrement') }}</h4>
+        <h4 class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-2">
+            <span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">description</span>
+            <span class="uppercase tracking-wide">{{ __('admin.document_agrement') }}</span>
+        </h4>
         @if($etablissement->document_agrement)
             <a href="{{ asset('storage/' . $etablissement->document_agrement) }}" target="_blank"
                style="display:flex;align-items:center;gap:10px;background:#FEF3DC;border:1px solid #FDE68A;border-radius:10px;padding:12px 14px;text-decoration:none;transition:background .15s;"
                onmouseover="this.style.background='#FDE9B8'" onmouseout="this.style.background='#FEF3DC'">
                 <span style="width:34px;height:34px;background:#E8A020;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
-                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
-                    </svg>
+                    <span class="material-symbols-outlined" style="font-size:17px;color:#fff;" aria-hidden="true">description</span>
                 </span>
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:13px;font-weight:600;color:#854F0B;">{{ __('admin.voir_document_agrement') }}</div>
                     <div style="font-size:11px;color:#92400E;">{{ __('admin.ouvrir_nouvel_onglet') }}</div>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2" style="flex-shrink:0;">
-                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
+                <span class="material-symbols-outlined" style="font-size:17px;color:#92400E;flex-shrink:0;" aria-hidden="true">open_in_new</span>
             </a>
         @else
             <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-400">{{ __('admin.aucun_document_fourni') }}</div>
@@ -140,7 +145,10 @@
 
     {{-- ── Responsable / Directeur ── --}}
     <div>
-        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ __('admin.responsable_etablissement') }}</h4>
+        <h4 class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-2">
+            <span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">person</span>
+            <span class="uppercase tracking-wide">{{ __('admin.responsable_etablissement') }}</span>
+        </h4>
         @if($responsable)
         <div style="background:#E6F0FB;border:1px solid #BFDBFE;border-radius:10px;padding:14px;">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
@@ -174,7 +182,10 @@
 
     {{-- ── Activité ── --}}
     <div>
-        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{{ __('admin.activite') }}</h4>
+        <h4 class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 mb-2">
+            <span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">monitoring</span>
+            <span class="uppercase tracking-wide">{{ __('admin.activite') }}</span>
+        </h4>
         <div class="grid grid-cols-3 gap-3 text-center">
             <div class="bg-[#E0F5EE] rounded-lg p-3">
                 <div class="text-xl font-bold text-[#0D9E75]">{{ $etablissement->apprenants_count }}</div>

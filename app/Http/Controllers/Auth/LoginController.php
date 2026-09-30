@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
-use App\Mail\ParentOtpMail;
+use App\Mail\OtpConnexionMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -129,15 +129,23 @@ class LoginController extends Controller
             }
 
             $otp = (string) random_int(100000, 999999);
-            $key = 'otp_parent_' . $user->id;
+            $key = 'otp_connexion_' . $user->id;
             Cache::put($key, Hash::make($otp), now()->addMinutes(5));
+
+            // Un nouveau code doit repartir de zero tentative. Sans cette remise a
+            // zero, trois codes errones suffisaient a bloquer l'utilisateur
+            // pendant 10 minutes (cle `otp_attempts_{ip}_{user}` conservee en
+            // cache) MEME apres avoir demande un code neuf et valide : l'OTP
+            // etait recu mais refuse, et l'utilisateur n'avait aucun moyen de
+            // debloquer la situation.
+            Cache::forget('otp_attempts_' . $request->ip() . '_' . $user->id);
 
             $request->session()->put('otp_login', $login);
             $request->session()->put('otp_user_id', $user->id);
             $request->session()->put('otp_attempts', 0);
 
             try {
-                Mail::to($user->email)->send(new ParentOtpMail($user, $otp));
+                Mail::to($user->email)->send(new OtpConnexionMail($user, $otp));
                 Log::info("OTP envoyé par email à {$login}");
             } catch (\Throwable $e) {
                 Cache::forget($key);
@@ -164,14 +172,14 @@ class LoginController extends Controller
 
         if ($attempts >= 3) {
             $request->session()->forget(['otp_login', 'otp_user_id', 'otp_attempts']);
-            Cache::forget('otp_parent_' . $user->id);
+            Cache::forget('otp_connexion_' . $user->id);
             Cache::forget($otpAttemptsKey);
             return back()
                 ->with('error', 'Trop de tentatives. Veuillez recommencer.')
                 ->withInput();
         }
 
-        $hashedOtp = Cache::get('otp_parent_' . $user->id);
+        $hashedOtp = Cache::get('otp_connexion_' . $user->id);
 
         if (! $hashedOtp || ! Hash::check($request->otp_code, $hashedOtp)) {
             Cache::put($otpAttemptsKey, $attempts + 1, now()->addMinutes(10));
@@ -181,12 +189,12 @@ class LoginController extends Controller
         }
 
         Cache::forget($otpAttemptsKey);
-        Cache::forget('otp_parent_' . $user->id);
+        Cache::forget('otp_connexion_' . $user->id);
 
         // Vérifier que le compte n'est pas suspendu avant d'authentifier
         if ($user->suspendu) {
             $request->session()->forget(['otp_login', 'otp_user_id', 'otp_attempts']);
-            Cache::forget('otp_parent_' . $user->id);
+            Cache::forget('otp_connexion_' . $user->id);
             return back()
                 ->with('error', 'Votre compte a été suspendu. Contactez le support EduPay pour plus d\'informations.')
                 ->withInput();

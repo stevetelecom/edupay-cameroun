@@ -92,7 +92,9 @@
      onclick="if(event.target===this)fermerModal(this.id)">
   <div class="bg-white rounded-xl w-full max-w-md shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto overflow-hidden">
     <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
-      <h3 class="font-bold text-gray-900">{{ __('admin.renouveler_abonnement') }}</h3>
+      <h3 class="flex items-center gap-2 font-bold text-gray-900">
+          <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">autorenew</span>{{ __('admin.renouveler_abonnement') }}
+        </h3>
       <button onclick="fermerModal('modal-renew-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
     </div>
     <form id="form-renew" method="POST" action="" class="flex flex-col flex-1 min-h-0">

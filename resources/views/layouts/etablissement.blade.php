@@ -397,6 +397,10 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                 {{ __('messages.paiements') }}
             </a>
+            <a href="{{ route('etablissement.reversements.index') }}" class="sbar-item {{ request()->routeIs('etablissement.reversements.*') ? 'on' : '' }}">
+                <span class="material-symbols-outlined" style="font-size:15px;color:inherit;">account_balance_wallet</span>
+                {{ __('messages.reversements') }}
+            </a>
             <a href="{{ route('etablissement.impayes.index') }}" class="sbar-item {{ request()->routeIs('etablissement.impayes.*') ? 'on' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 {{ __('messages.impayes') }}

@@ -98,8 +98,12 @@ Route::middleware(['auth', 'role:parent|eleve'])->prefix('espace')->name('payeur
     Route::get('/paiement/{fraisApprenant}', [\App\Http\Controllers\Payeur\PaiementController::class, 'show'])->name('paiement.show');
     Route::post('/paiement/{fraisApprenant}/initier', [\App\Http\Controllers\Payeur\PaiementController::class, 'initier'])->middleware('throttle:10,1')->name('paiement.initier');
     Route::get('/paiement/{paiement}/attente',  [\App\Http\Controllers\Payeur\PaiementController::class, 'attente'])->name('paiement.attente');
-    Route::get('/paiement/{paiement}/statut',   [\App\Http\Controllers\Payeur\PaiementController::class, 'verifierStatut'])->name('paiement.statut');
-    Route::post('/paiement/{paiement}/annuler',  [\App\Http\Controllers\Payeur\PaiementController::class, 'annuler'])->name('paiement.annuler');
+    // Meme cadrage que l'API mobile : la page d'attente interroge le statut
+    // toutes les 5 s (12/min), le plafond laisse 10x de marge pour un onglet
+    // laisse ouvert. Sans plafond, un pollingForeground en boucle sature le
+    // worker et frappe l'API AangaraaPay autant de fois qu'il veut.
+    Route::get('/paiement/{paiement}/statut',   [\App\Http\Controllers\Payeur\PaiementController::class, 'verifierStatut'])->middleware('throttle:120,1')->name('paiement.statut');
+    Route::post('/paiement/{paiement}/annuler',  [\App\Http\Controllers\Payeur\PaiementController::class, 'annuler'])->middleware('throttle:20,1')->name('paiement.annuler');
     Route::get('/historique', [\App\Http\Controllers\Payeur\PaiementController::class, 'historique'])->name('historique');
     Route::get('/mes-enfants', [\App\Http\Controllers\Payeur\MesEnfantsController::class, 'index'])->name('mes-enfants');
     Route::get('/recus', [\App\Http\Controllers\Payeur\RecuController::class, 'index'])->name('recus.index');
@@ -167,6 +171,7 @@ Route::middleware(['auth', 'role:directeur|comptable|caissier', 'check.abonnemen
     Route::post('/apprenants/import', [\App\Http\Controllers\Etablissement\ApprenantController::class, 'import'])
          ->name('apprenants.import');
     Route::get('/paiements',  [\App\Http\Controllers\Etablissement\PaiementController::class, 'index'])->name('paiements.index');
+    Route::get('/reversements', [\App\Http\Controllers\Etablissement\ReversementController::class, 'index'])->name('reversements.index');
     Route::get('/impayes',    [\App\Http\Controllers\Etablissement\ImpayeController::class, 'index'])->name('impayes.index');
     Route::post('/impayes/relancer', [\App\Http\Controllers\Etablissement\ImpayeController::class, 'relancerSms'])->name('impayes.relancer');
     Route::post('/impayes/{apprenant}/relancer', [\App\Http\Controllers\Etablissement\ImpayeController::class, 'relancerApprenant'])->name('impayes.relancer.apprenant');

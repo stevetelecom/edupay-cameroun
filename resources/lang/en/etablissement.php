@@ -573,6 +573,33 @@ return [
     // ── Dashboard v2 (charts) ──
     'moyens_paiement' => 'Payment methods (active year)',
 
+    // ── Reversements (AangaraaPay payouts tracking) ──
+    'rev_titre'                    => 'Payouts',
+    'rev_sous_titre'               => 'AangaraaPay payments transferred to your Mobile Money account',
+    'rev_attention'                => 'Amounts to handle:',
+    'rev_a_traiter_msg'            => ':count payout(s) blocked for a total of :montant FCFA. Contact EduPay support for settlement.',
+    'rev_recherche'                => 'Search',
+    'rev_recherche_ph'             => 'Payment ref, payout ref, learner...',
+    'rev_st_prelevee'              => 'Transferred',
+    'rev_st_calculee'              => 'Waiting',
+    'rev_st_en_cours'              => 'In progress',
+    'rev_st_a_verifier'            => 'To verify',
+    'rev_st_echec'                 => 'Failed',
+    'rev_total_reverse'            => 'FCFA transferred',
+    'rev_en_cours'                 => 'FCFA in progress',
+    'rev_a_traiter'                => 'FCFA to handle (:count)',
+    'rev_paiement'                 => 'Payment',
+    'rev_apprenant'                => 'Learner',
+    'rev_montant_transaction'      => 'Amount paid',
+    'rev_taux'                     => 'Commission rate',
+    'rev_commission'               => 'EduPay commission',
+    'rev_net'                      => 'Net transferred',
+    'rev_reference'                => 'Payout reference',
+    'rev_date'                     => 'Date',
+    'rev_aucun'                    => 'No payout found.',
+    'rev_detail'                   => 'Payout details',
+    'rev_motif'                    => 'Reason:',
+
     // ── PDF/CSV exports: charts ──
     'venn_multi_moyens' => 'Multi-method',
     'pdf_legende_attendu' => 'Expected',
@@ -588,4 +615,5 @@ return [
     'kpi_classes'               => 'Classes',
     'kpi_du_total'              => 'of total',
     'kpi_en_attente_validation' => 'Awaiting validation',
+    'encaissements_14_jours'    => 'Revenue of the last 14 days',
 ];

@@ -72,6 +72,14 @@ class PaymentFlowTest extends TestCase
         $mock = Mockery::mock(AangaraaPayService::class);
 
         // calculerFrais doit renvoyer le détail des frais
+        // tauxCommissionEtablissement est appele a la creation de la
+        // commission pour y figer le taux reellement preleve. Le mock doit
+        // donc le repondre, sinon Mockery leve sur une expectation non
+        // declaree et le webhook tombe en 500.
+        $mock->shouldReceive('tauxCommissionEtablissement')->andReturnUsing(
+            fn ($etablissement = null) => (new AangaraaPayService())->tauxCommissionEtablissement($etablissement)
+        );
+
         $mock->shouldReceive('calculerFrais')->andReturnUsing(function ($montant) {
             $fraisVisibles = 200;
             $fraisAangaraa = (int) round($montant * 0.02);
@@ -229,6 +237,11 @@ class PaymentFlowTest extends TestCase
 
         // Idem : le job detecte l'operateur avant de reverser.
         $mock->shouldReceive('detecterOperateur')->andReturn('MTN_Cameroon');
+
+        // Le webhook fige le taux reellement preleve sur la commission.
+        $mock->shouldReceive('tauxCommissionEtablissement')->andReturnUsing(
+            fn ($etablissement = null) => (new AangaraaPayService())->tauxCommissionEtablissement($etablissement)
+        );
 
         $this->app->instance(AangaraaPayService::class, $mock);
 

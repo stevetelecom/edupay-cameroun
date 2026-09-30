@@ -573,6 +573,33 @@ return [
     'purge_reussie' => ':count catégorie(s) d\'années passées supprimée(s) définitivement.',
     'purge_aucune' => 'Aucune catégorie d\'année passée à purger — tout est déjà à jour.',
 
+    // ── Reversements (suivi des virements AangaraaPay) ──
+    'rev_titre'                    => 'Reversements',
+    'rev_sous_titre'               => 'Paiements AangaraaPay virés sur votre compte Mobile Money',
+    'rev_attention'                => 'Sommes à traiter :',
+    'rev_a_traiter_msg'            => ':count reversement(s) bloqué(s) pour un total de :montant FCFA. Contactez le support EduPay pour la régularisation.',
+    'rev_recherche'                => 'Rechercher',
+    'rev_recherche_ph'             => 'Référence paiement, référence reversement, apprenant...',
+    'rev_st_prelevee'              => 'Reversé',
+    'rev_st_calculee'              => 'En attente',
+    'rev_st_en_cours'              => 'En cours',
+    'rev_st_a_verifier'            => 'À vérifier',
+    'rev_st_echec'                 => 'Échec',
+    'rev_total_reverse'            => 'FCFA reversés',
+    'rev_en_cours'                 => 'FCFA en cours',
+    'rev_a_traiter'                => 'FCFA à traiter (:count)',
+    'rev_paiement'                 => 'Paiement',
+    'rev_apprenant'                => 'Apprenant',
+    'rev_montant_transaction'      => 'Montant payé',
+    'rev_taux'                     => 'Taux commission',
+    'rev_commission'               => 'Commission EduPay',
+    'rev_net'                      => 'Net reversé',
+    'rev_reference'                => 'Référence reversement',
+    'rev_date'                     => 'Date',
+    'rev_aucun'                    => 'Aucun reversement trouvé.',
+    'rev_detail'                   => 'Détail du reversement',
+    'rev_motif'                    => 'Motif :',
+
     // ── Dashboard v2 (graphiques) ──
     'moyens_paiement' => 'Moyens de paiement (année active)',
 
@@ -591,4 +618,5 @@ return [
     'kpi_classes'               => 'Classes',
     'kpi_du_total'              => 'du total',
     'kpi_en_attente_validation' => 'En attente de validation',
+    'encaissements_14_jours'    => 'Encaissements des 14 derniers jours',
 ];

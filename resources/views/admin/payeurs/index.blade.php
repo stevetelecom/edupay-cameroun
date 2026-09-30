@@ -114,8 +114,13 @@
         </div>
       </div>
       <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:16px;">
-        <p style="font-size:12px;color:#b91c1c;margin:0;">{{ __('admin.irreversible_archive') }}</p>
+        <p style="font-size:12px;color:#b91c1c;margin:0;">{{ __('admin.irreversible_suppression_reelle') }}</p>
       </div>
+      <label style="display:flex;align-items:flex-start;gap:10px;background:#fff7f7;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;margin-bottom:14px;cursor:pointer;">
+        <input type="checkbox" id="supprimer-payeur-confirm" onchange="document.getElementById('btn-supprimer-payeur-confirme').disabled = !this.checked;"
+               style="width:16px;height:16px;margin-top:1px;accent-color:#dc2626;flex-shrink:0;">
+        <span style="font-size:12px;color:#b91c1c;line-height:1.5;">{{ __('admin.confirm_suppression_check_avant') }} <strong id="supprimer-payeur-check-nom"></strong>{{ __('admin.confirm_suppression_check_apres') }}</span>
+      </label>
       <form id="form-supprimer-payeur" method="POST">
         @csrf @method('DELETE')
         <div style="display:flex;justify-content:flex-end;gap:10px;">
@@ -123,8 +128,8 @@
                   style="padding:8px 16px;font-size:13px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer;">
             {{ __('messages.annuler') }}
           </button>
-          <button type="submit"
-                  style="padding:8px 20px;font-size:13px;font-weight:600;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;">
+          <button type="submit" id="btn-supprimer-payeur-confirme" disabled
+                  style="padding:8px 20px;font-size:13px;font-weight:600;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;opacity:.5;cursor:not-allowed;">
             {{ __('admin.supprimer') }}
           </button>
         </div>
@@ -244,9 +249,9 @@
 </form>
 
 {{-- Table --}}
-<div class="bg-white border border-gray-200 rounded-xl">
-  <div>
-    <table id="dt-payeurs" class="ep-dt text-sm">
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+  <div class="overflow-x-auto">
+    <table id="dt-payeurs" class="ep-dt ep-dt-nowrap text-sm">
     <thead>
       <tr>
         <th data-orderable="false" class="w-8">
@@ -254,10 +259,10 @@
         </th>
         <th>{{ __('admin.payeur_col') }}</th>
         <th>{{ __('messages.contact') }}</th>
-        <th>{{ __('admin.enfants') }}</th>
+        <th class="text-center">{{ __('admin.enfants') }}</th>
         <th>{{ __('messages.statut') }}</th>
         <th>{{ __('admin.inscrit_le') }}</th>
-        <th data-orderable="false">{{ __('messages.actions') }}</th>
+        <th data-orderable="false" class="text-center">{{ __('messages.actions') }}</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -342,7 +347,17 @@ function ouvrirSuspensionPayeur(id, nom) {
 }
 function ouvrirSuppressionPayeur(id, nom) {
     document.getElementById('supprimer-payeur-nom').textContent = nom;
+    document.getElementById('supprimer-payeur-check-nom').textContent = nom;
+    document.getElementById('supprimer-payeur-confirm').checked = false;
+    document.getElementById('btn-supprimer-payeur-confirme').disabled = true;
     document.getElementById('form-supprimer-payeur').action = '/admin-ep2026/payeurs/' + id;
+    // Suppression lancee depuis la modale de detail : on referme aussi le
+    // detail, sinon il resterait affiche sur un compte qui n'existe plus.
+    // Les overlays ep-modal sont ouverts via la classe .open (voir
+    // ep-modal-polyfill.js), pas .hidden.
+    var detail = document.getElementById('modal-detail-payeur');
+    var depuisDetail = !!(detail && detail.classList.contains('open'));
+    window.epDetailApresSuppression = depuisDetail ? 'modal-detail-payeur' : null;
     epModal.open('modal-supprimer-payeur');
 }
 
@@ -366,10 +381,19 @@ function epSubmitAjaxPayeur(form, modalId, btnSelector) {
         if (status >= 200 && status < 300 && body.success) {
             epToast(body.message || @json(__('admin.action_effectuee')), 'success');
             epModal.close(modalId);
-            dtPayeurs.ajax.reload(null, false);
+            // Si la suppression venait du detail, ce detail montre un compte
+            // qui n'existe plus : on le referme aussi.
+            if (window.epDetailApresSuppression) {
+                epModal.close(window.epDetailApresSuppression);
+                window.epDetailApresSuppression = null;
+            }
         } else {
             epToast(body.message || @json(__('admin.une_erreur_survenue')), 'error');
         }
+        // Recharge dans les DEUX cas : une suppression groupee peut etre
+        // partiellement appliquee (comptes soldes effaces, comptes endettes
+        // refuses). Sans cela, la liste garderait les lignes deja supprimees.
+        dtPayeurs.ajax.reload(null, false);
     })
     .catch(() => {
         epToast(@json(__('admin.erreur_reseau')), 'error');

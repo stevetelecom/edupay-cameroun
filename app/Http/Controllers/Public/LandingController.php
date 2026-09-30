@@ -15,7 +15,7 @@ use Illuminate\View\View;
 class LandingController extends Controller
 {
     /** Nombre d'établissements par page dans l'annuaire public. */
-    private const PAR_PAGE = 12;
+    private const PAR_PAGE = 60;
 
     /** Types d'établissement acceptés par le filtre de l'annuaire. */
     private const TYPES = [

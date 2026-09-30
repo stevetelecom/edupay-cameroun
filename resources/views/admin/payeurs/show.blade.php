@@ -94,6 +94,22 @@
     </div>
     @endif
 
+    {{-- Suppression du compte : le bouton appelle ouvrirSuppressionPayeur(),
+         definie dans l'index qui charge cette vue en AJAX. Le garde typeof
+         evite une ReferenceError si la vue est atteinte sans la page hote.
+         IMPORTANT : cette vue est injectee par innerHTML, donc <script> et
+         @push ne s'executent pas ici — seul un onclick inline fonctionne,
+         d'ou ce choix. --}}
+    <div class="pt-3 border-t border-gray-100">
+        <button type="button"
+                onclick="if (typeof ouvrirSuppressionPayeur === 'function') ouvrirSuppressionPayeur({{ $payeur->id }}, @js($payeur->nom_complet));"
+                style="display:inline-flex;align-items:center;gap:7px;padding:9px 16px;font-size:13px;font-weight:600;color:#b91c1c;background:#fff;border:1px solid #fecaca;border-radius:8px;cursor:pointer;"
+                onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#fff'">
+            <span class="material-symbols-outlined" style="font-size:17px;" aria-hidden="true">delete</span>
+            {{ __('admin.supprimer_compte') }}
+        </button>
+    </div>
+
     <div class="flex items-center justify-between text-xs text-gray-400 pt-2 border-t border-gray-100">
         <span>{{ __('admin.inscrit_le') }} {{ $payeur->created_at->format('d/m/Y') }}</span>
         <span>{{ __('admin.mis_a_jour') }} {{ $payeur->updated_at->diffForHumans() }}</span>

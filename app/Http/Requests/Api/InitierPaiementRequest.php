@@ -38,10 +38,22 @@ class InitierPaiementRequest extends FormRequest
             'montant'            => ['nullable', 'integer'],
             'type_paiement'      => ['nullable', 'in:integral,tranche'],
             'telephone'          => ['required', 'regex:/^6\d{8}$/'],
-            'mode_paiement'      => ['required', 'in:mtn_momo,orange_money,carte'],
+            'mode_paiement'      => ['required', 'in:mtn_momo,orange_money'],
         ];
     }
 
+    /**
+     * `carte` n'est volontairement pas accepte.
+     *
+     * La colonne autorise 'carte' et les rapports l'affichent, mais aucun
+     * canal AangaraaPay ne le gere : `Api\PaiementController::initier` passe
+     * `null` comme operateur (le `match` tombe dans son `default`), le
+     * prestataire deduit l'operateur du NUMERO et debite donc en Mobile
+     * Money. Le paiement etait ensuite comptabilise « Carte » dans les
+     * statistiques alors que l'argent avait bouge par mobile money.
+     * Le web n'acceptait que mtn_momo et orange_money (reste vrai ici) :
+     * leger leger, c'est l'API qui ajoutait une option non implementee.
+     */
     public function messages(): array
     {
         return [

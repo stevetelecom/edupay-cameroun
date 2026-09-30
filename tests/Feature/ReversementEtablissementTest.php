@@ -17,6 +17,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 /**
@@ -130,6 +131,177 @@ class ReversementEtablissementTest extends TestCase
             'montant_net_etablissement'  => $net,
             'frais_aangaraa'             => 1100,
         ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Regle metier : aucun reversement sans paiement valide
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Regle imposee par le metier : « si un paiement n'a pas ete valide,
+     * aucun reversement ne doit etre fait ».
+     *
+     * Le job selectionne sur `commissions.statut = calculee`. Ce statut est
+     * pose au moment ou le webhook passe le paiement a `valide`, mais rien ne
+     * le verifiait au moment de l'envoi. Ce test verrouille la regle desormais
+     * sur le paiement lui-meme : c'est la seule source de verite, et elle est
+     * verifiable independamment du code qui emet la commission.
+     *
+     * Sans ce garde-fou, un rejeu de commande, une commission reinseree a la
+     * main ou un bug de webhook pourrait vider de l'argent sur un paiement
+     * echeoue, annule ou encore en attente de confirmation client.
+     */
+    #[DataProvider('statutsPaiementNonValides')]
+    public function test_aucun_reversement_si_le_paiement_nest_pas_valide(string $statutPaiement): void
+    {
+        $paiement = $this->paiement;
+        $paiement->update(['statut' => $statutPaiement]);
+
+        $commission = $this->commission();
+
+        Http::fake();
+
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        // Le point critique : AUCUNE requete de retrait n'est partie.
+        Http::assertNothingSent();
+
+        $commission->refresh();
+
+        $this->assertNotSame(Commission::STATUT_PRELEVEE, $commission->statut);
+    }
+
+    public static function statutsPaiementNonValides(): array
+    {
+        return [
+            'en attente de confirmation client' => ['en_attente'],
+            'echoue'                           => ['echoue'],
+            'rembourse'                        => ['rembourse'],
+            'annule'                           => ['annule'],
+        ];
+    }
+
+    public function test_le_reversement_part_bien_quand_le_paiement_est_valide(): void
+    {
+        $this->paiement->update(['statut' => 'valide']);
+
+        $commission = $this->commission();
+
+        Http::fake([
+            '*/withdrawal' => Http::response([
+                'statusCode' => 200,
+                'message'    => 'Withdrawal initiated successfully',
+                'data'       => [
+                    'status'       => 'SUCCESSFUL',
+                    'reference_id' => 'REF-OK-1',
+                ],
+            ], 200),
+        ]);
+
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        $commission->refresh();
+
+        $this->assertSame(Commission::STATUT_PRELEVEE, $commission->statut);
+
+        // Une seule requete : le double envoi est le risque principal.
+        Http::assertSentCount(1);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Contrat documente de /check_withdrawal_status
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Payloads repris tels quels de la documentation officielle AangaraaPay
+     * (documentation d'integration, section « Verifier le statut d'un
+     * retrait »). Ils verrouillent le contrat : le statut se lit a la RACINE
+     * de la reponse (`status`), pas sous `data`. Si l'on avait lu
+     * `data.status` comme pour la creation du retrait, chaque verification
+     * serait tombee en `INCONNU` et aucune commission `a_verifier` ne pourrait
+     * jamais etre levee automatiquement.
+     */
+    public static function statutsRetraitDocumentes(): array
+    {
+        return [
+            'succes' => [
+                'SUCCESSFUL',
+                [
+                    'success' => true,
+                    'status' => 'SUCCESSFUL',
+                    'operator' => 'MTN_Cameroon',
+                    'transaction_id' => 'abc123def456',
+                    'amount' => 1000.0,
+                    'currency' => 'XAF',
+                    'message' => 'Transaction réussie',
+                    'operator_code' => 'SUCCESSFUL',
+                    'timestamp' => '2025-12-29T14:30:15',
+                    'details' => [
+                        'financialTransactionId' => 'MT789012345',
+                        'reason' => null,
+                    ],
+                ],
+            ],
+            'en cours' => [
+                'PENDING',
+                [
+                    'success' => true,
+                    'status' => 'PENDING',
+                    'operator' => 'Orange_Cameroon',
+                    'transaction_id' => 'abc123def456',
+                    'amount' => 1000.0,
+                    'currency' => 'XAF',
+                    'message' => 'Transaction en attente',
+                    'operator_code' => 'PENDING',
+                    'timestamp' => null,
+                    'details' => [
+                        'txnid' => 'OM456789012',
+                        'payToken' => 'MP2512295AD67EBB09E121E235B2',
+                    ],
+                ],
+            ],
+            'echoue' => [
+                'FAILED',
+                [
+                    'success' => true,
+                    'status' => 'FAILED',
+                    'operator' => 'MTN_Cameroon',
+                    'transaction_id' => 'abc123def456',
+                    'amount' => 1000.0,
+                    'currency' => 'XAF',
+                    'message' => 'Transaction échouée',
+                    'operator_code' => 'FAILED',
+                    'timestamp' => '2025-12-29T14:30:15',
+                    'details' => [
+                        'financialTransactionId' => null,
+                        'reason' => 'Invalid phone number',
+                    ],
+                ],
+            ],
+            'introuvable' => [
+                'NOT_FOUND',
+                [
+                    'success' => true,
+                    'status' => 'NOT_FOUND',
+                    'operator' => 'Orange_Cameroon',
+                    'transaction_id' => 'abc123def456',
+                    'message' => 'Transaction introuvable',
+                    'currency' => 'XAF',
+                ],
+            ],
+        ];
+    }
+
+    #[DataProvider('statutsRetraitDocumentes')]
+    public function test_le_statut_de_retrait_se_lit_a_la_racine_de_la_reponse(string $attendu, array $payload): void
+    {
+        Http::fake([
+            '*/check_withdrawal_status/*' => Http::response($payload, 200),
+        ]);
+
+        $resultat = (new AangaraaPayService())->verifierStatutRetrait('abc123def456', 'mtn');
+
+        $this->assertSame($attendu, $resultat['statut']);
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -312,12 +484,23 @@ class ReversementEtablissementTest extends TestCase
         Mail::assertSent(AlerteReversementManquantMail::class);
     }
 
-    public function test_2xx_sans_reference_est_traite_comme_un_succes(): void
+    public function test_2xx_sans_statut_nest_plus_considere_comme_un_succes(): void
     {
-        // AangaraaPay repond 201 {"message":"Payment request successful","data":{"message":...}}
-        // sur ses retraits, SANS transaction_id. Exiger la reference classait
-        // tout reversement reussi en 'a_verifier' : l'argent partait mais la
-        // commission restait bloquee (150 XAF perdus le 30/09/2026).
+        // Avant le correctif, on envoyait `operator`/`description` au lieu de
+        // `payment_method`/`username` : AangaraaPay repondait 201
+        // {"message":"Payment request successful"} sans `status` ni `reference_id`.
+        // On classait alors TOUT en succes — faux, le retrait pouvait avoir ete
+        // refuse. Desormais une reponse 2xx SANS statut documente n'est jamais
+        // un succes.
+        //
+        // CORRECTION 30/09/2026 : la suite a montre que ce format n'etait pas
+        // un artefact de test mais la REPONSE REELLE de /withdrawal. La classer
+        // `refuse` (donc rejouable) etait le bug le plus dangereux du projet :
+        // constate en test reel, deux virements de 49 CFA sont partis pour la
+        // commission 8 alors que la reponse 201 etait traitee comme un echec.
+        // On ne peut pas affirmer le succes, mais on ne doit surtout pas
+        // nier que l'argent est parti : le seul traitement sur est
+        // `a_verifier` (aucun rejeu automatique, verification humaine).
         Http::fake([
             '*/withdrawal' => Http::response([
                 'message' => 'Payment request successful',
@@ -331,10 +514,104 @@ class ReversementEtablissementTest extends TestCase
 
         $commission->refresh();
 
+        $this->assertNotSame(Commission::STATUT_PRELEVEE, $commission->statut);
+        $this->assertSame(Commission::STATUT_A_VERIFIER, $commission->statut);
+
+        // Le point critique : une seule tentative. Un rejeu automatique
+        // enverrait un DEUXIEME virement reel a l'etablissement.
+        Http::assertSentCount(1);
+    }
+
+    /**
+     * Le contrat reel de /withdrawal exige payment_method (pas operator) et
+     * username (pas description). On verifie que le payload part avec les
+     * bons noms et que la reponse documentee (status SUCCESSFUL +
+     * data.reference_id) est un succes.
+     */
+    public function test_payload_avec_payment_method_et_username_et_reference_id(): void
+    {
+        Http::fake([
+            '*/withdrawal' => Http::response([
+                'status'  => 'SUCCESSFUL',
+                'message' => 'Transfert enregistre',
+                'data'    => ['reference_id' => 'REF-DOC-1'],
+            ], 200),
+        ]);
+
+        $commission = $this->commission();
+
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        $commission->refresh();
+
         $this->assertSame(Commission::STATUT_PRELEVEE, $commission->statut);
-        $this->assertNotNull($commission->reversed_at);
-        // Reference synthetique, identifiable comme generee localement.
-        $this->assertStringStartsWith('WITHDRAWAL-SANS-REF-', (string) $commission->reference_reversement);
+        $this->assertSame('REF-DOC-1', $commission->reference_reversement);
+
+        $payload = Http::recorded()[0][0]->data();
+        $this->assertArrayHasKey('payment_method', $payload);
+        $this->assertArrayHasKey('username', $payload);
+        $this->assertArrayNotHasKey('operator', $payload);
+        $this->assertArrayNotHasKey('description', $payload);
+        $this->assertSame('MTN_Cameroon', $payload['payment_method']);
+    }
+
+    public function test_statut_pending_met_en_a_verifier_sans_relancer(): void
+    {
+        // PENDING : accepte mais pas encore confirme. On ne rejoue jamais, le
+        // veritable statut sera tranche via /check_withdrawal_status.
+        Http::fake([
+            '*/withdrawal' => Http::response([
+                'status'  => 'PENDING',
+                'message' => 'Retrait en cours',
+                'data'    => ['reference_id' => 'REF-PEND-1'],
+            ], 200),
+        ]);
+
+        $commission = $this->commission();
+
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        $commission->refresh();
+
+        $this->assertSame(Commission::STATUT_A_VERIFIER, $commission->statut);
+        $this->assertTrue($commission->requiertIntervention());
+        Http::assertSentCount(1);
+    }
+
+    public function test_statut_failed_met_en_echec(): void
+    {
+        // FAILED : l'operateur a refuse, rien n'est parti.
+        Http::fake([
+            '*/withdrawal' => Http::response([
+                'status'  => 'FAILED',
+                'message' => 'Solde insuffisant',
+                'data'    => ['reference_id' => 'REF-FAIL-1', 'details' => ['reason' => 'Solde insuffisant']],
+            ], 200),
+        ]);
+
+        $commission = $this->commission();
+
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        $commission->refresh();
+
+        $this->assertSame(Commission::STATUT_CALCULEE, $commission->statut);
+    }
+
+    public function test_verifier_statut_retrait_interroge_le_bon_endpoint(): void
+    {
+        Http::fake([
+            '*/check_withdrawal_status/*' => Http::response([
+                'status' => 'SUCCESSFUL',
+            ], 200),
+        ]);
+
+        $resultat = (new AangaraaPayService())->verifierStatutRetrait('REF-XYZ', 'orange');
+
+        $this->assertSame('SUCCESSFUL', $resultat['statut']);
+        $requete = Http::recorded()[0][0];
+        $this->assertStringContainsString('/check_withdrawal_status/REF-XYZ', (string) $requete->url());
+        $this->assertSame('Orange_Cameroon', $requete['payment_method']);
     }
 
     public function test_reversement_orphelin_en_cours_passe_en_a_verifier_sans_rappel(): void
@@ -479,24 +756,77 @@ class ReversementEtablissementTest extends TestCase
         }
     }
 
-    public function test_etablissement_recoit_exactement_les_frais_de_scolarite(): void
+    /**
+     * ── Modele de reversement, confirme par le metier le 30/09/2026 ──────
+     *
+     * Ce que l'etablissement recoit est le NET, pas le montant de la
+     * transaction. Le test precedent affirmait le contraire (« il recoit
+     * exactement les frais de scolarite ») mais ne verifiait rien : il
+     * assignait `$net = $detail['montant_frais']` puis controlait que cette
+     * variable valait l'entree. Il ne touchait ni la commission, ni le net
+     * reellement utilise pour virer.
+     *
+     * Ce test observe l'APPEL REEL envoye a AangaraaPay : c'est le seul moyen
+     * de garantir qu'aucun etablissement ne recoive 50 000 au lieu de 49 950.
+     */
+    public function test_le_reversement_vire_le_net_et_jamais_le_montant_de_la_transaction(): void
+    {
+        Http::fake([
+            '*/withdrawal' => Http::response([
+                'status' => 'SUCCESS',
+                'data'   => ['transaction_id' => 'REV-NET-1'],
+            ], 200),
+        ]);
+
+        // Commission reelle : 50 000 de frais de scolarite, 50 de marge.
+        $commission = $this->commission(Commission::STATUT_CALCULEE, 49950);
+
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        Http::assertSent(function ($req) {
+            $corps = json_decode($req->body(), true) ?: [];
+
+            // Le virement porte le NET.
+            $this->assertSame('49950', (string) $corps['amount']);
+
+            // Et surtout PAS le montant de la transaction, qui
+            // sur-payerait l'etablissement de la commission.
+            $this->assertNotSame('50000', (string) $corps['amount']);
+
+            return true;
+        });
+
+        $this->assertSame(
+            50000,
+            (int) $commission->fresh()->montant_transaction,
+            'La transaction conserve son montant d origine'
+        );
+    }
+
+    /**
+     * Le calcul doit rester coherent sur toute la gamme : le net reverse ne
+     * peut jamais depasser le montant de la transaction, ni devenir negatif
+     * sur un petit montant ou la marge est arrondie au franc superieur.
+     */
+    public function test_le_net_ne_depasse_jamais_le_montant_sur_la_gamme_complete(): void
     {
         $service = new AangaraaPayService();
-        $detail  = $service->calculerFrais(50000);
 
-        // Ce que le payeur debite entre sur le compte AangaraaPay...
-        $this->assertSame(51150, $detail['montant_total_paye']);
+        foreach ([1000, 5000, 10000, 50000, 100000, 1000000] as $montant) {
+            $detail = $service->calculerFrais($montant);
+            $marge  = $detail['frais_service'] - $detail['frais_aangaraa'];
+            $net    = max(0, $montant - $marge);
 
-        // ...ce que l'etablissement recoit vaut les seuls frais de scolarite,
-        // donc la difference reste sur le compte : 50 FCFA de marge.
-        $net = $detail['montant_frais'];
+            $this->assertLessThanOrEqual($montant, $net, "net > montant sur $montant");
+            $this->assertGreaterThan(0, $net, "net nul sur $montant");
 
-        $this->assertSame(50000, $net);
-        $this->assertSame(
-            $detail['montant_total_paye'] - $net,
-            $detail['frais_service'],
-            'Le solde conserve doit etre exactement les frais de service'
-        );
+            // La marge prelevee doit toujours couvrir le cout AangaraaPay.
+            $this->assertGreaterThanOrEqual(
+                0,
+                $marge,
+                "Marge EduPay negative sur $montant : la plateforme perdrait de l'argent."
+            );
+        }
     }
 
     // ─────────────────────────────────────────────────────────────

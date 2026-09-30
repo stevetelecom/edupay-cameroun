@@ -153,9 +153,9 @@
           <h3>{{ __('admin.taux_commission_lbl') }}</h3>
         </div>
         <p class="ep-sous-titre" style="margin:0 0 16px;line-height:1.7;">
-          Le payeur regle les frais de scolarite plus ces frais de service. L'etablissement recoit
-          uniquement les frais de scolarite, le cout AangaraaPay est preleve sur le reversement, et la
-          marge reste sur le compte AangaraaPay.
+          Le payeur regle les frais de scolarite plus ces frais de service. Ce qui est reellement
+          reverse a l'etablissement est le <strong>net</strong> : les frais de scolarite moins la marge
+          EduPay. Le cout AangaraaPay est preleve par le prestataire sur ce reversement.
         </p>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
@@ -172,7 +172,7 @@
                 {{ number_format($parametres['taux_aangaraa'] * 100, 1, ',', '') }}%
               </div>
             </div>
-            <p style="font-size:11px;color:#9ca3af;margin:4px 0 0;font-family:'Poppins',sans-serif;">Preleve par le prestataire sur chaque reversement.</p>
+            <p style="font-size:11px;color:#9ca3af;margin:4px 0 0;font-family:'Poppins',sans-serif;">Preleve par le prestataire sur chaque reversement. Attention : le cout porte sur le NET vire, soit un peu moins que le montant de la transaction.</p>
           </div>
 
           <div>
@@ -188,7 +188,7 @@
                 {{ number_format($parametres['marge_edupay'] * 100, 1, ',', '') }}%
               </div>
             </div>
-            <p style="font-size:11px;color:#9ca3af;margin:4px 0 0;font-family:'Poppins',sans-serif;">Benefice conserve par EduPay sur chaque paiement.</p>
+            <p style="font-size:11px;color:#9ca3af;margin:4px 0 0;font-family:'Poppins',sans-serif;">Benefice conserve par EduPay. Elle est deduite du montant de la transaction : l'etablissement est reverse du net (frais de scolarite - marge).</p>
           </div>
         </div>
 

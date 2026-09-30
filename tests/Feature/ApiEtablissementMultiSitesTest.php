@@ -10,6 +10,7 @@ use App\Models\FraisApprenant;
 use App\Models\Paiement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -79,6 +80,23 @@ class ApiEtablissementMultiSitesTest extends TestCase
             'date_debut'       => now()->subMonth(),
             'date_fin'         => now()->addMonths(10),
             'grace_period_fin' => now()->addMonths(11),
+        ]);
+    }
+
+    /**
+     * Abonnement dont la periode est REELLEMENT terminee (les dates le
+     * disent), par opposition a un simple `statut` desynchronise.
+     */
+    private function abonnerExpire(Etablissement $etablissement, string $plan): Abonnement
+    {
+        return Abonnement::create([
+            'etablissement_id' => $etablissement->id,
+            'plan'             => $plan,
+            'statut'           => 'expire',
+            'montant_mensuel'  => Abonnement::PLANS[$plan]['montant'],
+            'date_debut'       => now()->subMonths(12),
+            'date_fin'         => now()->subMonths(2),
+            'grace_period_fin' => now()->subMonth(),
         ]);
     }
 
@@ -155,13 +173,63 @@ class ApiEtablissementMultiSitesTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_un_abonnement_inexpire_ne_donne_plus_acces_au_multi_sites()
+    public function test_un_abonnement_reellement_expire_ferme_le_multi_sites()
+    {
+        $this->abonnerExpire($this->principal, 'premium');
+
+        $this->actingAs($this->directeur, 'sanctum')
+            ->getJson(route('api.v1.etablissement.sites.index'))
+            // 402 et non 403 : CheckAbonnement bloque avant meme que le
+            // controleur ne soit atteint. L'ecole n'accede plus du tout a son
+            // back-office, ce qui est plus fort que le seul verrou multi-sites.
+            ->assertStatus(402)
+            ->assertJsonPath('code', 'abonnement_requis');
+    }
+
+    /**
+     * Regression : la selection de l'abonnement passait par
+     * whereIn('statut', [actif, grace_period])->latest(). Le `statut` etant un
+     * champ DERIVE des dates, une ligne visitele avant son renouvellement
+     * etait rejetee alors que la periode etait de nouveau couverte. Le
+     * middleware CheckAbonnement, lui, ne se fie pas a ce statut : meme
+     * situation, memes conclusions exigees des deux cotes.
+     */
+    public function test_un_statut_desynchronise_ne_ferme_pas_le_multi_sites()
     {
         $this->abonner($this->principal, 'premium', 'expire');
 
         $this->actingAs($this->directeur, 'sanctum')
             ->getJson(route('api.v1.etablissement.sites.index'))
-            ->assertForbidden();
+            ->assertOk();
+    }
+
+    /**
+     * Le doublon invoque : deux abonnements inseres le meme jour. Le tri
+     * `latest()` (created_at) en choisit un au hasard, `abonnementCourant()`
+     * departage deterministiquement sur date_debut puis id. C'est le plan du
+     * plus recent qui doit s'appliquer, et c'est lui qui fixe le taux de
+     * commission (CDC S0 #3).
+     */
+    public function test_avec_deux_abonnements_le_meme_jour_le_plus_recent_gagne()
+    {
+        $ancien = $this->abonner($this->principal, 'basique');
+        $recent = $this->abonner($this->principal, 'premium');
+
+        // Egalite stricte en base : on ecrit par le query builder pour ne pas
+        // dependre du cast `date` du modele, qui normalise a l'ecriture et
+        // rendrait le tie-break non deterministe.
+        $debut = now()->subMonths(6)->startOfDay();
+        DB::table('abonnements')->where('id', $ancien->id)->update(['date_debut' => $debut]);
+        DB::table('abonnements')->where('id', $recent->id)->update(['date_debut' => $debut]);
+
+        // Sans le `orderByDesc('id')`, le tri `latest()` (created_at) aurait
+        // pu retenir le basique : le groupe perdrait alors le multi-sites.
+        $this->assertSame($recent->id, $this->principal->abonnementCourant()->id);
+        $this->assertSame('premium', $this->principal->abonnementCourant()->plan);
+
+        $this->actingAs($this->directeur, 'sanctum')
+            ->getJson(route('api.v1.etablissement.sites.index'))
+            ->assertOk();
     }
 
     public function test_le_plan_du_site_secondaire_n_ouvre_pas_le_multi_sites()

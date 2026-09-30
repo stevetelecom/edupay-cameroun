@@ -117,8 +117,17 @@ Route::middleware(['auth:admin', 'super.admin'])->group(function () {
     // Commissions
     Route::prefix('commissions')->name('commissions.')->group(function () {
         Route::get('/',                              [CommissionController::class, 'index'])->name('index');
+        // Taux global : route nommee, placee AVANT {etablissement} pour ne pas
+        // etre capturee par le segment modele.
+        Route::patch('/taux-global',                 [CommissionController::class, 'updateTauxGlobal'])->name('taux-global');
+        // Taux par profil d'abonnement (CDC S0 #3) : egalement nommee et
+        // placee avant {etablissement} pour la meme raison.
+        Route::patch('/taux-plans',                  [CommissionController::class, 'updateTauxParPlan'])->name('taux-plans');
+        // La route PATCH /{etablissement}/modifier a ete retiree : elle
+        // ecrivait etablissements.taux_commission, une colonne decorative qui
+        // n'entre dans aucun calcul. Elle promettait un reglage sans effet.
+        // Le taux se regle par profil via /taux-plans (CDC S0 #3).
         Route::get('/{etablissement}/modifier',      [CommissionController::class, 'edit'])->name('edit');
-        Route::patch('/{etablissement}/modifier',    [CommissionController::class, 'update'])->name('update');
         Route::patch('/{commission}/prelever',       [CommissionController::class, 'marquerPrelevee'])->name('prelever');
         Route::patch('/{commission}/rejouer',        [CommissionController::class, 'rejouerReversement'])->name('rejouer');
     });

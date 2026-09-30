@@ -111,12 +111,12 @@
         </div>
       </div>
       <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:16px;">
-        <p style="font-size:12px;color:#b91c1c;margin:0;">{{ __('admin.irreversible_archive') }}</p>
+        <p style="font-size:12px;color:#b91c1c;margin:0;">{{ __('admin.suppr_etab_avertissement') }}</p>
       </div>
       <label style="display:flex;align-items:flex-start;gap:10px;background:#fff7f7;border:1px solid #fecaca;border-radius:8px;padding:10px 12px;margin-bottom:14px;cursor:pointer;">
         <input type="checkbox" id="supprimer-etab-confirm" onchange="document.getElementById('btn-supprimer-etab-confirme').disabled = !this.checked;"
                style="width:16px;height:16px;margin-top:1px;accent-color:#dc2626;flex-shrink:0;">
-        <span style="font-size:12px;color:#b91c1c;line-height:1.5;">{!! __('admin.confirm_suppression_check', ['nom' => e('<strong id="supprimer-etab-check-nom"></strong>')]) !!}</span>
+        <span style="font-size:12px;color:#b91c1c;line-height:1.5;">{{ __('admin.confirm_suppression_check_avant') }} <strong id="supprimer-etab-check-nom"></strong>{{ __('admin.confirm_suppression_check_apres') }}</span>
       </label>
       <form id="form-supprimer-etab" method="POST">
         @csrf @method('DELETE')
@@ -149,8 +149,8 @@
   </div>
 </div>
 
-{{-- KPIs : pastilles époxy Material Symbols (style dashboard) --}}
-<div class="grid grid-cols-4 gap-4 mb-6">
+{{-- KPIs : paliers responsive alignes sur le tableau de bord et la page payeurs --}}
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
   <div class="kpi ep-kpi">
     <div class="ep-ico navy"><span class="material-symbols-outlined">apartment</span></div>
     <div>
@@ -186,7 +186,7 @@
   <form method="GET" action="{{ route('admin.etablissements.index') }}" class="flex items-center gap-3 flex-wrap">
     <input type="text" name="search" value="{{ request('search') }}"
            placeholder="{{ __('admin.rechercher_nom_ville_email') }}"
-           class="flex-1 min-w-50 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+           class="w-full sm:w-auto sm:flex-1 sm:min-w-[220px] px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
     <select name="statut" class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
       <option value="">{{ __('admin.tous_statuts') }}</option>
       <option value="actif"      {{ request('statut')==='actif'      ? 'selected' : '' }}>Actif</option>
@@ -228,10 +228,12 @@
   <input type="hidden" name="ids" value="">
 </form>
 
-{{-- Table --}}
-<div class="bg-white border border-gray-200 rounded-xl">
-  <div>
-    <table id="dt-etablissements" class="ep-dt text-sm">
+{{-- Table : l'enveloppe.scroll permet le defilement horizontal quand le
+     plugin Responsive de DataTables ne peut plus replier de colonne — meme
+     regle que .tableau-enveloppe de la maquette admin.html. --}}
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+  <div class="overflow-x-auto">
+    <table id="dt-etablissements" class="ep-dt ep-dt-nowrap text-sm">
     <thead>
       <tr>
         <th data-orderable="false" class="w-8">
@@ -240,10 +242,10 @@
         <th>{{ __('messages.etablissement') }}</th>
         <th>{{ __('admin.type_region') }}</th>
         <th>{{ __('messages.contact') }}</th>
-        <th>{{ __('messages.apprenants') }}</th>
+        <th class="text-center">{{ __('messages.apprenants') }}</th>
         <th>{{ __('messages.statut') }}</th>
         <th>{{ __('admin.inscrit_le') }}</th>
-        <th data-orderable="false">{{ __('messages.actions') }}</th>
+        <th data-orderable="false" class="text-center">{{ __('messages.actions') }}</th>
       </tr>
     </thead>
     <tbody></tbody>

@@ -84,8 +84,9 @@
                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
             </div>
 
-            <div class="mb-6 bg-amber-50 border border-amber-200 text-amber-700 text-xs px-4 py-3 rounded-lg">
-                {{ __('admin.formulaire_une_fois') }}
+            <div class="mb-6 flex items-start gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs px-4 py-3 rounded-lg">
+                <span class="material-symbols-outlined shrink-0" style="font-size:16px;" aria-hidden="true">warning</span>
+                <span>{{ __('admin.formulaire_une_fois') }}</span>
             </div>
 
             <button type="submit"

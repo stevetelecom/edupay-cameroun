@@ -47,6 +47,7 @@ return [
     'recouvrement'          => 'Recouvrement',
     'recus_certificats'     => 'Reçus & Certificats',
     'remboursements'        => 'Remboursements',
+    'reversements'          => 'Reversements',
     's_inscrire'            => 'S\'inscrire',
     's_inscrire_gratuit'    => 'S\'inscrire gratuitement',
     'statut'                => 'Statut',

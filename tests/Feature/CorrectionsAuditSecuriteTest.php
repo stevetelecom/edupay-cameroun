@@ -167,6 +167,43 @@ class CorrectionsAuditSecuriteTest extends TestCase
             ->assertForbidden();
     }
 
+    /**
+     * Le taux ne se regle plus par etablissement mais par profil
+     * d'abonnement (CDC S0 #3). Les deux routes d'ecriture ecrivent dans
+     * parametres_systeme : elles doivent donc etre reservees au super-admin,
+     * exactement comme l'etait l'ancienne edition par etablissement.
+     */
+    public function test_le_comptable_plateforme_ne_peut_pas_ecrire_les_taux_de_commission()
+    {
+        $comptable = $this->admin('cp-taux@test.cm', true, 'comptable_plateforme');
+        $avant     = \App\Models\ParametreSysteme::obtenir('taux_commission_standard');
+
+        $this->actingAs($comptable, 'admin')
+            ->patch(route('admin.commissions.taux-plans'), [
+                'taux_basique'  => 0.030,
+                'taux_standard' => 0.050,
+                'taux_premium'  => 0.060,
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($comptable, 'admin')
+            ->patch(route('admin.commissions.taux-global'), ['taux_global' => 0.050])
+            ->assertForbidden();
+
+        // Le role « lecture + rapports » ne touche pas non plus aux taux.
+        $superviseur = $this->admin('sup-taux@test.cm', true, 'superviseur');
+
+        $this->actingAs($superviseur, 'admin')
+            ->patch(route('admin.commissions.taux-plans'), [
+                'taux_basique'  => 0.030,
+                'taux_standard' => 0.050,
+                'taux_premium'  => 0.060,
+            ])
+            ->assertForbidden();
+
+        $this->assertSame($avant, \App\Models\ParametreSysteme::obtenir('taux_commission_standard'));
+    }
+
     // ─────────────────────────────────────────────
     // 3. Remboursements : parite web / API
     // ─────────────────────────────────────────────

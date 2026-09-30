@@ -293,7 +293,7 @@ class AuthController extends Controller
         Cache::put($key, Hash::make($otp), now()->addMinutes(5));
 
         try {
-            Mail::to($user->email)->send(new \App\Mail\ParentOtpMail($user, $otp));
+            Mail::to($user->email)->send(new \App\Mail\OtpConnexionMail($user, $otp));
             Log::info("OTP API envoyé par email à {$login}");
         } catch (\Throwable $e) {
             Cache::forget($key);

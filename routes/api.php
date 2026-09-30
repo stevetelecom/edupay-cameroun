@@ -76,10 +76,25 @@ Route::prefix('v1')->group(function () {
         Route::get('/frais-apprenants/{frais_apprenant}', [\App\Http\Controllers\Api\FraisController::class, 'show'])->name('api.v1.frais-apprenants.show');
 
         // Paiements
+        //
+        // Ces trois routes sont les seules qui appellent AangaraaPay depuis
+        // l'API, et `verifier` le fait a CHAQUE poll : sans limite, un seul
+        // compte authentique pouvait déclencher des dizaines de milliers
+        // d'appels sortants par jour avec notre app_key, et faire bannir
+        // l'app_key chez le prestataire. Les routes /auth avaient déjà un
+        // throttle, celles-ci avaient été oubliées.
+        //
+        // Les valeurs laisse une marge tres large pour l'usage reel : le web
+        // interroge toutes les 5 s pendant ~20 min, soit 156 appels, ~12/min
+        // en pointe (paiement_attente.blade.php:144-146). 120/min couvre
+        // plusieurs paiements simultanes. Et meme en cas de 429, aucun argent
+        // n'est perdu : `aangaraa:reconcilie` tourne toutes les 2 min et
+        // solde les paiements confirmes cote serveur, independamment du
+        // client. Le polling est un confort, jamais la source de verite.
         Route::get('/paiements',                [\App\Http\Controllers\Api\PaiementController::class, 'index'])->name('api.v1.paiements.index');
-        Route::post('/paiements/initier',       [\App\Http\Controllers\Api\PaiementController::class, 'initier'])->name('api.v1.paiements.initier');
-        Route::post('/paiements/{paiement}/verifier', [\App\Http\Controllers\Api\PaiementController::class, 'verifier'])->name('api.v1.paiements.verifier');
-        Route::post('/paiements/{paiement}/annuler',  [\App\Http\Controllers\Api\PaiementController::class, 'annuler'])->name('api.v1.paiements.annuler');
+        Route::post('/paiements/initier',       [\App\Http\Controllers\Api\PaiementController::class, 'initier'])->middleware('throttle:10,1')->name('api.v1.paiements.initier');
+        Route::post('/paiements/{paiement}/verifier', [\App\Http\Controllers\Api\PaiementController::class, 'verifier'])->middleware('throttle:120,1')->name('api.v1.paiements.verifier');
+        Route::post('/paiements/{paiement}/annuler',  [\App\Http\Controllers\Api\PaiementController::class, 'annuler'])->middleware('throttle:20,1')->name('api.v1.paiements.annuler');
 
         // Réclamations
         Route::get('/reclamations',   [\App\Http\Controllers\Api\ReclamationController::class, 'index'])->name('api.v1.reclamations.index');

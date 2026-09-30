@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ParentOtpMail extends Mailable
+class OtpConnexionMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -31,7 +31,7 @@ class ParentOtpMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.parent-otp',
+            view: 'emails.otp-connexion',
         );
     }
 

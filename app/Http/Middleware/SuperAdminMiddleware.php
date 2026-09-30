@@ -92,7 +92,12 @@ class SuperAdminMiddleware
             // Argent sortant : prelevement de commission et rejeu.
             'admin.commissions.prelever',
             'admin.commissions.rejouer',
-            'admin.commissions.update',
+
+            // Reglage du taux de commission. Le taux se configure par profil
+            // d'abonnement (CDC S0 #3) : ces deux routes ecrivent dans
+            // parametres_systeme et doivent rester reservees au super-admin.
+            'admin.commissions.taux-global',
+            'admin.commissions.taux-plans',
 
             // Suppression d'etablissement.
             'admin.etablissements.destroy',

@@ -23,7 +23,12 @@ class RejouerReversementsAangaraaPay extends Command
         {--retablir-echec : Repartir de zéro pour les commissions en « echec » (nouvel essai complet)}
         {--dry-run : Afficher ce qui serait rejoue sans rien envoyer}';
 
-    protected $description = 'Relance les reversements AangaraaPay non effectues (etats calculee / a_verifier / echec)';
+    // Description volontairement explicite sur le comportement PAR DEFAUT :
+    // la version precedente annoncait « etats calculee / a_verifier / echec »,
+    // ce qui laissait croire qu'un simple appel renvoyait de l'argent sur des
+    // commissions peut-deja payees. Le code, lui, ne touche par defaut que
+    // « calculee ». L'aide doit dire la meme chose que le code.
+    protected $description = 'Relance les reversements AangaraaPay en attente. Par defaut : etat « calculee » uniquement. Les etats « a verifier » (argent peut-etre deja parti) et « echec » (terminal) exigent --inclure-a-verifier ou --retablir-echec, sous votre responsabilite.';
 
     public function handle(AangaraaPayService $aangaraa): int
     {
@@ -81,6 +86,31 @@ class RejouerReversementsAangaraaPay extends Command
 
             if ($this->option('dry-run')) {
                 continue;
+            }
+
+            // BUG CORRIGE le 30/09/2026 — `--retablir-echec` et
+            // `--inclure-a-verifier` ne fonctionnaient pas. Ils selectionnaient
+            // des commissions en « echec » / « a verifier » puis dispatchaient
+            // le job, dont la reservation atomique n'accepte QUE « calculee » :
+            // l'UPDATE ne touchait aucune ligne, aucun appel API n'etait emis,
+            // et la commande annoncait pourtant « mis en file ». Consequence
+            // reelle : un reversement echoue n'etait recuperable a jamais, ce
+            // qui rendait le retrait d'argent definitive.
+            if (in_array($commission->statut, [
+                Commission::STATUT_ECHEC,
+                Commission::STATUT_A_VERIFIER,
+            ], true)) {
+                $commission->forceFill([
+                    'statut'               => Commission::STATUT_CALCULEE,
+                    'reference_reversement' => null,
+                    'reversement_tente_le'  => null,
+                    'reversement_erreur'    => null,
+                ])->save();
+
+                Log::warning('Remise a zero de commission avant rejeu', [
+                    'commission_id' => $commission->id,
+                    'ancien_statut' => $commission->getOriginal('statut'),
+                ]);
             }
 
             ReverserEtablissementJob::dispatch($commission->id);

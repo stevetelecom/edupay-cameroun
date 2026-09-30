@@ -89,7 +89,9 @@
      onclick="if(event.target===this)fermerModal(this.id)">
   <div class="bg-white rounded-xl w-full max-w-sm mx-4 shadow-xl">
     <div class="flex items-center justify-between px-6 py-4 border-b border-red-100">
-      <h3 class="font-bold text-red-600">{{ __('admin.supprimer_admin') }}</h3>
+      <h3 class="flex items-center gap-2 font-bold text-red-600">
+          <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">delete</span>{{ __('admin.supprimer_admin') }}
+        </h3>
       <button onclick="fermerModal('modal-delete-admin')"
               class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
     </div>
@@ -179,7 +181,9 @@
      onclick="if(event.target===this)fermerModal(this.id)">
   <div class="bg-white rounded-xl w-full max-w-md mx-4 shadow-xl">
     <div class="flex items-center justify-between px-6 py-4 border-b">
-      <h3 class="font-bold text-gray-900">{{ __('admin.detail_admin') }}</h3>
+      <h3 class="flex items-center gap-2 font-bold text-gray-900">
+          <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">person</span>{{ __('admin.detail_admin') }}
+        </h3>
       <button onclick="fermerModal('modal-voir-admin')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
     </div>
     <div class="p-6 space-y-3">
@@ -195,7 +199,9 @@
         <div class="flex justify-between text-sm"><span class="text-gray-500">{{ __('messages.telephone') }}</span><span id="voir-tel" class="font-medium"></span></div>
         <div class="flex justify-between text-sm"><span class="text-gray-500">{{ __('messages.statut') }}</span><span id="voir-statut" class="font-medium"></span></div>
         <div class="flex justify-between text-sm"><span class="text-gray-500">{{ __('messages.dern_connexion') }}</span><span id="voir-connexion" class="font-medium"></span></div>
-        <div class="flex justify-between text-sm"><span class="text-gray-500">{{ __('admin.two_fa') }}</span><span class="font-medium text-green-600">{{ __('admin.email_actif') }}</span></div>
+        <div class="flex justify-between text-sm"><span class="text-gray-500">{{ __('admin.two_fa') }}</span><span class="font-medium text-green-600 flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size:15px;" aria-hidden="true">verified</span>{{ __('admin.email_actif') }}
+        </span></div>
       </div>
     </div>
     <div class="flex justify-end px-6 py-4 border-t">
@@ -209,7 +215,9 @@
      onclick="if(event.target===this)fermerModal(this.id)">
   <div class="bg-white rounded-xl w-full max-w-lg mx-4 shadow-xl">
     <div class="flex items-center justify-between px-6 py-4 border-b">
-      <h3 class="font-bold text-gray-900">{{ __('admin.modifier_admin') }}</h3>
+      <h3 class="flex items-center gap-2 font-bold text-gray-900">
+          <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">edit</span>{{ __('admin.modifier_admin') }}
+        </h3>
       <button onclick="fermerModal('modal-edit-admin')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
     </div>
     <form id="form-edit-admin" method="POST" action="">

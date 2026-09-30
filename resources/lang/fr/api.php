@@ -25,6 +25,7 @@ return [
 
     'reconnexion_requise'        => 'Votre mot de passe a été modifié. Reconnectez-vous sur vos autres appareils.',
 
+    'paiement_en_cours'         => 'Un paiement est déjà en cours pour ces frais. Confirmez-le sur votre téléphone ou attendez 5 minutes.',
     'relance_anti_spam'          => 'Une relance a déjà été envoyée à ces parents dans les :heures dernières heures.',
     'relance_force'              => 'Utilisez force=true pour la renvoyer quand même.',
 

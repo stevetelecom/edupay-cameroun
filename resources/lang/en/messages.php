@@ -47,6 +47,7 @@ return [
     'recouvrement'          => 'Recovery',
     'recus_certificats'     => 'Receipts & Certificates',
     'remboursements'        => 'Refunds',
+    'reversements'          => 'Payouts',
     's_inscrire'            => 'Sign up',
     's_inscrire_gratuit'    => 'Sign up for free',
     'statut'                => 'Status',

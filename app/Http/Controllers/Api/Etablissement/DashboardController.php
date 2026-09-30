@@ -8,6 +8,7 @@ use App\Http\Resources\PaiementResource;
 use App\Models\Abonnement;
 use App\Models\Apprenant;
 use App\Models\FraisApprenant;
+use App\Models\Etablissement;
 use App\Models\Paiement;
 use Illuminate\Http\JsonResponse;
 use App\Support\AnneeScolaire;
@@ -108,10 +109,19 @@ class DashboardController extends Controller
             ->get();
 
         // Abonnement actif
-        $abonnement = Abonnement::where('etablissement_id', $etablissementId)
-            ->whereIn('statut', ['actif', 'grace_period'])
-            ->latest()
-            ->first();
+        // Source de vérité unique : Etablissement::abonnementCourant()
+        // (tri date_debut puis id, AUCUN filtre sur `statut`).
+        //
+        // Ce code faisait whereIn('statut', [actif, grace_period])->latest(),
+        // c'est-à-dire un filtre sur un statut DERIVE des dates et un tri
+        // created_at. C'est exactement l'erreur que documente le middleware
+        // CheckAbonnement : deux abonnements inseres le meme jour étaient
+        // departages au hasard, et une ligne repassée 'expire' par une visite
+        // anterieure etait traitée comme « pas d'abonnement » alors que le
+        // middleware, lui, la prenait en compte. Consequence directe depuis le
+        // CDC S0 #3 : le plan affiche pouvait ne pas etre celui qui a fixe le
+        // taux de commission preleve.
+        $abonnement = Etablissement::find($etablissementId)?->abonnementCourant();
 
         return response()->json([
             // Audit G : le contrat mobile (docs/DOCUMENTATION_API.md) lit les
@@ -165,10 +175,19 @@ class DashboardController extends Controller
 
         $etablissementId = $user->etablissement_id;
 
-        $abonnement = Abonnement::where('etablissement_id', $etablissementId)
-            ->whereIn('statut', ['actif', 'grace_period'])
-            ->latest()
-            ->first();
+        // Source de vérité unique : Etablissement::abonnementCourant()
+        // (tri date_debut puis id, AUCUN filtre sur `statut`).
+        //
+        // Ce code faisait whereIn('statut', [actif, grace_period])->latest(),
+        // c'est-à-dire un filtre sur un statut DERIVE des dates et un tri
+        // created_at. C'est exactement l'erreur que documente le middleware
+        // CheckAbonnement : deux abonnements inseres le meme jour étaient
+        // departages au hasard, et une ligne repassée 'expire' par une visite
+        // anterieure etait traitée comme « pas d'abonnement » alors que le
+        // middleware, lui, la prenait en compte. Consequence directe depuis le
+        // CDC S0 #3 : le plan affiche pouvait ne pas etre celui qui a fixe le
+        // taux de commission preleve.
+        $abonnement = $user->etablissement?->abonnementCourant();
 
         $planActuel = $abonnement?->plan;
 

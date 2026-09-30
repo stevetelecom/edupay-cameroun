@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\User;
+use App\Support\SuppressionPayeur;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -198,24 +199,70 @@ class PayeurAdminController extends Controller
         return back()->with('success', $message);
     }
 
+    /**
+     * Suppression REELLE d'un compte payeur.
+     *
+     * Le comportement precedent — `$payeur->delete()` — ne faisait qu'un SOFT
+     * DELETE : la colonne `users.deleted_at` etait posee, la ligne restait en
+     * base. Rien n'etait reellement efface.
+     *
+     * La suppression reelle est maintenant conditionnee par la situation
+     * financiere du compte (voir App\Support\SuppressionPayeur) : elle n'est
+     * acceptee que si aucun frais ne lui est attribue, ou si tous ses frais
+     * sont deja regles. Les paiements restent en base, simplement detaches
+     * (`paiements.user_id` -> NULL), afin de preserver la tracabilite exigee
+     * par le CDC §3.2.
+     */
     public function destroy(Request $request, User $payeur)
     {
-        $nom = $payeur->nom_complet;
+        $nom  = $payeur->nom_complet;
+        $analyse = SuppressionPayeur::analyser($payeur);
+
+        if (! $analyse['autorise']) {
+            AuditLog::enregistrer(
+                Auth::guard('admin')->user(),
+                'PAYEUR_SUPPRESSION_REFUSEE',
+                "Compte payeur #{$payeur->id} — {$nom} : {$analyse['motif']}",
+                $request, 'WARNING'
+            );
+
+            $message = $analyse['motif'];
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message], 422);
+            }
+
+            return back()->with('error', $message);
+        }
+
+        // Suppression reelle. Les paiements, notifications et demandes de
+        // remboursement ne sont pas effaces : les cles etrangeres passees en
+        // ON DELETE SET NULL les detachent automatiquement, ce qui conserve le
+        // releve financier de la personne sans la maintenir en base.
+        $nombrePaiements = $payeur->paiements()->count();
 
         DB::table('sessions')->where('user_id', $payeur->id)->delete();
-        $payeur->delete();
+        $payeur->forceDelete();
 
         AuditLog::enregistrer(
             Auth::guard('admin')->user(),
             'PAYEUR_SUPPRIME',
-            "Compte payeur #{$payeur->id} — {$nom} supprimé (soft delete)",
+            "Compte payeur #{$payeur->id} — {$nom} supprimé définitivement de la base"
+            . ($nombrePaiements > 0
+                ? " ({$nombrePaiements} paiement(s) conservé(s) et détachés pour la traçabilité)"
+                : ''),
             $request, 'CRITICAL'
         );
 
-        $message = "Le compte « {$nom} » a été supprimé.";
+        $message = __('admin.suppr_payeur_ok', [
+            'nom'     => $nom,
+            'paiements' => $nombrePaiements,
+        ]);
+
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => $message]);
         }
+
         return back()->with('success', $message);
     }
 
@@ -283,30 +330,69 @@ class PayeurAdminController extends Controller
     }
 
     /**
-     * Action groupée — supprimer (soft delete) plusieurs comptes payeurs.
+     * Action groupée — supprimer RÉELLEMENT plusieurs comptes payeurs.
+     *
+     * Une sélection mixte est traitée compte par compte : seuls les comptes
+     * remplissant la regle (aucun frais attribue, ou tous les frais regles) sont
+     * effaces, les autres sont lists avec leur motif de refus. Supprimer en
+     * aveugle un lot mixte reviendrait a faire disparaitre desdebiteurs encore
+     * endettes.
      */
     public function bulkDestroy(Request $request)
     {
         $ids = $this->normaliserIds($request);
 
         if (empty($ids)) {
-            return $this->bulkReponse($request, 'Aucun compte payeur sélectionné à supprimer.', 'error');
+            return $this->bulkReponse($request, __('admin.aucun_payeur_selectionne'), 'error');
         }
 
         $users = User::whereIn('id', $ids)->whereIn('profil', $this->profils)->get();
-        $noms = $users->pluck('nom_complet')->implode(', ');
 
-        DB::table('sessions')->whereIn('user_id', $ids)->delete();
-        User::whereIn('id', $ids)->whereIn('profil', $this->profils)->delete();
+        if ($users->isEmpty()) {
+            return $this->bulkReponse($request, __('admin.aucun_payeur_selectionne'), 'error');
+        }
 
-        AuditLog::enregistrer(
-            Auth::guard('admin')->user(),
-            'PAYEURS_BULK_SUPPRIMES',
-            count($users) . " comptes payeurs supprimés (soft delete) : {$noms}",
-            $request, 'CRITICAL'
-        );
+        $lot = SuppressionPayeur::analyserLot($users);
 
-        return $this->bulkReponse($request, count($users) . ' compte(s) payeur(s) supprimé(s).', 'success');
+        $noms = $lot['supprimer']->pluck('nom_complet')->all();
+
+        if ($lot['supprimer']->isNotEmpty()) {
+            $idsSupprimables = $lot['supprimer']->pluck('id')->all();
+
+            DB::table('sessions')->whereIn('user_id', $idsSupprimables)->delete();
+            User::whereIn('id', $idsSupprimables)->forceDelete();
+
+            AuditLog::enregistrer(
+                Auth::guard('admin')->user(),
+                'PAYEURS_BULK_SUPPRIMES',
+                count($idsSupprimables) . " comptes payeurs supprimés définitivement de la base : " . implode(', ', $noms),
+                $request, 'CRITICAL'
+            );
+        }
+
+        if ($lot['refuses']->isNotEmpty()) {
+            foreach ($lot['refuses'] as $refuse) {
+                AuditLog::enregistrer(
+                    Auth::guard('admin')->user(),
+                    'PAYEUR_SUPPRESSION_REFUSEE',
+                    "Compte payeur #{$refuse->id} — {$refuse->nom_complet} : {$lot['motifs'][$refuse->id]}",
+                    $request, 'WARNING'
+                );
+            }
+        }
+
+        $message = __('admin.suppr_payeur_lot', [
+            'supprimes' => count($noms),
+            'refuses'   => $lot['refuses']->count(),
+        ]);
+
+        if ($lot['refuses']->isNotEmpty()) {
+            // Partiellement applique : `success: false` force l'affichage du
+            // message en toast d'erreur plutot qu'en succes silencieux.
+            return $this->bulkReponse($request, $message, 'error');
+        }
+
+        return $this->bulkReponse($request, $message, 'success');
     }
 
     /**

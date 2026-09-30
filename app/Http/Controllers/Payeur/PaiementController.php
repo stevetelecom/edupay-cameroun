@@ -128,10 +128,15 @@ class PaiementController extends Controller
 
         $montant = $calcul['montant'];
 
-        // Calculer les frais de service (visibles payeur = EduPay + AangaraaPay fusionnés)
+        // Calculer les frais de service (visibles payeur = taux du plan)
         // renamed: le detail des frais de service ne doit pas ecraser la
         // variable $frais qui contient le modele FraisApprenant.
-        $detailFrais = $this->aangaraa->calculerFrais($montant);
+        // L'etablissement porte le taux : il depend du profil d'abonnement
+        // de l'etablissement (CDC S0 #3).
+        $detailFrais = $this->aangaraa->calculerFrais(
+            $montant,
+            $fraisApprenant->apprenant?->etablissement
+        );
 
         // Créer le paiement en base avec statut en_attente
         $paiement = Paiement::create([
@@ -336,7 +341,12 @@ class PaiementController extends Controller
                     'paiement_id'               => $paiement->id,
                     'etablissement_id'          => $etablissement->id,
                     'montant_transaction'       => $paiement->montant,
-                    'taux'                      => $etablissement->taux_commission,
+                    // Taux REELLEMENT preleve : celui du profil d'abonnement de
+                    // l'etablissement (CDC S0 #3), pas le taux_commission
+                    // decoratif de l'etablissement. Fige a la creation pour
+                    // ne pas reecrire l'historique (CDC 3.2).
+                    'taux'                      => app(\App\Services\AangaraaPayService::class)
+                                                    ->tauxCommissionEtablissement($etablissement),
                     'montant_commission'        => $paiement->marge_edupay,
                     // Net = montant - commission EduPay (cf. Api\PaiementController)
                     'montant_net_etablissement' => max(0, $paiement->montant - $paiement->marge_edupay),

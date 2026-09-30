@@ -22,10 +22,15 @@
     // débité. Les taux viennent des paramètres système modifiables en super
     // admin : les afficher en dur ici les désynchroniserait à nouveau.
     $serviceFrais  = app(\App\Services\AangaraaPayService::class);
-    $tauxFraisVue  = $serviceFrais->tauxFraisService();
 
-    $fraisIntegral = $serviceFrais->calculerFrais((int) $resteAPayer);
-    $fraisTranche  = $serviceFrais->calculerFrais($montantTranche);
+    // Le taux depend du profil d'abonnement de l'etablissement (CDC S0 #3) :
+    // l'afficher ici avec le meme appel que le serveur evite que le total
+    // annonce au payeur diverge du montant reellement debite.
+    $etablissementFrais = $fraisApprenant->apprenant?->etablissement;
+    $tauxFraisVue  = $serviceFrais->tauxCommissionEtablissement($etablissementFrais);
+
+    $fraisIntegral = $serviceFrais->calculerFrais((int) $resteAPayer, $etablissementFrais);
+    $fraisTranche  = $serviceFrais->calculerFrais($montantTranche, $etablissementFrais);
 @endphp
 
 @section('content')

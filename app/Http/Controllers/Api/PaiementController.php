@@ -55,6 +55,35 @@ class PaiementController extends Controller
             return $lien;
         }
 
+        // Garde-fou anti-double-paiement : MEME garde que le web
+        // (Payeur\PaiementController::initier:82-100). Elle manquait ici, et
+        // deux appels « initier » sur les memes frais creaient deux Paiement
+        // distincts (chaque `reference` est unique) : le payeur etait debite
+        // deux fois, et `traiterPaiementValide` incrementait `montant_paye`
+        // deux fois sur les memes lignes de frais.
+        $paiementBloquant = Paiement::where('frais_apprenant_id', $frais->id)
+            ->where('user_id', $user->id)
+            ->where('statut', 'en_attente')
+            ->where('annule_manuellement', false)
+            ->where('created_at', '>=', now()->subMinutes(5))
+            ->latest()
+            ->first();
+
+        // Si le paiement en attente est mort (delai depasse, FAILED chez
+        // AangaraaPay) on le solde et on autorise le suivant ; s'il est
+        // vivant, on refuse et on renvoie l'identifiant pour que le mobile
+        // interroge /paiements/{id}/verifier.
+        if ($paiementBloquant && ! $this->synchroniserPaiementEnAttente($paiementBloquant)) {
+            return response()->json([
+                'message' => __('api.paiement_en_cours'),
+                'code'    => 'paiement_en_cours',
+                'data'    => [
+                    'paiement_id' => $paiementBloquant->id,
+                    'reference'   => $paiementBloquant->reference,
+                ],
+            ], 409);
+        }
+
         $telephoneNormalise = $this->aangaraa->normaliserNumero($valid['telephone']);
         $numeroLocal        = substr($telephoneNormalise, 3);
 
@@ -101,7 +130,12 @@ class PaiementController extends Controller
 
         // renamed: le detail des frais de service ne doit pas ecraser la
         // variable $frais qui contient le modele FraisApprenant.
-        $detailFrais = $this->aangaraa->calculerFrais($montant);
+        // L'etablissement est passe pour que le taux de commission soit celui
+        // du profil d'abonnement (CDC S0 #3) et non le taux global.
+        $detailFrais = $this->aangaraa->calculerFrais(
+            $montant,
+            $frais->apprenant?->etablissement
+        );
 
         $paiement = Paiement::create([
             'user_id'            => $user->id,
@@ -128,10 +162,14 @@ class PaiementController extends Controller
             Log::warning('API paiement initier — notify_url pointe vers localhost', ['notify_url' => $notifyUrl]);
         }
 
+        // La validation n'accepte que ces deux modes. Le `default` leve une
+        // exception au lieu de retomber a `null` : avec `null`, AangaraaPay
+        // deduit l'operateur du numero et debite quand meme en Mobile Money,
+        // ce qui faisait diverger le mouvement reel et la comptabilisation.
         $operateur = match ($valid['mode_paiement']) {
             'mtn_momo'     => 'MTN_Cameroon',
             'orange_money' => 'Orange_Cameroon',
-            default        => null,
+            default        => throw new \InvalidArgumentException('Mode de paiement non supporte : ' . $valid['mode_paiement']),
         };
 
         $resultat = $this->aangaraa->initierPaiement(
@@ -337,7 +375,15 @@ class PaiementController extends Controller
                         'paiement_id'               => $paiement->id,
                         'etablissement_id'          => $etablissement->id,
                         'montant_transaction'       => $paiement->montant,
-                        'taux'                      => $etablissement->taux_commission,
+                        // Taux REELLEMENT preleve sur cette transaction : celui
+                        // du profil d'abonnement (CDC S0 #3). On copiait
+                        // etablissements.taux_commission, une valeur qui
+                        // n'entrait dans aucun calcul et affichait 0,5 % au
+                        // lieu des 2,3 % reels. La commission est figee a la
+                        // creation : un changement de taux ulterieur ne doit
+                        // pas reecrire l'historique (CDC 3.2).
+                        'taux'                      => app(\App\Services\AangaraaPayService::class)
+                                                        ->tauxCommissionEtablissement($etablissement),
                         'montant_commission'        => $paiement->marge_edupay,
                         // Le net reverse est le montant MOINS la commission
                         // EduPay. Mettre montant - commission ici eviterait de
@@ -361,6 +407,41 @@ class PaiementController extends Controller
         }
 
         return $resultat;
+    }
+
+    /**
+     * Synchronise un paiement en_attente avec AangaraaPay.
+     * Retourne true si un nouveau paiement peut etre lance.
+     *
+     * Memoire de la version web (Payeur\PaiementController:591-614), passee
+     * en API : c'est la seule facon de distinguer un paiement « mort » d'un
+     * paiement « vivant » avant d'en creer un second.
+     */
+    private function synchroniserPaiementEnAttente(Paiement $paiement): bool
+    {
+        if ($paiement->created_at->lt(now()->subMinutes(5))) {
+            $this->marquerEchoue($paiement, 'Délai d\'attente dépassé (5 minutes).');
+
+            return true;
+        }
+
+        if (! $paiement->pay_token) {
+            return false;
+        }
+
+        $check = $this->aangaraa->verifierStatut($paiement->pay_token);
+
+        if ($check['statut'] === 'FAILED') {
+            $this->marquerEchoue($paiement, $check['message'] ?? null);
+
+            return true;
+        }
+
+        if ($check['statut'] === 'SUCCESSFUL') {
+            $this->traiterPaiementValide($paiement->id);
+        }
+
+        return false;
     }
 
     private function marquerEchoue(Paiement $paiement, ?string $raison = null): bool

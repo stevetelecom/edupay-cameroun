@@ -172,10 +172,56 @@ class ReverserEtablissementJob implements ShouldQueue
         $commission->refresh();
 
         if ($reserve === 0) {
+            // L'echec de la reservation a DEUX causes tres differentes, et les
+            // confondre enverrait chercher une concurrence inexistante :
+            //  1. un autre traitement a bien reserve -> vraie concurrence ;
+            //  2. la commission n'etait pas « calculee » mais dans un etat
+            //     terminal (« echec »), le job ayant ete dispatche a tort.
+            // Le cas 2 est survenu reel le 30/09/2026 via
+            // `aangaraa:reversements:rejouer --retablir-echec`, qui annoncait
+            // « 1 reversement mis en file » alors que l'UPDATE conditionnel ne
+            // pouvait pas aboutir : aucun appel API n'etait emis, et le log
+            // designait une concurrence fantome.
+            $statutObserve = $commission->statut;
+            $estTerminal = in_array($statutObserve, [
+                Commission::STATUT_ECHEC,
+                Commission::STATUT_A_VERIFIER,
+                Commission::STATUT_PRELEVEE,
+            ], true);
+
+            $raison = $estTerminal
+                ? 'Reversement dans un etat terminal (statut : ' . $statutObserve . ') : '
+                    . 'ce job ne reserve que les commissions « calculee ». Il a ete dispatche '
+                    . 'sur une ligne non reservable, donc aucun appel AangaraaPay n\'a ete fait. '
+                    . 'Repartir de zero demande « aangaraa:reversements:rejouer --retablir-echec ».'
+                : 'Un autre traitement a reserve ce reversement entre-temps (statut : '
+                    . $statutObserve . ') : aucun nouvel envoi.';
+
+            $this->mettreEnAttenteDeVerification($commission, $raison);
+
+            return;
+        }
+
+        // ── Garde-fou metier : aucun reversement sans paiement VALIDE ──
+        //
+        // Le statut `calculee` de la commission est pose par le webhook quand le
+        // paiement passe a `valide`, mais ce statut n'est pas une preuve : une
+        // commission reinserive a la main, un rejeu de commande, ou un webhook
+        // qui aurait produit la commission avant d'aboutir pourraient tous
+        // envoyer de l'argent sur un paiement echeoue, annule ou encore en
+        // attente de confirmation du client.
+        //
+        // `paiements.statut` est la seule source de verite, et elle se verifie
+        // seule, independamment du code qui a emis la commission. On relit donc
+        // le paiement en base juste avant d'envoyer l'argent.
+        $paiement = $commission->paiement()->first();
+
+        if (! $paiement || $paiement->statut !== 'valide') {
             $this->mettreEnAttenteDeVerification(
                 $commission,
-                'Un autre traitement a reserve ce reversement entre-temps (statut : '
-                . $commission->statut . ') : aucun nouvel envoi.'
+                'Aucun reversement envoye : le paiement #'
+                . ($paiement?->id ?? '?') . ' est au statut « '
+                . ($paiement?->statut ?? 'intrant') . ' », pas « valide ».'
             );
             return;
         }
