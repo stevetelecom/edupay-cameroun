@@ -501,6 +501,9 @@
         });
     }
 
+    } // ── ferme monterGraphiques() : cette accolade manquait, le script
+      //    entier mourait en SyntaxError et les 2 graphiques restaient vides
+
     // Premier rendu, puis re-rendu en fondu à chaque bascule clair/sombre
     monterGraphiques();
     var epTimerTheme = null;

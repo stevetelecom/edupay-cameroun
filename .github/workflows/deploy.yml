@@ -81,7 +81,7 @@ jobs:
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p 22" \
             ./ ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:${{ secrets.DEPLOY_PATH }}
 
-      - name: Post-deploy
+      - name: Post-deploy - migrations et seeders
         run: |
           ssh -i ~/.ssh/deploy_key \
               -o StrictHostKeyChecking=no \
@@ -94,11 +94,26 @@ jobs:
                php artisan db:seed --class=PayeurTestSeeder --force && \
                php artisan db:seed --class=EtablissementsPaginationSeeder --force && \
                php artisan db:seed --class=ProdCoreAccountsSeeder --force && \
-               php artisan db:seed --class=PayeurRegleTestSeeder --force && \
-               php artisan permission:cache-reset && \
-               php artisan storage:link && \
-               php artisan config:cache && \
-               php artisan route:cache && \
+               php artisan db:seed --class=PayeurRegleTestSeeder --force"
+
+      # Les caches etant reconstruits meme si un seeder a echoue. La chaine
+      # `&&` unique d'origine faisait dependre config:cache, route:cache et
+      # view:cache de la reussite du DERNIER seeder : un seeder en echec
+      # laissait le site avec un cache de configuration perime, sans le
+      # moindre signal. Les separateurs `;` garantissent que chaque cache est
+      # reconstruit meme si l'un d'echoue.
+      - name: Post-deploy - reconstruction des caches (toujours execute)
+        if: always()
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              -p 22 \
+              ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} \
+              "cd ${{ secrets.DEPLOY_PATH }}; \
+               php artisan permission:cache-reset; \
+               php artisan storage:link; \
+               php artisan config:cache; \
+               php artisan route:cache; \
                php artisan view:cache"
 
       - name: Remove GitHub Actions IP from whitelist
