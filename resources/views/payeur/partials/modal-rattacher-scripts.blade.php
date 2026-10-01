@@ -19,7 +19,19 @@ function mEscapeHtml(str) {
         .replace(/'/g, '&#039;');
 }
 
-// ── Modal rattachement ──
+// ── Modal rattachement : liste des établissements ──
+// Liste déroulante à la datalist (maquette v3) : elle s'ouvre au focus/à la
+// saisie et ne se ferme que par un clic HORS de la zone étape 1. L'ancienne
+// version fermait la liste pour tout clic hors des 3 champs : le clic sur le
+// bouton « Rechercher » (non protégé) déclenchait donc
+// ouverture (handler du bouton) puis fermeture immédiate (handler global) —
+// c'est le bug « la liste apparaît puis disparaît ». La protection s'appuie
+// désormais sur la zone #m-step1 entière, et non plus champ par champ.
+function mListeVisible(visible) {
+    var liste = document.getElementById('m-etab-liste');
+    if (liste) liste.style.display = visible ? 'block' : 'none';
+}
+
 function mFiltrerEtabs() {
     var nom   = (document.getElementById('m-etab-search').value || '').toLowerCase().trim();
     var ville = (document.getElementById('m-etab-ville').value  || '').toLowerCase().trim();
@@ -33,6 +45,8 @@ function mFiltrerEtabs() {
                 && (!code  || iCode.includes(code));
         item.style.display = show ? 'flex' : 'none';
     });
+    // Toute saisie dans les filtres (re)monte la liste, comme un datalist
+    mListeVisible(true);
 }
 
 function mSelectionnerEtab(el) {
@@ -54,9 +68,10 @@ function mSelectionnerEtab(el) {
     if (badgeNom)   badgeNom.textContent   = el.dataset.nom;
     if (badgeVille) badgeVille.textContent = (el.dataset.ville || '') + (el.dataset.type ? ' · ' + el.dataset.type : '');
 
-    // Passer à l'étape 2
+    // Passer à l'étape 2 et replier la liste (comportement datalist)
     document.getElementById('m-step1').style.display = 'none';
     document.getElementById('m-step2').style.display = 'block';
+    mListeVisible(false);
 
     // Révéler la section annuaire (recherche apprenant) — masquée par défaut
     var sectionAnnuaire = document.getElementById('m-section-annuaire');
@@ -89,26 +104,36 @@ function mReinitEtab() {
         i.querySelector('.m-etab-check').style.opacity = '0';
         i.style.display = 'flex';
     });
-    // Revenir à l'étape 1
+    // Revenir à l'étape 1, liste visible (comportement datalist)
     document.getElementById('m-step1').style.display = 'block';
     document.getElementById('m-step2').style.display = 'none';
-    // Réafficher la liste des établissements (le clic global peut l'avoir masquée)
-    var listeEtabs = document.getElementById('m-etab-liste');
-    if (listeEtabs) listeEtabs.style.display = 'block';
+    mListeVisible(true);
     var sectionAnnuaire2 = document.getElementById('m-section-annuaire');
     if (sectionAnnuaire2) sectionAnnuaire2.style.display = 'none';
     mReinitApprenant();
 }
 
+// ── Soumission : validation inline + étape de confirmation (v3) ──
+function mAfficherErreur(message, champ) {
+    var errBox = document.getElementById('m-erreur');
+    if (errBox) {
+        errBox.textContent = message;
+        errBox.style.display = 'block';
+    }
+    if (champ) {
+        champ.style.border = '1.5px solid var(--ep-red)';
+        champ.focus();
+    }
+}
+
 function mSoumettre() {
-    var etabId = document.getElementById('m-h-etab-id').value;
+    var etabId  = document.getElementById('m-h-etab-id').value;
     var etabNom = document.getElementById('m-h-etab-nom').value;
 
     // Vérifier établissement
     if (!etabId && !etabNom) {
-        document.getElementById('m-etab-search').style.border = '1.5px solid var(--ep-red)';
-        document.getElementById('m-etab-search').focus();
-        alert(PAYEUR_L10N.select_etab);
+        mAfficherErreur(PAYEUR_L10N.select_etab, document.getElementById('m-etab-search'));
+        mListeVisible(true);
         return;
     }
 
@@ -117,38 +142,100 @@ function mSoumettre() {
     if (appId) {
         // Rattachement direct via apprenant_id existant
         document.getElementById('m-h-matricule').value = mApprenantSelectionne
-            ? mApprenantSelectionne.matricule : '';
+            ? (mApprenantSelectionne.matricule || '') : '';
     }
 
     // Vérifier classe obligatoire
     var classeInp = document.querySelector('#m-onb-form [name="classe"]');
     if (classeInp && !classeInp.value.trim()) {
-        classeInp.style.border = '1.5px solid var(--ep-red)';
-        classeInp.focus();
-        alert(PAYEUR_L10N.select_classe);
+        mAfficherErreur(PAYEUR_L10N.select_classe, classeInp);
         return;
     }
 
+    // Validation OK : masquer l'erreur, remplir le récapitulatif et afficher
+    // l'étape de confirmation au lieu de soumettre brutalement le formulaire.
+    var errBox = document.getElementById('m-erreur');
+    if (errBox) errBox.style.display = 'none';
+
+    var confEtab   = document.getElementById('m-conf-etab');
+    var confVille  = document.getElementById('m-conf-ville');
+    var confApp    = document.getElementById('m-conf-app');
+    var confClasse = document.getElementById('m-conf-classe');
+    var confMat    = document.getElementById('m-conf-mat');
+
+    if (confEtab)  confEtab.textContent  = etabNom;
+    if (confVille) confVille.textContent = (document.getElementById('m-etab-badge-ville') || {}).textContent || '';
+
+    if (confApp) {
+        if (appId && mApprenantSelectionne) {
+            confApp.textContent = mApprenantSelectionne.prenom + ' ' + mApprenantSelectionne.nom;
+        } else {
+            var pInp = document.querySelector('#m-onb-form [name="prenom_apprenant"]');
+            var nInp = document.querySelector('#m-onb-form [name="nom_apprenant"]');
+            confApp.textContent = (((pInp && pInp.value) || '') + ' ' + ((nInp && nInp.value) || '')).trim();
+        }
+    }
+    if (confClasse) confClasse.textContent = (classeInp && classeInp.value) || '—';
+    if (confMat) {
+        var matAffiche = (appId && mApprenantSelectionne && mApprenantSelectionne.matricule)
+            ? mApprenantSelectionne.matricule
+            : (document.querySelector('#m-onb-form [name="matricule_display"]') || {}).value;
+        confMat.textContent = matAffiche || '—';
+    }
+
+    document.getElementById('m-step1').style.display = 'none';
+    document.getElementById('m-step2').style.display = 'none';
+    var etapeConfirm = document.getElementById('m-step-confirm');
+    if (etapeConfirm) etapeConfirm.style.display = 'block';
+    mListeVisible(false);
+
+    // Pied du modal : « Rattacher » cède la place à « Confirmer » + « Retour »
+    var btnSubmit    = document.getElementById('m-btn-submit');
+    var btnConfirmer = document.getElementById('m-btn-confirmer');
+    var btnRetour    = document.getElementById('m-btn-retour');
+    if (btnSubmit)    btnSubmit.style.display    = 'none';
+    if (btnConfirmer) btnConfirmer.style.display = 'inline-flex';
+    if (btnRetour)    btnRetour.style.display    = 'inline-flex';
+}
+
+function mRetourConfirmation() {
+    var etapeConfirm = document.getElementById('m-step-confirm');
+    if (etapeConfirm) etapeConfirm.style.display = 'none';
+    document.getElementById('m-step2').style.display = 'block';
+    var errBox = document.getElementById('m-erreur');
+    if (errBox) errBox.style.display = 'none';
+    // Pied du modal : retour aux boutons de l'étape 2
+    var btnSubmit    = document.getElementById('m-btn-submit');
+    var btnConfirmer = document.getElementById('m-btn-confirmer');
+    var btnRetour    = document.getElementById('m-btn-retour');
+    if (btnSubmit)    btnSubmit.style.display    = 'inline-flex';
+    if (btnConfirmer) btnConfirmer.style.display = 'none';
+    if (btnRetour)    btnRetour.style.display    = 'none';
+}
+
+function mConfirmerRattachement() {
+    // Verrou anti double-clic : le pied du modal n'a qu'un seul bouton actif a
+    // ce stade (« Confirmer »), donc le desactiver suffit a empecher le second
+    // submit. Le controller est idempotent sur l'identite, ce qui couvre aussi
+    // le re-envoi du navigateur.
+    var btn = document.getElementById('m-btn-confirmer');
+    if (btn) {
+        if (btn.disabled) return;
+        btn.disabled = true;
+    }
     document.getElementById('m-onb-form').submit();
 }
 
+// Fermeture « clic extérieur » : on replie la liste uniquement quand le clic
+// tombe hors de la zone étape 1 (filtres + bouton + liste). Phase capture :
+// exécutée avant les handlers des éléments, quel que soit l'ordre d'empilement.
 document.addEventListener('click', function(e) {
-    var liste  = document.getElementById('m-etab-liste');
-    var search = document.getElementById('m-etab-search');
-    var villeInp = document.getElementById('m-etab-ville');
-    var codeInp  = document.getElementById('m-etab-code');
-    var changerBtn = document.getElementById('m-btn-changer-etab');
-    if (!liste) return;
-    // Ne pas masquer si le clic vient d'un des filtres, de la liste, ou du bouton « Changer d'établissement »
-    var cibleFiltre = (search    && search.contains(e.target))
-                   || (villeInp  && villeInp.contains(e.target))
-                   || (codeInp   && codeInp.contains(e.target))
-                   || (changerBtn && changerBtn.contains(e.target))
-                   || liste.contains(e.target);
-    if (!cibleFiltre) {
-        liste.style.display = 'none';
-    }
-});
+    var liste = document.getElementById('m-etab-liste');
+    var step1 = document.getElementById('m-step1');
+    if (!liste || !step1) return;
+    if (step1.contains(e.target)) return;
+    mListeVisible(false);
+}, true);
 
 // ── Annuaire apprenants (F04) ──
 var mAnnuaireTimeout = null;
@@ -290,5 +377,36 @@ function mReinitApprenant() {
     if (searchInp) { searchInp.value = ''; }
     mAfficherSaisieManuelle(false);
 }
+
+// ── Réinitialisation complète à CHAQUE ouverture du modal ──
+// Sans cela, une confirmation abandonnée laissait le modal sur l'étape 3
+// (et le pied avec « Confirmer ») à la réouverture suivante.
+function mResetComplet() {
+    var errBox = document.getElementById('m-erreur');
+    if (errBox) errBox.style.display = 'none';
+    var stepConfirm = document.getElementById('m-step-confirm');
+    if (stepConfirm) stepConfirm.style.display = 'none';
+    var step2 = document.getElementById('m-step2');
+    if (step2) step2.style.display = 'none';
+    var step1 = document.getElementById('m-step1');
+    if (step1) step1.style.display = 'block';
+    var btnSubmit    = document.getElementById('m-btn-submit');
+    var btnConfirmer = document.getElementById('m-btn-confirmer');
+    var btnRetour    = document.getElementById('m-btn-retour');
+    if (btnSubmit)    btnSubmit.style.display    = 'inline-flex';
+    if (btnConfirmer) btnConfirmer.style.display = 'none';
+    if (btnRetour)    btnRetour.style.display    = 'none';
+    mReinitEtab();
+}
+
+// epModal.open ajoute la classe .open sur l'overlay : on l'observe pour
+// repartir de l'étape 1 à chaque ouverture, quel que soit le bouton appelant.
+(function () {
+    var overlay = document.getElementById('modal-rattacher');
+    if (!overlay || !window.MutationObserver) return;
+    new MutationObserver(function () {
+        if (overlay.classList.contains('open')) mResetComplet();
+    }).observe(overlay, { attributes: true, attributeFilter: ['class'] });
+})();
 
 </script>

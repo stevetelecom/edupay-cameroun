@@ -3,20 +3,23 @@
 
 @push('modals')
 {{-- ══ MODAL : Nouvel abonnement ══ --}}
-<div id="modal-new-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
+<div id="modal-new-abo" class="ep-modal-overlay overflow-y-auto"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-lg shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto overflow-hidden">
-    <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
-      <h3 class="font-bold text-gray-900">{{ __('admin.activer_abonnement_btn') }}</h3>
-      <button onclick="fermerModal('modal-new-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+  <div class="ep-modal ep-modal-lg flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
+      <h3 style="display:flex;align-items:center;gap:9px;">
+        <span class="ep-ico vert ep-ico-side"><span class="material-symbols-outlined">add_circle</span></span>
+        {{ __('admin.activer_abonnement_btn') }}
+      </h3>
+      <button class="ep-modal-close" onclick="fermerModal('modal-new-abo')">×</button>
     </div>
     <form method="POST" action="{{ route('admin.abonnements.store') }}" class="flex flex-col flex-1 min-h-0">
       @csrf
-      <div class="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+      <div class="ep-modal-body space-y-4 overflow-y-auto flex-1 min-h-0">
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.etablissement') }} *</label>
+          <label class="lbl">{{ __('messages.etablissement') }} *</label>
           <select name="etablissement_id" required
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75] bg-white">
+                  class="select">
             <option value="">-- {{ __('admin.choisir_etablissement') }} --</option>
             @foreach(\App\Models\Etablissement::where('statut','actif')->orderBy('nom')->get() as $etab)
               <option value="{{ $etab->id }}">{{ $etab->nom }} — {{ $etab->ville }}</option>
@@ -24,7 +27,7 @@
           </select>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.plan_etoile') }}</label>
+          <label class="lbl">{{ __('admin.plan_etoile') }}</label>
           <div class="grid grid-cols-3 gap-3">
             @foreach(\App\Models\Abonnement::PLANS as $key => $plan)
             <label class="border-2 rounded-lg p-3 cursor-pointer text-center transition-all hover:border-[#0D9E75]"
@@ -40,16 +43,16 @@
           </div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.date_debut') }}</label>
+          <label class="lbl">{{ __('admin.date_debut') }}</label>
           <input type="date" name="date_debut" id="date-debut-new" required value="{{ now()->format('Y-m-d') }}"
                  onchange="majResume('periode-prevue-new', 'montant-prevu-new', this.value, document.getElementById('duree-mois-new').value, planCourant)"
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"/>
+                 class="inp"/>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.duree_abonnement') }}</label>
+          <label class="lbl">{{ __('admin.duree_abonnement') }}</label>
           <select name="duree_mois" id="duree-mois-new"
                   onchange="majResume('periode-prevue-new', 'montant-prevu-new', document.getElementById('date-debut-new').value, this.value, planCourant)"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
+                  class="inp">
             @foreach(\App\Models\Abonnement::DUREES_MOIS as $mois)
               <option value="{{ $mois }}">{{ $mois }} {{ __('admin.mois') }}</option>
             @endforeach
@@ -60,26 +63,25 @@
                class="mt-2 text-xs text-[#0D9E75] bg-[#E8F7F1] rounded-lg px-3 py-2 font-medium"></div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.montant_a_encaisser') }}</label>
+          <label class="lbl">{{ __('admin.montant_a_encaisser') }}</label>
           <div id="montant-prevu-new"
                class="text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 font-bold"></div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.ref_paiement_recu') }}</label>
+          <label class="lbl">{{ __('admin.ref_paiement_recu') }}</label>
           <input type="text" name="reference_paiement" placeholder="{{ __('admin.ph_ref_mtn') }}"
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"/>
+                 class="inp"/>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.notes') }}</label>
+          <label class="lbl">{{ __('admin.notes') }}</label>
           <textarea name="notes" rows="2" placeholder="{{ __('admin.notes_ph') }}"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"></textarea>
+                    class="inp"></textarea>
         </div>
       </div>
-      <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
-        <button type="button" onclick="fermerModal('modal-new-abo')"
-                class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('messages.annuler') }}</button>
+      <div class="ep-modal-foot shrink-0">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="fermerModal('modal-new-abo')">{{ __('messages.annuler') }}</button>
         <button type="submit"
-                class="px-5 py-2 text-sm bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold rounded-lg">
+                class="btn-p" style="width:auto;padding:8px 20px;">
           {{ __('admin.activer_abonnement_title') }}
         </button>
       </div>
@@ -88,26 +90,27 @@
 </div>
 
 {{-- ══ MODAL : Renouveler ══ --}}
-<div id="modal-renew-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
+<div id="modal-renew-abo" class="ep-modal-overlay overflow-y-auto"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-md shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto overflow-hidden">
-    <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
-      <h3 class="flex items-center gap-2 font-bold text-gray-900">
-          <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">autorenew</span>{{ __('admin.renouveler_abonnement') }}
-        </h3>
-      <button onclick="fermerModal('modal-renew-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+  <div class="ep-modal ep-modal-md flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
+      <h3 style="display:flex;align-items:center;gap:9px;">
+        <span class="ep-ico or ep-ico-side"><span class="material-symbols-outlined" aria-hidden="true">autorenew</span></span>
+        {{ __('admin.renouveler_abonnement') }}
+      </h3>
+      <button class="ep-modal-close" onclick="fermerModal('modal-renew-abo')">×</button>
     </div>
-    <form id="form-renew" method="POST" action="" class="flex flex-col flex-1 min-h-0">
+    <form id="form-renew" method="POST" action="">
       @csrf @method('PATCH')
-      <div class="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+      <div class="ep-modal-body space-y-4 overflow-y-auto flex-1 min-h-0">
         <div class="bg-blue-50 rounded-lg p-3 text-sm text-blue-700">
           {{ __('admin.renouvellement_pour') }} <strong id="renew-nom"></strong><br/>
           {{ __('admin.plan_actuel_label') }} <strong id="renew-plan"></strong>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.duree_abonnement') }}</label>
+          <label class="lbl">{{ __('admin.duree_abonnement') }}</label>
           <select name="duree_mois" id="duree-mois-renew" onchange="majResume('periode-prevue-renew', 'montant-prevu-renew', renouvellementDebut(), this.value, planRenouvellement)"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
+                  class="inp">
             @foreach(\App\Models\Abonnement::DUREES_MOIS as $mois)
               <option value="{{ $mois }}">{{ $mois }} {{ __('admin.mois') }}</option>
             @endforeach
@@ -116,26 +119,25 @@
                class="mt-2 text-xs text-[#0D9E75] bg-[#E8F7F1] rounded-lg px-3 py-2 font-medium"></div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.montant_a_encaisser') }}</label>
+          <label class="lbl">{{ __('admin.montant_a_encaisser') }}</label>
           <div id="montant-prevu-renew"
                class="text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 font-bold"></div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.ref_paiement_recu') }}</label>
+          <label class="lbl">{{ __('admin.ref_paiement_recu') }}</label>
           <input type="text" name="reference_paiement" placeholder="{{ __('admin.ph_ref_om') }}"
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"/>
+                 class="inp"/>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.notes') }}</label>
+          <label class="lbl">{{ __('admin.notes') }}</label>
           <textarea name="notes" rows="2"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"></textarea>
+                    class="inp"></textarea>
         </div>
       </div>
-      <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
-        <button type="button" onclick="fermerModal('modal-renew-abo')"
-                class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('messages.annuler') }}</button>
+      <div class="ep-modal-foot shrink-0">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="fermerModal('modal-renew-abo')">{{ __('messages.annuler') }}</button>
         <button type="submit"
-                class="px-5 py-2 text-sm bg-[#185FA5] hover:bg-[#144d8a] text-white font-semibold rounded-lg">
+                class="btn-p" style="width:auto;padding:8px 20px;background:var(--ep-blue,#185FA5);">
           {{ __('admin.confirmer_renouvellement') }}
         </button>
       </div>
@@ -143,23 +145,26 @@
   </div>
 </div>
 {{-- ══ MODAL : Modifier le plan ══ --}}
-<div id="modal-edit-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
+<div id="modal-edit-abo" class="ep-modal-overlay overflow-y-auto"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-md shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto overflow-hidden">
-    <div class="flex items-center justify-between px-6 py-4 border-b shrink-0">
-      <h3 class="font-bold text-gray-900">{{ __('admin.modifier_plan') }}</h3>
-      <button onclick="fermerModal('modal-edit-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+  <div class="ep-modal ep-modal-md flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
+      <h3 style="display:flex;align-items:center;gap:9px;">
+        <span class="ep-ico bleu ep-ico-side"><span class="material-symbols-outlined">tune</span></span>
+        {{ __('admin.modifier_plan') }}
+      </h3>
+      <button class="ep-modal-close" onclick="fermerModal('modal-edit-abo')">×</button>
     </div>
-    <form id="form-edit-abo" method="POST" action="" class="flex flex-col flex-1 min-h-0">
+    <form id="form-edit-abo" method="POST" action="">
       @csrf @method('PATCH')
-      <div class="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+      <div class="ep-modal-body space-y-4 overflow-y-auto flex-1 min-h-0">
         <div class="bg-gray-50 rounded-lg p-3 text-sm text-gray-700">
           {{ __('messages.etablissement') }} : <strong id="edit-abo-nom"></strong><br/>
           {{ __('admin.periode_actuelle') }} : <strong id="edit-abo-periode"></strong>
           <input type="hidden" id="edit-abo-debut" value="">
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-2">{{ __('admin.nouveau_plan') }}</label>
+          <label class="lbl">{{ __('admin.nouveau_plan') }}</label>
           <div class="grid grid-cols-3 gap-3">
             @foreach(\App\Models\Abonnement::PLANS as $key => $plan)
             <label class="border-2 rounded-lg p-3 cursor-pointer text-center transition-all hover:border-[#0D9E75]"
@@ -174,9 +179,9 @@
           </div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.duree_abonnement') }}</label>
+          <label class="lbl">{{ __('admin.duree_abonnement') }}</label>
           <select name="duree_mois" id="duree-mois-edit" onchange="majResume('periode-prevue-edit', 'montant-prevu-edit', document.getElementById('edit-abo-debut').value, this.value, planEdition)"
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]">
+                  class="inp">
             @foreach(\App\Models\Abonnement::DUREES_MOIS as $mois)
               <option value="{{ $mois }}">{{ $mois }} {{ __('admin.mois') }}</option>
             @endforeach
@@ -185,26 +190,25 @@
                class="mt-2 text-xs text-[#0D9E75] bg-[#E8F7F1] rounded-lg px-3 py-2 font-medium"></div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.montant_a_encaisser') }}</label>
+          <label class="lbl">{{ __('admin.montant_a_encaisser') }}</label>
           <div id="montant-prevu-edit"
                class="text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 font-bold"></div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.ref_paiement') }}</label>
+          <label class="lbl">{{ __('admin.ref_paiement') }}</label>
           <input type="text" name="reference_paiement" placeholder="{{ __('admin.ph_ref_mtn') }}"
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"/>
+                 class="inp"/>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.notes') }}</label>
+          <label class="lbl">{{ __('admin.notes') }}</label>
           <textarea name="notes" rows="2"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"></textarea>
+                    class="inp"></textarea>
         </div>
       </div>
-      <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
-        <button type="button" onclick="fermerModal('modal-edit-abo')"
-                class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('messages.annuler') }}</button>
+      <div class="ep-modal-foot shrink-0">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="fermerModal('modal-edit-abo')">{{ __('messages.annuler') }}</button>
         <button type="submit"
-                class="px-5 py-2 text-sm bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold rounded-lg">
+                class="btn-p" style="width:auto;padding:8px 20px;">
           {{ __('messages.enregistrer') }}
         </button>
       </div>
@@ -213,25 +217,24 @@
 </div>
 
 {{-- ══ MODAL : Supprimer abonnement ══ --}}
-<div id="modal-delete-abo" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center overflow-y-auto p-4"
+<div id="modal-delete-abo" class="ep-modal-overlay overflow-y-auto"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-sm shadow-xl flex flex-col max-h-[calc(100vh-2rem)] my-auto">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-red-100 shrink-0">
-      <h3 class="font-bold text-red-600">{{ __('admin.supprimer_abonnement') }}</h3>
-      <button onclick="fermerModal('modal-delete-abo')" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+  <div class="ep-modal ep-modal-sm flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
+      <h3 style="color:var(--ep-red);">{{ __('admin.supprimer_abonnement') }}</h3>
+      <button class="ep-modal-close" onclick="fermerModal('modal-delete-abo')">×</button>
     </div>
-    <div class="p-6 overflow-y-auto flex-1">
+    <div class="ep-modal-body overflow-y-auto flex-1 min-h-0">
       <p class="text-sm text-gray-600 leading-relaxed">
-        {!! __('admin.confirm_suppr_abonnement', ['nom' => e('<span id="delete-abo-nom" class="text-red-600"></span>')]) !!}
+        {!! __('admin.confirm_suppr_abonnement', ['nom' => '<span id="delete-abo-nom" class="text-red-600"></span>']) !!}
       </p>
     </div>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t shrink-0">
-      <button onclick="fermerModal('modal-delete-abo')"
-              class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('messages.annuler') }}</button>
+    <div class="ep-modal-foot shrink-0">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="fermerModal('modal-delete-abo')">{{ __('messages.annuler') }}</button>
       <form id="form-delete-abo" method="POST" style="display:inline;">
         @csrf @method('DELETE')
         <button type="submit"
-                class="px-5 py-2 text-sm bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg">
+                class="btn-r" style="width:auto;padding:8px 18px;">
           {{ __('admin.supprimer') }}
         </button>
       </form>

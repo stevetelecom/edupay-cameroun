@@ -9,8 +9,8 @@
 {{-- ══ MODAL : Ajouter un admin — composant ep-modal (coins 16px, en-tête pastille époxy, Poppins) ══ --}}
 <div id="modal-create-admin" class="ep-modal-overlay"
      onclick="if(event.target===this)epModal.close('modal-create-admin')">
-  <div class="ep-modal ep-modal-md">
-    <div class="ep-modal-head">
+  <div class="ep-modal ep-modal-md flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
       <div style="display:flex;align-items:center;gap:11px;min-width:0;">
         <div class="ep-ico purple ep-ico-side"><span class="material-symbols-outlined">person_add</span></div>
         <h3>{{ __('admin.ajouter_admin') }}</h3>
@@ -68,7 +68,7 @@
         </div>
 
       </div>
-      <div class="ep-modal-foot">
+      <div class="ep-modal-foot shrink-0">
         <button type="button"
                 onclick="epModal.close('modal-create-admin')"
                 class="btn-o" style="width:auto;padding:8px 16px;">
@@ -85,30 +85,28 @@
 </div>
 
 {{-- ══ MODAL : Confirmer suppression ══ --}}
-<div id="modal-delete-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+<div id="modal-delete-admin" class="ep-modal-overlay overflow-y-auto"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-sm mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-red-100">
-      <h3 class="flex items-center gap-2 font-bold text-red-600">
+  <div class="ep-modal ep-modal-sm flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
+      <h3 style="color:var(--ep-red);">
           <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">delete</span>{{ __('admin.supprimer_admin') }}
         </h3>
-      <button onclick="fermerModal('modal-delete-admin')"
-              class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+      <button class="ep-modal-close" onclick="fermerModal('modal-delete-admin')">×</button>
     </div>
-    <div class="p-6">
-      <p class="text-sm text-gray-600 leading-relaxed">
-        {!! __('admin.confirm_suppr_admin', ['nom' => e('<span id="delete-admin-nom" class="text-red-600"></span>')]) !!}
+    <div class="ep-modal-body">
+      <p style="font-size:13.5px;color:var(--ep-gris);line-height:1.7;font-family:'Poppins',sans-serif;">
+        {!! __('admin.confirm_suppr_admin', ['nom' => '<span id="delete-admin-nom" style="color:var(--ep-red);font-weight:600;"></span>']) !!}
       </p>
     </div>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t">
-      <button onclick="fermerModal('modal-delete-admin')"
-              class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+    <div class="ep-modal-foot shrink-0">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="fermerModal('modal-delete-admin')">
         {{ __('messages.annuler') }}
       </button>
       <form id="delete-admin-form" method="POST" style="display:inline;">
         @csrf @method('DELETE')
         <button type="submit"
-                class="px-5 py-2 text-sm bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg">
+                class="btn-r" style="width:auto;padding:8px 18px;">
           {{ __('admin.supprimer') }}
         </button>
       </form>
@@ -117,28 +115,28 @@
 </div>
 
 {{-- ══ MODAL : Confirmer suspension ══ --}}
-<div id="modal-suspend-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+<div id="modal-suspend-admin" class="ep-modal-overlay overflow-y-auto"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-sm mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-yellow-100">
-      <h3 class="font-bold text-yellow-700">{{ __('admin.suspendre_admin') }}</h3>
-      <button onclick="fermerModal('modal-suspend-admin')"
-              class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+  <div class="ep-modal ep-modal-sm flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
+      <h3 style="color:#B45309;">
+          <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">pause_circle</span>{{ __('admin.suspendre_admin') }}
+        </h3>
+      <button class="ep-modal-close" onclick="fermerModal('modal-suspend-admin')">×</button>
     </div>
-    <div class="p-6">
-      <p class="text-sm text-gray-600 leading-relaxed">
-        {!! __('admin.confirm_suspendre_admin', ['nom' => e('<span id="suspend-admin-nom" class="text-yellow-700"></span>')]) !!}
+    <div class="ep-modal-body">
+      <p style="font-size:13.5px;color:var(--ep-gris);line-height:1.7;font-family:'Poppins',sans-serif;">
+        {!! __('admin.confirm_suspendre_admin', ['nom' => '<span id="suspend-admin-nom" style="color:#B45309;font-weight:600;"></span>']) !!}
       </p>
     </div>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t">
-      <button onclick="fermerModal('modal-suspend-admin')"
-              class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+    <div class="ep-modal-foot shrink-0">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="fermerModal('modal-suspend-admin')">
         {{ __('messages.annuler') }}
       </button>
       <form id="suspend-admin-form" method="POST" style="display:inline;">
         @csrf @method('PATCH')
         <button type="submit"
-                class="px-5 py-2 text-sm bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg">
+                class="btn-p" style="width:auto;padding:8px 18px;background:var(--ep-gold);">
           {{ __('admin.suspendre') }}
         </button>
       </form>
@@ -147,28 +145,28 @@
 </div>
 
 {{-- ══ MODAL : Confirmer activation ══ --}}
-<div id="modal-activer-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+<div id="modal-activer-admin" class="ep-modal-overlay overflow-y-auto"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-sm mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-green-100">
-      <h3 class="font-bold text-green-700">{{ __('admin.activer_admin') }}</h3>
-      <button onclick="fermerModal('modal-activer-admin')"
-              class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+  <div class="ep-modal ep-modal-sm flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
+      <h3 style="color:var(--ep-teal2);">
+          <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">play_circle</span>{{ __('admin.activer_admin') }}
+        </h3>
+      <button class="ep-modal-close" onclick="fermerModal('modal-activer-admin')">×</button>
     </div>
-    <div class="p-6">
-      <p class="text-sm text-gray-600 leading-relaxed">
-        {!! __('admin.confirm_activer_admin', ['nom' => e('<span id="activate-admin-nom" class="text-green-700"></span>')]) !!}
+    <div class="ep-modal-body">
+      <p style="font-size:13.5px;color:var(--ep-gris);line-height:1.7;font-family:'Poppins',sans-serif;">
+        {!! __('admin.confirm_activer_admin', ['nom' => '<span id="activate-admin-nom" style="color:var(--ep-teal2);font-weight:600;"></span>']) !!}
       </p>
     </div>
-    <div class="flex justify-end gap-3 px-6 py-4 border-t">
-      <button onclick="fermerModal('modal-activer-admin')"
-              class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">
+    <div class="ep-modal-foot shrink-0">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="fermerModal('modal-activer-admin')">
         {{ __('messages.annuler') }}
       </button>
       <form id="activate-admin-form" method="POST" style="display:inline;">
         @csrf @method('PATCH')
         <button type="submit"
-                class="px-5 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg">
+                class="btn-p" style="width:auto;padding:8px 18px;">
           {{ __('admin.activer') }}
         </button>
       </form>
@@ -177,25 +175,25 @@
 </div>
 
 {{-- ══ MODAL : Voir un admin ══ --}}
-<div id="modal-voir-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+<div id="modal-voir-admin" class="ep-modal-overlay overflow-y-auto"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-md mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b">
-      <h3 class="flex items-center gap-2 font-bold text-gray-900">
+  <div class="ep-modal ep-modal-md flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
+      <h3>
           <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">person</span>{{ __('admin.detail_admin') }}
         </h3>
-      <button onclick="fermerModal('modal-voir-admin')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+      <button class="ep-modal-close" onclick="fermerModal('modal-voir-admin')">×</button>
     </div>
-    <div class="p-6 space-y-3">
+    <div class="ep-modal-body">
       <div class="flex items-center gap-4 mb-4">
-        <div id="voir-avatar" class="w-14 h-14 rounded-full bg-[#E0F5EE] flex items-center justify-center text-lg font-bold text-[#085041]"></div>
+        <div id="voir-avatar" class="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold" style="background:var(--ep-teal-lt,#E0F5EE);color:#085041;"></div>
         <div>
           <div id="voir-nom" class="text-base font-bold text-gray-900"></div>
           <div id="voir-email" class="text-sm text-gray-500"></div>
           <div id="voir-role-badge" class="mt-1"></div>
         </div>
       </div>
-      <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+      <div class="rounded-lg p-4 space-y-2" style="background:var(--ep-gris-lt,#F4F6F9);">
         <div class="flex justify-between text-sm"><span class="text-gray-500">{{ __('messages.telephone') }}</span><span id="voir-tel" class="font-medium"></span></div>
         <div class="flex justify-between text-sm"><span class="text-gray-500">{{ __('messages.statut') }}</span><span id="voir-statut" class="font-medium"></span></div>
         <div class="flex justify-between text-sm"><span class="text-gray-500">{{ __('messages.dern_connexion') }}</span><span id="voir-connexion" class="font-medium"></span></div>
@@ -204,73 +202,72 @@
         </span></div>
       </div>
     </div>
-    <div class="flex justify-end px-6 py-4 border-t">
-      <button onclick="fermerModal('modal-voir-admin')" class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('admin.fermer') }}</button>
+    <div class="ep-modal-foot shrink-0">
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="fermerModal('modal-voir-admin')">{{ __('admin.fermer') }}</button>
     </div>
   </div>
 </div>
 
 {{-- ══ MODAL : Modifier un admin ══ --}}
-<div id="modal-edit-admin" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center"
+<div id="modal-edit-admin" class="ep-modal-overlay overflow-y-auto"
      onclick="if(event.target===this)fermerModal(this.id)">
-  <div class="bg-white rounded-xl w-full max-w-lg mx-4 shadow-xl">
-    <div class="flex items-center justify-between px-6 py-4 border-b">
-      <h3 class="flex items-center gap-2 font-bold text-gray-900">
+  <div class="ep-modal ep-modal-md flex flex-col max-h-[calc(100vh-2rem)]">
+    <div class="ep-modal-head shrink-0">
+      <h3>
           <span class="material-symbols-outlined" style="font-size:19px;" aria-hidden="true">edit</span>{{ __('admin.modifier_admin') }}
         </h3>
-      <button onclick="fermerModal('modal-edit-admin')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">×</button>
+      <button class="ep-modal-close" onclick="fermerModal('modal-edit-admin')">×</button>
     </div>
     <form id="form-edit-admin" method="POST" action="">
       @csrf @method('PATCH')
-      <div class="p-6 space-y-4">
+      <div class="ep-modal-body space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.prenom') }} *</label>
+            <label class="lbl">{{ __('admin.prenom') }} *</label>
             <input type="text" name="prenom" id="edit-prenom" required
-                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                   class="inp" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.nom') }} *</label>
+            <label class="lbl">{{ __('messages.nom') }} *</label>
             <input type="text" name="nom" id="edit-nom" required
-                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                   class="inp" />
           </div>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.email') }} *</label>
+          <label class="lbl">{{ __('admin.email') }} *</label>
           <input type="email" name="email" id="edit-email" required
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                 class="inp" />
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('messages.telephone') }}</label>
+          <label class="lbl">{{ __('messages.telephone') }}</label>
           <input type="text" name="telephone" id="edit-telephone"
-                 class="tel-cm-input w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]"
+                 class="inp tel-cm-input"
                  data-allow-fixe="false" />
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.role_etoile') }}</label>
+          <label class="lbl">{{ __('admin.role_etoile') }}</label>
           <select name="role" id="edit-role" required
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75] bg-white">
+                  class="select">
             <option value="super-admin">{{ __('admin.opt_super_admin_total') }}</option>
             <option value="superviseur">{{ __('admin.opt_superviseur_lecture') }}</option>
             <option value="comptable_plateforme">{{ __('admin.opt_comptable_plateforme') }}</option>
           </select>
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.nouveau_mdp_vide') }}</label>
+          <label class="lbl">{{ __('admin.nouveau_mdp_vide') }}</label>
           <input type="password" name="password" autocomplete="new-password"
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                 class="inp" />
         </div>
         <div>
-          <label class="block text-xs font-medium text-gray-600 mb-1">{{ __('admin.confirmer_mdp_opt') }}</label>
+          <label class="lbl">{{ __('admin.confirmer_mdp_opt') }}</label>
           <input type="password" name="password_confirmation"
-                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-[#0D9E75]" />
+                 class="inp" />
         </div>
       </div>
-      <div class="flex justify-end gap-3 px-6 py-4 border-t">
-        <button type="button" onclick="fermerModal('modal-edit-admin')"
-                class="px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50">{{ __('messages.annuler') }}</button>
+      <div class="ep-modal-foot shrink-0">
+        <button type="button" class="btn-o" style="width:auto;padding:8px 16px;" onclick="fermerModal('modal-edit-admin')">{{ __('messages.annuler') }}</button>
         <button type="submit"
-                class="px-5 py-2 text-sm bg-[#0D9E75] hover:bg-[#0A8562] text-white font-semibold rounded-lg">{{ __('messages.enregistrer') }}</button>
+                class="btn-p" style="width:auto;padding:8px 20px;">{{ __('messages.enregistrer') }}</button>
       </div>
     </form>
   </div>

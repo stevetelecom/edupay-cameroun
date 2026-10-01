@@ -14,9 +14,11 @@ class OnboardingController extends Controller
     // ── F04 : Affiche la page de rattachement initial ──
     public function index(): View
     {
+        // 'logo' doit rester dans la selection : la vue fait
+        // @if($etab->logo) et tombait donc toujours sur l'avatar initiale.
         $etablissements = Etablissement::where('statut', 'actif')
             ->orderBy('nom')
-            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement']);
+            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement', 'logo']);
 
         return view('payeur.onboarding', compact('etablissements'));
     }
@@ -77,6 +79,27 @@ class OnboardingController extends Controller
         }
 
         // Cas 3 : créer (pré-rattachement)
+        //
+        // Idempotence : le bouton « Confirmer » appelle form.submit() sans se
+        // desactiver, donc un double-clic (ou un simple re-envoi navigateur)
+        // rejouait ce POST et créait un SECOND dossier apprenant identique,
+        // tous deux affiches au payeur. Sans contrainte d'unicite sur la pivot
+        // user_apprenant, rien ne l'arretait en base. On reapplique donc
+        // l'identite soumise : si ce payeur est deja rattache a un apprenant
+        // de meme nom/prenom/classe dans cet etablissement, on le reutilise.
+        if (!$apprenant) {
+            $existant = Apprenant::where('etablissement_id', $etablissement->id)
+                ->where('nom', $nomApprenant)
+                ->where('prenom', $prenomApprenant)
+                ->where('classe', $validated['classe'])
+                ->whereIn('id', Auth::user()->apprenants()->select('apprenants.id'))
+                ->first();
+
+            if ($existant) {
+                $apprenant = $existant;
+            }
+        }
+
         if (!$apprenant) {
             // Génération auto du matricule si non fourni
             $matriculeAuto = $validated['matricule'] ?? null;
@@ -128,7 +151,7 @@ class OnboardingController extends Controller
 
         $etablissements = Etablissement::where('statut', 'actif')
             ->orderBy('nom')
-            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement']);
+            ->get(['id', 'nom', 'ville', 'type', 'code_etablissement', 'logo']);
 
         $lien = Auth::user()->apprenants()
             ->where('apprenant_id', $apprenant->id)

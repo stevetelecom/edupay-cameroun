@@ -69,18 +69,36 @@
 
 {{-- ══ MODAL : Désaffecter une catégorie de frais ══ --}}
 <div id="modal-desaffecter" class="ep-modal-overlay">
-  <div class="ep-modal ep-modal-sm ep-modal-danger">
+  <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3>{{ __('etablissement.desaffecter_titre') }}</h3>
+      <h3 style="display:flex;align-items:center;gap:9px;color:var(--ep-red);">
+        <span class="ep-ico rouge ep-ico-side"><span class="material-symbols-outlined">link_off</span></span>
+        {{ __('etablissement.desaffecter_titre') }}
+      </h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-desaffecter')">×</button>
     </div>
     <div class="ep-modal-body">
-      <p style="font-size:13px;color:#555;line-height:1.6;">
-        {!! __('etablissement.desaffecter_confirm', ['prenom' => e($apprenant->prenom), 'nom' => e($apprenant->nom)]) !!}
-        <strong id="desaffecter-categorie-nom"></strong>
-      </p>
-      <div style="background:#fdf3f3;border:1px solid #f5c6c6;border-radius:8px;padding:10px 12px;font-size:12px;color:#b13a3a;margin-top:10px;">
-        {{ __('etablissement.desaffecter_avertissement') }}
+      {{-- Récapitulatif v3 (même langage visuel que le modal rattacher) --}}
+      <div class="ep-m-conf-carte" style="margin-bottom:12px;">
+        <div class="ep-m-conf-ligne">
+          <div class="ep-m-conf-lib">{{ __('messages.etablissement') }}</div>
+          <div class="ep-m-conf-val" style="font-weight:700;">{{ $apprenant->etablissement->nom ?? '—' }}</div>
+        </div>
+        <div class="ep-m-conf-ligne">
+          <div class="ep-m-conf-lib">{{ __('etablissement.apprenant_col') }}</div>
+          <div class="ep-m-conf-val">
+            <div style="font-weight:700;">{{ $apprenant->prenom }} {{ $apprenant->nom }}</div>
+            <div style="font-size:11px;color:#888;">{{ $apprenant->classe }}</div>
+          </div>
+        </div>
+        <div class="ep-m-conf-ligne">
+          <div class="ep-m-conf-lib">{{ __('etablissement.categorie_bread') }}</div>
+          <div class="ep-m-conf-val" style="font-weight:700;" id="desaffecter-categorie-nom"></div>
+        </div>
+      </div>
+      <div class="ep-m-conf-alerte">
+        <span class="material-symbols-outlined" style="font-size:15px;">warning</span>
+        <span>{{ __('etablissement.desaffecter_avertissement') }}</span>
       </div>
     </div>
     <div class="ep-modal-foot">

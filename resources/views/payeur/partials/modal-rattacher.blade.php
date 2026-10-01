@@ -1,16 +1,21 @@
 <div id="modal-rattacher" class="ep-modal-overlay">
-  <div class="ep-modal ep-modal-lg">
+  <div class="ep-modal ep-modal-lg ep-modal-rattacher">
     <div class="ep-modal-head">
-      <h3>
+      <h3 style="display:flex;align-items:center;gap:9px;">
+        <span class="ep-ico vert ep-ico-side"><span class="material-symbols-outlined">link</span></span>
         {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? __('payeur.rattacher_modal_titre_solo') : __('payeur.rattacher_modal_titre') }}
       </h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-rattacher')">×</button>
     </div>
     <div class="ep-modal-body">
 
+      {{-- Message d'erreur inline (remplace les alert() bloquants) --}}
+      <div id="m-erreur" style="display:none;background:var(--ep-red-lt);border:1px solid rgba(217,64,64,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12.5px;color:#9B2C2C;font-weight:600;">
+      </div>
+
       {{-- ETAPE 1 : Recherche établissement --}}
       <div id="m-step1">
-        <div style="font-size:11px;font-weight:600;color:#0D9E75;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">
+        <div class="ep-m-etiquette">
           {{ __('payeur.m_etape1_titre') }}
         </div>
 
@@ -21,21 +26,18 @@
             <input type="text" id="m-etab-search"
                    placeholder="{{ __('payeur.m_nom_etablissement') }}…"
                    style="width:100%;padding:9px 12px 9px 34px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
-                   oninput="mFiltrerEtabs()"
-                 onfocus="document.getElementById('m-etab-liste').style.display='block'" />
+                   oninput="mFiltrerEtabs()" />
             <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#aaa;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </div>
           <input type="text" id="m-etab-ville"
                  placeholder="{{ __('payeur.m_ville') }}…"
                  style="width:130px;flex:1 1 110px;min-width:100px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
-                 oninput="mFiltrerEtabs()"
-                 onfocus="document.getElementById('m-etab-liste').style.display='block'" />
+                 oninput="mFiltrerEtabs()" />
           <input type="text" id="m-etab-code"
                  placeholder="{{ __('payeur.m_code') }}…"
                  style="width:110px;flex:1 1 96px;min-width:90px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"
-                 oninput="mFiltrerEtabs()"
-                 onfocus="document.getElementById('m-etab-liste').style.display='block'" />
-          <button type="button" onclick="mFiltrerEtabs();document.getElementById('m-etab-liste').style.display='block';"
+                 oninput="mFiltrerEtabs()" />
+          <button type="button" onclick="mFiltrerEtabs()"
                   style="background:var(--ep-teal);color:#fff;border:none;padding:9px 16px;
                          border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;flex-shrink:0;">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" style="margin-right:4px;vertical-align:middle;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -44,7 +46,7 @@
         </div>
 
         <div id="m-etab-liste"
-             style="border:1px solid #e0e0e0;border-radius:8px;background:#fff;max-height:200px;overflow-y:auto;">
+             style="display:none;border:1px solid #e0e0e0;border-radius:10px;background:#fff;max-height:200px;overflow-y:auto;box-shadow:0 12px 28px rgba(0,0,0,.08);">
           @foreach($etablissements ?? [] as $etab)
             <div class="m-etab-item"
                  data-id="{{ $etab->id }}"
@@ -96,7 +98,7 @@
       {{-- ETAPE 2 : Annuaire apprenants (apres selection etablissement) --}}
       <div id="m-step2" style="display:none;margin-top:16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-          <div style="font-size:11px;font-weight:600;color:#0D9E75;text-transform:uppercase;letter-spacing:.05em;">
+          <div class="ep-m-etiquette">
             {{ __('payeur.m_etape2_titre') }}
           </div>
           <button type="button" id="m-btn-changer-etab" onclick="mReinitEtab()"
@@ -199,14 +201,53 @@
 
       </div>
 
+      {{-- ETAPE CONFIRMATION (maquette v3) : recapitulatif avant soumission --}}
+      <div id="m-step-confirm" style="display:none;margin-top:16px;">
+        <div class="ep-m-etiquette">
+          {{ __('payeur.m_confirm_titre') }}
+        </div>
+        <div class="ep-m-conf-carte">
+          <div class="ep-m-conf-ligne">
+            <div class="ep-m-conf-lib">{{ __('messages.etablissement') }}</div>
+            <div class="ep-m-conf-val">
+              <div style="font-weight:700;" id="m-conf-etab"></div>
+              <div style="font-size:11px;color:#888;" id="m-conf-ville"></div>
+            </div>
+          </div>
+          <div class="ep-m-conf-ligne">
+            <div class="ep-m-conf-lib">{{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? __('payeur.m_conf_app_solo') : __('payeur.m_conf_app') }}</div>
+            <div class="ep-m-conf-val">
+              <div style="font-weight:700;" id="m-conf-app"></div>
+              <div style="font-size:11px;color:#888;">
+                <span id="m-conf-classe"></span>
+                @if(!in_array(Auth::user()->profil, ['eleve','etudiant'])) · <span id="m-conf-mat"></span>@endif
+              </div>
+            </div>
+          </div>
+          <div class="ep-m-conf-note">
+            <span class="material-symbols-outlined" style="font-size:15px;">info</span>
+            {{ __('payeur.m_confirm_note') }}
+          </div>
+        </div>
+      </div>
+
     </div>
     </div>
-    <div class="ep-modal-foot">
+    <div class="ep-modal-foot" id="m-foot">
       <button type="button" class="btn-o" style="width:auto;padding:8px 16px;"
               onclick="epModal.close('modal-rattacher')">{{ __('messages.annuler') }}</button>
       <button type="button" class="btn-p" style="width:auto;padding:8px 20px;" id="m-btn-submit"
               onclick="mSoumettre()">
         {{ in_array(Auth::user()->profil, ['eleve','etudiant']) ? __('payeur.me_rattacher').' →' : __('payeur.rattacher').' →' }}
+      </button>
+      <button type="button" class="btn-p" style="width:auto;padding:8px 20px;display:none;" id="m-btn-confirmer"
+              onclick="mConfirmerRattachement()">
+        <span class="material-symbols-outlined" style="font-size:15px;color:#fff;">check_circle</span>
+        {{ __('payeur.m_confirm_ok') }}
+      </button>
+      <button type="button" class="btn-o" style="width:auto;padding:8px 16px;display:none;" id="m-btn-retour"
+              onclick="mRetourConfirmation()">
+        {{ __('payeur.retour') }}
       </button>
     </div>
   </div>

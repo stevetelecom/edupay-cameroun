@@ -67,7 +67,10 @@ Route::prefix('v1')->group(function () {
         // Recherche d'un enfant a rattacher : une requete = un LIKE par mot
         // sur toute la table des apprenants, sans aucune limite de debit.
         Route::get('/apprenants/search',            [\App\Http\Controllers\Api\ApprenantController::class, 'searchApprenants'])->middleware('throttle:30,1')->name('api.v1.apprenants.search');
-        Route::post('/apprenants/rattacher',        [\App\Http\Controllers\Api\ApprenantController::class, 'rattacher'])->name('api.v1.apprenants.rattacher');
+        // Rattachement : ecrit sur la pivot, donc throttlee comme les autres
+        // POST d'ecriture. Un client qui rejoue la requete en boucle ne peut
+        // pas siphonner la table des rattachements.
+        Route::post('/apprenants/rattacher',        [\App\Http\Controllers\Api\ApprenantController::class, 'rattacher'])->middleware('throttle:20,1')->name('api.v1.apprenants.rattacher');
         Route::put('/apprenants/{apprenant}',       [\App\Http\Controllers\Api\ApprenantController::class, 'updateInfo'])->name('api.v1.apprenants.update');
         Route::delete('/apprenants/{apprenant}',    [\App\Http\Controllers\Api\ApprenantController::class, 'detacher'])->name('api.v1.apprenants.detacher');
 

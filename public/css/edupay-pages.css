@@ -1,4 +1,90 @@
 /* ============================================================
+   MODAL RATTACHER — style maquette v3 (version-final.html)
+   Étiquettes d'étape, liste déroulante façon datalist (l'ancienne
+   version fermait la liste au clic sur « Rechercher » : elle
+   "apparaissait puis disparaissait"), carte de confirmation avec
+   récapitulatif avant soumission.
+   ============================================================ */
+.ep-m-etiquette {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ep-teal, #0D9E75);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 10px;
+    font-family: 'Poppins', sans-serif;
+}
+html[data-theme="dark"] .ep-m-etiquette { color: #34C89B; }
+.ep-modal-rattacher .m-etab-item:hover {
+    background: var(--ep-teal-lt, #E0F5EE);
+}
+html[data-theme="dark"] .ep-modal-rattacher .m-etab-item:hover {
+    background: rgba(13,158,117,.12);
+}
+html[data-theme="dark"] .ep-modal-rattacher #m-etab-liste,
+html[data-theme="dark"] .ep-modal-rattacher #m-apprenant-liste {
+    background: var(--ep-carte, #132341);
+    border-color: #24354F;
+}
+.ep-m-conf-carte {
+    background: var(--ep-gris-lt, #F7F9FB);
+    border: 1px solid var(--ep-bordure, #E4E9EE);
+    border-radius: 12px;
+    padding: 4px 16px;
+    margin-bottom: 12px;
+}
+html[data-theme="dark"] .ep-m-conf-carte {
+    background: rgba(255,255,255,.04);
+    border-color: #24354F;
+}
+.ep-m-conf-ligne {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--ep-bordure, #E4E9EE);
+}
+.ep-m-conf-ligne:last-of-type { border-bottom: none; }
+.ep-m-conf-lib {
+    flex: 0 0 130px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ep-gris, #8B93A1);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding-top: 2px;
+    font-family: 'Poppins', sans-serif;
+}
+.ep-m-conf-val { flex: 1; min-width: 0; font-size: 13.5px; color: var(--ep-encre, #1F2937); }
+.ep-m-conf-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--ep-gris, #8B93A1);
+    padding: 10px 0 12px;
+    line-height: 1.5;
+}
+/* Variante alerte (détachement/désaffectation) : avertissement destructif */
+.ep-m-conf-alerte {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--ep-red-lt, #FBEAEA);
+    border: 1px solid rgba(217,64,64,.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: #B03A2E;
+    line-height: 1.5;
+}
+html[data-theme="dark"] .ep-m-conf-alerte {
+    background: rgba(217,64,64,.12);
+    border-color: rgba(217,64,64,.35);
+    color: #F0A5A5;
+}
+
+/* ============================================================
    EDUPAY CAMEROUN — HARMONISATION DES PAGES SECONDAIRES
    Titres de page, sous-titres et liens de retour avec la même
    police et le même style que le tableau de bord (maquette
@@ -279,6 +365,71 @@ html[data-theme="dark"] table#dt-apprenants tbody td { color: var(--ep-encre, #E
 @media (max-width: 640px) {
     .ep-entete { flex-direction: column; align-items: flex-start; }
     .ep-entete .btn-p { width: 100% !important; }
+}
+
+/* ============================================================
+   SYSTÈME EP-MODAL (définition de base centralisée)
+   Anciennement dupliqué en <style> inline dans layouts/admin
+   (et en variantes flex dans layouts/payeur et layouts/etablissement,
+   qui conservent leurs spécificités). z-index 9000 = au-dessus de
+   toutes les navbar/sidebar des trois back-offices.
+   Surcharges : edupay-theme.css (coins 20px, dark mode) et blocs
+   ci-dessous (form enfant, champs, responsive).
+   ============================================================ */
+.ep-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: rgba(0,0,0,0.45);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+.ep-modal-overlay.open { display: flex; }
+.ep-modal {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: epSlideUp .2s ease;
+}
+.ep-modal-sm  { max-width: 420px; }
+.ep-modal-md  { max-width: 560px; }
+.ep-modal-lg  { max-width: 720px; }
+.ep-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+}
+.ep-modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+}
+.ep-modal-close:hover { color: #333; }
+.ep-modal-body  { padding: 20px; }
+.ep-modal-foot  {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid #f0f0f0;
+}
+@keyframes epSlideUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
 }
 
 /* ============================================================

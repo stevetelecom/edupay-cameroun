@@ -42,17 +42,32 @@
 <div id="modal-detacher-apprenant" class="ep-modal-overlay">
   <div class="ep-modal ep-modal-sm">
     <div class="ep-modal-head">
-      <h3 style="color:var(--ep-red);">{{ __('payeur.detacher_titre') }}</h3>
+      <h3 style="display:flex;align-items:center;gap:9px;color:var(--ep-red);">
+        <span class="ep-ico rouge ep-ico-side"><span class="material-symbols-outlined">link_off</span></span>
+        {{ __('payeur.detacher_titre') }}
+      </h3>
       <button class="ep-modal-close" onclick="epModal.close('modal-detacher-apprenant')">×</button>
     </div>
     <form method="POST" action="{{ route('payeur.apprenant.detach', $apprenant) }}" id="form-detacher">
       @csrf @method('DELETE')
       <div class="ep-modal-body" style="padding:18px 20px;">
-        <p style="font-size:13px;color:#333;line-height:1.6;margin:0 0 12px;">
-          {{ __('payeur.detacher_confirm_texte', ['prenom' => $apprenant->prenom, 'nom' => $apprenant->nom]) }}
-        </p>
-        <div style="background:#fdf3f3;border:1px solid #f5c6c6;border-radius:8px;padding:10px 12px;font-size:12px;color:#b13a3a;margin-bottom:16px;">
-          {{ __('payeur.detacher_avertissement') }}
+        {{-- Récapitulatif v3 (même langage visuel que le modal rattacher) --}}
+        <div class="ep-m-conf-carte" style="margin-bottom:12px;">
+          <div class="ep-m-conf-ligne">
+            <div class="ep-m-conf-lib">{{ __('messages.etablissement') }}</div>
+            <div class="ep-m-conf-val" style="font-weight:700;">{{ $apprenant->etablissement->nom ?? '—' }}</div>
+          </div>
+          <div class="ep-m-conf-ligne">
+            <div class="ep-m-conf-lib">{{ __('payeur.m_conf_app_solo') }}</div>
+            <div class="ep-m-conf-val">
+              <div style="font-weight:700;">{{ $apprenant->prenom }} {{ $apprenant->nom }}</div>
+              <div style="font-size:11px;color:#888;">{{ $apprenant->classe }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="ep-m-conf-alerte" style="margin-bottom:14px;">
+          <span class="material-symbols-outlined" style="font-size:15px;">warning</span>
+          <span>{{ __('payeur.detacher_avertissement') }}</span>
         </div>
         <label style="display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:#555;cursor:pointer;line-height:1.5;">
           <input type="checkbox" id="detacher-confirm" style="margin-top:2px;" />
