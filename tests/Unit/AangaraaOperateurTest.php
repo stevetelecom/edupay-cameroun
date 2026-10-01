@@ -34,16 +34,29 @@ class AangaraaOperateurTest extends TestCase
             'MTN 00237'      => ['00237650000000', 'MTN_Cameroon'],
             'MTN espaces'    => ['650 00 00 00', 'MTN_Cameroon'],
 
-            // Orange Money : 655-659 et 690-699
+            // Orange Money : plages documentees par AangaraaPay, confirmes en prod
             'Orange 655'     => ['655000000', 'Orange_Cameroon'],
             'Orange 659'     => ['659000000', 'Orange_Cameroon'],
             'Orange 690'     => ['690000000', 'Orange_Cameroon'],
             'Orange 699'     => ['699000000', 'Orange_Cameroon'],
             'Orange +237'    => ['+237655000000', 'Orange_Cameroon'],
 
-            // 680-683 : Nexttel / Viettel, pas MTN.
+            // Orange Money : plages du plan ART, absentes de la doc AangaraaPay.
+            // 688 echouait en detection avant ce correctif : le numero est
+            // Orange, la page de paiement laissait le selecteur sur MTN.
+            'Orange 640'     => ['640000000', 'Orange_Cameroon'],
+            'Orange 686'     => ['686000000', 'Orange_Cameroon'],
+            'Orange 687'     => ['687000000', 'Orange_Cameroon'],
+            'Orange 688'     => ['688000000', 'Orange_Cameroon'],
+            'Orange 689'     => ['689000000', 'Orange_Cameroon'],
+            'Orange 688 +237'=> ['+237688123456', 'Orange_Cameroon'],
+
+            // 680-683 : Nexttel / Viettel, ni MTN ni Orange.
             'Nexttel 680'    => ['680000000', 'ALL'],
             'Nexttel 683'    => ['683000000', 'ALL'],
+
+            // 685 : hors attribution Orange (ART 86-87 et 88 uniquement).
+            'libre 685'      => ['685000000', 'ALL'],
 
             // Prefixe inconnu : on ne devine pas, l'utilisateur choisit.
             'prefixe libre'  => ['222000000', 'ALL'],

@@ -631,13 +631,29 @@ class AangaraaPayService
         }
 
         $prefixe = (int) substr($numero, 0, 3);
-        // 680-683 appartiennent a Nexttel/Viettel, pas a MTN — ne pas les inclure.
+
+        // MTN MoMo — plan national de numerotation (ART).
+        // 680-683 restent exclus : Nexttel/Viettel, pas MTN.
         if (($prefixe >= 650 && $prefixe <= 654) || ($prefixe >= 670 && $prefixe <= 679)) {
             return 'MTN_Cameroon';
         }
-        if (($prefixe >= 655 && $prefixe <= 659) || ($prefixe >= 690 && $prefixe <= 699)) {
+
+        // Orange Money — 6 plages au total. Les deux premieres sont celles que
+        // la doc AangaraaPay cite, et les seules qui aient ete confirmees par
+        // un encaissement reussi. Les suivantes sont Orange selon le plan
+        // national de numerotation de l'ART (86-87 et 88 pour la 88) et la
+        // base de reference phoneverify-cameroon (640, 686-689), mais AangaraaPay
+        // ne les a jamais documentees : elles sont acceptees ici pour ne pas
+        // laisser un vrai client Orange sur une detection qui ne se fait pas,
+        // et un refus eventuel vient alors de l'API, message compris.
+        if ($prefixe === 640
+            || ($prefixe >= 655 && $prefixe <= 659)
+            || ($prefixe >= 686 && $prefixe <= 689)
+            || ($prefixe >= 690 && $prefixe <= 699)
+        ) {
             return 'Orange_Cameroon';
         }
+
         return 'ALL';
     }
 

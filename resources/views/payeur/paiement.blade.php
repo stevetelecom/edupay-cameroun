@@ -251,9 +251,13 @@ function selPay(n) {
 }
 
 // ── Détection automatique MTN / Orange à la saisie du numéro ──
-// Règles confirmées 2026 : MTN = 650-654 / 670-679 · Orange = 655-659 / 690-699
-// Tout préfixe hors de ces plages (ex. Nexttel/Camtel/68x) reste volontairement
-// "inconnu" plutôt que de deviner au hasard — le payeur choisit alors manuellement.
+// MTN   : 650-654 / 670-679
+// Orange: 640 / 655-659 / 686-689 / 690-699
+// Seul le 655-659 et le 690-699 sont documentés par AangaraaPay et confirmés par
+// un encaissement réel. Le 640 et le 686-689 viennent du plan national de
+// numérotation de l'ART : ce sont des numéros Orange légitimes, on ne doit donc
+// pas laisser le payeur choisir à la main. 680-683 = Nexttel/Viettel, ni l'un ni
+// l'autre : reste "inconnu", le payeur choisit manuellement.
 function detecterOperateurLocal(valeur) {
     let numero = (valeur || '').replace(/\D/g, '');
     if (numero.startsWith('237')) numero = numero.slice(3);
@@ -261,7 +265,10 @@ function detecterOperateurLocal(valeur) {
     if (numero.length < 3) return null;
     const prefixe = parseInt(numero.slice(0, 3), 10);
     if ((prefixe >= 650 && prefixe <= 654) || (prefixe >= 670 && prefixe <= 679)) return 'mtn';
-    if ((prefixe >= 655 && prefixe <= 659) || (prefixe >= 690 && prefixe <= 699)) return 'orange';
+    if (prefixe === 640
+        || (prefixe >= 655 && prefixe <= 659)
+        || (prefixe >= 686 && prefixe <= 689)
+        || (prefixe >= 690 && prefixe <= 699)) return 'orange';
     return 'inconnu';
 }
 
