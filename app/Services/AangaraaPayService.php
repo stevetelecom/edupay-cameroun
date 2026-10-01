@@ -484,17 +484,32 @@ class AangaraaPayService
             // Un 4xx est un refus definitif d'AangaraaPay (solde insuffisant,
             // operateur inconnu, montant hors limites...). Aucun argent n'a
             // pu partir : la commission doit rester rejouable apres delai.
-            $estErreurDocumentee = $response->clientError()
-                || $statutApi !== ''
-                || $messageApi === ''
-                || preg_match('/invalid|erreur|error|failed|rejected|insufficient|insuffisant|refus|excede|limite/i', $messageApi) === 1;
-
-            if ($estErreurDocumentee) {
+            //
+            // 01/10/2026 : plus AUCUN 4xx n'est traite comme un refus net.
+            //
+            // La doc AangaraaPay precise que /withdrawal ne deduit le solde
+            // QUE si le retrait aboutit, mais un 4xx ne parle que du SOLDE de
+            // notre compte, pas du sort du retrait courant. Consequence
+            // observee en production : 4 retraits SUCCESSFUL, puis le solde
+            //vide renvoie 400 « Insufficient balance ». Traiter ce 400 comme
+            // « rien n'est parti » a relance le job et produit 5 retraits
+            // pour un seul paiement.
+            //
+            // On ne peut pas distinguer « 4xx avant execution » de « 4xx apres
+            // execution » : la seule donnee qui tranche est le statut reel du
+            // retrait, qu'on obtient via verifierStatutRetrait(). Donc tout
+            // 4xx part en 'indetermine' : commission en 'a_verifier', aucun
+            // renvoi automatique, et la reconciliation tranche sur la preuve.
+            if ($response->clientError() || $estErreurDocumenteeSignalee($messageApi, $statutApi)) {
                 return [
                     'succes'    => false,
-                    'outcome'   => 'refuse',
+                    'outcome'   => 'indetermine',
                     'reference' => $reference,
-                    'message'   => $this->extraireMessageErreur($data, 'FAILED'),
+                    'message'   => 'Refus HTTP ' . $response->status() . ' d\'AangaraaPay : '
+                        . ($this->extraireMessageErreur($data, 'FAILED') ?: 'raison inconnue')
+                        . '. Ce code signale un probleme de solde ou de configuration, PAS l\'echec du'
+                        . ' retrait : la reponse ne dit rien du sort de l\'argent. Verification du'
+                        . ' statut reel obligatoire, aucun renvoi automatique.',
                     'raw'       => $data,
                 ];
             }
@@ -552,6 +567,20 @@ class AangaraaPayService
             Log::error('AangaraaPay check_withdrawal_status exception', ['error' => $e->getMessage()]);
             return ['statut' => 'INCONNU', 'raw' => []];
         }
+    }
+
+    private function estErreurDocumenteeSignalee(string $messageApi, string $statutApi): bool
+    {
+        $m = strtolower($messageApi);
+
+        // Ne PAS inclure 'insufficient/insuffisant' ici : traité comme ambigu
+        if (preg_match('/insufficient|insuffisant/i', $m) === 1) {
+            return false;
+        }
+
+        return $statutApi !== ''
+            || $messageApi === ''
+            || preg_match('/invalid|erreur|error|failed|rejected|refus|excede|limite/i', $m) === 1;
     }
 
     public function detecterOperateur(string $telephone): string

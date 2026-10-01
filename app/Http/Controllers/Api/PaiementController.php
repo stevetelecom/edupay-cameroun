@@ -384,14 +384,25 @@ class PaiementController extends Controller
                         // pas reecrire l'historique (CDC 3.2).
                         'taux'                      => app(\App\Services\AangaraaPayService::class)
                                                         ->tauxCommissionEtablissement($etablissement),
-                        'montant_commission'        => $paiement->marge_edupay,
-                        // Le net reverse est le montant MOINS la commission
-                        // EduPay. Mettre montant - commission ici eviterait de
-                        // reverser 100 sur un paiement de 100 et de perdre la
-                        // commission : c'etait le cas avant.
-                        'montant_net_etablissement' => max(0, $paiement->montant - $paiement->marge_edupay),
-                        'frais_aangaraa'            => $paiement->frais_aangaraa,
-                        'statut'                    => 'calculee',
+                        // 01/10/2026 — EXIGENCE METIER : l'etablissement recoit les
+                    // frais EXACTS. Il ne supporte aucune charge : ni la marge
+                    // EduPay, ni le coucout AangaraaPay. C'est EduPay qui
+                    // encaisse `frais_service` (marge 0,1 % + coucout 2,2 %)
+                    // et qui le reverse a l'etablissement.
+                    //
+                    // L'ancien calcul `montant - marge_edupay` amputait le
+                    // reversement de la marge : l'etablissement payait 1 FCFA
+                    // sur 50, et le back-office affichait un net inferieur aux
+                    // frais reels. C'est ce que le compte de Paul ATEBA
+                    // verifiait : 50 attendus, 49 Announces.
+                    //
+                    // Identite comptable, verifiable sans hypothese :
+                    //   total_paye = net_etablissement + commission
+                    //   commission - frais_aangaraa = marge_edupay reelle
+                    'montant_commission'        => $paiement->frais_service,
+                    'montant_net_etablissement' => max(0, $paiement->montant_total_paye - $paiement->frais_service),
+                    'frais_aangaraa'            => $paiement->frais_aangaraa,
+                    'statut'                    => 'calculee',
                     ]);
                     $commissionId = $commission->id;
                 } catch (\Illuminate\Database\QueryException $e) {

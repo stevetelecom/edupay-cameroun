@@ -347,9 +347,23 @@ class PaiementController extends Controller
                     // ne pas reecrire l'historique (CDC 3.2).
                     'taux'                      => app(\App\Services\AangaraaPayService::class)
                                                     ->tauxCommissionEtablissement($etablissement),
-                    'montant_commission'        => $paiement->marge_edupay,
-                    // Net = montant - commission EduPay (cf. Api\PaiementController)
-                    'montant_net_etablissement' => max(0, $paiement->montant - $paiement->marge_edupay),
+                    // 01/10/2026 — EXIGENCE METIER : l'etablissement recoit les
+                    // frais EXACTS. Il ne supporte aucune charge : ni la marge
+                    // EduPay, ni le coucout AangaraaPay. C'est EduPay qui
+                    // encaisse `frais_service` (marge 0,1 % + coucout 2,2 %)
+                    // et qui le reverse a l'etablissement.
+                    //
+                    // L'ancien calcul `montant - marge_edupay` amputait le
+                    // reversement de la marge : l'etablissement payait 1 FCFA
+                    // sur 50, et le back-office affichait un net inferieur aux
+                    // frais reels. C'est ce que le compte de Paul ATEBA
+                    // verifiait : 50 attendus, 49 Announces.
+                    //
+                    // Identite comptable, verifiable sans hypothese :
+                    //   total_paye = net_etablissement + commission
+                    //   commission - frais_aangaraa = marge_edupay reelle
+                    'montant_commission'        => $paiement->frais_service,
+                    'montant_net_etablissement' => max(0, $paiement->montant_total_paye - $paiement->frais_service),
                     'frais_aangaraa'            => $paiement->frais_aangaraa,
                     'statut'                    => 'calculee',
                 ]);

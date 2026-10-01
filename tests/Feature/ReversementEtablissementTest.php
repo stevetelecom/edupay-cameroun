@@ -424,7 +424,7 @@ class ReversementEtablissementTest extends TestCase
         $this->assertSame(Commission::STATUT_PRELEVEE, $commission->fresh()->statut);
     }
 
-    public function test_refus_aangaraa_laisse_la_commission_rejouable(): void
+    public function test_refus_4xx_bloque_le_rejeu_automatique(): void
     {
         Http::fake([
             '*/withdrawal' => Http::response(['message' => 'Solde insuffisant'], 400),
@@ -436,12 +436,38 @@ class ReversementEtablissementTest extends TestCase
 
         $commission->refresh();
 
-        // Un refus net n'a rien envoye : la commission redevient eligible au
-        // rejeu automatique. Elle n'est plus piegee dans un etat terminal
-        // inconnu, et la trace de la tentative est conservee.
-        $this->assertSame(Commission::STATUT_CALCULEE, $commission->statut);
+        // REGRESSION 01/10/2026 : un 4xx sur /withdrawal parle du SOLDE de notre
+        // compte chez AangaraaPay, pas du sort du retrait courant. Le traiter
+        // comme « rien n'est parti » rendait la commission rejouable, et le job
+        // suivant repartait : 4 retraits SUCCESSFUL puis le 5e, pour un seul
+        // paiement. La commission doit donc partir en verification manuelle,
+        // jamais revenir a 'calculee'.
+        $this->assertSame(Commission::STATUT_A_VERIFIER, $commission->statut);
+        $this->assertTrue($commission->requiertIntervention());
         $this->assertNotNull($commission->reversement_tente_le);
 
+        Http::assertSentCount(1);
+    }
+
+    public function test_4xx_avec_solde_insuffisant_ne_provoque_jamais_de_second_envoi(): void
+    {
+        // Un seul etat de depart, deux passages du job : le second ne doit
+        // rien envoyer, quelle que soit la maniere dont le premier a repondu.
+        Http::fake([
+            '*/withdrawal' => Http::response([
+                'statusCode' => 400,
+                'message'    => 'Insufficient balance',
+                'data'       => ['operator' => 'MTN_Cameroon'],
+            ], 400),
+        ]);
+
+        $commission = $this->commission();
+
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+        (new ReverserEtablissementJob($commission->id))->handle(new AangaraaPayService());
+
+        $this->assertSame(Commission::STATUT_A_VERIFIER, $commission->fresh()->statut);
         Http::assertSentCount(1);
     }
 
@@ -580,12 +606,14 @@ class ReversementEtablissementTest extends TestCase
 
     public function test_statut_failed_met_en_echec(): void
     {
-        // FAILED : l'operateur a refuse, rien n'est parti.
+        // FAILED renvoye en HTTP 200 avec un statut explicite : la, contrairement
+        // au 4xx, AangaraaPay tranche le sort du retrait. Aucun 4xx n'est
+        // concerne ici — seule cette reponse affirmative autorise un refus net.
         Http::fake([
             '*/withdrawal' => Http::response([
                 'status'  => 'FAILED',
-                'message' => 'Solde insuffisant',
-                'data'    => ['reference_id' => 'REF-FAIL-1', 'details' => ['reason' => 'Solde insuffisant']],
+                'message' => 'Operateur inconnu',
+                'data'    => ['reference_id' => 'REF-FAIL-1', 'details' => ['reason' => 'Operateur inconnu']],
             ], 200),
         ]);
 
@@ -595,7 +623,10 @@ class ReversementEtablissementTest extends TestCase
 
         $commission->refresh();
 
-        $this->assertSame(Commission::STATUT_CALCULEE, $commission->statut);
+        // ECHEC est un etat terminal : la reprise exige une decision humaine
+        // explicite via « aangaraa:reversements:rejouer --retablir-echec ».
+        $this->assertSame(Commission::STATUT_ECHEC, $commission->statut);
+        Http::assertSentCount(1);
     }
 
     public function test_verifier_statut_retrait_interroge_le_bon_endpoint(): void
