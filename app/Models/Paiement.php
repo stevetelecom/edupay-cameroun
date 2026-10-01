@@ -70,5 +70,25 @@ class Paiement extends Model
     {
         return in_array($this->statut, self::STATUTS_TERMINAUX, true);
     }
+
+    /**
+     * Opérateur réel du paiement, pour l'affichage.
+     *
+     * La colonne `operateur` n'est écrite qu'APRÈS la réponse de l'API. Un
+     * paiement dont l'initiation a échoué (400 du prestataire), ou créé par
+     * l'API mobile, l'a donc encore à `null` — et la page d'attente retombait
+     * alors sur MTN, donnant à un payeur Orange les consignes USSD de MTN.
+     *
+     * `mode_paiement` est la valeur réellement POSTée et elle est toujours
+     * renseignée : c'est donc le repli fiable, indépendant de l'API.
+     */
+    public function operateurAffiche(): string
+    {
+        if (! empty($this->operateur)) {
+            return $this->operateur;
+        }
+
+        return $this->mode_paiement === 'orange_money' ? 'Orange_Cameroon' : 'MTN_Cameroon';
+    }
 }
 

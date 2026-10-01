@@ -238,6 +238,14 @@ function selPay(n) {
         1: { border:'#FFCC00', bg:'#FFFBE6', dot:'#FFCC00', lbl:PAYEUR_L10N.numero_mtn,     ph:PAYEUR_L10N.ph_mtn,     op:PAYEUR_L10N.op_mtn },
         2: { border:'#FF6600', bg:'#FFF5EE', dot:'#FF6600', lbl:PAYEUR_L10N.numero_orange,   ph:PAYEUR_L10N.ph_orange,   op:PAYEUR_L10N.op_orange },
     };
+    // Le radio porte la valeur reellement POSTee : `mode_paiement`. Sans ce
+    // cochage, la detection automatique ne faisait que repeindre l'ecran en
+    // Orange alors que le formulaire partait toujours en `mtn_momo` (le radio
+    // MTN a `checked` en dur dans le HTML). Constat en production le
+    // 01/10/2026 : paiement 76, tel 237693723200 (Orange) envoye en MTN.
+    const radio = document.querySelector('input[name="mode_paiement"][value="' + (n === 1 ? 'mtn_momo' : 'orange_money') + '"]');
+    if (radio) radio.checked = true;
+
     [1,2].forEach(i => {
         const el = document.getElementById('pm'+i);
         if (!el) return;

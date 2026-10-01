@@ -39,7 +39,7 @@
         </div>
 
         @php
-            $operateurAffiche = match($paiement->operateur ?? null) {
+            $operateurAffiche = match($paiement->operateurAffiche()) {
                 'MTN_Cameroon'    => ['nom' => 'MTN Mobile Money', 'court' => 'MTN',    'bg' => '#FFFBE6', 'border' => '#FFCC00', 'texte' => '#996600', 'chip_texte' => '#553300'],
                 'Orange_Cameroon' => ['nom' => 'Orange Money',      'court' => 'Orange', 'bg' => '#FFF5EE', 'border' => '#FF6600', 'texte' => '#CC4400', 'chip_texte' => '#ffffff'],
                 default           => ['nom' => 'Mobile Money',      'court' => __('payeur.pa_votre_operateur'), 'bg' => '#f5f5f5', 'border' => '#ddd', 'texte' => '#555', 'chip_texte' => '#555'],
@@ -52,7 +52,7 @@
             // avant ce correctif etait un code Orange valide mais FAUX ici : il
             // sert au paiement marchand PAR CODE, pas a valider une transaction
             // deja initiatee par API. Le composer menait a une erreur Orange.
-            $estOrange = ($paiement->operateur ?? null) === 'Orange_Cameroon';
+            $estOrange = $paiement->operateurAffiche() === 'Orange_Cameroon';
         @endphp
         <div id="msg-attente">
             <div id="msg-attente-titre" style="font-size:17px;font-weight:700;margin-bottom:8px;">{{ __('payeur.pa_attente_titre') }}</div>
