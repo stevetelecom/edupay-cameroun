@@ -85,9 +85,7 @@
                 {!! __('payeur.pa_attente_notif') !!}<br>
                 {{ __('payeur.pa_attente_orange_notif') }}<br>
                 <strong>{{ __('payeur.pa_attente_orange_pin') }}</strong>
-                <span style="background:#f0fdf4;color:#085041;font-weight:700;
-                             padding:2px 8px;border-radius:4px;font-family:monospace;">#</span>
-                {{ __('payeur.pa_attente_orange_code') }}
+                {{ __('payeur.pa_attente_orange_code') }}<br>
                 <strong>{{ __('payeur.pa_attente_rejetez') }}</strong> {{ __('payeur.pa_attente_validez') }}
             </div>
             {{-- Frais : le payeur doit voir ce qu'il debite au total, pas seulement

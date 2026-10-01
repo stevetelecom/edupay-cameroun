@@ -159,7 +159,7 @@ class PageAttenteOperateurTest extends TestCase
         $this->assertStringContainsString('Orange Money', $vue);
     }
 
-    public function test_le_parcours_orange_mentionne_le_code_secret_et_interdit_le_code_ussd(): void
+    public function test_le_parcours_orange_demande_le_code_secret(): void
     {
         $paiement = $this->creerPaiement('Orange_Cameroon');
 
@@ -169,7 +169,6 @@ class PageAttenteOperateurTest extends TestCase
             ->getContent();
 
         $this->assertStringContainsString('code secret Orange Money', $vue);
-        $this->assertStringContainsString('Ne composez aucun code USSD', $vue);
     }
 
     public function test_le_detail_des_frais_est_affiche_avec_le_total_debite(): void

@@ -128,12 +128,12 @@ return [
     'pa_attente_frais_base'        => 'School fees',
     'pa_attente_frais_service'     => 'Service fee',
     'pa_attente_total_debite'      => 'Total debited',
-    // Orange Money: AangaraaPay sends a notification (MP... payToken), not a USSD
-    // prompt. No code to dial, only the 4-digit secret code. #150*50# does not
-    // apply here: that is merchant payment by code, not API transaction approval.
+    // Orange Money: according to AangaraaPay official API docs (no_redirect
+    // direct payment), the client receives an Orange Money notification to
+    // approve the payment. Enter the 4-digit secret code.
     'pa_attente_orange_notif'      => 'An Orange Money notification has just arrived on your phone.',
     'pa_attente_orange_pin'        => 'Open it and enter your 4-digit Orange Money secret code.',
-    'pa_attente_orange_code'       => 'to confirm the payment. Do not dial any USSD code.',
+    'pa_attente_orange_code'       => 'to confirm the payment.',
     'pa_attente_menu'              => 'Press 1 in the USSD menu',
     'pa_attente_notif'             => 'Notification sent',
     'pa_attente_phone'             => 'Check your phone (:operateur)',
