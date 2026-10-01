@@ -44,6 +44,15 @@
                 'Orange_Cameroon' => ['nom' => 'Orange Money',      'court' => 'Orange', 'bg' => '#FFF5EE', 'border' => '#FF6600', 'texte' => '#CC4400', 'chip_texte' => '#ffffff'],
                 default           => ['nom' => 'Mobile Money',      'court' => __('payeur.pa_votre_operateur'), 'bg' => '#f5f5f5', 'border' => '#ddd', 'texte' => '#555', 'chip_texte' => '#555'],
             };
+            // Le parcours de confirmation n'est PAS le même selon l'opérateur.
+            // MTN : AangaraaPay envoie un prompt USSD, le payeur doit composer
+            // *126# puis appuyer sur 1 (payToken UUID).
+            // Orange : AangaraaPay envoie une NOTIFICATION Orange Money (payToken
+            // en MP...), il n'y a aucun code a composer. Le #150*50# affiche
+            // avant ce correctif etait un code Orange valide mais FAUX ici : il
+            // sert au paiement marchand PAR CODE, pas a valider une transaction
+            // deja initiatee par API. Le composer menait a une erreur Orange.
+            $estOrange = ($paiement->operateur ?? null) === 'Orange_Cameroon';
         @endphp
         <div id="msg-attente">
             <div id="msg-attente-titre" style="font-size:17px;font-weight:700;margin-bottom:8px;">{{ __('payeur.pa_attente_titre') }}</div>
@@ -62,13 +71,41 @@
                 </span>
                 {{ __('payeur.pa_attente_phone', ['operateur' => $operateurAffiche['court']]) }}
             </div>
-            <div id="msg-attente-detail" style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;">
+            {{-- Parcours MTN : prompt USSD, composition obligatoire --}}
+            <div id="msg-attente-detail-mtn" style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;{{ $estOrange ? 'display:none;' : '' }}">
                 {!! __('payeur.pa_attente_notif') !!}<br>
                 <strong>{{ __('payeur.pa_attente_si30s') }}</strong>
                 <span style="background:#f0fdf4;color:#085041;font-weight:700;
                              padding:2px 8px;border-radius:4px;font-family:monospace;">*126#</span>
                 {!! __('payeur.pa_attente_menu') !!}
                 <strong>{{ __('payeur.pa_attente_rejetez') }}</strong> {{ __('payeur.pa_attente_validez') }}
+            </div>
+            {{-- Parcours Orange : notification Orange Money, rien a composer --}}
+            <div id="msg-attente-detail-orange" style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;{{ $estOrange ? '' : 'display:none;' }}">
+                {!! __('payeur.pa_attente_notif') !!}<br>
+                {{ __('payeur.pa_attente_orange_notif') }}<br>
+                <strong>{{ __('payeur.pa_attente_orange_pin') }}</strong>
+                <span style="background:#f0fdf4;color:#085041;font-weight:700;
+                             padding:2px 8px;border-radius:4px;font-family:monospace;">#</span>
+                {{ __('payeur.pa_attente_orange_code') }}
+                <strong>{{ __('payeur.pa_attente_rejetez') }}</strong> {{ __('payeur.pa_attente_validez') }}
+            </div>
+            {{-- Frais : le payeur doit voir ce qu'il debite au total, pas seulement
+                 le montant des frais scolaires. La page d'attente ne montrait que
+                 le total, d'ou l'incomprehension sur le debit reel. --}}
+            <div style="background:{{ $operateurAffiche['bg'] }};border:1px solid {{ $operateurAffiche['border'] }};border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#555;line-height:1.8;text-align:left;">
+                <div style="display:flex;justify-content:space-between;">
+                    <span>{{ __('payeur.pa_attente_frais_base') }}</span>
+                    <span style="font-weight:600;">{{ number_format($paiement->montant ?? 0, 0, ',', ' ') }} FCFA</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                    <span>{{ __('payeur.pa_attente_frais_service') }}</span>
+                    <span style="font-weight:600;">{{ number_format($paiement->frais_service ?? 0, 0, ',', ' ') }} FCFA</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-top:1px solid {{ $operateurAffiche['border'] }};margin-top:6px;padding-top:6px;">
+                    <span style="font-weight:700;color:{{ $operateurAffiche['texte'] }};">{{ __('payeur.pa_attente_total_debite') }}</span>
+                    <span style="font-weight:700;color:{{ $operateurAffiche['texte'] }};">{{ number_format($paiement->montant_total_paye ?? $paiement->montant ?? 0, 0, ',', ' ') }} FCFA</span>
+                </div>
             </div>
             <div id="msg-attente-prolonge" style="display:none;background:#FEF9EC;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#854F0B;line-height:1.6;text-align:left;">
                 {!! __('payeur.pa_attente_prolonge', ['ref' => e($paiement->reference)]) !!}
@@ -135,6 +172,7 @@ const PAYEUR_L10N = {
 };
 
 const statutUrl = "{{ route('payeur.paiement.statut', $paiement) }}";
+const estOrangeJs = @json($estOrange);
 
 // Phase 1 : vérification rapide, toutes les 5s, pendant 6 minutes (72 tentatives)
 // Phase 2 : si rien de définitif après la phase 1, on NE déclare JAMAIS d'échec
@@ -220,7 +258,10 @@ async function verifier() {
     // automatique mais on NE déclare PAS d'échec — l'utilisateur peut vérifier
     // manuellement ou contacter le support avec la référence.
     passerEnPhase2();
-    document.getElementById('msg-attente-detail').textContent = PAYEUR_L10N.fin;
+    // Le detail affiché depend de l'operateur (USSD pour MTN, notification pour
+    // Orange) : on remplit celui qui est visible, l'autre est masque.
+    const detail = document.getElementById(estOrangeJs ? 'msg-attente-detail-orange' : 'msg-attente-detail-mtn');
+    if (detail) detail.textContent = PAYEUR_L10N.fin;
 }
 
 async function verifierMaintenant() {
