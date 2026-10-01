@@ -69,3 +69,19 @@ Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')
     ->everyMinute()
     ->withoutOverlapping(2)
     ->name('queue-worker-minute');
+
+// Reconciliation des reversements « a verifier » (reponse AangaraaPay perdue).
+//
+// Ces commissions ne sont NI rejouees ni alertees par personne : le filet
+// `rejouer` les exclut volontairement, faute de pouvoir savoir si l'argent est
+// parti. Elles restaient donc bloquees indefiniment. Cette commande interroge
+// AangaraaPay en LECTURE seule (`/check_withdrawal_status`) et tranche :
+// SUCCESSFUL -> `prelevee`, FAILED -> `calculee` (rejouable sans risque).
+// Elle n'appelle jamais `/withdrawal`, donc ne peut pas payer deux fois.
+//
+// Toutes les 15 minutes : la lecture est une requete HTTP de plus, et une
+// reponse PENDING peut mettre des heures a se confirmer.
+Schedule::command('aangaraa:reversements:reconcilier')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping(2)
+    ->name('reconciliation-reversements-aangaraa');

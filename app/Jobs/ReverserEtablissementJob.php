@@ -251,10 +251,23 @@ class ReverserEtablissementJob implements ShouldQueue
         // ── Réponse perdue / 5xx : l'argent est peut-être parti. Ne JAMAIS
         //    renvoyer automatiquement, il faut vérifier.
         if (($resultat['outcome'] ?? 'refuse') === 'indetermine') {
+            // La reference AangaraaPay est ici le SEUL moyen de savoir, plus
+            // tard, si l'argent est parti. Elle etait recue dans le resultat puis
+            // purement etrangere : `mettreEnAttenteDeVerification()` ne recevait
+            // que le motif, donc la colonne `reference_reversement` restait vide
+            // et la commission devenait DEFINITIVEMENT invérifiable sans passer
+            // par un tinker manuel. Constat production 01/10/2026 : commission 2
+            // en `a_verifier` sans reference, aucune reconciliation possible.
+            //
+            // On ne l'ecrit que si elle existe deja. La poser NEUTRELEMENT ne
+            // changerait rien : `reversementEffectue()` teste `prelevee`, pas la
+            // reference, donc une commission `a_verifier` reste bloquee au
+            // rejeu quel que soit son contenu.
             $this->mettreEnAttenteDeVerification(
                 $commission,
                 'Reponse AangaraaPay perdue (timeout ou erreur serveur) : le virement est peut-etre deja parti. '
-                .'Verification manuelle obligatoire avant tout nouvel envoi. Motif : ' . ($resultat['message'] ?? '?')
+                .'Verification manuelle obligatoire avant tout nouvel envoi. Motif : ' . ($resultat['message'] ?? '?'),
+                $resultat['reference'] ?? null
             );
             return;
         }
@@ -334,12 +347,25 @@ class ReverserEtablissementJob implements ShouldQueue
     }
 
     /** Sort inconnue : l'argent est peut-être parti, vérification humaine. */
-    private function mettreEnAttenteDeVerification(Commission $commission, string $raison): void
-    {
-        $commission->update([
+    private function mettreEnAttenteDeVerification(
+        Commission $commission,
+        string $raison,
+        ?string $reference = null
+    ): void {
+        $donnees = [
             'statut'             => Commission::STATUT_A_VERIFIER,
             'reversement_erreur' => mb_substr($raison, 0, 500),
-        ]);
+        ];
+
+        // On ne remplace jamais une reference deja enregistree : une premiere
+        // tentative peut avoir repondu alors qu'une tentative ulterieure, elle,
+        // s'est perdu. La reference la plus ancienne est la seule qui decrive un
+        // virement reellement confirme par AangaraaPay.
+        if ($reference && ! $commission->reference_reversement) {
+            $donnees['reference_reversement'] = $reference;
+        }
+
+        $commission->update($donnees);
 
         Log::critical('Reversement établissement À VÉRIFIER — ne pas renvoyer', [
             'commission_id'    => $commission->id,
