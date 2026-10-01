@@ -391,7 +391,7 @@ class AangaraaPayService
                 ]);
 
             $data      = $response->json() ?? [];
-            $statutApi = strtoupper((string) ($data['data']['status'] ?? $data['status'] ?? ''));
+            $statutApi = $this->normaliserStatutWithdrawal($data['data']['status'] ?? $data['status'] ?? null);
             $reference = $this->extraireReferenceWithdrawal($data);
 
             Log::info('AangaraaPay withdrawal', [
@@ -500,7 +500,7 @@ class AangaraaPayService
             // retrait, qu'on obtient via verifierStatutRetrait(). Donc tout
             // 4xx part en 'indetermine' : commission en 'a_verifier', aucun
             // renvoi automatique, et la reconciliation tranche sur la preuve.
-            if ($response->clientError() || $estErreurDocumenteeSignalee($messageApi, $statutApi)) {
+            if ($response->clientError() || $this->estErreurDocumenteeSignalee($messageApi, $statutApi)) {
                 return [
                     'succes'    => false,
                     'outcome'   => 'indetermine',
@@ -567,6 +567,41 @@ class AangaraaPayService
             Log::error('AangaraaPay check_withdrawal_status exception', ['error' => $e->getMessage()]);
             return ['statut' => 'INCONNU', 'raw' => []];
         }
+    }
+
+    /**
+     * Normalise le champ `status` de /withdrawal, qui n'est PAS une chaine.
+     *
+     * Reponse reelle capturee en production le 01/10/2026 (retrait 50 FCFA,
+     * commission 2 puis 3) :
+     *
+     *   "data": {"status": true, "message": "Transfer request accepted
+     *            and is being processed", "reference_id": "5c487ca1-..."}
+     *
+     * `status` y est un BOOLEEN. Le code faisait `(string) $statutApi`, ce qui
+     * donnait « 1 » — et le test `str_starts_with($statutApi, 'SUCCESS')`
+     * ne pouvait donc JAMAIS passer. Consequence : les deux retraits ont ete
+     * reellement executes par AangaraaPay, et le code les a classes
+     * « indetermine » puis « a_verifier » malgre une reponse HTTP 200
+     * parfaitement exploitable. Le back office affichait « a verifier » sur des
+     * virements deja payes.
+     *
+     * On accepte donc les trois formes rencontrees : booleen, chaine
+     * « SUCCESSFUL » / « SUCCESS » (doc officielle) et chaines d'echec.
+     * Un booléen `true` est une confirmation explicite d'AangaraaPay, pas un
+     * statut inconnu.
+     */
+    private function normaliserStatutWithdrawal($statutApi): string
+    {
+        if (is_bool($statutApi)) {
+            return $statutApi ? 'SUCCESSFUL' : 'FAILED';
+        }
+
+        if ($statutApi === null) {
+            return '';
+        }
+
+        return strtoupper(trim((string) $statutApi));
     }
 
     private function estErreurDocumenteeSignalee(string $messageApi, string $statutApi): bool
