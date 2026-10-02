@@ -3,12 +3,16 @@
 
 @section('content')
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
-  <div>
-    <div style="font-size:18px;font-weight:700;">{{ __('payeur.mes_enfants') }}</div>
-    <div style="font-size:13px;color:#888;">
-      {{ __('payeur.n_enfants_suivis', ['count' => $apprenants->count()]) }}
-      @if(Auth::user()->ville) · {{ Auth::user()->ville }} @endif
+{{-- En-tête de page v3 : pastille époxy + titre Poppins + actions à droite --}}
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:18px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="ep-ico vert ep-ico-entete"><span class="material-symbols-outlined">family_restroom</span></div>
+    <div>
+      <h3 style="margin:0;">{{ __('payeur.mes_enfants') }}</h3>
+      <div class="ep-sous-titre" style="margin-top:2px;">
+        {{ __('payeur.n_enfants_suivis', ['count' => $apprenants->count()]) }}
+        @if(Auth::user()->ville) · {{ Auth::user()->ville }} @endif
+      </div>
     </div>
   </div>
   <div style="display:flex;gap:8px;">

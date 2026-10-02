@@ -31,19 +31,28 @@
 @endpush
 
 @section('content')
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-        <a href="{{ route('payeur.dashboard') }}" style="color:#888;text-decoration:none;font-size:13px;">&#8592; {{ __('payeur.hist_retour_dashboard') }}</a>
+    {{-- Barre retour + export : même pill que paiement/frais_apprenant --}}
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <a href="{{ route('payeur.dashboard') }}" class="ep-retour-lien">
+            <span class="material-symbols-outlined" style="font-size:15px;">arrow_back</span>
+            {{ __('payeur.hist_retour_dashboard') }}
+        </a>
         {{-- Export PDF : bouton vert (dégradé teal) avec icône Material --}}
         <a href="{{ route('payeur.historique') }}?export=pdf" class="ep-btn-pdf-vert"
-           style="text-decoration:none;">
+           style="text-decoration:none;margin-left:auto;">
             <span class="material-symbols-outlined" style="font-size:17px;">picture_as_pdf</span>
             {{ __('payeur.hist_exporter_pdf') }}
         </a>
     </div>
 
-
-    <div style="font-size:17px;font-weight:700;margin-bottom:4px;">{{ __('payeur.hist_titre') }}</div>
-    <div style="font-size:12px;color:#888;margin-bottom:18px;">{{ __('payeur.hist_transactions', ['count' => $paiements->total() ?? $paiements->count()]) }}</div>
+    {{-- En-tête de page v3 : grande pastille époxy + titre Poppins (style dashboard) --}}
+    <div class="ep-entete ep-entete-page" style="margin-bottom:18px;">
+        <div class="ep-ico bleu ep-ico-entete"><span class="material-symbols-outlined">history</span></div>
+        <div>
+            <h3 style="margin:0;">{{ __('payeur.hist_titre') }}</h3>
+            <div class="ep-sous-titre" style="margin-top:2px;">{{ __('payeur.hist_transactions', ['count' => $paiements->total() ?? $paiements->count()]) }}</div>
+        </div>
+    </div>
 
     <div class="epcard" style="padding:0;overflow:hidden;">
         <table class="ep-table">
@@ -66,9 +75,20 @@
                         <td style="font-weight:600;">{{ $paiement->apprenant->nom ?? '—' }} {{ $paiement->apprenant->prenom ?? '' }}</td>
                         <td>{{ $paiement->fraisApprenant->categorieFrais->nom ?? '—' }}</td>
                         <td style="font-weight:600;">{{ number_format($paiement->montant, 0, ',', ' ') }} FCFA</td>
-                        <td>{{ match($paiement->mode_paiement) {
-                            'mtn_momo' => 'MTN MoMo', 'orange_money' => 'Orange Money', 'carte' => 'Carte', default => $paiement->mode_paiement,
-                        } }}</td>
+                        {{-- Moyen : logo couleur + libellé (pastillesMTN or / Orange),
+                             comme sur la fiche frais — plus lisible qu'un texte brut. --}}
+                        <td>
+                            <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ep-gris);">
+                                <span style="width:22px;height:22px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;{{ match($paiement->mode_paiement) {
+                                    'mtn_momo'     => 'background:#FFFBE6;color:#996600;',
+                                    'orange_money' => 'background:#FFF5EE;color:#FF6600;',
+                                    default        => 'background:var(--ep-fond);color:var(--ep-gris);',
+                                } }}">@if($paiement->mode_paiement === 'orange_money')<span class="material-symbols-outlined" style="font-size:14px;">signal_cellular_alt</span>@elseif($paiement->mode_paiement === 'mtn_momo')<span class="material-symbols-outlined" style="font-size:14px;">network_cell</span>@else<span class="material-symbols-outlined" style="font-size:14px;">credit_card</span>@endif</span>
+                                {{ match($paiement->mode_paiement) {
+                                    'mtn_momo' => 'MTN MoMo', 'orange_money' => 'Orange Money', 'carte' => 'Carte', default => $paiement->mode_paiement,
+                                } }}
+                            </span>
+                        </td>
                         <td>{{ $paiement->date_paiement ? \Carbon\Carbon::parse($paiement->date_paiement)->format('d/m/Y H:i') : '—' }}</td>
                         <td>
                             <span class="pill {{ match($paiement->statut) {
@@ -158,8 +178,7 @@ function ouvrirDetail(btn) {
     document.getElementById('detail-categorie').textContent  = btn.dataset.categorie;
     document.getElementById('detail-montant').textContent    = btn.dataset.montant;
     document.getElementById('detail-frais').textContent      = btn.dataset.frais;
-    document.getElementById('detail-total').textContent      = btn.dataset.total;
-    document.getElementById('detail-moyen').textContent      = btn.dataset.moyen;
+    document.getElementById('detail-total').textContent      = btn.dataset.total;    document.getElementById('detail-moyen').textContent  = btn.dataset.moyen;
     document.getElementById('detail-operateur').textContent  = btn.dataset.operateur;
     document.getElementById('detail-telephone').textContent  = btn.dataset.telephone;
     document.getElementById('detail-date').textContent       = btn.dataset.date;

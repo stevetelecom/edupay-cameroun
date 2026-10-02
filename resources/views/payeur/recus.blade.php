@@ -4,17 +4,24 @@
 
 @section('content')
 
-<div style="font-size:17px;font-weight:700;margin-bottom:4px;">{{ __('payeur.recu_titre') }}</div>
-<div style="font-size:12px;color:#888;margin-bottom:16px;">{{ __('payeur.recu_soustitre') }}</div>
+{{-- En-tête de page v3 : grande pastille époxy + titre Poppins (style dashboard) --}}
+<div class="ep-entete ep-entete-page" style="margin-bottom:16px;">
+    <div class="ep-ico or ep-ico-entete"><span class="material-symbols-outlined">receipt_long</span></div>
+    <div>
+        <h3 style="margin:0;">{{ __('payeur.recu_titre') }}</h3>
+        <div class="ep-sous-titre" style="margin-top:2px;">{{ __('payeur.recu_soustitre') }}</div>
+    </div>
+</div>
 
 <div class="seclbl" style="margin-top:0;">{{ __('payeur.recus_pdf') }}</div>
 <div class="epcard" style="margin-bottom:16px;">
     @forelse($recus as $paiement)
         <div class="row">
             <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ep-red)" stroke-width="2" style="flex-shrink:0;">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-                </svg>
+                {{-- Icône document : Material Symbols (grammaire v3, plus de SVG inline) --}}
+                <span class="ep-ico rouge" style="width:36px;height:36px;border-radius:10px;flex-shrink:0;">
+                    <span class="material-symbols-outlined" style="font-size:20px;">description</span>
+                </span>
                 <div style="min-width:0;">
                     <div style="font-size:13px;font-weight:600;">Reçu_{{ $paiement->reference }}.pdf</div>
                     <div style="font-size:11px;color:#888;">

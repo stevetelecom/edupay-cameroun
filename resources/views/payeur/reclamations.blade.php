@@ -60,8 +60,15 @@
 
 @section('content')
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-    <div style="font-size:17px;font-weight:700;">{{ __('payeur.recl_mes_reclamations') }}</div>
+{{-- En-tête de page v3 : pastille époxy + titre Poppins + action à droite
+     (même structure que reversements/index côté établissement) --}}
+<div class="ep-entete ep-entete-page" style="justify-content:space-between;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div class="ep-ico bleu ep-ico-entete"><span class="material-symbols-outlined">support_agent</span></div>
+        <div>
+            <h3 style="margin:0;">{{ __('payeur.recl_mes_reclamations') }}</h3>
+        </div>
+    </div>
     <button class="btn-p" style="width:auto;padding:9px 16px;font-size:12px;"
             onclick="epModal.open('modal-create-reclamation')">
         + {{ __('payeur.recl_nouvelle') }}
@@ -71,15 +78,21 @@
 <div class="epcard">
     @forelse($reclamations as $reclamation)
         <div class="row">
-            <div>
-                <div style="font-size:13px;font-weight:600;">
-                    #{{ $reclamation->numero_ticket }} — {{ $reclamation->sujet }}
-                </div>
-                <div style="font-size:11px;color:#888;">
-                    {{ __('payeur.recl_ouvert_le') }} {{ $reclamation->created_at->format('d M Y') }}
-                    @if($reclamation->paiement)
-                        · {{ $reclamation->paiement->fraisApprenant->categorieFrais->nom ?? __('payeur.paiement') }}
-                    @endif
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                {{-- Icône ticket : Material Symbols (grammaire v3) --}}
+                <span class="ep-ico or" style="width:36px;height:36px;border-radius:10px;flex-shrink:0;">
+                    <span class="material-symbols-outlined" style="font-size:20px;">confirmation_number</span>
+                </span>
+                <div style="min-width:0;">
+                    <div style="font-size:13px;font-weight:600;">
+                        #{{ $reclamation->numero_ticket }} — {{ $reclamation->sujet }}
+                    </div>
+                    <div style="font-size:11px;color:#888;">
+                        {{ __('payeur.recl_ouvert_le') }} {{ $reclamation->created_at->format('d M Y') }}
+                        @if($reclamation->paiement)
+                            · {{ $reclamation->paiement->fraisApprenant->categorieFrais->nom ?? __('payeur.paiement') }}
+                        @endif
+                    </div>
                 </div>
             </div>
             <span class="pill {{ match($reclamation->statut) {
