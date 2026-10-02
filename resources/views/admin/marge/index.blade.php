@@ -47,18 +47,43 @@
     <div class="ep-bandeau-corps">
         <div class="ep-bandeau-titre">{{ __('admin.solde_aangaraa') }}</div>
         @if ($solde['ok'])
+            <div class="ep-bandeau-texte" style="font-size:12px;opacity:.8;margin-bottom:2px;">
+                {{ __('admin.solde_disponible_libelle') }}
+            </div>
             <div class="ep-bandeau-texte" style="font-size:24px;font-weight:800;color:var(--ep-navy);line-height:1.2;">
                 {{ number_format($solde['solde'], 0, ',', ' ') }} FCFA
             </div>
             <div class="ep-bandeau-texte" style="margin-top:4px;">
                 {{ $solde['service_name'] ?? __('admin.service') }}
-                @if ($solde['nbTransactions'] !== null)
-                    · {{ number_format($solde['nbTransactions'], 0, ',', ' ') }} {{ __('admin.transactions_succes') }}
-                @endif
             </div>
-            <div class="ep-bandeau-texte" style="opacity:.8;">
-                MTN : {{ number_format($solde['parOperateur']['mtn'], 0, ',', ' ') }}
-                · Orange : {{ number_format($solde['parOperateur']['orange'], 0, ',', ' ') }} FCFA
+
+            {{-- Cumul encaisse : volume total passe par le compte sur les
+                 transactions reussies. A NE PAS confondre avec le solde
+                 disponible ci-dessus : les 774 XAF MTN observes le 02/10/2026
+                 sont le cumul encaisse, pas une somme disponible. --}}
+            <div class="ep-bandeau-texte" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--ep-bordure,#E4E9EE);">
+                <div style="font-size:12px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                    <span class="material-symbols-outlined"
+                          style="font-size:16px;vertical-align:-3px;font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 20;">receipt_long</span>
+                    {{ __('admin.cumul_encaisse_libelle') }}
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;">
+                    <span>
+                        MTN : {{ number_format($solde['cumul']['mtn'], 0, ',', ' ') }}
+                        @if ($solde['nbTransactions']['mtn'] !== null)
+                            <span style="opacity:.7;">({{ number_format($solde['nbTransactions']['mtn'], 0, ',', ' ') }})</span>
+                        @endif
+                    </span>
+                    <span>
+                        Orange : {{ number_format($solde['cumul']['orange'], 0, ',', ' ') }}
+                        @if ($solde['nbTransactions']['orange'] !== null)
+                            <span style="opacity:.7;">({{ number_format($solde['nbTransactions']['orange'], 0, ',', ' ') }})</span>
+                        @endif
+                    </span>
+                </div>
+                <div style="font-size:11.5px;opacity:.75;margin-top:6px;">
+                    {{ __('admin.cumul_encaisse_explication') }}
+                </div>
             </div>
         @else
             <div class="ep-bandeau-texte" style="color:#991B1B;font-weight:600;">{{ $solde['message'] }}</div>

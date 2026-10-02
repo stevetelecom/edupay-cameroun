@@ -835,6 +835,8 @@ class AangaraaPayService
                 'telephone'      => LogMasking::telephone($numero),
                 'operateur'      => $operateur,
                 'notify_url'     => $notifyUrl,
+                'statut_relu'    => $statutApi,
+                'statut_brut'    => $data['data']['status'] ?? $data['message'] ?? null,
                 'response'       => LogMasking::payloadReduit($data),
             ]);
 
@@ -898,16 +900,41 @@ class AangaraaPayService
 
             $details = $data['data']['balance_details'] ?? [];
 
+            // Deux grandeurs de nature differente, a ne jamais melanger :
+            //
+            // - `solde` = `balance_in_db`, la seule somme reellement retirable
+            //   du compte.
+            // - `cumul*` = `balance_details.*.amount`, le MONTANT CUMULE
+            //   encaisse sur les transactions au statut SUCCESSFUL (doc
+            //   AangaraaPay : « Montant et nombre de transactions MTN
+            //   reussies »). Ce n'est PAS un solde par operateur.
+            //
+            // Exemple reel du 02/10/2026 : balance_in_db = 2 alors que
+            // mtn_cameroon.amount = 774 sur 11 transactions. Les 774 sont
+            // le volume encaisse depuis toujours, dont 772 deja reverses ; il
+            // restait 2 XAF. L'admin affichait « MTN : 774 » sous le titre
+            // « Solde reel », ce qui se lisait « 2 disponibles, 774 chez MTN »
+            // et laissait croire a un ecart de 772 XAF qui n'existait pas.
+            $mtn    = $details['mtn_cameroon']    ?? [];
+            $orange = $details['orange_cameroon'] ?? [];
+            $total  = $details['total']            ?? [];
+
             return [
                 'ok'           => true,
                 'solde'        => (float) ($data['data']['balance_in_db'] ?? 0),
                 'service_id'   => $data['data']['service_id'] ?? null,
                 'service_name' => $data['data']['service_name'] ?? null,
-                'parOperateur' => [
-                    'mtn'    => (float) ($details['mtn_cameroon']['amount']    ?? 0),
-                    'orange' => (float) ($details['orange_cameroon']['amount'] ?? 0),
+                // Cumules encaisses, par operateur et au total.
+                'cumul'        => [
+                    'mtn'    => (float) ($mtn['amount']    ?? 0),
+                    'orange' => (float) ($orange['amount'] ?? 0),
+                    'total'  => (float) ($total['amount']  ?? ($mtn['amount'] ?? 0) + ($orange['amount'] ?? 0)),
                 ],
-                'nbTransactions' => $details['total']['transactions_count'] ?? null,
+                'nbTransactions' => [
+                    'mtn'    => $mtn['transactions_count']    ?? null,
+                    'orange' => $orange['transactions_count'] ?? null,
+                    'total'  => $total['transactions_count']  ?? null,
+                ],
                 'message'     => null,
             ];
         } catch (\Throwable $e) {

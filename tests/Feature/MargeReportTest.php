@@ -216,6 +216,75 @@ class MargeReportTest extends TestCase
         $this->assertStringContainsString('EduPay Cameroun', $reponse->getContent());
     }
 
+    /**
+ * Le solde disponible et le cumul encaisse sont deux grandeurs de nature
+ * differente et ne doivent JAMAIS etre presentees comme deux soldes.
+ *
+ * Donnees reelles relevees en production le 02/10/2026 sur
+ * GET /service/balance/{app_key} :
+ *
+ *   balance_in_db       = 2
+ *   mtn_cameroon.amount = 774   (11 transactions)
+ *   orange_cameroon     = 0     (0 transaction)
+ *   total.amount        = 774
+ *
+ * `balance_details.*.amount` est le volume encaisse cumule sur les
+ * transactions SUCCESSFUL (doc AangaraaPay), pas un solde par operateur :
+ * 774 XAF sont passes par le compte, 772 ont ete reverses, il en restait 2.
+ *
+ * L'ancien affichage imprimait « MTN : 774 » sous le titre « Solde reel »,
+ * juste sous « 2 FCFA ». Lu de haut en bas cela signifiait « 2 disponibles,
+ * 774 chez MTN », et laissait croire a un ecart de 772 XAF. L'ecart n'existait
+ * pas : c'etait l'etiquette qui etait fausse.
+ */
+public function test_solde_disponible_et_cumul_encaisse_sont_presentes_separement(): void
+    {
+        Http::fake([
+            '*/service/balance/*' => Http::response([
+                'message' => 'Balance retrieved successfully',
+                'data'    => [
+                    'service_id'     => 42,
+                    'service_name'   => 'Edupay Cameroun',
+                    'balance_in_db'  => 2,
+                    'balance_details' => [
+                        'mtn_cameroon'    => ['amount' => 774, 'transactions_count' => 11, 'currency' => 'XAF'],
+                        'orange_cameroon' => ['amount' => 0,   'transactions_count' => 0,  'currency' => 'XAF'],
+                        'total'           => ['amount' => 774, 'transactions_count' => 11, 'currency' => 'XAF'],
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $contenu = $this->get(route('admin.marge.index'))->assertOk()->getContent();
+
+        // Le solde retirable : 2 FCFA, pas 774.
+        $this->assertStringContainsString('Solde disponible', $contenu);
+        $this->assertMatchesRegularExpression(
+            '/Solde disponible.*?2\s*FCFA/s',
+            $contenu,
+            'Le solde disponible (balance_in_db = 2) doit etre affiche comme tel.'
+        );
+
+        // Le cumul encaisse : 774 FCFA, explicitement etiquete comme cumul.
+        $this->assertStringContainsString('Cumul encaisse', $contenu);
+        $this->assertMatchesRegularExpression(
+            '/Cumul encaisse.*?MTN\s*:\s*774/s',
+            $contenu,
+            'Le cumul encaisse MTN (774) doit apparaitre sous son propre libelle.'
+        );
+
+        // Le nombre de transactions accompagne le cumul, entre parentheses.
+        // Une balise <span> separe le montant de son compteur dans le rendu.
+        $this->assertMatchesRegularExpression('/MTN\s*:\s*774.*?\(11\)/s', $contenu);
+
+        // Orange a 0 : rien n'est encaisse de ce cote.
+        $this->assertMatchesRegularExpression('/Orange\s*:\s*0/', $contenu);
+
+        // La mention explicite que ce n'est pas un solde, pour lever toute
+        // ambiguite a la lecture.
+        $this->assertStringContainsString('Ce n est PAS un solde', $contenu);
+    }
+
     public function test_une_erreur_de_l_api_est_expliquee_sans_arreter_la_page(): void
     {
         Http::fake([
