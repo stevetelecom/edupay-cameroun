@@ -131,9 +131,9 @@ return [
     // Orange Money: according to AangaraaPay official API docs (no_redirect
     // direct payment), the client receives an Orange Money notification to
     // approve the payment. Enter the 4-digit secret code.
-    'pa_attente_orange_notif'      => 'An Orange Money notification has just arrived on your phone.',
-    'pa_attente_orange_pin'        => 'Open it and enter your 4-digit Orange Money secret code.',
-    'pa_attente_orange_code'       => 'to confirm the payment.',
+    'pa_attente_orange_notif'      => 'An Orange Money notification has just arrived on your phone: open it, then on that same phone dial',
+    'pa_attente_orange_pin'        => 'then follow Orange\'s instructions and enter your 4-digit Orange Money secret code.',
+    'pa_attente_orange_code'       => 'The code is given in the Orange SMS. Only dial it from the number that received the notification.',
     'pa_attente_menu'              => 'Press 1 in the USSD menu',
     'pa_attente_notif'             => 'Notification sent',
     'pa_attente_phone'             => 'Check your phone (:operateur)',

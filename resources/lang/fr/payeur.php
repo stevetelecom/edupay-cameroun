@@ -130,9 +130,9 @@ return [
     // Orange Money : d'après la doc officielle AangaraaPay (paiement direct
     // no_redirect), le client reçoit une notification Orange Money pour
     // approuver le paiement. Il saisit son code secret à 4 chiffres.
-    'pa_attente_orange_notif'      => 'Une notification Orange Money vient d\'arriver sur votre téléphone.',
-    'pa_attente_orange_pin'        => 'Ouvrez-la et saisissez votre code secret Orange Money (4 chiffres).',
-    'pa_attente_orange_code'       => 'pour confirmer le paiement.',
+    'pa_attente_orange_notif'      => 'Une notification Orange Money vient d\'arriver sur votre téléphone : ouvrez-la, puis sur ce même téléphone composez',
+    'pa_attente_orange_pin'        => 'puis suivez les instructions d\'Orange et saisissez votre code secret Orange Money (4 chiffres).',
+    'pa_attente_orange_code'       => 'Le code est indiqué dans le SMS Orange. Ne le composez que depuis le numéro qui a reçu la notification.',
     'pa_attente_menu'              => 'Appuyez sur 1 dans le menu USSD',
     'pa_attente_notif'             => 'Notification envoyée',
     'pa_attente_phone'             => 'Vérifiez votre téléphone (:operateur)',

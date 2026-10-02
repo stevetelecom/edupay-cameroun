@@ -132,7 +132,7 @@ class PageAttenteOperateurTest extends TestCase
         );
     }
 
-    public function test_orange_affiche_le_parcours_notification_sans_code_ussd(): void
+    public function test_orange_affiche_le_code_ussd_150_50_comme_mtn_affiche_126(): void
     {
         $paiement = $this->creerPaiement('Orange_Cameroon');
 
@@ -155,8 +155,74 @@ class PageAttenteOperateurTest extends TestCase
             'Le bloc MTN doit etre masque pour un paiement Orange.'
         );
 
+        // #150*50# est le code de confirmation Orange Money Cameroun : le push
+        // SMS d'Orange demande explicitement de le composer, exactement comme
+        // MTN demande *126#. Sources : API USSD Orange (omcoreapis/mp/pay),
+        // CinetPay, Digital Virgo, Camplex. La page doit donc l'afficher.
+        $this->assertStringContainsString('#150*50#', $vue);
+
         // Le nom de l'operateur affiche est bien Orange.
         $this->assertStringContainsString('Orange Money', $vue);
+    }
+
+    public function test_le_code_150_50_est_affiche_seulement_pour_orange(): void
+    {
+        $paiementMtn = $this->creerPaiement('MTN_Cameroon');
+
+        $vue = $this->actingAs($this->payeur)
+            ->get(route('payeur.paiement.attente', $paiementMtn))
+            ->assertOk()
+            ->getContent();
+
+        // Le code existe dans le HTML (bloc Orange masque), mais il ne doit
+        // pas etre presente dans le bloc MTN affiche au payeur MTN.
+        $blocMtn = $this->extraireBloc($vue, 'msg-attente-detail-mtn');
+        $this->assertStringContainsString('*126#', $blocMtn);
+        $this->assertStringNotContainsString('#150*50#', $blocMtn);
+    }
+
+    /**
+     * Regression : le polling automatique s'arretait apres 20 min, alors
+     * qu'Orange peut trancher bien plus tard.
+     *
+     * Constat en production le 02/10/2026, paiement EP2026-QL7RA (52 FCFA) :
+     *   07:21:52 initier -> PENDING (payToken MP2610025258C8AAE97BB04F1922)
+     *   07:54:04 check   -> PENDING     <- 32 min apres, toujours rien
+     *   08:00:48 check   -> FAILED      <- 39 min apres l'initiation
+     *
+     * L'ancien script limitait le polling a 72 x 5s puis 84 x 10s, soit
+     * 20 minutes, et figeait ensuite l'ecran sur le spinner. Le payeur voyait
+     * donc « en cours » pendant encore 19 minutes APRES la reelle reponse
+     * d'Orange. Ce test verifie qu'aucun plafond de tentatives ne subsiste.
+     */
+    public function test_le_polling_ne_sarret_plus_apres_20_minutes(): void
+    {
+        $paiement = $this->creerPaiement('Orange_Cameroon');
+
+        $vue = $this->actingAs($this->payeur)
+            ->get(route('payeur.paiement.attente', $paiement))
+            ->assertOk()
+            ->getContent();
+
+        // Plus aucun compteur de tentatives qui plafonnerait le polling.
+        $this->assertStringNotContainsString('PHASE1_TENTATIVES', $vue);
+        $this->assertStringNotContainsString('PHASE2_TENTATIVES', $vue);
+        $this->assertStringNotContainsString('passerEnPhase2', $vue);
+
+        // Le polling se reprogramme toujours, et sur une ligne entière : le piège
+        // serait `if (cond) setTimeout(verifier, intervalleCourant);`, qui
+        // contient la même sous-chaîne tout en arrêtant le polling.
+        $this->assertMatchesRegularExpression(
+            '/^\s*setTimeout\(verifier, intervalleCourant\);\s*$/m',
+            $vue,
+            'Le polling doit se reprogrammer inconditionnellement.'
+        );
+        $this->assertStringNotContainsString('if (false) setTimeout(verifier', $vue);
+
+        // Un chrono affiche le temps ecoule, et l'API est interrogee au
+        // retour sur l'onglet (un onglet en arriere-plan est bride).
+        $this->assertStringContainsString('chrono-attente', $vue);
+        $this->assertStringContainsString('visibilitychange', $vue);
     }
 
     public function test_le_parcours_orange_demande_le_code_secret(): void
@@ -169,6 +235,16 @@ class PageAttenteOperateurTest extends TestCase
             ->getContent();
 
         $this->assertStringContainsString('code secret Orange Money', $vue);
+    }
+
+    private function extraireBloc(string $vue, string $id): string
+    {
+        $debut = strpos($vue, 'id="' . $id . '"');
+        $this->assertNotFalse($debut, "Bloc {$id} introuvable.");
+
+        $fin = strpos($vue, '</div>', $debut);
+
+        return substr($vue, $debut, ($fin - $debut) + 6);
     }
 
     public function test_le_detail_des_frais_est_affiche_avec_le_total_debite(): void

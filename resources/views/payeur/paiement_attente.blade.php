@@ -70,6 +70,7 @@
                     smartphone
                 </span>
                 {{ __('payeur.pa_attente_phone', ['operateur' => $operateurAffiche['court']]) }}
+                <span id="chrono-attente" style="font-family:monospace;font-weight:700;">00:00</span>
             </div>
             {{-- Parcours MTN : prompt USSD, composition obligatoire --}}
             <div id="msg-attente-detail-mtn" style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;{{ $estOrange ? 'display:none;' : '' }}">
@@ -80,11 +81,19 @@
                 {!! __('payeur.pa_attente_menu') !!}
                 <strong>{{ __('payeur.pa_attente_rejetez') }}</strong> {{ __('payeur.pa_attente_validez') }}
             </div>
-            {{-- Parcours Orange : notification Orange Money, rien a composer --}}
+            {{-- Parcours Orange : notification + code USSD Orange Money (#150*50#).
+                 Le push SMS d'Orange demande explicitement de composer ce code
+                 pour valider le paiement : c'est l'equivalent du *126# de MTN.
+                 Sources : doc Orange Money Cameroun (api-s1.orange.cm omcoreapis
+                 /mp/pay), CinetPay, Digital Virgo, Camplex. La consigne d'Orange
+                 elle-meme prime sur la doc AangaraaPay, qui ne mentionne pour
+                 Orange qu'une « notification » sans code. --}}
             <div id="msg-attente-detail-orange" style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6;{{ $estOrange ? '' : 'display:none;' }}">
                 {!! __('payeur.pa_attente_notif') !!}<br>
-                {{ __('payeur.pa_attente_orange_notif') }}<br>
-                <strong>{{ __('payeur.pa_attente_orange_pin') }}</strong>
+                {{ __('payeur.pa_attente_orange_notif') }}
+                <span style="background:#fff5ee;color:#CC4400;font-weight:700;
+                             padding:2px 8px;border-radius:4px;font-family:monospace;">#150*50#</span><br>
+                <strong>{{ __('payeur.pa_attente_orange_pin') }}</strong><br>
                 {{ __('payeur.pa_attente_orange_code') }}<br>
                 <strong>{{ __('payeur.pa_attente_rejetez') }}</strong> {{ __('payeur.pa_attente_validez') }}
             </div>
@@ -166,24 +175,51 @@
 const PAYEUR_L10N = {
     verifier_btn: @json(__('payeur.pa_attente_verifier_btn')),
     verification: @json(__('payeur.pa_attente_verification_ellipsis')),
-    fin: @json(__('payeur.pa_attente_fin')),
 };
 
 const statutUrl = "{{ route('payeur.paiement.statut', $paiement) }}";
-const estOrangeJs = @json($estOrange);
 
-// Phase 1 : vérification rapide, toutes les 5s, pendant 6 minutes (72 tentatives)
-// Phase 2 : si rien de définitif après la phase 1, on NE déclare JAMAIS d'échec
-//           côté client — on continue à vérifier, plus espacé, jusqu'à 20 minutes
-//           au total. Seule une vraie réponse de l'opérateur (SUCCESSFUL / FAILED)
-//           peut faire passer l'écran en "valide" ou "échec".
-const PHASE1_TENTATIVES = 72;   // 72 × 5s  = 6 min
-const PHASE2_INTERVALLE = 10000; // 10s
-const PHASE2_TENTATIVES = 84;   // 84 × 10s = 14 min supplémentaires (total ≈ 20 min)
+// Vérification continue jusqu'à une réponse DÉFINITIVE de l'opérateur.
+//
+// Pourquoi plus de plafond de tentatives : Orange ne tranche pas toujours en
+// quelques minutes. Constat en production le 02/10/2026, paiement
+// EP2026-QL7RA (52 FCFA, 693723***200) :
+//     07:21:52  initier    -> payToken MP2610025258C8AAE97BB04F1922, PENDING
+//     07:54:04  check      -> PENDING
+//     07:56:05  check      -> PENDING
+//     07:58:05  check      -> PENDING
+//     08:00:04  check      -> PENDING
+//     08:00:48  check      -> FAILED
+// L'échec est arrivé 39 min après l'initiation. L'ancien script abandonnait à
+// 20 min et laissait l'écran figé sur le spinner : le payeur voyait « en cours »
+// pendant 19 min après la réponse réelle de l'opérateur.
+//
+// On ne déclare JAMAIS d'échec pour raison de temps : seul un SUCCESSFUL /
+// FAILED explicite fait basculer l'écran. Passé le seuil d'affichage prolonged,
+// on ralentit la cadence et on affiche le temps écoulé, mais on continue
+// d'interroger l'API — c'est le seul moyen de rattraper une confirmation
+// tardive, qui est le cas normal d'Orange.
+const INTERVALLE_RAPIDE     = 5000;   // 5s  pendant les 3 premières minutes
+const SEUIL_RAPIDE_MS        = 180000;
+const INTERVALLE_LENT        = 15000;  // 15s ensuite
+const SEUIL_AFFICHAGE_LONG_MS = 600000; // 10 min : on affiche le temps écoulé
 
-let tentatives = 0;
-let enPhase2 = false;
+const debutAttente = Date.now();
+let intervalleCourant = INTERVALLE_RAPIDE;
 let verificationManuelleEnCours = false;
+let minuteur = null;
+
+function formaterDuree(ms) {
+    const total = Math.floor(ms / 1000);
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function majChrono() {
+    const el = document.getElementById('chrono-attente');
+    if (el) el.textContent = formaterDuree(Date.now() - debutAttente);
+}
 
 function afficher(etat) {
     document.getElementById('icone-attente').style.display = etat === 'attente' ? 'flex' : 'none';
@@ -196,11 +232,11 @@ function afficher(etat) {
     document.getElementById('msg-annule').style.display    = etat === 'annule'  ? '' : 'none';
 }
 
-function passerEnPhase2() {
-    if (enPhase2) return;
-    enPhase2 = true;
-    document.getElementById('msg-attente-prolonge').style.display = 'block';
-    document.getElementById('btn-verifier-maintenant').style.display = 'inline-block';
+function afficherDelaiLong() {
+    const box = document.getElementById('msg-attente-prolonge');
+    const btn = document.getElementById('btn-verifier-maintenant');
+    if (box && box.style.display !== 'block') box.style.display = 'block';
+    if (btn && btn.style.display !== 'inline-block') btn.style.display = 'inline-block';
 }
 
 async function appelStatut() {
@@ -213,16 +249,25 @@ async function appelStatut() {
 }
 
 async function verifier() {
-    tentatives++;
+    const ecoule = Date.now() - debutAttente;
+
+    // Ralentissement après 3 min : moins de appels, mais on ne cesse JAMAIS de
+    // interroger l'API tant qu'aucune réponse définitive n'est arrivée.
+    intervalleCourant = ecoule <= SEUIL_RAPIDE_MS ? INTERVALLE_RAPIDE : INTERVALLE_LENT;
+
+    if (ecoule >= SEUIL_AFFICHAGE_LONG_MS) afficherDelaiLong();
+
     const data = await appelStatut();
 
     if (data && data.statut === 'valide') {
+        arreterMinuteur();
         afficher('valide');
         return;
     }
 
     // Annulé entre-temps (autre onglet / API mobile) : état définitif, on arrête.
     if (data && data.statut === 'annule') {
+        arreterMinuteur();
         afficher('annule');
         return;
     }
@@ -230,37 +275,22 @@ async function verifier() {
     // Seule une réponse EXPLICITE 'echoue' de l'API (donc un vrai FAILED/CANCELLED
     // confirmé par AangaraaPay/MTN) fait passer l'écran en échec — jamais un timeout.
     if (data && data.statut === 'echoue') {
+        arreterMinuteur();
         const detail = document.getElementById('msg-echec-detail');
         if (detail && data.message) detail.textContent = data.message;
         afficher('echec');
         return;
     }
 
-    // Toujours en attente : on continue, en passant en phase 2 (espacée) après
-    // la phase 1 rapide — sans jamais déclarer d'échec depuis le client.
-    if (tentatives === PHASE1_TENTATIVES) {
-        passerEnPhase2();
-    }
-
-    if (!enPhase2 && tentatives < PHASE1_TENTATIVES) {
-        setTimeout(verifier, 5000);
-        return;
-    }
-
-    if (enPhase2 && (tentatives - PHASE1_TENTATIVES) < PHASE2_TENTATIVES) {
-        setTimeout(verifier, PHASE2_INTERVALLE);
-        return;
-    }
-
-    // Fin de la phase 2 (~20 min) sans réponse définitive : on arrête le polling
-    // automatique mais on NE déclare PAS d'échec — l'utilisateur peut vérifier
-    // manuellement ou contacter le support avec la référence.
-    passerEnPhase2();
-    // Le detail affiché depend de l'operateur (USSD pour MTN, notification pour
-    // Orange) : on remplit celui qui est visible, l'autre est masque.
-    const detail = document.getElementById(estOrangeJs ? 'msg-attente-detail-orange' : 'msg-attente-detail-mtn');
-    if (detail) detail.textContent = PAYEUR_L10N.fin;
+    setTimeout(verifier, intervalleCourant);
 }
+
+// Réveil d'onglet : un onglet mis en arrière-plan est bridé par le navigateur,
+// ce qui espace les appels au-delà de notre intervalle. À son retour on
+// interroge l'API immédiatement plutôt que d'attendre le prochain tick.
+document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && verificationManuelleEnCours === false) verifier();
+});
 
 async function verifierMaintenant() {
     if (verificationManuelleEnCours) return;
@@ -272,10 +302,13 @@ async function verifierMaintenant() {
     const data = await appelStatut();
 
     if (data && data.statut === 'valide') {
+        arreterMinuteur();
         afficher('valide');
     } else if (data && data.statut === 'annule') {
+        arreterMinuteur();
         afficher('annule');
     } else if (data && data.statut === 'echoue') {
+        arreterMinuteur();
         const detail = document.getElementById('msg-echec-detail');
         if (detail && data.message) detail.textContent = data.message;
         afficher('echec');
@@ -286,10 +319,20 @@ async function verifierMaintenant() {
     }
 }
 
+function arreterMinuteur() {
+    if (minuteur !== null) {
+        clearInterval(minuteur);
+        minuteur = null;
+    }
+}
+
 // Un paiement deja annule est un etat definitif : aucun polling.
 if (@json($paiement->estAnnule())) {
+    arreterMinuteur();
     afficher('annule');
 } else {
+    minuteur = setInterval(majChrono, 1000);
+    majChrono();
     setTimeout(verifier, 5000);
 }
 </script>
