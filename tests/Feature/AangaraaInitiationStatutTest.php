@@ -45,7 +45,7 @@ class AangaraaInitiationStatutTest extends TestCase
         ]);
     }
 
-    private function initier(array $reponse, int $codeHttp): array
+    private function initier(array $reponse, int $codeHttp, string $operateur = 'Orange_Cameroon', ?string $returnUrl = null): array
     {
         Http::fake([
             'https://api.aangaraapay.test/no_redirect/payment' => Http::response($reponse, $codeHttp),
@@ -57,7 +57,8 @@ class AangaraaInitiationStatutTest extends TestCase
             'Test EduPay',
             'EP-TEST-0001',
             'https://edupay.test/paiement/webhook',
-            'Orange_Cameroon'
+            $operateur,
+            $returnUrl,
         );
     }
 
@@ -123,5 +124,48 @@ class AangaraaInitiationStatutTest extends TestCase
         $this->assertFalse($r['succes']);
         $this->assertSame('INVALID PHONE NUMBER', $r['statut']);
         $this->assertNull($r['pay_token']);
+    }
+
+    /**
+     * Le payload doit reproduire l'exemple de la doc AangaraaPay champ par
+     * champ. Seul `return_url` en manquait.
+     */
+    public function test_le_payload_reproduit_l_exemple_de_la_doc(): void
+    {
+        $this->initier(['message' => 'PENDING', 'data' => ['payToken' => 'APT-1']], 201, 'Orange_Cameroon');
+
+        Http::assertSent(function ($request) {
+            $b = $request->data();
+
+            $this->assertSame('237691234567', $b['phone_number']);
+            $this->assertSame('500', $b['amount']);
+            $this->assertSame('XAF', $b['devise_id']);
+            $this->assertSame('Orange_Cameroon', $b['operator']);
+            $this->assertSame('cle-de-test', $b['app_key']);
+            $this->assertSame('EP-TEST-0001', $b['transaction_id']);
+            $this->assertSame('https://edupay.test/paiement/webhook', $b['notify_url']);
+
+            return true;
+        });
+    }
+
+    public function test_return_url_est_envoye_pour_orange_seulement(): void
+    {
+        // Orange : le champ de la doc est present, on teste si le push USSD
+        // se met en place.
+        $this->initier(
+            ['message' => 'PENDING', 'data' => ['payToken' => 'APT-1']],
+            201,
+            'Orange_Cameroon',
+            'https://edupay.test/espace/paiement/1/attente'
+        );
+
+        Http::assertSent(fn ($r) => ($r->data()['return_url'] ?? null)
+            === 'https://edupay.test/espace/paiement/1/attente');
+
+        // MTN : payload inchange, son prompt USSD *126# fonctionne deja.
+        $this->initier(['message' => 'PENDING', 'data' => ['payToken' => 'APT-2']], 201, 'MTN_Cameroon');
+
+        Http::assertSent(fn ($r) => ! array_key_exists('return_url', $r->data()));
     }
 }

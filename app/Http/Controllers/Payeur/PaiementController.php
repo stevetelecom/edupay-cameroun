@@ -176,6 +176,13 @@ class PaiementController extends Controller
             default        => null,
         };
 
+        // `return_url` : ou le prestataire doit renvoyer le payeur si un jour
+        // il redirige. Ajoute pour Orange seul (MTN garde son payload connu
+        // bon) — voir le bloc commente dans AangaraaPayService::initierPaiement.
+        $returnUrl = $operateur === 'Orange_Cameroon'
+            ? route('payeur.paiement.attente', $paiement)
+            : null;
+
         $resultat = $this->aangaraa->initierPaiement(
             telephone:      $telephoneNormalise,
             montant:        $paiement->montant_total_paye,
@@ -183,6 +190,7 @@ class PaiementController extends Controller
             transactionId:  $paiement->reference,
             notifyUrl:      $notifyUrl,
             operateurForce: $operateur,
+            returnUrl:      $returnUrl,
         );
 
         if (! $resultat['succes']) {

@@ -774,7 +774,8 @@ class AangaraaPayService
         string $description,
         string $transactionId,
         string $notifyUrl,
-        ?string $operateurForce = null
+        ?string $operateurForce = null,
+        ?string $returnUrl = null
     ): array {
         if ($this->appKey === '') {
             Log::error('AangaraaPay : AANGARAA_APP_KEY manquante');
@@ -819,6 +820,30 @@ class AangaraaPayService
                 'operator'       => $operateur,
                 'devise_id'      => 'XAF',
             ];
+
+            // `return_url` est le SEUL champ de l'exemple de la doc que
+            // nous n'envoyions pas. Il est ajoute pour Orange uniquement, a
+            // titre d'experience : la doc affirme que le client recoit un
+            // prompt sur son telephone, ce qui n'a jamais ete observe en prod
+            // sur Orange (la transaction EP2026-QL7RA a recu un SMS
+            // AangaraaPay indiquant de composer #150*50#, puis a expiree).
+            //
+            // MTN n'est PAS touche : son prompt USSD (*126#) fonctionne et
+            // fonctionne depuis toujours, on ne le met pas en risque pour
+            // tester une hypothese sur l'autre operateur.
+            //
+            // Verdict a lire apres un essai Orange :
+            //  - si Orange passe enfin par un prompt USSD -> generaliser a
+            //    tous les operateurs et le documenter ;
+            //  - si Orange reste en SMS #150*50# -> la decision est cote
+            //    AangaraaPay/Orange, pas dans notre payload, et ce bloc
+            //    devient inutile (a supprimer). Dans ce cas la question
+            //    precise a poser au prestataire est : « Orange_Cameroon
+            //    supporte-t-il le push USSD sur /no_redirect/payment, ou
+            //    uniquement la confirmation par SMS ? ».
+            if ($returnUrl !== null && $returnUrl !== '') {
+                $payload['return_url'] = $returnUrl;
+            }
 
             $response = Http::timeout(30)
                 ->post($this->apiUrl . '/no_redirect/payment', $payload);

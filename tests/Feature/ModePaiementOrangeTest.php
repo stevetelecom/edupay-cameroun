@@ -9,6 +9,7 @@ use App\Models\FraisApprenant;
 use App\Models\Paiement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -218,6 +219,68 @@ class ModePaiementOrangeTest extends TestCase
         ]);
 
         $this->assertSame('Orange_Cameroon', $paiement->operateurAffiche());
+    }
+
+    /**
+     * Le champ `return_url` de la doc AangaraaPay est envoye pour Orange
+     * seulement : le controlur web doit le brancher, sinon l'experience
+     * "Orange aurait peut-etre un vrai prompt USSD" ne teste rien.
+     */
+    #[DataProvider('operateurEtReturnUrlAttendu')]
+    public function test_le_controleur_web_envoie_return_url_pour_orange_seulement(
+        string $mode,
+        string $operateur,
+        bool   $attendu
+    ): void {
+        config([
+            'services.aangaraa.api_url' => 'https://api.aangaraapay.test',
+            'services.aangaraa.app_key' => 'cle-de-test',
+        ]);
+
+        Http::fake([
+            'https://api.aangaraapay.test/no_redirect/payment' => Http::response([
+                'message' => 'PENDING',
+                'data'    => ['payToken' => 'APT-RETOUR'],
+            ], 201),
+        ]);
+
+        $this->actingAs($this->payeur)
+            ->post(route('payeur.paiement.initier', $this->frais), [
+                'type_paiement'      => 'integral',
+                'mode_paiement'      => $mode,
+                'telephone_paiement' => '693723200',
+            ])
+            ->assertRedirect();
+
+        Http::assertSent(function ($request) use ($operateur, $attendu) {
+            $this->assertSame($operateur, $request->data()['operator']);
+
+            if ($attendu) {
+                $this->assertArrayHasKey('return_url', $request->data());
+                $this->assertStringContainsString(
+                    '/paiement/',
+                    $request->data()['return_url'],
+                    'return_url doit pointer vers la page d attente du payeur.'
+                );
+                $this->assertStringContainsString(
+                    '/attente',
+                    $request->data()['return_url'],
+                    'return_url doit pointer vers la page d attente du payeur.'
+                );
+            } else {
+                $this->assertArrayNotHasKey('return_url', $request->data());
+            }
+
+            return true;
+        });
+    }
+
+    public static function operateurEtReturnUrlAttendu(): array
+    {
+        return [
+            'Orange recoit return_url' => ['orange_money', 'Orange_Cameroon', true],
+            'MTN garde son payload'    => ['mtn_momo',     'MTN_Cameroon',     false],
+        ];
     }
 
     public function test_la_colonne_operateur_lorsqu_elle_est_remplie_prime(): void
