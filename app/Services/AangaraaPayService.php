@@ -716,6 +716,58 @@ class AangaraaPayService
             : 'Erreur inconnue';
     }
 
+    /**
+     * Statut initial d'une initiation, normalise.
+     *
+     * AangaraaPay ne renvoie pas toujours `data.status` a l'initiation. La doc
+     * officielle montre deux formes reellement rencontrees :
+     *
+     *   MTN  : "message": "PENDING", "data": {"payToken": "...", "status": "PENDING"}
+     *   Orange (variante doc) : "message": "PENDING", "data": {"payToken": "..."}
+     *
+     * Le code faisait `$data['data']['status'] ?? 'FAILED'`. Sur la seconde
+     * forme il obtenait FAILED, donc `succes` false, donc le paiement passe en
+     * `echoue` ALORS QUE le push operateur vient d partir et que le payeur peut
+     * encore confirmer. L'argent etait alors debite pour un paiement marque
+     * echoue : le pire ecart possible entre notre comptabilite et la realite.
+     *
+     * Regle appliquee : un jeton de transaction ET un HTTP 201 prouvent que la
+     * transaction existe chez le prestataire. L'absence de `data.status` n'est
+     * donc jamais interpretee comme un echec ; on lit le statut racine
+     * (`message`) s'il est connu, sinon on assume PENDING et on laisse le
+     * polling trancher. Un echec n'est retenu que si le prestataire dit
+     * explicitement que la transaction a echoue.
+     */
+    private function normaliserStatutInitiation(array $data): string
+    {
+        // 1. Champ explicite, prioritaire.
+        $brut = $data['data']['status'] ?? null;
+
+        if (is_string($brut) && trim($brut) !== '') {
+            return strtoupper(trim($brut));
+        }
+
+        if (is_bool($brut)) {
+            return $brut ? 'SUCCESSFUL' : 'FAILED';
+        }
+
+        // 2. Variante sans `data.status` : le statut est au niveau racine.
+        $racine = trim((string) ($data['message'] ?? ''));
+        if ($racine !== '' && strtoupper($racine) === 'PENDING') {
+            return 'PENDING';
+        }
+
+        // 3. Un jeton de transaction sur HTTP 201 (verifie plus bas par
+        //    l'appelant) signifie que la transaction existe : on ne declare
+        //    PAS un echec par defaut, le polling fera l'arbitrage.
+        if (! empty($data['data']['payToken'])) {
+            return 'PENDING';
+        }
+
+        // 4. Aucun jeton : rien n'a ete cree, c'est un echec reel.
+        return $racine !== '' ? strtoupper($racine) : 'FAILED';
+    }
+
     public function initierPaiement(
         string $telephone,
         int    $montant,
@@ -772,8 +824,9 @@ class AangaraaPayService
                 ->post($this->apiUrl . '/no_redirect/payment', $payload);
 
             $data      = is_array($response->json()) ? $response->json() : [];
-            $statutApi = $data['data']['status'] ?? 'FAILED';
             $payToken  = $data['data']['payToken'] ?? null;
+            $statutApi = $this->normaliserStatutInitiation($data);
+
             $message   = $this->extraireMessageErreur($data, $statutApi);
 
 
