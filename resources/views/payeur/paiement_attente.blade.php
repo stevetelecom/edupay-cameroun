@@ -44,14 +44,20 @@
                 'Orange_Cameroon' => ['nom' => 'Orange Money',      'court' => 'Orange', 'bg' => '#FFF5EE', 'border' => '#FF6600', 'texte' => '#CC4400', 'chip_texte' => '#ffffff'],
                 default           => ['nom' => 'Mobile Money',      'court' => __('payeur.pa_votre_operateur'), 'bg' => '#f5f5f5', 'border' => '#ddd', 'texte' => '#555', 'chip_texte' => '#555'],
             };
-            // Le parcours de confirmation n'est PAS le même selon l'opérateur.
-            // MTN : AangaraaPay envoie un prompt USSD, le payeur doit composer
-            // *126# puis appuyer sur 1 (payToken UUID).
-            // Orange : AangaraaPay envoie une NOTIFICATION Orange Money (payToken
-            // en MP...), il n'y a aucun code a composer. Le #150*50# affiche
-            // avant ce correctif etait un code Orange valide mais FAUX ici : il
-            // sert au paiement marchand PAR CODE, pas a valider une transaction
-            // deja initiatee par API. Le composer menait a une erreur Orange.
+// Le declenchement de la confirmation n'est PAS le meme selon
+            // l'operateur, meme si le-schema est identique (notification,
+            // puis code a composer, puis code secret) :
+            // MTN : AangaraaPay pousse l'USSD, une fenetre *126# s'ouvre
+            // toute seule, le payeur appuie sur 1 puis saisit son code secret.
+            // Orange : AangaraaPay envoie un SMS, aucune fenetre USSD ne
+            // s'ouvre. Le payeur compose lui-meme #150*50# depuis le numero
+            // qui a recu le SMS.
+            //
+            // Le SMS est donc le declencheur normal des deux cote
+            // operateur ; le popup automatique est une specificite MTN.
+            // La formulation « le client recoit un prompt sur son telephone »
+            // de la doc AangaraaPay decrit ce SMS, pas un push USSD qui
+            // s'ouvrirait aussi chez Orange.
             $estOrange = $paiement->operateurAffiche() === 'Orange_Cameroon';
         @endphp
         <div id="msg-attente">
